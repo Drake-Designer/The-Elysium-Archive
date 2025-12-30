@@ -4,7 +4,7 @@
 ##########################################
 
 # Core Django web app
-Django>=5.0
+Django
 gunicorn
 whitenoise
 dj-database-url
