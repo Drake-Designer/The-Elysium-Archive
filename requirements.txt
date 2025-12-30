@@ -1,0 +1,14 @@
+##########################################
+# PRODUCTION DEPENDENCIES
+# Needed for the app to run on Heroku
+##########################################
+
+# Core Django web app
+Django>=5.0
+gunicorn
+whitenoise
+dj-database-url
+psycopg2-binary
+
+# Payments
+stripe

@@ -1,0 +1,14 @@
+##########################################
+# DEVELOPMENT DEPENDENCIES
+# Used only for local development
+##########################################
+
+# Linting and formatting
+pylint
+flake8
+djlint
+
+# Testing and security
+pytest
+pytest-django
+bandit
