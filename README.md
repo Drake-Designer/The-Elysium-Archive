@@ -344,10 +344,68 @@ For detailed testing, see [TESTING.md](TESTING.md).
 
 ## Running the Project Locally
 
+This project uses environment variables for environment specific configuration and to keep secrets out of version control.
+
+Local development uses a file called `env.py` in the project root.  
+This file sets environment variables for local development only and is loaded automatically by the Django settings if present.
+
+The `env.py` file must never be committed.
+
+### Local setup
+
+1. Create and activate a virtual environment.
+2. Install production dependencies:
+   - `pip install -r requirements.txt`
+3. Optional: install development dependencies:
+   - `pip install -r dev-requirements.txt`
+4. Create an `env.py` file in the project root.
+5. Run the development server:
+   - `python manage.py runserver`
+
+### Example `env.py`
+
+Create a file named `env.py` in the project root (same level as `manage.py`):
+
+```python
+import os
+
+os.environ.setdefault("DEBUG", "True")
+os.environ.setdefault("SECRET_KEY", "local-dev-secret-key-change-me")
+os.environ.setdefault("ALLOWED_HOSTS", "127.0.0.1,localhost")
+```
+
+### DEBUG auto-switch
+
+DEBUG is controlled by an environment variable:
+
+- If `DEBUG` is not set, the project defaults to DEBUG True in local development.
+- On Heroku, DEBUG is set to False using a config var.
+
 
 ## Deployment
 
 The project will be deployed on Heroku.
+
+Production configuration uses Heroku Config Vars, which become environment variables at runtime.  
+The production environment does not use `env.py`.
+
+### Required config vars
+
+The following values are required on Heroku:
+
+- `DEBUG=False`
+- `SECRET_KEY`
+- `DATABASE_URL`
+
+More config vars are added as the project grows (Stripe keys, webhook secret, and other settings).
+
+### DEBUG auto-switch in production
+
+Production must always set:
+
+- `DEBUG=False`
+
+This keeps Django debug mode disabled in production while keeping local development convenient.
 
 
 ## Behind the Scenes: My Development Journey
