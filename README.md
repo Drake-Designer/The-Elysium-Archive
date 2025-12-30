@@ -235,26 +235,13 @@ Each app handles a specific area of functionality.
 
 ### Django Apps Structure
 
-#### `home`
-Public-facing pages and layout.
-
-#### `accounts`
-Authentication and profile management.
-
-#### `products`
-Product catalog and protected archive content.
-
-#### `cart`
-Shopping cart logic.
-
-#### `checkout`
-Stripe checkout handling.
-
-#### `orders`
-Order storage and history.
-
-#### `reviews`
-Verified buyer reviews.
+- `home` – Public-facing pages and layout
+- `accounts` – Authentication and profile management
+- `products` – Product catalog and protected archive content
+- `cart` – Shopping cart logic
+- `checkout` – Stripe checkout handling
+- `orders` – Order storage and history
+- `reviews` – Verified buyer reviews
 
 
 ## Technologies Used
@@ -267,6 +254,87 @@ Verified buyer reviews.
 
 
 ## Database Design
+
+This project uses a relational database designed to support secure access control, verified purchases, and protected premium content.
+
+### Business Rules
+
+- Users can register and authenticate.
+- Users can purchase products via Stripe checkout.
+- A successful payment unlocks access to premium on-site content.
+- Content is accessible only within the website and is never downloadable.
+- Access is granted per product and linked to the purchasing user.
+- Only verified buyers can leave a review for a product.
+
+### Core Entities
+
+- **User**  
+  Django built-in authentication user.
+
+- **UserProfile**  
+  One-to-one extension of the User model for profile-related data.
+
+- **Product**  
+  Represents a premium archive entry available for purchase.
+
+- **Order**  
+  Stores checkout and payment-related information.
+
+- **OrderLineItem**  
+  Links products to an order and records purchased items.
+
+- **AccessEntitlement**  
+  Represents granted access to a product for a specific user after payment.
+
+- **Review**  
+  Product review linked to a verified purchase.
+
+Each entity and relationship is designed to be Django-friendly and simple to reason about, avoiding unnecessary complexity while supporting all required functionality.
+
+### Data Model Overview
+
+The database follows a relational structure implemented using Django ORM and PostgreSQL.
+
+Each model uses Django’s default primary key. Relationships are defined using foreign keys and one-to-one fields where appropriate.
+
+**Key design choices:**
+- Users are managed using Django’s built-in authentication system.
+- Profile data is stored separately using a one-to-one UserProfile model.
+- Products represent premium archive entries.
+- Orders and OrderLineItems store purchase history.
+- Access to premium content is controlled via an explicit AccessEntitlement model.
+- Reviews are restricted to verified buyers only.
+
+### Core Relationships
+
+- **User to UserProfile**: One-to-one relationship for profile data.
+- **User to Order**: One-to-many relationship to track purchase history.
+- **Order to OrderLineItem**: One-to-many relationship for purchased items.
+- **User to Product**: Many-to-many relationship implemented via AccessEntitlement.
+- **AccessEntitlement**: Grants access to a specific product for a specific user after payment.
+- **Product to Review**: One-to-many relationship for verified buyer reviews.
+
+This structure keeps access control simple, auditable, and aligned with Django best practices.
+
+### ERD (Entity Relationship Diagram)
+
+The Entity Relationship Diagram (ERD) below illustrates the structure of the database used in this project.
+
+It shows the main entities, their primary and foreign keys, and how they relate to each other.  
+The diagram reflects the relational data model implemented using Django ORM and PostgreSQL.
+
+The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagramming tool that allows database relationships to be defined using clear, readable syntax and exported as an image.
+
+Key aspects highlighted in the ERD:
+- One-to-one relationship between User and UserProfile.
+- One-to-many relationships for orders and order line items.
+- Explicit many-to-many relationship between users and products via AccessEntitlement.
+- Access-based control of premium content.
+- Reviews linked to verified purchases only.
+
+![ERD Diagram](documentation/erd.png)
+
+
 
 
 ## Testing and Bug Fixes
