@@ -31,20 +31,21 @@ The Elysium Archive is a dark fantasy ecommerce site where each purchase unlocks
 
 ## Project Overview
 
-**The Elysium Archive** is a story-driven, dark fantasy ecommerce project where you do not buy a file. You buy access.
+**The Elysium Archive** is a story-driven, dark fantasy ecommerce project where you do not buy a file, you buy access.
 
-Each product is an “archive entry” that unlocks a private page inside the site. After a successful Stripe test payment, the entry becomes visible in your personal archive area. You can read it whenever you want, but you cannot download it.
+Each product represents an archive entry, a forbidden text stored inside a private, vampire-only archive. After a successful Stripe (test) payment, the entry unlocks a hidden page within the site and becomes part of your personal archive. The content can be read online at any time, but it is never downloadable, reinforcing the idea of secrecy and exclusivity.
 
-I built this as my Code Institute Milestone Project 4 using Django and PostgreSQL. I love the dark fantasy vampire vibe, so I used that theme to make the project feel like a real place: a secret library with locked shelves and invited guests.
+I built this project as my Code Institute Milestone Project 4 using Django and PostgreSQL. Inspired by gothic vampire lore and secret societies, I designed The Elysium Archive to feel like a real place: an ancient library reserved for invited members only, where every unlocked page reveals a fragment of a hidden world.
 
 ### The Story Behind The Elysium Archive
 
-I have always liked gothic worlds, vampire politics, and that “hidden society” feeling. So instead of building a generic shop, I built a site that feels like a private collection of forbidden texts.
+The Elysium Archive is inspired by gothic vampire lore and the idea of a hidden society that exists alongside the ordinary world. Rather than presenting content as a traditional online shop, the project is designed as a private collection of forbidden texts, accessible only to invited members.
 
-The theme is not just decoration. It gives the project a good reason for:
-- user accounts (your archive follows your account)
-- permissions (only buyers can access locked pages)
-- clear business rules (the content unlocks instantly after payment)
+The dark fantasy theme is not purely aesthetic. It supports the core logic of the platform by providing a clear narrative reason for:
+
+- User accounts, as each archive is tied to a specific member
+- Access permissions, where only verified buyers can unlock protected pages
+- Clear business rules, with content unlocking instantly after a successful payment
 
 ### What You Get
 
@@ -117,7 +118,60 @@ To keep this section simple and easy to scan, it is organized in the following o
 
 User stories are planned and tracked using GitHub Projects.
 
- [GitHub Project board](https://github.com/users/Drake-Designer/projects/5)
+[GitHub Project board](https://github.com/users/Drake-Designer/projects/5)
+
+### Site Structure
+
+The site structure of The Elysium Archive was designed to support a clear and intuitive user journey, from public browsing to protected content access.
+
+The platform is divided into public and restricted areas:
+
+**Public areas**
+- Homepage
+- Product catalog (archive entries preview)
+- Product detail pages
+- Registration and login pages
+
+These pages are accessible without authentication and allow visitors to explore the concept and available archive entries before committing to a purchase.
+
+**Restricted areas**
+- Shopping cart
+- Checkout
+- Order confirmation
+- Personal “My Archive” area
+- Protected archive entry pages
+- User profile and order history
+
+Restricted areas require authentication and, where applicable, a verified purchase.  
+Direct URL access to protected content is blocked to prevent unauthorized viewing.
+
+This structure ensures a smooth transition from visitor to registered user, and from customer to archive member, while keeping private content secure.
+
+### Wireframes
+
+Wireframes were created during the planning phase to define the layout, structure, and user flow of the application before development began.
+
+The goal of the wireframes was to focus on usability and content hierarchy rather than visual design. All wireframes were created using Balsamiq and cover both desktop and mobile experiences.
+
+#### Desktop Wireframes
+
+The desktop wireframes were designed for a Windows PC with a 27" display (QHD 2560x1440).  
+They show the main homepage layout, including navigation, hero section, featured archive entries, and the access flow explanation.
+
+![Desktop Wireframe](documentation/wireframes/desktop.png)
+
+#### Mobile Wireframes
+
+Mobile wireframes were created to ensure a clear and consistent user experience across different devices.  
+Layouts were tested and adapted for the following screen sizes:
+
+- iPhone 15 Pro (6.1")
+- iPad Pro (12.9")
+- Samsung Galaxy S24 (6.2")
+
+The mobile designs prioritize readability, vertical scrolling, and simplified navigation using a hamburger menu where appropriate.
+
+![Mobile Wireframe](documentation/wireframes/mobile.png)
 
 
 ## Features
@@ -127,6 +181,64 @@ This section will be expanded as features are built milestone by milestone.
 
 ## Technical Overview
 
+The Elysium Archive is built using a modular Django architecture.  
+Each Django app is responsible for a specific area of functionality and is directly linked to the user stories defined during the UX planning phase.
+
+This approach keeps the codebase organized, readable, and aligned with real-world development practices. It also makes it easier to develop, test, and maintain each feature independently.
+
+### Django Apps Structure
+
+The project is divided into the following Django apps:
+
+#### `home`
+Handles the public-facing structure of the site, including the homepage, static content, layout, and general navigation.  
+This app provides the core presentation layer of the project.
+
+#### `accounts`
+Manages user authentication and account-related features, including:
+- User registration
+- Login and logout
+- Profile management
+- Account deletion
+
+All features related to user identity and access control are handled here.
+
+#### `products`
+Responsible for the product catalog and protected archive content.  
+This app includes:
+- Product listing and product detail pages
+- Product data and relationships
+- Protected archive entry pages unlocked after purchase
+- Access control to ensure only verified buyers can view archive content
+
+#### `cart`
+Handles the shopping cart functionality.  
+Users can add, remove, and update products in their cart before proceeding to checkout.  
+This app manages cart state and ensures the checkout flow only starts when the cart contains items.
+
+#### `checkout`
+Manages the payment process using Stripe in test mode.  
+This includes:
+- Creating Stripe checkout sessions
+- Handling payment success and cancellation
+- Validating payment completion before granting access
+
+#### `orders`
+Stores and manages completed orders.  
+This app is responsible for:
+- Order confirmation pages
+- Order history for logged-in users
+- Linking purchased products to user accounts
+
+#### `reviews`
+Handles product reviews submitted by verified buyers.  
+Only users who have purchased a product can leave a review, ensuring feedback is genuine and relevant.
+
+### User Stories and App Mapping
+
+Each user story is linked to one primary Django app and tracked using GitHub Projects.  
+This ensures a clear connection between planning, implementation, and final features.
+
 
 ## Technologies Used
 
@@ -135,6 +247,7 @@ This section will be expanded as features are built milestone by milestone.
 - PostgreSQL
 - Stripe (test mode)
 - Bootstrap
+
 
 ## Database Design
 
@@ -162,5 +275,3 @@ This project will be deployed on Heroku. Deployment steps will be documented her
 
 
 ## Credits
-
-
