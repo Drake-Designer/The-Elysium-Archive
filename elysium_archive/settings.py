@@ -1,6 +1,5 @@
 """
-Django settings for elysium_archive project.
-
+Django settings for elysium_archive project
 """
 
 import os
@@ -8,16 +7,16 @@ from pathlib import Path
 
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# This import loads local environment variables.
+# Load local environment variables
 if (BASE_DIR / "env.py").exists():
     import env  # noqa: F401
 
 
 def _env_bool(value, default=False):
-    """This helper parses a boolean environment variable."""
+    """Parse a boolean environment variable"""
     if value is None:
         return default
     return str(value).strip().lower() in ["true", "1", "yes", "y", "on"]
@@ -27,6 +26,7 @@ def _env_bool(value, default=False):
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
 
+# Allowed hosts
 _allowed_hosts_raw = os.environ.get("ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_raw.split(",") if h.strip()]
 
@@ -39,8 +39,7 @@ if DEBUG:
 
 # Application definition
 INSTALLED_APPS = [
-
-    # Django core
+    # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -58,6 +57,7 @@ INSTALLED_APPS = [
     "reviews",
 ]
 
+# Middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -69,8 +69,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# URL configuration
 ROOT_URLCONF = "elysium_archive.urls"
 
+# Templates configuration
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -86,11 +88,11 @@ TEMPLATES = [
     },
 ]
 
+# WSGI application
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
 
 
-# Database
-# Use Postgres on Heroku and SQLite locally
+# Database configuration
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -129,14 +131,12 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = "static/"
-
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
-# Default primary key field type
+# Default primary key field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
