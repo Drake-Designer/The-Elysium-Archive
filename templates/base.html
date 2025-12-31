@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Basic metadata -->
+    <!-- Metadata -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
@@ -18,33 +18,33 @@
     {% block meta %}
     {% endblock meta %}
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="icon" type="image/png" href="#">
     <!-- Google fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
           rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet"
           integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
           crossorigin="anonymous">
-    <!-- Base project styles -->
+    <!-- Project CSS -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block extra_css %}
     {% endblock extra_css %}
   </head>
-  <body class="d-flex flex-column min-vh-100 ea-body">
+  <body class="d-flex flex-column min-vh-100 site-body">
     <!-- Skip link for accessibility -->
-    <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
+    <a class="site-skip-link" href="#main-content">Skip to main content</a>
     <!-- Main navigation -->
     <header>
-      <nav class="navbar navbar-expand-lg ea-navbar"
+      <nav class="navbar navbar-expand-lg site-navbar"
            data-bs-theme="dark"
            aria-label="Primary navigation">
         <div class="container">
-          <a class="navbar-brand ea-brand" href="{% url 'home' %}">The Elysium Archive</a>
-          <button class="navbar-toggler"
+          <a class="navbar-brand site-brand" href="{% url 'home' %}">The Elysium Archive</a>
+          <button class="navbar-toggler site-toggler"
                   type="button"
                   data-bs-toggle="collapse"
                   data-bs-target="#primaryNav"
@@ -54,26 +54,46 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="primaryNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <!-- Main menu items -->
+            <ul class="navbar-nav site-nav-links mx-lg-auto">
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'home' %}">Home</a>
+                <a class="nav-link site-nav-link"
+                   href="{% url 'home' %}"
+                   {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}>
+                  <span class="site-nav-link-text">Home</span>
+                </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Catalog</a>
+                <a class="nav-link site-nav-link" href="#">
+                  <span class="site-nav-link-text">Archive</span>
+                </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">My Archive</a>
+                <a class="nav-link site-nav-link" href="#">
+                  <span class="site-nav-link-text">Lore</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link site-nav-link" href="#">
+                  <span class="site-nav-link-text">Reviews</span>
+                </a>
               </li>
             </ul>
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <!-- Divider for mobile only -->
+            <hr class="d-lg-none border-secondary my-2">
+            <!-- Auth items -->
+            <ul class="navbar-nav site-nav-auth align-items-lg-center ms-lg-auto">
               <li class="nav-item">
-                <a class="nav-link" href="#">Cart</a>
+                <a class="nav-link site-nav-link" href="#">
+                  <span class="site-nav-link-text">Login</span>
+                </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Login</a>
-              </li>
-              <li class="nav-item">
-                <a class="btn btn-sm btn-outline-light ea-cta" href="#">Register</a>
+                <a class="nav-link site-nav-link d-lg-none" href="#">
+                  <span class="site-nav-link-text">Register</span>
+                </a>
+                <a class="btn btn-outline-light site-cta d-none d-lg-inline-flex"
+                   href="#">Register</a>
               </li>
             </ul>
           </div>
@@ -82,6 +102,7 @@
     </header>
     <!-- Page content -->
     <main id="main-content" class="flex-grow-1">
+      <!-- Django messages -->
       <div class="container py-3">
         {% if messages %}
           {% for message in messages %}<div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>{% endfor %}
@@ -91,12 +112,12 @@
       {% endblock content %}
     </main>
     <!-- Footer -->
-    <footer class="mt-auto ea-footer" data-bs-theme="dark">
+    <footer class="mt-auto site-footer" data-bs-theme="dark">
       <div class="container py-4">
         <div class="row align-items-center g-3">
           <div class="col">
-            <p class="mb-0 ea-footer-title">The Elysium Archive</p>
-            <p class="mb-0 small ea-footer-text">No downloads. No refunds. Access is the product.</p>
+            <p class="mb-0 site-footer-title">The Elysium Archive</p>
+            <p class="mb-0 small site-footer-text">No downloads. No refunds. Access is the product.</p>
           </div>
           <div class="col-auto">
             <ul class="list-inline mb-0">

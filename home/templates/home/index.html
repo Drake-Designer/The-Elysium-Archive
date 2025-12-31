@@ -1,18 +1,98 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
   Home | The Elysium Archive
 {% endblock title %}
 {% block content %}
+  <!-- Homepage layout -->
   <section class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-9 text-center">
-        <h1 class="display-5 mb-3">The Elysium Archive</h1>
-        <p class="lead mb-4">No downloads. No files. Only access.</p>
-        <div class="d-flex justify-content-center gap-2 flex-wrap">
-          <a class="btn btn-primary" href="#">Enter the Catalog</a>
-          <a class="btn btn-outline-light" href="#">How It Works</a>
+    <div class="row g-4 align-items-center">
+      <!-- Hero -->
+      <div class="col-12 col-lg-5">
+        <div class="panel p-4 text-center">
+          <h1 class="display-5 mb-3">The Elysium Archive</h1>
+          <p class="muted mb-4">A forbidden archive reserved for invited members only.</p>
+          <!-- Intro video -->
+          <div class="video-wrapper mb-4">
+            <video class="video w-100" autoplay loop muted playsinline>
+              <source src="{% static 'video/elysium-intro-video.mp4' %}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <a class="btn btn-primary" href="#">Enter the Archive</a>
         </div>
-        <p class="small mt-4 text-muted">This homepage is a temporary placeholder.</p>
+      </div>
+      <!-- Preview entries -->
+      <div class="col-12 col-lg-7">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="h3 mb-0">Archive Entries</h2>
+          <a class="small text-decoration-none" href="#">View all</a>
+        </div>
+        <div class="row g-3">
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="entry-card h-100">
+              <div class="entry-card-media"></div>
+              <div class="p-3">
+                <h3 class="h5 mb-1">Entry</h3>
+                <p class="small muted mb-2">Short teaser text</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="price">€9.99</span>
+                  <a class="btn btn-sm btn-outline-light" href="#">View Entry</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="entry-card h-100">
+              <div class="entry-card-media"></div>
+              <div class="p-3">
+                <h3 class="h5 mb-1">Entry</h3>
+                <p class="small muted mb-2">Short teaser text</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="price">€9.99</span>
+                  <a class="btn btn-sm btn-outline-light" href="#">View Entry</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="entry-card h-100">
+              <div class="entry-card-media"></div>
+              <div class="p-3">
+                <h3 class="h5 mb-1">Entry</h3>
+                <p class="small muted mb-2">Short teaser text</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="price">€9.99</span>
+                  <a class="btn btn-sm btn-outline-light" href="#">View Entry</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- How access works -->
+    <div class="py-5" id="how-access-works">
+      <h2 class="text-center mb-4">How Access Works</h2>
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <div class="panel p-4 h-100">
+            <h3 class="h5">Create an account</h3>
+            <p class="muted mb-0">Sign up to unlock the forbidden archive</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="panel p-4 h-100">
+            <h3 class="h5">Unlock archive entries</h3>
+            <p class="muted mb-0">Pay once via Stripe and the archive is yours forever</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="panel p-4 h-100">
+            <h3 class="h5">Access your private archive</h3>
+            <p class="muted mb-0">Read exclusive content online only</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
