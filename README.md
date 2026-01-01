@@ -80,6 +80,15 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 
 ## Feature Summary
 
+### Homepage and User Interface
+
+- Featured archive carousel with a single entry per slide
+- Automatic carousel rotation with manual navigation controls
+- Fully responsive layout across desktop, tablet, and mobile
+- Global reduced-effects toggle available on all pages
+- Consistent button styling and iconography across the site
+- Optimised image loading and scaling via Cloudinary
+
 ### Catalog and Purchases
 
 - Browse products with title, price, and description
@@ -207,6 +216,14 @@ Typography rules:
 
 ![Google Fonts](documentation/google-fonts.png)
 
+### Design and UX Decisions
+
+The homepage carousel displays a single archive entry per slide rather than multiple cards. This design choice prioritises readability and allows each featured entry to command attention without visual clutter. The layout maintains a clear visual hierarchy, guiding visitors naturally from the hero section to featured content and membership information.
+
+A global toggle for reduced visual effects is available on all pages. This feature respects user preferences for motion sensitivity and improves accessibility without compromising the dark fantasy atmosphere. The toggle state persists across page navigation using local storage.
+
+Consistency between the homepage and archive views ensures a cohesive experience. Button styles, iconography, and interactive elements follow the same design language throughout the site, reinforcing the premium feel of the platform.
+
 ## Features
 
 This section will be expanded milestone by milestone.
@@ -292,6 +309,16 @@ Included formats:
 
 This ensures consistent branding across desktop, mobile, and installed web experiences.
 
+### Media Handling and Image Optimisation
+
+Media assets are stored and delivered using Cloudinary, a cloud-based media management platform. This approach provides several benefits for performance and maintainability.
+
+Images are served responsively based on device size and resolution. Cloudinary automatically generates optimised formats such as WebP and AVIF where supported, reducing file sizes without visible quality loss.
+
+Image scaling is handled server-side to ensure appropriate dimensions for each breakpoint. This prevents unnecessary bandwidth usage on mobile devices while maintaining sharp visuals on larger screens.
+
+The implementation avoids unintended cropping by using intelligent scaling with automatic gravity detection. Featured images retain their intended composition across all device sizes.
+
 ## Technologies Used
 
 - HTML, CSS, JavaScript
@@ -299,6 +326,9 @@ This ensures consistent branding across desktop, mobile, and installed web exper
 - PostgreSQL
 - Stripe (test mode)
 - Bootstrap
+- Cloudinary (media storage and optimisation)
+- Font Awesome (iconography)
+- Bootstrap Carousel (customised)
 
 ## Admin Panel Setup
 
@@ -489,3 +519,9 @@ This keeps Django debug mode disabled in production while keeping local developm
 ## Future Improvements
 
 ## Credits
+
+### Media and Visual Assets
+
+All atmospheric images used throughout the project are sourced from [Stockcake](https://stockcake.com/), a platform providing free AI-generated stock images. All images are used for educational purposes only as part of a Code Institute student project.
+
+Media assets are optimised and delivered using Cloudinary.
