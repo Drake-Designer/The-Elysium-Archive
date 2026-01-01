@@ -226,7 +226,38 @@ Consistency between the homepage and archive views ensures a cohesive experience
 
 ## Features
 
-This section will be expanded milestone by milestone.
+This section documents implemented features organised by category.
+
+### User Authentication
+
+- **Registration**: Users can create an account with username and password validation
+- **Login**: Secure authentication with session management
+- **Logout**: Safe logout via POST request to prevent CSRF attacks
+- **Auth State**: Navbar dynamically reflects login status
+
+### Public Pages
+
+- **Homepage**: Hero section, featured entries carousel, membership information
+- **Archive Catalog**: Browse all available archive entries
+- **Lore Page**: Background story and world-building content
+
+### User Feedback
+
+- **Django Messages**: Clear success and error notifications
+- **Form Validation**: Inline error feedback on registration and login forms
+- **Accessible Alerts**: Bootstrap-styled alerts with proper ARIA roles
+
+## Pages Overview
+
+| Page | URL | Access | Description |
+| ------ | ----- | -------- | ------------- |
+| Home | `/` | Public | Landing page with hero, carousel, and membership info |
+| Archive | `/archive/` | Public | Browse all archive entries |
+| Lore | `/lore/` | Public | World-building and story content |
+| Register | `/accounts/register/` | Anonymous only | Create a new account |
+| Login | `/accounts/login/` | Anonymous only | Sign in to existing account |
+| Logout | `/accounts/logout/` | Authenticated | Sign out (POST only) |
+| Admin | `/admin/` | Staff only | Django admin panel |
 
 ## Technical Overview
 

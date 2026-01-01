@@ -193,25 +193,29 @@
               <li class="muted">No refunds after access is unlocked</li>
             </ul>
             <div class="panel p-4">
-              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                <h3 class="h5 mb-0">Ready to enter?</h3>
-                <span class="badge text-bg-secondary">Coming next</span>
-              </div>
-              <p class="muted mb-3">Register and login will be enabled in the Accounts milestone.</p>
-              <div class="d-grid gap-2 d-sm-flex">
-                <a class="btn btn-primary site-auth-btn btn-icon disabled"
-                   href="#"
-                   aria-disabled="true"
-                   tabindex="-1">
-                  <i class="fa-solid fa-user-plus"></i>Register
-                </a>
-                <a class="btn btn-outline-light site-auth-btn btn-icon disabled"
-                   href="#"
-                   aria-disabled="true"
-                   tabindex="-1">
-                  <i class="fa-solid fa-right-to-bracket"></i>Login
-                </a>
-              </div>
+              {% if user.is_authenticated %}
+                <h3 class="h5 mb-2">Welcome back, {{ user.username }}</h3>
+                <p class="muted mb-3">You are a member of the Archive. Explore and unlock forbidden knowledge.</p>
+                <div class="d-grid gap-2 d-sm-flex">
+                  <a class="btn btn-primary site-auth-btn btn-icon"
+                     href="{% url 'archive' %}">
+                    <i class="fa-solid fa-book-open"></i>Browse Entries
+                  </a>
+                </div>
+              {% else %}
+                <h3 class="h5 mb-2">Ready to enter?</h3>
+                <p class="muted mb-3">Create an account to unlock archive entries and build your collection.</p>
+                <div class="d-grid gap-2 d-sm-flex">
+                  <a class="btn btn-primary site-auth-btn btn-icon"
+                     href="{% url 'register' %}">
+                    <i class="fa-solid fa-user-plus"></i>Register
+                  </a>
+                  <a class="btn btn-outline-light site-auth-btn btn-icon"
+                     href="{% url 'login' %}">
+                    <i class="fa-solid fa-right-to-bracket"></i>Login
+                  </a>
+                </div>
+              {% endif %}
               <p class="small muted mt-3 mb-0">You can browse the public catalog without an account.</p>
             </div>
           </div>

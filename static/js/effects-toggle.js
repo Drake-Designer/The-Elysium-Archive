@@ -2,7 +2,8 @@
 
 (() => {
   const storageKey = 'elysium_reduced_effects';
-  const toggle = document.getElementById('effectsToggleGlobal');
+  const toggleMobile = document.getElementById('effectsToggleGlobal');
+  const toggleDesktop = document.getElementById('effectsToggleGlobalDesktop');
   const heroVideo = document.querySelector('[data-hero-video]');
 
   const safeGet = () => {
@@ -25,7 +26,9 @@
     document.body.classList.toggle('reduced-effects', isReduced);
     document.documentElement.classList.toggle('reduced-effects', isReduced);
 
-    if (toggle) {
+    // Update both buttons (mobile and desktop)
+    const buttons = [toggleMobile, toggleDesktop].filter(Boolean);
+    buttons.forEach((toggle) => {
       toggle.setAttribute('aria-pressed', String(isReduced));
       toggle.setAttribute('title', isReduced ? 'Effects: Off' : 'Effects: On');
       toggle.classList.toggle('is-active', isReduced);
@@ -39,7 +42,7 @@
       if (tooltip) {
         tooltip.setContent({ '.tooltip-inner': isReduced ? 'Effects: Off' : 'Effects: On' });
       }
-    }
+    });
 
     if (heroVideo) {
       if (isReduced) {
@@ -53,16 +56,28 @@
     }
   };
 
-  // Initialize tooltip
-  if (toggle) {
-    new bootstrap.Tooltip(toggle);
+  // Initialize tooltips for both buttons
+  if (toggleMobile) {
+    new bootstrap.Tooltip(toggleMobile);
+  }
+  if (toggleDesktop) {
+    new bootstrap.Tooltip(toggleDesktop);
   }
 
   const initial = safeGet() === '1';
   applyState(initial);
 
-  if (toggle) {
-    toggle.addEventListener('click', () => {
+  // Attach click handlers to both buttons
+  if (toggleMobile) {
+    toggleMobile.addEventListener('click', () => {
+      const next = !document.body.classList.contains('reduced-effects');
+      safeSet(next ? '1' : '0');
+      applyState(next);
+    });
+  }
+
+  if (toggleDesktop) {
+    toggleDesktop.addEventListener('click', () => {
       const next = !document.body.classList.contains('reduced-effects');
       safeSet(next ? '1' : '0');
       applyState(next);

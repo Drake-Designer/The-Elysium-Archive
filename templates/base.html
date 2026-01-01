@@ -71,9 +71,20 @@
            data-bs-theme="dark"
            aria-label="Primary navigation">
         <div class="container">
+          <!-- Brand -->
           <a class="navbar-brand site-brand" href="{% url 'home' %}">The Elysium Archive</a>
-          <!-- Effects toggle (always visible) -->
-          <button class="btn effects-toggle-btn order-lg-last ms-auto ms-lg-2"
+          <!-- Hamburger toggler (pushed to right with margin-left auto) -->
+          <button class="navbar-toggler site-toggler site-toggler-fixed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#primaryNav"
+                  aria-controls="primaryNav"
+                  aria-expanded="false"
+                  aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <!-- Effects toggle button MOBILE (visible only on small screens, next to hamburger) -->
+          <button class="btn effects-toggle-btn site-effects-toggle-mobile d-lg-none"
                   type="button"
                   id="effectsToggleGlobal"
                   aria-label="Toggle visual effects"
@@ -83,18 +94,10 @@
                   title="Effects: On">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
           </button>
-          <button class="navbar-toggler site-toggler ms-2"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#primaryNav"
-                  aria-controls="primaryNav"
-                  aria-expanded="false"
-                  aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+          <!-- Collapsible content -->
           <div class="collapse navbar-collapse" id="primaryNav">
-            <!-- Main menu items -->
-            <ul class="navbar-nav site-nav-links mx-lg-auto">
+            <!-- Main menu items (centered on desktop) -->
+            <ul class="navbar-nav mx-auto">
               <li class="nav-item">
                 <a class="nav-link site-nav-link"
                    href="{% url 'home' %}"
@@ -119,20 +122,52 @@
             </ul>
             <!-- Divider for mobile only -->
             <hr class="d-lg-none border-secondary my-2">
-            <!-- Auth items -->
-            <ul class="navbar-nav site-nav-auth align-items-lg-center ms-lg-auto">
-              <li class="nav-item">
-                <a class="nav-link site-nav-link" href="{% url 'home' %}#membership">
-                  <span class="site-nav-link-text"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link site-nav-link d-lg-none"
-                   href="{% url 'home' %}#membership">
-                  <span class="site-nav-link-text"><i class="fa-solid fa-user-plus me-1"></i>Register</span>
-                </a>
-                <a class="btn btn-outline-light site-cta d-none d-lg-inline-flex"
-                   href="{% url 'home' %}#membership"><i class="fa-solid fa-user-plus me-1"></i>Register</a>
+            <!-- Auth items (right on desktop) -->
+            <ul class="navbar-nav align-items-lg-center">
+              {% if user.is_authenticated %}
+                <!-- Authenticated user: icon only -->
+                <li class="nav-item">
+                  <span class="nav-link site-nav-link site-user-icon"
+                        aria-label="User account">
+                    <i class="fa-solid fa-user"></i>
+                  </span>
+                </li>
+                <!-- Logout form (POST with CSRF) -->
+                <li class="nav-item">
+                  <form method="post" action="{% url 'logout' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link site-nav-link site-logout-btn">
+                      <span class="site-nav-link-text"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</span>
+                    </button>
+                  </form>
+                </li>
+              {% else %}
+                <!-- Anonymous user menu -->
+                <li class="nav-item">
+                  <a class="nav-link site-nav-link" href="{% url 'login' %}">
+                    <span class="site-nav-link-text"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link site-nav-link d-lg-none" href="{% url 'register' %}">
+                    <span class="site-nav-link-text"><i class="fa-solid fa-user-plus me-1"></i>Register</span>
+                  </a>
+                  <a class="btn btn-outline-light site-cta d-none d-lg-inline-flex"
+                     href="{% url 'register' %}"><i class="fa-solid fa-user-plus me-1"></i>Register</a>
+                </li>
+              {% endif %}
+              <!-- Effects toggle button DESKTOP (visible only on large screens, at the right) -->
+              <li class="nav-item d-none d-lg-inline-flex">
+                <button class="btn effects-toggle-btn site-effects-toggle-desktop ms-2"
+                        type="button"
+                        id="effectsToggleGlobalDesktop"
+                        aria-label="Toggle visual effects"
+                        aria-pressed="false"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Effects: On">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </button>
               </li>
             </ul>
           </div>
