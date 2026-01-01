@@ -1,3 +1,4 @@
+{# home/templates/home/index.html #}
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
@@ -8,89 +9,205 @@
     <div class="row g-4 align-items-center">
       <!-- Hero -->
       <div class="col-12 col-lg-5">
-        <div class="panel p-4 text-center">
+        <div class="panel p-4 text-center hero-panel">
           <h1 class="display-5 mb-3">The Elysium Archive</h1>
-          <p class="muted mb-3">A dark fantasy library of forbidden texts, unlocked on site.</p>
-          <div class="d-flex flex-column gap-2 mb-4">
-            <p class="mb-0">
-              <strong>No downloads.</strong> Read inside your private archive.
-            </p>
-            <p class="mb-0">
-              <strong>Permanent access.</strong> Each purchase unlocks a page tied to your account.
-            </p>
-            <p class="mb-0">
-              <strong>Members only.</strong> What is sealed stays sealed.
-            </p>
-          </div>
-          <!-- Intro video -->
-          <div class="video-wrapper mb-4">
-            <video class="video w-100" autoplay loop muted playsinline>
+          <p class="muted mb-4">
+            A forbidden archive reserved for invited members only. Unlock entries and read them online forever.
+          </p>
+          <!-- Loop intro video -->
+          <div class="video-wrapper mb-3">
+            <video class="video w-100"
+                   autoplay
+                   loop
+                   muted
+                   playsinline
+                   preload="metadata"
+                   data-hero-video
+                   aria-label="A looping corridor entrance video">
               <source src="{% static 'video/elysium-intro-video.mp4' %}" type="video/mp4">
               Your browser does not support the video tag.
             </video>
           </div>
-          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a class="btn btn-primary" href="#membership">Become a Member</a>
-            <a class="btn btn-outline-light" href="#how-access-works">How it works</a>
+          <div class="d-grid gap-2">
+            <a class="btn btn-primary" href="{% url 'archive' %}">Browse the Archive</a>
+            <a class="btn btn-outline-light" href="#membership">Become a Member</a>
           </div>
-          <p class="small muted mt-3 mb-0">Already initiated? Use Login from the menu.</p>
+          <button class="btn btn-link effects-toggle mt-2"
+                  type="button"
+                  id="effectsToggle"
+                  aria-pressed="false">Reduce effects</button>
+          <p class="small muted mt-3 mb-0">No downloads. No external files. Access is the product.</p>
         </div>
       </div>
-      <!-- Preview entries -->
+      <!-- Archive Entries -->
       <div class="col-12 col-lg-7">
-        <div class="d-flex justify-content-between align-items-center mb-4"
-             id="archives">
-          <h2 class="h3 mb-0">Archive Previews</h2>
-          <a class="small text-decoration-none" href="#membership">Unlock access</a>
-        </div>
-        <div class="row g-3">
-          <div class="col-12 col-md-6 col-xl-4">
-            <div class="entry-card h-100">
-              <div class="entry-card-media"></div>
-              <div class="p-3">
-                <div class="d-flex justify-content-between align-items-start gap-2">
-                  <h3 class="h5 mb-1">Sealed Entry</h3>
-                  <span class="badge text-bg-secondary">Locked</span>
-                </div>
-                <p class="small muted mb-3">A brief whisper from a forbidden volume. Full text unlocks after purchase.</p>
-                <a class="btn btn-sm btn-outline-light w-100" href="#how-access-works">Learn how to unlock</a>
-              </div>
-            </div>
+        <div class="section-header mb-3" id="archives">
+          <div class="section-header-text">
+            <h2 class="h3 mb-1 section-title">Archive Entries</h2>
+            <p class="small muted mb-0">A rotating selection of sealed previews from the public catalog.</p>
           </div>
-          <div class="col-12 col-md-6 col-xl-4">
-            <div class="entry-card h-100">
-              <div class="entry-card-media"></div>
-              <div class="p-3">
-                <div class="d-flex justify-content-between align-items-start gap-2">
-                  <h3 class="h5 mb-1">Sealed Entry</h3>
-                  <span class="badge text-bg-secondary">Locked</span>
-                </div>
-                <p class="small muted mb-3">A name erased from history. The full archive remains members only.</p>
-                <a class="btn btn-sm btn-outline-light w-100" href="#how-access-works">Learn how to unlock</a>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-6 col-xl-4">
-            <div class="entry-card h-100">
-              <div class="entry-card-media"></div>
-              <div class="p-3">
-                <div class="d-flex justify-content-between align-items-start gap-2">
-                  <h3 class="h5 mb-1">Sealed Entry</h3>
-                  <span class="badge text-bg-secondary">Locked</span>
-                </div>
-                <p class="small muted mb-3">A ritual, a key, a door. The full text opens only after checkout.</p>
-                <a class="btn btn-sm btn-outline-light w-100" href="#how-access-works">Learn how to unlock</a>
-              </div>
-            </div>
+          <div class="section-header-actions">
+            <button class="btn btn-sm btn-outline-light section-nav-btn"
+                    type="button"
+                    data-bs-target="#entryCarousel"
+                    data-bs-slide="prev"
+                    aria-controls="entryCarousel"
+                    aria-label="Previous entries">‹</button>
+            <button class="btn btn-sm btn-outline-light section-nav-btn"
+                    type="button"
+                    data-bs-target="#entryCarousel"
+                    data-bs-slide="next"
+                    aria-controls="entryCarousel"
+                    aria-label="Next entries">›</button>
           </div>
         </div>
-        <div class="panel p-4 mt-4">
-          <h3 class="h5 mb-2">What you get as a member</h3>
-          <ul class="mb-0">
-            <li>Access is tied to your account.</li>
-            <li>Every purchase unlocks a private page permanently.</li>
-            <li>Content is readable online only, inside The Elysium.</li>
-          </ul>
+        <div class="panel p-3 p-lg-4">
+          <div id="entryCarousel"
+               class="carousel slide entry-carousel"
+               data-bs-ride="false"
+               data-bs-touch="true">
+            <div class="carousel-inner">
+              <!-- Slide 1 -->
+              <div class="carousel-item active">
+                <div class="entry-carousel-grid">
+                  <article class="entry-card entry-card--carousel">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-01.jpg' %}"
+                           alt="Preview image for Archive Entry I"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head">
+                        <h3 class="h5 mb-0">Archive Entry I</h3>
+                        <span class="badge badge-sealed">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A blood-sealed ledger recovered from a ruined chapel.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€9.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                  <article class="entry-card entry-card--carousel d-none d-md-flex">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-02.jpg' %}"
+                           alt="Preview image for Archive Entry II"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head">
+                        <h3 class="h5 mb-0">Archive Entry II</h3>
+                        <span class="badge badge-sealed">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A vow written in ash. Names vanish when read aloud.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€12.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                  <article class="entry-card entry-card--carousel d-none d-xl-flex">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-03.jpg' %}"
+                           alt="Preview image for Archive Entry III"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head">
+                        <h3 class="h5 mb-0">Archive Entry III</h3>
+                        <span class="badge badge-sealed">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A map that redraws itself when candlelight fades.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€7.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                </div>
+              </div>
+              <!-- Slide 2 -->
+              <div class="carousel-item">
+                <div class="entry-carousel-grid">
+                  <article class="entry-card entry-card--carousel">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-04.jpg' %}"
+                           alt="Preview image for Archive Entry IV"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head">
+                        <h3 class="h5 mb-0">Archive Entry IV</h3>
+                        <span class="badge badge-sealed">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A confession from a witness who never existed.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€10.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                  <article class="entry-card entry-card--carousel d-none d-md-flex">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-05.jpg' %}"
+                           alt="Preview image for Archive Entry V"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head">
+                        <h3 class="h5 mb-0">Archive Entry V</h3>
+                        <span class="badge badge-sealed">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A ritual index bound in relic-gold thread.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€14.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                  <article class="entry-card entry-card--carousel d-none d-xl-flex">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-06.jpg' %}"
+                           alt="Preview image for Archive Entry VI"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head">
+                        <h3 class="h5 mb-0">Archive Entry VI</h3>
+                        <span class="badge badge-sealed">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A pact signed in silence. The ink moves like smoke.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€11.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
+              <button type="button"
+                      data-bs-target="#entryCarousel"
+                      data-bs-slide-to="0"
+                      class="active"
+                      aria-current="true"
+                      aria-label="Slide 1"></button>
+              <button type="button"
+                      data-bs-target="#entryCarousel"
+                      data-bs-slide-to="1"
+                      aria-label="Slide 2"></button>
+            </div>
+          </div>
+          <p class="small muted mt-3 mb-0">
+            These are public previews. Full entries unlock after membership and a successful payment.
+          </p>
         </div>
       </div>
     </div>
@@ -99,48 +216,118 @@
       <h2 class="text-center mb-4">How Access Works</h2>
       <div class="row g-3">
         <div class="col-12 col-md-4">
-          <div class="panel p-4 h-100">
-            <h3 class="h5">Create an account</h3>
-            <p class="muted mb-0">Register to become a member and enter The Elysium.</p>
+          <div class="panel p-4 h-100 how-card">
+            <img class="how-card-img"
+                 src="{% static 'img/home/how/how-01-account.jpg' %}"
+                 alt="An atmospheric image representing creating an account"
+                 loading="lazy">
+            <h3 class="h5 mt-3">Create an account</h3>
+            <p class="muted mb-0">Register to become a member and unlock purchases to your profile.</p>
           </div>
         </div>
         <div class="col-12 col-md-4">
-          <div class="panel p-4 h-100">
-            <h3 class="h5">Unlock archive entries</h3>
-            <p class="muted mb-0">Pay once via Stripe and the archive stays linked to your account.</p>
+          <div class="panel p-4 h-100 how-card">
+            <img class="how-card-img"
+                 src="{% static 'img/home/how/how-02-seal.jpg' %}"
+                 alt="An atmospheric image representing a sealed archive entry"
+                 loading="lazy">
+            <h3 class="h5 mt-3">Unlock archive entries</h3>
+            <p class="muted mb-0">Pay once via Stripe and the entry becomes yours permanently.</p>
           </div>
         </div>
         <div class="col-12 col-md-4">
-          <div class="panel p-4 h-100">
-            <h3 class="h5">Read on site, anytime</h3>
-            <p class="muted mb-0">No PDFs, no downloads. Your content lives inside the website.</p>
+          <div class="panel p-4 h-100 how-card">
+            <img class="how-card-img"
+                 src="{% static 'img/home/how/how-03-library.jpg' %}"
+                 alt="An atmospheric image representing a private library"
+                 loading="lazy">
+            <h3 class="h5 mt-3">Access your private archive</h3>
+            <p class="muted mb-0">Read exclusive content online only, anytime you return.</p>
           </div>
         </div>
       </div>
     </div>
-    <!-- Policies -->
-    <div class="pb-5" id="policies">
-      <div class="panel p-4">
-        <h2 class="h4 mb-2">Policies</h2>
-        <p class="muted mb-2">This is a members only archive. Each purchase unlocks access to on site content.</p>
-        <ul class="mb-0">
-          <li>No downloads and no external files.</li>
-          <li>No refunds, because access is granted immediately after successful payment.</li>
-          <li>Your unlocked archives remain available in your private area.</li>
-        </ul>
-      </div>
-    </div>
-    <!-- Membership CTA -->
-    <div class="pb-5" id="membership">
-      <div class="panel p-4 text-center">
-        <h2 class="h3 mb-2">Become a Member</h2>
-        <p class="muted mb-4">Create an account to unlock your private archive and start collecting forbidden texts.</p>
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-          <a class="btn btn-primary" href="#">Register</a>
-          <a class="btn btn-outline-light" href="#">Login</a>
+    <!-- Membership -->
+    <div class="py-5" id="membership">
+      <div class="panel p-4 p-lg-5">
+        <div class="row g-4 align-items-center">
+          <div class="col-12 col-lg-5">
+            <div class="membership-media">
+              <img class="membership-img"
+                   src="{% static 'img/home/membership/membership.jpg' %}"
+                   alt="An atmospheric image representing membership access"
+                   loading="lazy">
+            </div>
+          </div>
+          <div class="col-12 col-lg-7">
+            <h2 class="h3 mb-3">Membership</h2>
+            <p class="muted mb-3">Membership is required to unlock entries. Your access is tied to your account, not to a file.</p>
+            <ul class="mb-4">
+              <li class="muted">Buy once, access forever on site</li>
+              <li class="muted">Unlocked entries live in your private archive</li>
+              <li class="muted">Verified buyers can leave reviews</li>
+              <li class="muted">No refunds: access unlocks immediately after payment</li>
+            </ul>
+            <div class="panel p-4">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <h3 class="h5 mb-0">Ready to enter?</h3>
+                <span class="badge text-bg-secondary">Coming next</span>
+              </div>
+              <p class="muted mb-3">Register and login will be enabled in the Accounts milestone.</p>
+              <div class="d-grid gap-2 d-sm-flex">
+                <a class="btn btn-primary site-auth-btn disabled"
+                   href="#"
+                   aria-disabled="true"
+                   tabindex="-1">Register</a>
+                <a class="btn btn-outline-light site-auth-btn disabled"
+                   href="#"
+                   aria-disabled="true"
+                   tabindex="-1">Login</a>
+              </div>
+              <p class="small muted mt-3 mb-0">You can browse the public catalog without an account.</p>
+            </div>
+          </div>
         </div>
-        <p class="small muted mt-3 mb-0">Registration and login are enabled in the next steps of this milestone.</p>
       </div>
     </div>
   </section>
 {% endblock content %}
+{% block extra_js %}
+  <script>
+    // This script toggles reduced effects for motion-sensitive users.
+    (function () {
+      const storageKey = 'elysium_reduced_effects';
+      const toggle = document.getElementById('effectsToggle');
+      const heroVideo = document.querySelector('[data-hero-video]');
+
+      function applyState(isReduced) {
+        document.body.classList.toggle('reduced-effects', isReduced);
+        document.documentElement.classList.toggle('reduced-effects', isReduced);
+
+        if (toggle) {
+          toggle.setAttribute('aria-pressed', String(isReduced));
+          toggle.textContent = isReduced ? 'Enable effects' : 'Reduce effects';
+        }
+
+        if (heroVideo) {
+          if (isReduced) {
+            heroVideo.pause();
+          } else {
+            heroVideo.play().catch(() => {});
+          }
+        }
+      }
+
+      const initial = localStorage.getItem(storageKey) === '1';
+      applyState(initial);
+
+      if (toggle) {
+        toggle.addEventListener('click', function () {
+          const next = !document.body.classList.contains('reduced-effects');
+          localStorage.setItem(storageKey, next ? '1' : '0');
+          applyState(next);
+        });
+      }
+    })();
+  </script>
+{% endblock extra_js %}
