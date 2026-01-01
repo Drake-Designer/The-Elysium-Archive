@@ -1,5 +1,5 @@
 """
-Django settings for elysium_archive project
+Django settings for elysium_archive project.
 """
 
 import os
@@ -10,31 +10,47 @@ import dj_database_url
 # Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load local environment variables
+# Load local environment variables (dev only)
 if (BASE_DIR / "env.py").exists():
     import env  # noqa: F401
 
 
 def _env_bool(value, default=False):
-    """Parse a boolean environment variable"""
+    """Parse a boolean environment variable."""
     if value is None:
         return default
-    return str(value).strip().lower() in ["true", "1", "yes", "y", "on"]
+    return str(value).strip().lower() in ("true", "1", "yes", "y", "on")
 
 
-# Security settings
+def _env_list(name, default=None):
+    """Parse a comma-separated environment variable into a list."""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default or []
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+# Security
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
 
-# Allowed hosts
-_allowed_hosts_raw = os.environ.get("ALLOWED_HOSTS", "")
-ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_raw.split(",") if h.strip()]
+# Hosts / CSRF
+ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", default=[])
 
 if DEBUG:
-    if "localhost" not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append("localhost")
-    if "127.0.0.1" not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append("127.0.0.1")
+    for host in ("localhost", "127.0.0.1"):
+        if host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(host)
+
+CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", default=[])
+
+# Heroku / reverse proxy HTTPS header
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -48,6 +64,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party (media only via Cloudinary)
+    # Keep staticfiles before cloudinary apps when you use Cloudinary for media only. :contentReference[oaicite:0]{index=0}
+    "cloudinary_storage",
+    "cloudinary",
     # Project apps
     "home",
     "accounts",
@@ -84,7 +104,6 @@ JAZZMIN_SETTINGS = {
     },
 }
 
-# Middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -96,10 +115,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# URL configuration
 ROOT_URLCONF = "elysium_archive.urls"
 
-# Templates configuration
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -115,11 +132,10 @@ TEMPLATES = [
     },
 ]
 
-# WSGI application
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
 
 
-# Database configuration
+# Database
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -127,25 +143,22 @@ DATABASES = {
     }
 }
 
-if "DATABASE_URL" in os.environ:
-    db_config = dj_database_url.config(conn_max_age=600, ssl_require=True)
-    DATABASES["default"] = dict(db_config)
+if os.environ.get("DATABASE_URL"):
+    db_config = dj_database_url.config(
+        conn_max_age=600,
+        ssl_require=True,
+    )
+    DATABASES["default"] = dict(db_config) if db_config is not None else {}
 
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 
@@ -157,13 +170,13 @@ USE_TZ = True
 
 
 # Static files
-STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# Media files (Cloudinary)
+MEDIA_URL = "/media/"
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-# Default primary key field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

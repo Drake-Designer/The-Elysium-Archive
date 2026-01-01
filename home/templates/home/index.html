@@ -1,4 +1,3 @@
-{# home/templates/home/index.html #}
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
@@ -46,24 +45,238 @@
             <h2 class="h3 mb-1 section-title">Archive Entries</h2>
             <p class="small muted mb-0">A rotating selection of sealed previews from the public catalog.</p>
           </div>
-          <div class="section-header-actions">
+          <!-- Mobile nav controls -->
+          <div class="section-header-actions d-md-none">
             <button class="btn btn-sm btn-outline-light section-nav-btn"
                     type="button"
-                    data-bs-target="#entryCarousel"
+                    data-bs-target="#entryCarouselMobile"
                     data-bs-slide="prev"
-                    aria-controls="entryCarousel"
-                    aria-label="Previous entries">‹</button>
+                    aria-label="Previous preview entries">‹</button>
             <button class="btn btn-sm btn-outline-light section-nav-btn"
                     type="button"
-                    data-bs-target="#entryCarousel"
+                    data-bs-target="#entryCarouselMobile"
                     data-bs-slide="next"
-                    aria-controls="entryCarousel"
-                    aria-label="Next entries">›</button>
+                    aria-label="Next preview entries">›</button>
+          </div>
+          <!-- Tablet nav controls -->
+          <div class="section-header-actions d-none d-md-flex d-xl-none">
+            <button class="btn btn-sm btn-outline-light section-nav-btn"
+                    type="button"
+                    data-bs-target="#entryCarouselTablet"
+                    data-bs-slide="prev"
+                    aria-label="Previous preview entries">‹</button>
+            <button class="btn btn-sm btn-outline-light section-nav-btn"
+                    type="button"
+                    data-bs-target="#entryCarouselTablet"
+                    data-bs-slide="next"
+                    aria-label="Next preview entries">›</button>
+          </div>
+          <!-- Desktop nav controls -->
+          <div class="section-header-actions d-none d-xl-flex">
+            <button class="btn btn-sm btn-outline-light section-nav-btn"
+                    type="button"
+                    data-bs-target="#entryCarouselDesktop"
+                    data-bs-slide="prev"
+                    aria-label="Previous preview entries">‹</button>
+            <button class="btn btn-sm btn-outline-light section-nav-btn"
+                    type="button"
+                    data-bs-target="#entryCarouselDesktop"
+                    data-bs-slide="next"
+                    aria-label="Next preview entries">›</button>
           </div>
         </div>
         <div class="panel p-3 p-lg-4">
-          <div id="entryCarousel"
-               class="carousel slide entry-carousel"
+          <!-- ========== MOBILE CAROUSEL (1 card per slide, 6 slides) ========== -->
+          <div id="entryCarouselMobile"
+               class="carousel slide entry-carousel d-md-none"
+               data-bs-ride="false"
+               data-bs-touch="true">
+            <div class="carousel-inner">
+              <!-- Slide 1 -->
+              <div class="carousel-item active">
+                <article class="entry-card entry-card--carousel">
+                  <div class="entry-card-media">
+                    <img class="entry-card-img"
+                         src="{% static 'img/home/entries/entry-01.jpg' %}"
+                         alt="Candlelit gothic corridor leading to a sealed door"
+                         loading="lazy">
+                  </div>
+                  <div class="entry-card-body">
+                    <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                      <div>
+                        <p class="small muted text-uppercase mb-1">Archive Entry I</p>
+                        <h3 class="h6 mb-0 lh-sm">The Candlelit Corridor</h3>
+                      </div>
+                      <span class="badge badge-sealed align-self-start">Sealed</span>
+                    </div>
+                    <p class="small muted mb-0">
+                      A candlelit passage that appears only to invited names. The door remembers who has entered.
+                    </p>
+                  </div>
+                  <div class="entry-card-footer">
+                    <span class="price">€9.99</span>
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                  </div>
+                </article>
+              </div>
+              <!-- Slide 2 -->
+              <div class="carousel-item">
+                <article class="entry-card entry-card--carousel">
+                  <div class="entry-card-media">
+                    <img class="entry-card-img"
+                         src="{% static 'img/home/entries/entry-02.jpg' %}"
+                         alt="Ancient parchment manuscript with dark, arcane writing"
+                         loading="lazy">
+                  </div>
+                  <div class="entry-card-body">
+                    <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                      <div>
+                        <p class="small muted text-uppercase mb-1">Archive Entry II</p>
+                        <h3 class="h6 mb-0 lh-sm">The Manuscript of Night</h3>
+                      </div>
+                      <span class="badge badge-sealed align-self-start">Sealed</span>
+                    </div>
+                    <p class="small muted mb-0">A parchment manuscript penned in old rites. Certain lines fade unless read in silence.</p>
+                  </div>
+                  <div class="entry-card-footer">
+                    <span class="price">€12.99</span>
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                  </div>
+                </article>
+              </div>
+              <!-- Slide 3 -->
+              <div class="carousel-item">
+                <article class="entry-card entry-card--carousel">
+                  <div class="entry-card-media">
+                    <img class="entry-card-img"
+                         src="{% static 'img/home/entries/entry-03.jpg' %}"
+                         alt="Crimson wax seal on a sealed letter"
+                         loading="lazy">
+                  </div>
+                  <div class="entry-card-body">
+                    <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                      <div>
+                        <p class="small muted text-uppercase mb-1">Archive Entry III</p>
+                        <h3 class="h6 mb-0 lh-sm">The Crimson Seal</h3>
+                      </div>
+                      <span class="badge badge-sealed align-self-start">Sealed</span>
+                    </div>
+                    <p class="small muted mb-0">A letter closed by wax and oath. Break the seal and the Archive records your name.</p>
+                  </div>
+                  <div class="entry-card-footer">
+                    <span class="price">€7.99</span>
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                  </div>
+                </article>
+              </div>
+              <!-- Slide 4 -->
+              <div class="carousel-item">
+                <article class="entry-card entry-card--carousel">
+                  <div class="entry-card-media">
+                    <img class="entry-card-img"
+                         src="{% static 'img/home/entries/entry-04.jpg' %}"
+                         alt="Occult parchment map illuminated by candlelight"
+                         loading="lazy">
+                  </div>
+                  <div class="entry-card-body">
+                    <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                      <div>
+                        <p class="small muted text-uppercase mb-1">Archive Entry IV</p>
+                        <h3 class="h6 mb-0 lh-sm">The Living Map</h3>
+                      </div>
+                      <span class="badge badge-sealed align-self-start">Sealed</span>
+                    </div>
+                    <p class="small muted mb-0">A map that redraws itself by candlelight. Paths shift when watched too long.</p>
+                  </div>
+                  <div class="entry-card-footer">
+                    <span class="price">€10.99</span>
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                  </div>
+                </article>
+              </div>
+              <!-- Slide 5 -->
+              <div class="carousel-item">
+                <article class="entry-card entry-card--carousel">
+                  <div class="entry-card-media">
+                    <img class="entry-card-img"
+                         src="{% static 'img/home/entries/entry-05.jpg' %}"
+                         alt="Old leather book with gold embossing"
+                         loading="lazy">
+                  </div>
+                  <div class="entry-card-body">
+                    <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                      <div>
+                        <p class="small muted text-uppercase mb-1">Archive Entry V</p>
+                        <h3 class="h6 mb-0 lh-sm">The Gilded Ledger</h3>
+                      </div>
+                      <span class="badge badge-sealed align-self-start">Sealed</span>
+                    </div>
+                    <p class="small muted mb-0">An embossed ledger bound in leather. Every purchase becomes a permanent record.</p>
+                  </div>
+                  <div class="entry-card-footer">
+                    <span class="price">€14.99</span>
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                  </div>
+                </article>
+              </div>
+              <!-- Slide 6 -->
+              <div class="carousel-item">
+                <article class="entry-card entry-card--carousel">
+                  <div class="entry-card-media">
+                    <img class="entry-card-img"
+                         src="{% static 'img/home/entries/entry-06.jpg' %}"
+                         alt="Dark ritual journal with smoky ink atmosphere"
+                         loading="lazy">
+                  </div>
+                  <div class="entry-card-body">
+                    <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                      <div>
+                        <p class="small muted text-uppercase mb-1">Archive Entry VI</p>
+                        <h3 class="h6 mb-0 lh-sm">The Ink That Breathes</h3>
+                      </div>
+                      <span class="badge badge-sealed align-self-start">Sealed</span>
+                    </div>
+                    <p class="small muted mb-0">A ritual journal where ink moves like smoke. Margins whisper if you linger.</p>
+                  </div>
+                  <div class="entry-card-footer">
+                    <span class="price">€11.99</span>
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                  </div>
+                </article>
+              </div>
+            </div>
+            <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
+              <button type="button"
+                      data-bs-target="#entryCarouselMobile"
+                      data-bs-slide-to="0"
+                      class="active"
+                      aria-current="true"
+                      aria-label="Slide 1"></button>
+              <button type="button"
+                      data-bs-target="#entryCarouselMobile"
+                      data-bs-slide-to="1"
+                      aria-label="Slide 2"></button>
+              <button type="button"
+                      data-bs-target="#entryCarouselMobile"
+                      data-bs-slide-to="2"
+                      aria-label="Slide 3"></button>
+              <button type="button"
+                      data-bs-target="#entryCarouselMobile"
+                      data-bs-slide-to="3"
+                      aria-label="Slide 4"></button>
+              <button type="button"
+                      data-bs-target="#entryCarouselMobile"
+                      data-bs-slide-to="4"
+                      aria-label="Slide 5"></button>
+              <button type="button"
+                      data-bs-target="#entryCarouselMobile"
+                      data-bs-slide-to="5"
+                      aria-label="Slide 6"></button>
+            </div>
+          </div>
+          <!-- ========== TABLET CAROUSEL (2 cards per slide, 3 slides) ========== -->
+          <div id="entryCarouselTablet"
+               class="carousel slide entry-carousel d-none d-md-block d-xl-none"
                data-bs-ride="false"
                data-bs-touch="true">
             <div class="carousel-inner">
@@ -74,53 +287,237 @@
                     <div class="entry-card-media">
                       <img class="entry-card-img"
                            src="{% static 'img/home/entries/entry-01.jpg' %}"
-                           alt="Preview image for Archive Entry I"
+                           alt="Candlelit gothic corridor leading to a sealed door"
                            loading="lazy">
                     </div>
                     <div class="entry-card-body">
-                      <div class="entry-card-head">
-                        <h3 class="h5 mb-0">Archive Entry I</h3>
-                        <span class="badge badge-sealed">Sealed</span>
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry I</p>
+                          <h3 class="h6 mb-0 lh-sm">The Candlelit Corridor</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
                       </div>
-                      <p class="small muted mb-0">A blood-sealed ledger recovered from a ruined chapel.</p>
+                      <p class="small muted mb-0">
+                        A candlelit passage that appears only to invited names. The door remembers who has entered.
+                      </p>
                     </div>
                     <div class="entry-card-footer">
                       <span class="price">€9.99</span>
                       <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
                     </div>
                   </article>
-                  <article class="entry-card entry-card--carousel d-none d-md-flex">
+                  <article class="entry-card entry-card--carousel">
                     <div class="entry-card-media">
                       <img class="entry-card-img"
                            src="{% static 'img/home/entries/entry-02.jpg' %}"
-                           alt="Preview image for Archive Entry II"
+                           alt="Ancient parchment manuscript with dark, arcane writing"
                            loading="lazy">
                     </div>
                     <div class="entry-card-body">
-                      <div class="entry-card-head">
-                        <h3 class="h5 mb-0">Archive Entry II</h3>
-                        <span class="badge badge-sealed">Sealed</span>
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry II</p>
+                          <h3 class="h6 mb-0 lh-sm">The Manuscript of Night</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
                       </div>
-                      <p class="small muted mb-0">A vow written in ash. Names vanish when read aloud.</p>
+                      <p class="small muted mb-0">A parchment manuscript penned in old rites. Certain lines fade unless read in silence.</p>
                     </div>
                     <div class="entry-card-footer">
                       <span class="price">€12.99</span>
                       <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
                     </div>
                   </article>
-                  <article class="entry-card entry-card--carousel d-none d-xl-flex">
+                </div>
+              </div>
+              <!-- Slide 2 -->
+              <div class="carousel-item">
+                <div class="entry-carousel-grid">
+                  <article class="entry-card entry-card--carousel">
                     <div class="entry-card-media">
                       <img class="entry-card-img"
                            src="{% static 'img/home/entries/entry-03.jpg' %}"
-                           alt="Preview image for Archive Entry III"
+                           alt="Crimson wax seal on a sealed letter"
                            loading="lazy">
                     </div>
                     <div class="entry-card-body">
-                      <div class="entry-card-head">
-                        <h3 class="h5 mb-0">Archive Entry III</h3>
-                        <span class="badge badge-sealed">Sealed</span>
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry III</p>
+                          <h3 class="h6 mb-0 lh-sm">The Crimson Seal</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
                       </div>
-                      <p class="small muted mb-0">A map that redraws itself when candlelight fades.</p>
+                      <p class="small muted mb-0">A letter closed by wax and oath. Break the seal and the Archive records your name.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€7.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                  <article class="entry-card entry-card--carousel">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-04.jpg' %}"
+                           alt="Occult parchment map illuminated by candlelight"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry IV</p>
+                          <h3 class="h6 mb-0 lh-sm">The Living Map</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A map that redraws itself by candlelight. Paths shift when watched too long.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€10.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                </div>
+              </div>
+              <!-- Slide 3 -->
+              <div class="carousel-item">
+                <div class="entry-carousel-grid">
+                  <article class="entry-card entry-card--carousel">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-05.jpg' %}"
+                           alt="Old leather book with gold embossing"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry V</p>
+                          <h3 class="h6 mb-0 lh-sm">The Gilded Ledger</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">An embossed ledger bound in leather. Every purchase becomes a permanent record.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€14.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                  <article class="entry-card entry-card--carousel">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-06.jpg' %}"
+                           alt="Dark ritual journal with smoky ink atmosphere"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry VI</p>
+                          <h3 class="h6 mb-0 lh-sm">The Ink That Breathes</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A ritual journal where ink moves like smoke. Margins whisper if you linger.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€11.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
+              <button type="button"
+                      data-bs-target="#entryCarouselTablet"
+                      data-bs-slide-to="0"
+                      class="active"
+                      aria-current="true"
+                      aria-label="Slide 1"></button>
+              <button type="button"
+                      data-bs-target="#entryCarouselTablet"
+                      data-bs-slide-to="1"
+                      aria-label="Slide 2"></button>
+              <button type="button"
+                      data-bs-target="#entryCarouselTablet"
+                      data-bs-slide-to="2"
+                      aria-label="Slide 3"></button>
+            </div>
+          </div>
+          <!-- ========== DESKTOP CAROUSEL (3 cards per slide, 2 slides) ========== -->
+          <div id="entryCarouselDesktop"
+               class="carousel slide entry-carousel d-none d-xl-block"
+               data-bs-ride="false"
+               data-bs-touch="true">
+            <div class="carousel-inner">
+              <!-- Slide 1 -->
+              <div class="carousel-item active">
+                <div class="entry-carousel-grid">
+                  <article class="entry-card entry-card--carousel">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-01.jpg' %}"
+                           alt="Candlelit gothic corridor leading to a sealed door"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry I</p>
+                          <h3 class="h6 mb-0 lh-sm">The Candlelit Corridor</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">
+                        A candlelit passage that appears only to invited names. The door remembers who has entered.
+                      </p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€9.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                  <article class="entry-card entry-card--carousel">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-02.jpg' %}"
+                           alt="Ancient parchment manuscript with dark, arcane writing"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry II</p>
+                          <h3 class="h6 mb-0 lh-sm">The Manuscript of Night</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A parchment manuscript penned in old rites. Certain lines fade unless read in silence.</p>
+                    </div>
+                    <div class="entry-card-footer">
+                      <span class="price">€12.99</span>
+                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                    </div>
+                  </article>
+                  <article class="entry-card entry-card--carousel">
+                    <div class="entry-card-media">
+                      <img class="entry-card-img"
+                           src="{% static 'img/home/entries/entry-03.jpg' %}"
+                           alt="Crimson wax seal on a sealed letter"
+                           loading="lazy">
+                    </div>
+                    <div class="entry-card-body">
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry III</p>
+                          <h3 class="h6 mb-0 lh-sm">The Crimson Seal</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
+                      </div>
+                      <p class="small muted mb-0">A letter closed by wax and oath. Break the seal and the Archive records your name.</p>
                     </div>
                     <div class="entry-card-footer">
                       <span class="price">€7.99</span>
@@ -136,53 +533,62 @@
                     <div class="entry-card-media">
                       <img class="entry-card-img"
                            src="{% static 'img/home/entries/entry-04.jpg' %}"
-                           alt="Preview image for Archive Entry IV"
+                           alt="Occult parchment map illuminated by candlelight"
                            loading="lazy">
                     </div>
                     <div class="entry-card-body">
-                      <div class="entry-card-head">
-                        <h3 class="h5 mb-0">Archive Entry IV</h3>
-                        <span class="badge badge-sealed">Sealed</span>
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry IV</p>
+                          <h3 class="h6 mb-0 lh-sm">The Living Map</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
                       </div>
-                      <p class="small muted mb-0">A confession from a witness who never existed.</p>
+                      <p class="small muted mb-0">A map that redraws itself by candlelight. Paths shift when watched too long.</p>
                     </div>
                     <div class="entry-card-footer">
                       <span class="price">€10.99</span>
                       <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
                     </div>
                   </article>
-                  <article class="entry-card entry-card--carousel d-none d-md-flex">
+                  <article class="entry-card entry-card--carousel">
                     <div class="entry-card-media">
                       <img class="entry-card-img"
                            src="{% static 'img/home/entries/entry-05.jpg' %}"
-                           alt="Preview image for Archive Entry V"
+                           alt="Old leather book with gold embossing"
                            loading="lazy">
                     </div>
                     <div class="entry-card-body">
-                      <div class="entry-card-head">
-                        <h3 class="h5 mb-0">Archive Entry V</h3>
-                        <span class="badge badge-sealed">Sealed</span>
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry V</p>
+                          <h3 class="h6 mb-0 lh-sm">The Gilded Ledger</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
                       </div>
-                      <p class="small muted mb-0">A ritual index bound in relic-gold thread.</p>
+                      <p class="small muted mb-0">An embossed ledger bound in leather. Every purchase becomes a permanent record.</p>
                     </div>
                     <div class="entry-card-footer">
                       <span class="price">€14.99</span>
                       <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
                     </div>
                   </article>
-                  <article class="entry-card entry-card--carousel d-none d-xl-flex">
+                  <article class="entry-card entry-card--carousel">
                     <div class="entry-card-media">
                       <img class="entry-card-img"
                            src="{% static 'img/home/entries/entry-06.jpg' %}"
-                           alt="Preview image for Archive Entry VI"
+                           alt="Dark ritual journal with smoky ink atmosphere"
                            loading="lazy">
                     </div>
                     <div class="entry-card-body">
-                      <div class="entry-card-head">
-                        <h3 class="h5 mb-0">Archive Entry VI</h3>
-                        <span class="badge badge-sealed">Sealed</span>
+                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                          <p class="small muted text-uppercase mb-1">Archive Entry VI</p>
+                          <h3 class="h6 mb-0 lh-sm">The Ink That Breathes</h3>
+                        </div>
+                        <span class="badge badge-sealed align-self-start">Sealed</span>
                       </div>
-                      <p class="small muted mb-0">A pact signed in silence. The ink moves like smoke.</p>
+                      <p class="small muted mb-0">A ritual journal where ink moves like smoke. Margins whisper if you linger.</p>
                     </div>
                     <div class="entry-card-footer">
                       <span class="price">€11.99</span>
@@ -194,13 +600,13 @@
             </div>
             <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
               <button type="button"
-                      data-bs-target="#entryCarousel"
+                      data-bs-target="#entryCarouselDesktop"
                       data-bs-slide-to="0"
                       class="active"
                       aria-current="true"
                       aria-label="Slide 1"></button>
               <button type="button"
-                      data-bs-target="#entryCarousel"
+                      data-bs-target="#entryCarouselDesktop"
                       data-bs-slide-to="1"
                       aria-label="Slide 2"></button>
             </div>
@@ -293,41 +699,5 @@
   </section>
 {% endblock content %}
 {% block extra_js %}
-  <script>
-    // This script toggles reduced effects for motion-sensitive users.
-    (function () {
-      const storageKey = 'elysium_reduced_effects';
-      const toggle = document.getElementById('effectsToggle');
-      const heroVideo = document.querySelector('[data-hero-video]');
-
-      function applyState(isReduced) {
-        document.body.classList.toggle('reduced-effects', isReduced);
-        document.documentElement.classList.toggle('reduced-effects', isReduced);
-
-        if (toggle) {
-          toggle.setAttribute('aria-pressed', String(isReduced));
-          toggle.textContent = isReduced ? 'Enable effects' : 'Reduce effects';
-        }
-
-        if (heroVideo) {
-          if (isReduced) {
-            heroVideo.pause();
-          } else {
-            heroVideo.play().catch(() => {});
-          }
-        }
-      }
-
-      const initial = localStorage.getItem(storageKey) === '1';
-      applyState(initial);
-
-      if (toggle) {
-        toggle.addEventListener('click', function () {
-          const next = !document.body.classList.contains('reduced-effects');
-          localStorage.setItem(storageKey, next ? '1' : '0');
-          applyState(next);
-        });
-      }
-    })();
-  </script>
+  <script src="{% static 'js/effects-toggle.js' %}" defer></script>
 {% endblock extra_js %}
