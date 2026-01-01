@@ -25,11 +25,14 @@ env.py
 db.sqlite3
 db.sqlite3-journal
 media/
+staticfiles/
+*.sqlite3
 
 # --------------------
-# Static files (generated)
+# Django cache
 # --------------------
-staticfiles/
+.cache/
+__django_cache__/
 
 # --------------------
 # Logs

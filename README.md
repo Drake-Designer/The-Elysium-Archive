@@ -1,16 +1,13 @@
-![Code Institute Project](documentation/code-institute-img.png)
+# Milestone Project 4: The Elysium Archive
 
-<h1 align="center">
-  Milestone Project 4: The Elysium Archive
-</h1>
+![Code Institute Project](documentation/code-institute-img.png)
 
 ![The Elysium Archive homepage screenshot](documentation/validation/am-i-responsive.webp)
 
-[Live Site: Coming soon](#)
+Live Site: Coming soon
 
 The Elysium Archive is a dark fantasy ecommerce site where each purchase unlocks a private archive page you can only access on the website.  
 No downloads. No loose files. Just secrets.
-
 
 ## Contents
 
@@ -20,6 +17,7 @@ No downloads. No loose files. Just secrets.
 - [User Experience Design](#user-experience-design)
 - [Features](#features)
 - [Technical Overview](#technical-overview)
+- [Frontend Structure and Static Assets](#frontend-structure-and-static-assets)
 - [Technologies Used](#technologies-used)
 - [Database Design](#database-design)
 - [Testing and Bug Fixes](#testing-and-bug-fixes)
@@ -28,7 +26,6 @@ No downloads. No loose files. Just secrets.
 - [Behind the Scenes: My Development Journey](#behind-the-scenes-my-development-journey)
 - [Future Improvements](#future-improvements)
 - [Credits](#credits)
-
 
 ## Project Overview
 
@@ -39,7 +36,6 @@ Each product represents an archive entry, a forbidden text stored inside a priva
 The content can be read online at any time, but it is never downloadable, reinforcing the idea of secrecy and exclusivity.
 
 I built this project as my Code Institute Milestone Project 4 using Django and PostgreSQL. Inspired by gothic vampire lore and secret societies, The Elysium Archive is designed to feel like a real place: an ancient library reserved for invited members only.
-
 
 ### The Story Behind The Elysium Archive
 
@@ -53,7 +49,6 @@ The dark fantasy theme supports the core logic of the platform by providing a na
 - Access permissions based on verified purchases
 - Immediate content unlocking after payment
 
-
 ### What You Get
 
 - A themed product catalog (digital content)
@@ -65,7 +60,6 @@ The dark fantasy theme supports the core logic of the platform by providing a na
 - Verified buyer reviews
 - Profile management and full account deletion
 
-
 ### Who It Is For
 
 - Visitors who enjoy dark fantasy themes and want to browse teasers
@@ -73,7 +67,6 @@ The dark fantasy theme supports the core logic of the platform by providing a na
 - Developers exploring a complete and structured Django project
 
 Refunds are not supported by design. Archive entries unlock immediately after purchase.
-
 
 ## How The Elysium Archive Works
 
@@ -85,7 +78,6 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 6. Only verified buyers can leave reviews.
 7. Users can manage or delete their account.
 
-
 ## Feature Summary
 
 ### Catalog and Purchases
@@ -94,13 +86,11 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 - Product detail pages with a clear purchase flow
 - Stripe test checkout and confirmation
 
-
 ### Archive Access Control
 
 - Private “My Archive” area
 - Individual protected archive pages
 - Direct URL access is blocked
-
 
 ### Reviews (Verified Buyers Only)
 
@@ -108,13 +98,11 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 - Displayed on product pages
 - Simple validation for clean feedback
 
-
 ### Profiles
 
 - Edit account details
 - View order history
 - Delete account permanently
-
 
 ## User Experience Design
 
@@ -125,25 +113,25 @@ To keep this section simple and easy to scan, it is organized in the following o
 3. [Wireframes](#wireframes)
 4. [Color Palette and Typography](#color-palette-and-typography)
 
-
 ### User Stories
 
 User stories are planned and tracked using GitHub Projects.
 
 [GitHub Project board](https://github.com/users/Drake-Designer/projects/5)
 
-
 ### Site Structure
 
 The site structure was designed to support a clear journey from public browsing to protected content access.
 
-**Public areas**
+#### Public areas
+
 - Homepage
 - Product catalog
 - Product detail pages
 - Registration and login pages
 
-**Restricted areas**
+#### Restricted areas
+
 - Shopping cart
 - Checkout
 - Order confirmation
@@ -152,7 +140,6 @@ The site structure was designed to support a clear journey from public browsing 
 - User profile and order history
 
 Restricted areas require authentication and verified purchases.
-
 
 ### Wireframes
 
@@ -172,7 +159,6 @@ Designed for a 27 inch QHD display (2560x1440).
 Optimized for common mobile and tablet devices.
 
 ![Mobile Wireframe](documentation/wireframes/mobile.png)
-
 
 ### Color Palette and Typography
 
@@ -199,7 +185,6 @@ All color combinations were tested for WCAG contrast compliance.
 
 ![Color Palette](documentation/color-palette.png)
 
-
 #### Typography
 
 The project uses the following Google Fonts:
@@ -222,11 +207,9 @@ Typography rules:
 
 ![Google Fonts](documentation/google-fonts.png)
 
-
 ## Features
 
 This section will be expanded milestone by milestone.
-
 
 ## Technical Overview
 
@@ -243,6 +226,71 @@ Each app handles a specific area of functionality.
 - `orders` – Order storage and history
 - `reviews` – Verified buyer reviews
 
+## Frontend Structure and Static Assets
+
+This section documents the frontend architecture and static asset management implemented during early development.
+
+### Base Template Architecture
+
+The project uses Django template inheritance to ensure consistency across all pages.
+
+- A global `base.html` template defines:
+  - HTML document structure
+  - Metadata and SEO blocks
+  - Navigation bar
+  - Footer
+  - Global message handling
+- All pages extend `base.html` and override content blocks only where needed
+- This approach reduces duplication and simplifies future maintenance
+
+### Navigation and Layout
+
+- The navigation bar is fully responsive using Bootstrap
+- Desktop and mobile layouts follow the wireframes exactly
+- Accessibility considerations include:
+  - Skip to content link
+  - Semantic HTML structure
+  - Clear focus states for keyboard navigation
+
+### Design System and Styling
+
+A custom design system was implemented using CSS variables.
+
+- All theme colours are defined as root variables
+- Typography is controlled centrally
+- Spacing, font sizes, and layout scales adapt responsively
+- No inline styles are used anywhere in the project
+
+This ensures:
+
+- Consistent visual identity
+- Easier future changes
+- Clean separation of concerns
+
+### Static Assets Structure
+
+Static assets are organised to support both development and production environments.
+
+- CSS files are stored in `static/css`
+- Images are stored in `static/img`
+- Video assets are stored in `static/video`
+- Favicon assets are stored in `static/img/favicon`
+
+All static files are collected using Django’s `collectstatic` command and are fully compatible with Heroku deployment.
+
+### Favicon Support
+
+A full favicon set is implemented to support all major platforms.
+
+Included formats:
+
+- Browser favicon (`.ico`)
+- PNG icons for multiple resolutions
+- Apple touch icon
+- Android icons
+- Web manifest file
+
+This ensures consistent branding across desktop, mobile, and installed web experiences.
 
 ## Technologies Used
 
@@ -252,6 +300,38 @@ Each app handles a specific area of functionality.
 - Stripe (test mode)
 - Bootstrap
 
+## Admin Panel Setup
+
+### Django Admin
+
+- The project uses Django’s built-in admin panel.
+- The admin interface is available at `/admin`.
+- It is used during development to manage users, products, orders, and reviews.
+
+### Jazzmin Admin Theme
+
+- `django-jazzmin` enhances the Django admin UI.
+- Jazzmin is configured in `settings.py`.
+- It improves layout and usability without changing admin logic.
+
+### Superuser Creation
+
+- Create a superuser locally to access the admin panel.
+- Run the command: `python manage.py createsuperuser`.
+- The superuser account is required for admin access.
+
+### Environment Variables and Security
+
+- Local development uses an `env.py` file for configuration.
+- `env.py` is never committed to version control.
+- Production uses Heroku Config Vars.
+- Configuration is always read from `os.environ`.
+
+### DEBUG Auto-Switch
+
+- `DEBUG` defaults to `True` locally.
+- `DEBUG` is set to `False` on Heroku.
+- No manual code changes are required between environments.
 
 ## Database Design
 
@@ -298,6 +378,7 @@ The database follows a relational structure implemented using Django ORM and Pos
 Each model uses Django’s default primary key. Relationships are defined using foreign keys and one-to-one fields where appropriate.
 
 **Key design choices:**
+
 - Users are managed using Django’s built-in authentication system.
 - Profile data is stored separately using a one-to-one UserProfile model.
 - Products represent premium archive entries.
@@ -326,6 +407,7 @@ The diagram reflects the relational data model implemented using Django ORM and 
 The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagramming tool that allows database relationships to be defined using clear, readable syntax and exported as an image.
 
 Key aspects highlighted in the ERD:
+
 - One-to-one relationship between User and UserProfile.
 - One-to-many relationships for orders and order line items.
 - Explicit many-to-many relationship between users and products via AccessEntitlement.
@@ -334,13 +416,9 @@ Key aspects highlighted in the ERD:
 
 ![ERD Diagram](documentation/erd.png)
 
-
-
-
 ## Testing and Bug Fixes
 
 For detailed testing, see [TESTING.md](TESTING.md).
-
 
 ## Running the Project Locally
 
@@ -381,7 +459,6 @@ DEBUG is controlled by an environment variable:
 - If `DEBUG` is not set, the project defaults to DEBUG True in local development.
 - On Heroku, DEBUG is set to False using a config var.
 
-
 ## Deployment
 
 The project will be deployed on Heroku.
@@ -407,11 +484,8 @@ Production must always set:
 
 This keeps Django debug mode disabled in production while keeping local development convenient.
 
-
 ## Behind the Scenes: My Development Journey
 
-
 ## Future Improvements
-
 
 ## Credits
