@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Archive | The Elysium Archive
+{% endblock title %}
+{% block meta_description %}
+    Browse the public archive catalog. Each purchase unlocks permanent on site access to a private entry.
+{% endblock meta_description %}
+{% block content %}
+    <section class="container py-5">
+        <div class="row g-4 align-items-center mb-4">
+            <div class="col-12 col-lg-7">
+                <div class="panel p-4">
+                    <h1 class="display-6 mb-2">The Archive Catalog</h1>
+                    <p class="muted mb-3">
+                        Browse sealed entries before you join. Each purchase unlocks a private page tied to your account.
+                    </p>
+                    <ul class="mb-0">
+                        <li>No downloads and no external files.</li>
+                        <li>Read on site anytime after unlock.</li>
+                        <li>Access stays linked to your account.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-12 col-lg-5">
+                <div class="panel p-4 text-center">
+                    <p class="muted mb-3">Some doors open only for members.</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a class="btn btn-primary" href="{% url 'home' %}#membership">Register to unlock</a>
+                        <a class="btn btn-outline-light" href="{% url 'lore' %}">Read the Lore</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel p-4 mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-lg-6">
+                    <h2 class="h4 mb-1">Browse entries</h2>
+                    <p class="muted mb-0">This is a public catalog. Full content unlocks only after login and purchase.</p>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <form class="d-flex gap-2" action="#" method="get">
+                        <label class="visually-hidden" for="archive-search">Search</label>
+                        <input id="archive-search"
+                               class="form-control"
+                               type="search"
+                               name="q"
+                               placeholder="Search the catalog"
+                               aria-label="Search the catalog">
+                        <button class="btn btn-outline-light" type="submit">Search</button>
+                    </form>
+                    <p class="small muted mt-2 mb-0">Search is a placeholder for now.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="entry-card h-100">
+                    <div class="entry-card-media"></div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="h5 mb-0">Archive Entry I</h3>
+                            <span class="badge text-bg-secondary">Locked</span>
+                        </div>
+                        <p class="small muted mb-3">A blood sealed ledger recovered from a ruined chapel.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">€9.99</span>
+                            <a class="btn btn-sm btn-outline-light"
+                               href="{% url 'home' %}#membership">Unlock</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="entry-card h-100">
+                    <div class="entry-card-media"></div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="h5 mb-0">Archive Entry II</h3>
+                            <span class="badge text-bg-secondary">Locked</span>
+                        </div>
+                        <p class="small muted mb-3">A vow written in ash. Names vanish when read aloud.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">€12.99</span>
+                            <a class="btn btn-sm btn-outline-light"
+                               href="{% url 'home' %}#membership">Unlock</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="entry-card h-100">
+                    <div class="entry-card-media"></div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="h5 mb-0">Archive Entry III</h3>
+                            <span class="badge text-bg-secondary">Locked</span>
+                        </div>
+                        <p class="small muted mb-3">A map that redraws itself when candlelight fades.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">€7.99</span>
+                            <a class="btn btn-sm btn-outline-light"
+                               href="{% url 'home' %}#membership">Unlock</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="entry-card h-100">
+                    <div class="entry-card-media"></div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="h5 mb-0">Archive Entry IV</h3>
+                            <span class="badge text-bg-secondary">Locked</span>
+                        </div>
+                        <p class="small muted mb-3">A confession from a witness who never existed.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">€10.99</span>
+                            <a class="btn btn-sm btn-outline-light"
+                               href="{% url 'home' %}#membership">Unlock</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="entry-card h-100">
+                    <div class="entry-card-media"></div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="h5 mb-0">Archive Entry V</h3>
+                            <span class="badge text-bg-secondary">Locked</span>
+                        </div>
+                        <p class="small muted mb-3">A ritual index bound in relic gold thread.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">€14.99</span>
+                            <a class="btn btn-sm btn-outline-light"
+                               href="{% url 'home' %}#membership">Unlock</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="entry-card h-100">
+                    <div class="entry-card-media"></div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="h5 mb-0">Archive Entry VI</h3>
+                            <span class="badge text-bg-secondary">Locked</span>
+                        </div>
+                        <p class="small muted mb-3">A pact signed in silence. The ink moves like smoke.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">€11.99</span>
+                            <a class="btn btn-sm btn-outline-light"
+                               href="{% url 'home' %}#membership">Unlock</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel p-4 mt-4 text-center">
+            <h2 class="h4 mb-2">Ready to unlock your first entry?</h2>
+            <p class="muted mb-3">Register, then purchase an Archive to reveal the private page inside The Elysium.</p>
+            <a class="btn btn-primary" href="{% url 'home' %}#membership">Become a Member</a>
+        </div>
+    </section>
+{% endblock content %}

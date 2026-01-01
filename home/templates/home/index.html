@@ -4,14 +4,24 @@
   Home | The Elysium Archive
 {% endblock title %}
 {% block content %}
-  <!-- Homepage layout -->
   <section class="container py-5">
     <div class="row g-4 align-items-center">
       <!-- Hero -->
       <div class="col-12 col-lg-5">
         <div class="panel p-4 text-center">
           <h1 class="display-5 mb-3">The Elysium Archive</h1>
-          <p class="muted mb-4">A forbidden archive reserved for invited members only.</p>
+          <p class="muted mb-3">A dark fantasy library of forbidden texts, unlocked on site.</p>
+          <div class="d-flex flex-column gap-2 mb-4">
+            <p class="mb-0">
+              <strong>No downloads.</strong> Read inside your private archive.
+            </p>
+            <p class="mb-0">
+              <strong>Permanent access.</strong> Each purchase unlocks a page tied to your account.
+            </p>
+            <p class="mb-0">
+              <strong>Members only.</strong> What is sealed stays sealed.
+            </p>
+          </div>
           <!-- Intro video -->
           <div class="video-wrapper mb-4">
             <video class="video w-100" autoplay loop muted playsinline>
@@ -19,26 +29,31 @@
               Your browser does not support the video tag.
             </video>
           </div>
-          <a class="btn btn-primary" href="#">Enter the Archive</a>
+          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a class="btn btn-primary" href="#membership">Become a Member</a>
+            <a class="btn btn-outline-light" href="#how-access-works">How it works</a>
+          </div>
+          <p class="small muted mt-3 mb-0">Already initiated? Use Login from the menu.</p>
         </div>
       </div>
       <!-- Preview entries -->
       <div class="col-12 col-lg-7">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="h3 mb-0">Archive Entries</h2>
-          <a class="small text-decoration-none" href="#">View all</a>
+        <div class="d-flex justify-content-between align-items-center mb-4"
+             id="archives">
+          <h2 class="h3 mb-0">Archive Previews</h2>
+          <a class="small text-decoration-none" href="#membership">Unlock access</a>
         </div>
         <div class="row g-3">
           <div class="col-12 col-md-6 col-xl-4">
             <div class="entry-card h-100">
               <div class="entry-card-media"></div>
               <div class="p-3">
-                <h3 class="h5 mb-1">Entry</h3>
-                <p class="small muted mb-2">Short teaser text</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="price">€9.99</span>
-                  <a class="btn btn-sm btn-outline-light" href="#">View Entry</a>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <h3 class="h5 mb-1">Sealed Entry</h3>
+                  <span class="badge text-bg-secondary">Locked</span>
                 </div>
+                <p class="small muted mb-3">A brief whisper from a forbidden volume. Full text unlocks after purchase.</p>
+                <a class="btn btn-sm btn-outline-light w-100" href="#how-access-works">Learn how to unlock</a>
               </div>
             </div>
           </div>
@@ -46,12 +61,12 @@
             <div class="entry-card h-100">
               <div class="entry-card-media"></div>
               <div class="p-3">
-                <h3 class="h5 mb-1">Entry</h3>
-                <p class="small muted mb-2">Short teaser text</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="price">€9.99</span>
-                  <a class="btn btn-sm btn-outline-light" href="#">View Entry</a>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <h3 class="h5 mb-1">Sealed Entry</h3>
+                  <span class="badge text-bg-secondary">Locked</span>
                 </div>
+                <p class="small muted mb-3">A name erased from history. The full archive remains members only.</p>
+                <a class="btn btn-sm btn-outline-light w-100" href="#how-access-works">Learn how to unlock</a>
               </div>
             </div>
           </div>
@@ -59,15 +74,23 @@
             <div class="entry-card h-100">
               <div class="entry-card-media"></div>
               <div class="p-3">
-                <h3 class="h5 mb-1">Entry</h3>
-                <p class="small muted mb-2">Short teaser text</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="price">€9.99</span>
-                  <a class="btn btn-sm btn-outline-light" href="#">View Entry</a>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <h3 class="h5 mb-1">Sealed Entry</h3>
+                  <span class="badge text-bg-secondary">Locked</span>
                 </div>
+                <p class="small muted mb-3">A ritual, a key, a door. The full text opens only after checkout.</p>
+                <a class="btn btn-sm btn-outline-light w-100" href="#how-access-works">Learn how to unlock</a>
               </div>
             </div>
           </div>
+        </div>
+        <div class="panel p-4 mt-4">
+          <h3 class="h5 mb-2">What you get as a member</h3>
+          <ul class="mb-0">
+            <li>Access is tied to your account.</li>
+            <li>Every purchase unlocks a private page permanently.</li>
+            <li>Content is readable online only, inside The Elysium.</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -78,21 +101,45 @@
         <div class="col-12 col-md-4">
           <div class="panel p-4 h-100">
             <h3 class="h5">Create an account</h3>
-            <p class="muted mb-0">Sign up to unlock the forbidden archive</p>
+            <p class="muted mb-0">Register to become a member and enter The Elysium.</p>
           </div>
         </div>
         <div class="col-12 col-md-4">
           <div class="panel p-4 h-100">
             <h3 class="h5">Unlock archive entries</h3>
-            <p class="muted mb-0">Pay once via Stripe and the archive is yours forever</p>
+            <p class="muted mb-0">Pay once via Stripe and the archive stays linked to your account.</p>
           </div>
         </div>
         <div class="col-12 col-md-4">
           <div class="panel p-4 h-100">
-            <h3 class="h5">Access your private archive</h3>
-            <p class="muted mb-0">Read exclusive content online only</p>
+            <h3 class="h5">Read on site, anytime</h3>
+            <p class="muted mb-0">No PDFs, no downloads. Your content lives inside the website.</p>
           </div>
         </div>
+      </div>
+    </div>
+    <!-- Policies -->
+    <div class="pb-5" id="policies">
+      <div class="panel p-4">
+        <h2 class="h4 mb-2">Policies</h2>
+        <p class="muted mb-2">This is a members only archive. Each purchase unlocks access to on site content.</p>
+        <ul class="mb-0">
+          <li>No downloads and no external files.</li>
+          <li>No refunds, because access is granted immediately after successful payment.</li>
+          <li>Your unlocked archives remain available in your private area.</li>
+        </ul>
+      </div>
+    </div>
+    <!-- Membership CTA -->
+    <div class="pb-5" id="membership">
+      <div class="panel p-4 text-center">
+        <h2 class="h3 mb-2">Become a Member</h2>
+        <p class="muted mb-4">Create an account to unlock your private archive and start collecting forbidden texts.</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <a class="btn btn-primary" href="#">Register</a>
+          <a class="btn btn-outline-light" href="#">Login</a>
+        </div>
+        <p class="small muted mt-3 mb-0">Registration and login are enabled in the next steps of this milestone.</p>
       </div>
     </div>
   </section>

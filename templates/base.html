@@ -86,18 +86,13 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link site-nav-link" href="#">
+                <a class="nav-link site-nav-link" href="{% url 'home' %}#archives">
                   <span class="site-nav-link-text">Archive</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link site-nav-link" href="#">
+                <a class="nav-link site-nav-link" href="{% url 'lore' %}">
                   <span class="site-nav-link-text">Lore</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link site-nav-link" href="#">
-                  <span class="site-nav-link-text">Reviews</span>
                 </a>
               </li>
             </ul>
@@ -106,16 +101,17 @@
             <!-- Auth items -->
             <ul class="navbar-nav site-nav-auth align-items-lg-center ms-lg-auto">
               <li class="nav-item">
-                <a class="nav-link site-nav-link" href="#">
+                <a class="nav-link site-nav-link" href="{% url 'home' %}#membership">
                   <span class="site-nav-link-text">Login</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link site-nav-link d-lg-none" href="#">
+                <a class="nav-link site-nav-link d-lg-none"
+                   href="{% url 'home' %}#membership">
                   <span class="site-nav-link-text">Register</span>
                 </a>
                 <a class="btn btn-outline-light site-cta d-none d-lg-inline-flex"
-                   href="#">Register</a>
+                   href="{% url 'home' %}#membership">Register</a>
               </li>
             </ul>
           </div>
