@@ -2,7 +2,7 @@
 
 (() => {
   const storageKey = 'elysium_reduced_effects';
-  const toggle = document.getElementById('effectsToggle');
+  const toggle = document.getElementById('effectsToggleGlobal');
   const heroVideo = document.querySelector('[data-hero-video]');
 
   const safeGet = () => {
@@ -27,7 +27,18 @@
 
     if (toggle) {
       toggle.setAttribute('aria-pressed', String(isReduced));
-      toggle.textContent = isReduced ? 'Enable effects' : 'Reduce effects';
+      toggle.setAttribute('title', isReduced ? 'Effects: Off' : 'Effects: On');
+      toggle.classList.toggle('is-active', isReduced);
+      // Update icon based on state
+      const icon = toggle.querySelector('i');
+      if (icon) {
+        icon.className = isReduced ? 'fa-solid fa-eye-slash' : 'fa-solid fa-wand-magic-sparkles';
+      }
+      // Update Bootstrap tooltip if initialized
+      const tooltip = bootstrap.Tooltip.getInstance(toggle);
+      if (tooltip) {
+        tooltip.setContent({ '.tooltip-inner': isReduced ? 'Effects: Off' : 'Effects: On' });
+      }
     }
 
     if (heroVideo) {
@@ -41,6 +52,11 @@
       }
     }
   };
+
+  // Initialize tooltip
+  if (toggle) {
+    new bootstrap.Tooltip(toggle);
+  }
 
   const initial = safeGet() === '1';
   applyState(initial);

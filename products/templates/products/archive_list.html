@@ -26,8 +26,12 @@
                 <div class="panel p-4 text-center">
                     <p class="muted mb-3">Some doors open only for members.</p>
                     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                        <a class="btn btn-primary" href="{% url 'home' %}#membership">Register to unlock</a>
-                        <a class="btn btn-outline-light" href="{% url 'lore' %}">Read the Lore</a>
+                        <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                            <i class="fa-solid fa-lock-open"></i>Register to unlock
+                        </a>
+                        <a class="btn btn-outline-light btn-icon" href="{% url 'lore' %}">
+                            <i class="fa-solid fa-scroll"></i>Read the Lore
+                        </a>
                     </div>
                 </div>
             </div>
@@ -47,7 +51,9 @@
                                name="q"
                                placeholder="Search the catalog"
                                aria-label="Search the catalog">
-                        <button class="btn btn-outline-light" type="submit">Search</button>
+                        <button class="btn btn-outline-light btn-icon" type="submit">
+                            <i class="fa-solid fa-magnifying-glass"></i>Search
+                        </button>
                     </form>
                     <p class="small muted mt-2 mb-0">Search is a placeholder for now.</p>
                 </div>
@@ -65,8 +71,10 @@
                         <p class="small muted mb-3">A blood sealed ledger recovered from a ruined chapel.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">€9.99</span>
-                            <a class="btn btn-sm btn-outline-light"
-                               href="{% url 'home' %}#membership">Unlock</a>
+                            <a class="btn btn-sm btn-outline-light btn-icon"
+                               href="{% url 'home' %}#membership">
+                                <i class="fa-solid fa-lock-open"></i>Unlock
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -82,8 +90,10 @@
                         <p class="small muted mb-3">A vow written in ash. Names vanish when read aloud.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">€12.99</span>
-                            <a class="btn btn-sm btn-outline-light"
-                               href="{% url 'home' %}#membership">Unlock</a>
+                            <a class="btn btn-sm btn-outline-light btn-icon"
+                               href="{% url 'home' %}#membership">
+                                <i class="fa-solid fa-lock-open"></i>Unlock
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -99,8 +109,10 @@
                         <p class="small muted mb-3">A map that redraws itself when candlelight fades.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">€7.99</span>
-                            <a class="btn btn-sm btn-outline-light"
-                               href="{% url 'home' %}#membership">Unlock</a>
+                            <a class="btn btn-sm btn-outline-light btn-icon"
+                               href="{% url 'home' %}#membership">
+                                <i class="fa-solid fa-lock-open"></i>Unlock
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -116,8 +128,10 @@
                         <p class="small muted mb-3">A confession from a witness who never existed.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">€10.99</span>
-                            <a class="btn btn-sm btn-outline-light"
-                               href="{% url 'home' %}#membership">Unlock</a>
+                            <a class="btn btn-sm btn-outline-light btn-icon"
+                               href="{% url 'home' %}#membership">
+                                <i class="fa-solid fa-lock-open"></i>Unlock
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -133,8 +147,10 @@
                         <p class="small muted mb-3">A ritual index bound in relic gold thread.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">€14.99</span>
-                            <a class="btn btn-sm btn-outline-light"
-                               href="{% url 'home' %}#membership">Unlock</a>
+                            <a class="btn btn-sm btn-outline-light btn-icon"
+                               href="{% url 'home' %}#membership">
+                                <i class="fa-solid fa-lock-open"></i>Unlock
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -150,8 +166,10 @@
                         <p class="small muted mb-3">A pact signed in silence. The ink moves like smoke.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price">€11.99</span>
-                            <a class="btn btn-sm btn-outline-light"
-                               href="{% url 'home' %}#membership">Unlock</a>
+                            <a class="btn btn-sm btn-outline-light btn-icon"
+                               href="{% url 'home' %}#membership">
+                                <i class="fa-solid fa-lock-open"></i>Unlock
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -160,7 +178,9 @@
         <div class="panel p-4 mt-4 text-center">
             <h2 class="h4 mb-2">Ready to unlock your first entry?</h2>
             <p class="muted mb-3">Register, then purchase an Archive to reveal the private page inside The Elysium.</p>
-            <a class="btn btn-primary" href="{% url 'home' %}#membership">Become a Member</a>
+            <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                <i class="fa-solid fa-key"></i>Become a Member
+            </a>
         </div>
     </section>
 {% endblock content %}

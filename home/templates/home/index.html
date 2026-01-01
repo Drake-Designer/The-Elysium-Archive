@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load elysium_images %}
 {% block title %}
   Home | The Elysium Archive
 {% endblock title %}
@@ -28,13 +29,13 @@
             </video>
           </div>
           <div class="d-grid gap-2">
-            <a class="btn btn-primary" href="{% url 'archive' %}">Browse the Archive</a>
-            <a class="btn btn-outline-light" href="#membership">Become a Member</a>
+            <a class="btn btn-primary btn-icon" href="{% url 'archive' %}">
+              <i class="fa-solid fa-book-open"></i>Browse the Archive
+            </a>
+            <a class="btn btn-outline-light btn-icon" href="#membership">
+              <i class="fa-solid fa-key"></i>Become a Member
+            </a>
           </div>
-          <button class="btn btn-link effects-toggle mt-2"
-                  type="button"
-                  id="effectsToggle"
-                  aria-pressed="false">Reduce effects</button>
           <p class="small muted mt-3 mb-0">No downloads. No external files. Access is the product.</p>
         </div>
       </div>
@@ -45,207 +46,85 @@
             <h2 class="h3 mb-1 section-title">Archive Entries</h2>
             <p class="small muted mb-0">A rotating selection of sealed previews from the public catalog.</p>
           </div>
-          <!-- Mobile navigation -->
-          <div class="section-header-actions d-md-none">
-            <button class="btn btn-sm btn-outline-light section-nav-btn"
-                    type="button"
-                    data-bs-target="#entryCarouselMobile"
-                    data-bs-slide="prev"
-                    aria-label="Previous preview entries">‹</button>
-            <button class="btn btn-sm btn-outline-light section-nav-btn"
-                    type="button"
-                    data-bs-target="#entryCarouselMobile"
-                    data-bs-slide="next"
-                    aria-label="Next preview entries">›</button>
-          </div>
-          <!-- Tablet navigation -->
-          <div class="section-header-actions d-none d-md-flex d-xl-none">
-            <button class="btn btn-sm btn-outline-light section-nav-btn"
-                    type="button"
-                    data-bs-target="#entryCarouselTablet"
-                    data-bs-slide="prev"
-                    aria-label="Previous preview entries">‹</button>
-            <button class="btn btn-sm btn-outline-light section-nav-btn"
-                    type="button"
-                    data-bs-target="#entryCarouselTablet"
-                    data-bs-slide="next"
-                    aria-label="Next preview entries">›</button>
-          </div>
-          <!-- Desktop navigation -->
-          <div class="section-header-actions d-none d-xl-flex">
-            <button class="btn btn-sm btn-outline-light section-nav-btn"
-                    type="button"
-                    data-bs-target="#entryCarouselDesktop"
-                    data-bs-slide="prev"
-                    aria-label="Previous preview entries">‹</button>
-            <button class="btn btn-sm btn-outline-light section-nav-btn"
-                    type="button"
-                    data-bs-target="#entryCarouselDesktop"
-                    data-bs-slide="next"
-                    aria-label="Next preview entries">›</button>
-          </div>
+          {% if featured_products %}
+            <!-- Carousel navigation -->
+            <div class="section-header-actions">
+              <button class="btn btn-sm btn-outline-light section-nav-btn"
+                      type="button"
+                      data-bs-target="#entryCarousel"
+                      data-bs-slide="prev"
+                      aria-label="Previous entry">‹</button>
+              <button class="btn btn-sm btn-outline-light section-nav-btn"
+                      type="button"
+                      data-bs-target="#entryCarousel"
+                      data-bs-slide="next"
+                      aria-label="Next entry">›</button>
+            </div>
+          {% endif %}
         </div>
         <div class="panel p-3 p-lg-4">
-          <!-- Mobile carousel (1 card per slide) -->
-          <div id="entryCarouselMobile"
-               class="carousel slide entry-carousel d-md-none"
-               data-bs-ride="false"
-               data-bs-touch="true">
-            <div class="carousel-inner">
-              {% for product in featured_products %}
-                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                  <article class="entry-card entry-card--carousel">
-                    <div class="entry-card-media">
-                      {% if product.image %}
-                        <img class="entry-card-img"
-                             src="{{ product.image.url }}"
-                             alt="{{ product.image_alt }}"
-                             loading="lazy">
-                      {% else %}
-                        <div class="entry-card-img-placeholder"></div>
-                      {% endif %}
-                    </div>
-                    <div class="entry-card-body">
-                      <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
-                        <div>
-                          <p class="small muted text-uppercase mb-1">Archive Entry {{ forloop.counter }}</p>
-                          <h3 class="h6 mb-0 lh-sm">{{ product.title }}</h3>
-                        </div>
-                        <span class="badge badge-sealed align-self-start">Sealed</span>
-                      </div>
-                      <p class="small muted mb-0">{{ product.tagline }}</p>
-                    </div>
-                    <div class="entry-card-footer">
-                      <span class="price">€{{ product.price }}</span>
-                      <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
-                    </div>
-                  </article>
-                </div>
-              {% endfor %}
-            </div>
-            <!-- Mobile indicators -->
-            <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
-              {% for product in featured_products %}
-                <button type="button"
-                        data-bs-target="#entryCarouselMobile"
-                        data-bs-slide-to="{{ forloop.counter0 }}"
-                        {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                        aria-label="Slide {{ forloop.counter }}"></button>
-              {% endfor %}
-            </div>
-          </div>
-          <!-- Tablet carousel (2 cards per slide) -->
-          <div id="entryCarouselTablet"
-               class="carousel slide entry-carousel d-none d-md-block d-xl-none"
-               data-bs-ride="false"
-               data-bs-touch="true">
-            <div class="carousel-inner">
-              {% for product in featured_products %}
-                {% if forloop.first or forloop.counter0|divisibleby:2 %}
+          {% if featured_products %}
+            <!-- Single-slide carousel: one product per slide, auto-advances every 5s -->
+            <div id="entryCarousel"
+                 class="carousel slide entry-carousel"
+                 data-bs-ride="carousel"
+                 data-bs-interval="5000"
+                 data-bs-pause="hover"
+                 data-bs-touch="true">
+              <div class="carousel-inner">
+                {% for product in featured_products %}
                   <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <div class="entry-carousel-grid entry-carousel-grid--tablet">
-                    {% endif %}
-                    <article class="entry-card entry-card--carousel">
-                      <div class="entry-card-media">
+                    <article class="entry-card entry-card--featured">
+                      <div class="entry-card-media entry-card-media--featured">
                         {% if product.image %}
                           <img class="entry-card-img"
-                               src="{{ product.image.url }}"
-                               alt="{{ product.image_alt }}"
-                               loading="lazy">
+                               src="{% cloudinary_fill product.image 800 450 %}"
+                               srcset="{% cloudinary_fill_srcset product.image 400 225 600 338 800 450 %}"
+                               sizes="(max-width: 575px) 100vw,
+                                      720px"
+                               alt="{{ product.image_alt|default:product.title }}"
+                               loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                               decoding="async">
                         {% else %}
-                          <div class="entry-card-img-placeholder"></div>
+                          <div class="entry-card-img-placeholder"
+                               role="img"
+                               aria-label="Image coming soon"></div>
                         {% endif %}
                       </div>
-                      <div class="entry-card-body">
-                        <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
-                          <div>
-                            <p class="small muted text-uppercase mb-1">Archive Entry {{ forloop.counter }}</p>
-                            <h3 class="h6 mb-0 lh-sm">{{ product.title }}</h3>
-                          </div>
-                          <span class="badge badge-sealed align-self-start">Sealed</span>
+                      <div class="entry-card-body entry-card-body--featured">
+                        <div class="entry-card-head">
+                          <h3 class="entry-card-title">{{ product.title }}</h3>
+                          <span class="badge badge-sealed">Sealed</span>
                         </div>
-                        <p class="small muted mb-0">{{ product.tagline }}</p>
+                        <p class="entry-card-desc muted">{{ product.tagline|default:product.description|truncatewords:25 }}</p>
                       </div>
-                      <div class="entry-card-footer">
-                        <span class="price">€{{ product.price }}</span>
-                        <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
+                      <div class="entry-card-footer entry-card-footer--featured">
+                        <span class="price price--featured">€{{ product.price }}</span>
+                        <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
+                          <i class="fa-solid fa-eye"></i>View Entry
+                        </a>
                       </div>
                     </article>
-                    {% if forloop.counter|divisibleby:2 or forloop.last %}
-                    </div>
                   </div>
-                {% endif %}
-              {% endfor %}
-            </div>
-            <!-- Tablet indicators -->
-            <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
-              {% for product in featured_products %}
-                {% if forloop.first or forloop.counter0|divisibleby:2 %}
+                {% endfor %}
+              </div>
+              <!-- Carousel indicators -->
+              <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
+                {% for product in featured_products %}
                   <button type="button"
-                          data-bs-target="#entryCarouselTablet"
-                          data-bs-slide-to="{% widthratio forloop.counter0 2 1 %}"
+                          data-bs-target="#entryCarousel"
+                          data-bs-slide-to="{{ forloop.counter0 }}"
                           {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                          aria-label="Slide {% widthratio forloop.counter 2 1 %}"></button>
-                {% endif %}
-              {% endfor %}
+                          aria-label="Slide {{ forloop.counter }}"></button>
+                {% endfor %}
+              </div>
             </div>
-          </div>
-          <!-- Desktop carousel (3 cards per slide) -->
-          <div id="entryCarouselDesktop"
-               class="carousel slide entry-carousel d-none d-xl-block"
-               data-bs-ride="false"
-               data-bs-touch="true">
-            <div class="carousel-inner">
-              {% for product in featured_products %}
-                {% if forloop.first or forloop.counter0|divisibleby:3 %}
-                  <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <div class="entry-carousel-grid">
-                    {% endif %}
-                    <article class="entry-card entry-card--carousel">
-                      <div class="entry-card-media">
-                        {% if product.image %}
-                          <img class="entry-card-img"
-                               src="{{ product.image.url }}"
-                               alt="{{ product.image_alt }}"
-                               loading="lazy">
-                        {% else %}
-                          <div class="entry-card-img-placeholder"></div>
-                        {% endif %}
-                      </div>
-                      <div class="entry-card-body">
-                        <div class="entry-card-head d-flex align-items-start justify-content-between gap-3">
-                          <div>
-                            <p class="small muted text-uppercase mb-1">Archive Entry {{ forloop.counter }}</p>
-                            <h3 class="h6 mb-0 lh-sm">{{ product.title }}</h3>
-                          </div>
-                          <span class="badge badge-sealed align-self-start">Sealed</span>
-                        </div>
-                        <p class="small muted mb-0">{{ product.tagline }}</p>
-                      </div>
-                      <div class="entry-card-footer">
-                        <span class="price">€{{ product.price }}</span>
-                        <a class="btn btn-sm btn-outline-light" href="{% url 'archive' %}">View Entry</a>
-                      </div>
-                    </article>
-                    {% if forloop.counter|divisibleby:3 or forloop.last %}
-                    </div>
-                  </div>
-                {% endif %}
-              {% endfor %}
+          {% else %}
+            <!-- No featured products fallback -->
+            <div class="text-center py-4">
+              <p class="muted mb-0">No featured entries available at the moment. Check back soon.</p>
             </div>
-            <!-- Desktop indicators -->
-            <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
-              {% for product in featured_products %}
-                {% if forloop.first or forloop.counter0|divisibleby:3 %}
-                  <button type="button"
-                          data-bs-target="#entryCarouselDesktop"
-                          data-bs-slide-to="{% widthratio forloop.counter0 3 1 %}"
-                          {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                          aria-label="Slide {% widthratio forloop.counter 3 1 %}"></button>
-                {% endif %}
-              {% endfor %}
-            </div>
-          </div>
+          {% endif %}
           <p class="small muted mt-3 mb-0">
             These are public previews. Full entries unlock after membership and a successful payment.
           </p>
@@ -261,7 +140,8 @@
             <img class="how-card-img"
                  src="{% static 'img/home/how/how-01-account.jpg' %}"
                  alt="Creating an account"
-                 loading="lazy">
+                 loading="lazy"
+                 decoding="async">
             <h3 class="h5 mt-3">Create an account</h3>
             <p class="muted mb-0">Register to become a member and unlock purchases to your profile.</p>
           </div>
@@ -271,7 +151,8 @@
             <img class="how-card-img"
                  src="{% static 'img/home/how/how-02-seal.jpg' %}"
                  alt="Sealed archive entry"
-                 loading="lazy">
+                 loading="lazy"
+                 decoding="async">
             <h3 class="h5 mt-3">Unlock archive entries</h3>
             <p class="muted mb-0">Pay once via Stripe and the entry becomes yours permanently.</p>
           </div>
@@ -281,7 +162,8 @@
             <img class="how-card-img"
                  src="{% static 'img/home/how/how-03-library.jpg' %}"
                  alt="Private archive library"
-                 loading="lazy">
+                 loading="lazy"
+                 decoding="async">
             <h3 class="h5 mt-3">Access your private archive</h3>
             <p class="muted mb-0">Read exclusive content online only, anytime you return.</p>
           </div>
@@ -297,7 +179,8 @@
               <img class="membership-img"
                    src="{% static 'img/home/membership/membership.jpg' %}"
                    alt="Membership access"
-                   loading="lazy">
+                   loading="lazy"
+                   decoding="async">
             </div>
           </div>
           <div class="col-12 col-lg-7">
@@ -316,14 +199,18 @@
               </div>
               <p class="muted mb-3">Register and login will be enabled in the Accounts milestone.</p>
               <div class="d-grid gap-2 d-sm-flex">
-                <a class="btn btn-primary site-auth-btn disabled"
+                <a class="btn btn-primary site-auth-btn btn-icon disabled"
                    href="#"
                    aria-disabled="true"
-                   tabindex="-1">Register</a>
-                <a class="btn btn-outline-light site-auth-btn disabled"
+                   tabindex="-1">
+                  <i class="fa-solid fa-user-plus"></i>Register
+                </a>
+                <a class="btn btn-outline-light site-auth-btn btn-icon disabled"
                    href="#"
                    aria-disabled="true"
-                   tabindex="-1">Login</a>
+                   tabindex="-1">
+                  <i class="fa-solid fa-right-to-bracket"></i>Login
+                </a>
               </div>
               <p class="small muted mt-3 mb-0">You can browse the public catalog without an account.</p>
             </div>
@@ -333,6 +220,3 @@
     </div>
   </section>
 {% endblock content %}
-{% block extra_js %}
-  <script src="{% static 'js/effects-toggle.js' %}" defer></script>
-{% endblock extra_js %}

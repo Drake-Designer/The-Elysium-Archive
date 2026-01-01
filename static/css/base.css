@@ -268,6 +268,10 @@ main .container,
   border-radius: 4px;
   background: transparent;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
 }
 
 .site-cta:hover,
@@ -278,9 +282,102 @@ main .container,
   transform: translateY(-2px);
 }
 
+/* Unified button styles - Theme colors */
+.btn-primary {
+  background-color: var(--relic-gold);
+  border-color: var(--relic-gold);
+  color: var(--void-black);
+  font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+  color: var(--ash-white);
+}
+
+.btn-primary:active {
+  background-color: #6e1724;
+  border-color: #6e1724;
+}
+
+.btn-outline-light {
+  border-color: rgba(230, 230, 235, 0.5);
+  color: var(--ash-white);
+}
+
 .btn-outline-light:hover,
 .btn-outline-light:focus {
-  color: var(--void-black);
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+  color: var(--ash-white);
+}
+
+.btn-outline-light:active {
+  background-color: #6e1724;
+  border-color: #6e1724;
+}
+
+/* Disabled buttons */
+.btn.disabled,
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Buttons with icons */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: fit-content;
+}
+
+/* Prevent buttons from stretching full width in d-grid */
+.d-grid .btn {
+  width: fit-content;
+}
+
+.d-grid.gap-2 {
+  justify-items: center;
+}
+
+/* Effects toggle button (navbar) */
+.effects-toggle-btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--relic-gold);
+  background: transparent;
+  color: var(--relic-gold);
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+}
+
+.effects-toggle-btn:hover,
+.effects-toggle-btn:focus {
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+  color: var(--ash-white);
+}
+
+.effects-toggle-btn.is-active {
+  background-color: rgba(139, 30, 45, 0.25);
+  border-color: var(--blood-crimson);
+  color: var(--blood-crimson);
+}
+
+.effects-toggle-btn.is-active:hover,
+.effects-toggle-btn.is-active:focus {
+  background-color: var(--blood-crimson);
+  color: var(--ash-white);
 }
 
 /* =========================================================
@@ -321,17 +418,28 @@ main .container,
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
 }
 
+/* Disable hover lift effect inside carousel to avoid animation glitch */
+.entry-carousel .entry-card {
+  transition: box-shadow 0.25s ease;
+}
+
+.entry-carousel .entry-card:hover {
+  transform: none;
+}
+
 .entry-card-media {
   position: relative;
   background: linear-gradient(135deg, rgba(194, 161, 77, 0.14), rgba(139, 30, 45, 0.12));
-  min-height: 140px;
+  aspect-ratio: 16 / 9;
   border-bottom: var(--border);
+  overflow: hidden;
 }
 
 .entry-card-img {
   width: 100%;
-  height: 170px;
+  height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
@@ -366,19 +474,6 @@ main .container,
   text-transform: uppercase;
 }
 
-.effects-toggle {
-  color: rgba(230, 230, 235, 0.75);
-  text-decoration: none;
-  font-size: 0.95rem;
-  padding: 0.15rem 0.25rem;
-}
-
-.effects-toggle:hover,
-.effects-toggle:focus {
-  color: var(--relic-gold);
-  text-decoration: underline;
-}
-
 /* Home - Archive section header */
 .section-header {
   display: flex;
@@ -403,44 +498,87 @@ main .container,
   line-height: 1;
 }
 
-/* Home - Carousel grid (1/2/3 cards per slide) */
-.entry-carousel-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
+/* Home - Featured entry card (single per slide) */
+.entry-card--featured {
+  display: flex;
+  flex-direction: column;
+  max-width: 780px;
+  margin: 0 auto;
 }
 
-/* Tablet grid: always 2 columns */
-.entry-carousel-grid--tablet {
-  display: grid;
+.entry-card-media--featured {
+  aspect-ratio: 16 / 9;
+}
+
+.entry-card-body--featured {
+  padding: 1.25rem 1rem;
+}
+
+.entry-card-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.entry-card-desc {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0.75rem 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.entry-card-footer--featured {
+  padding: 1rem;
   gap: 1rem;
-  grid-template-columns: repeat(2, 1fr);
+}
+
+.price--featured {
+  font-size: 1.25rem;
 }
 
 @media (min-width: 768px) {
-  .entry-carousel-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .entry-card-media--featured {
+    aspect-ratio: 2 / 1;
+  }
+
+  .entry-card-body--featured {
+    padding: 1.5rem;
+  }
+
+  .entry-card-title {
+    font-size: 1.35rem;
+  }
+
+  .entry-card-desc {
+    font-size: 0.95rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .entry-card-footer--featured {
+    padding: 1rem 1.5rem 1.25rem;
+  }
+
+  .entry-card-footer--featured .btn {
+    padding: 0.5rem 1.25rem;
+  }
+
+  .price--featured {
+    font-size: 1.4rem;
   }
 }
 
-@media (min-width: 1200px) {
-  .entry-carousel-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Placeholder for missing images */
+/* Placeholder for missing product images */
 .entry-card-img-placeholder {
   width: 100%;
-  height: 170px;
-  background: linear-gradient(135deg, rgba(194, 161, 77, 0.14), rgba(139, 30, 45, 0.12));
-}
-
-/* Home - Card consistency (carousel) */
-.entry-card--carousel {
-  display: flex;
-  flex-direction: column;
   height: 100%;
+  background: linear-gradient(135deg, rgba(194, 161, 77, 0.14), rgba(139, 30, 45, 0.12));
 }
 
 .entry-card-body {
@@ -454,11 +592,6 @@ main .container,
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
-}
-
-.entry-card--carousel .entry-card-body p {
-  line-height: 1.35;
-  min-height: 2.7em; /* keeps cards aligned even if text differs slightly */
 }
 
 .entry-card-footer {
@@ -503,8 +636,9 @@ main .container,
 /* Home - How cards */
 .how-card-img {
   width: 100%;
-  height: 110px;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
+  object-position: center;
   display: block;
   border-radius: calc(var(--radius) - 4px);
   border: 1px solid rgba(194, 161, 77, 0.25);
@@ -521,8 +655,9 @@ main .container,
 
 .membership-img {
   width: 100%;
-  height: clamp(220px, 18vw, 360px);
+  aspect-ratio: 4 / 3;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 

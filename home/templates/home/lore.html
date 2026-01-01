@@ -15,8 +15,12 @@
                 A secret library for the initiated. Every Archive is a sealed text, revealed only to those who unlock it.
             </p>
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a class="btn btn-primary" href="{% url 'home' %}#membership">Become a Member</a>
-                <a class="btn btn-outline-light" href="{% url 'archive' %}">Browse the Archive</a>
+                <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                    <i class="fa-solid fa-key"></i>Become a Member
+                </a>
+                <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
+                    <i class="fa-solid fa-book-open"></i>Browse the Archive
+                </a>
             </div>
             <p class="small muted mt-3 mb-0">No downloads. No external files. Access is the product.</p>
         </div>
@@ -314,8 +318,13 @@
             <h2 class="h3 mb-2">Enter The Elysium</h2>
             <p class="muted mb-4">Join the archive, unlock your first entry, and read what the world was not meant to remember.</p>
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a class="btn btn-primary" href="{% url 'home' %}#membership">Register</a>
-                <a class="btn btn-outline-light" href="{% url 'home' %}#membership">Login</a>
+                <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                    <i class="fa-solid fa-user-plus"></i>Register
+                </a>
+                <a class="btn btn-outline-light btn-icon"
+                   href="{% url 'home' %}#membership">
+                    <i class="fa-solid fa-right-to-bracket"></i>Login
+                </a>
             </div>
         </div>
     </section>
