@@ -39,6 +39,8 @@ if DEBUG:
 
 # Application definition
 INSTALLED_APPS = [
+    # Admin theme
+    "jazzmin",
     # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -46,7 +48,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # Project apps
     "home",
     "accounts",
@@ -56,6 +57,32 @@ INSTALLED_APPS = [
     "orders",
     "reviews",
 ]
+
+# Jazzmin configuration
+JAZZMIN_SETTINGS = {
+    "site_title": "The Elysium Archive Admin",
+    "site_header": "The Elysium Archive",
+    "site_brand": "The Elysium Archive",
+    "site_logo": None,
+    "welcome_sign": "Welcome to the Elysium Archive admin panel.",
+    "copyright": "The Elysium Archive",
+    "search_model": [
+        "auth.User",
+        "auth.Group",
+    ],
+    "topmenu_links": [
+        {"name": "View site", "url": "/", "new_window": False},
+        {"model": "auth.User"},
+        {"model": "auth.Group"},
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.group": "fas fa-users",
+    },
+}
 
 # Middleware
 MIDDLEWARE = [
