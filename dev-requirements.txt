@@ -3,6 +3,9 @@
 # Used only for local development
 ##########################################
 
+# Include production dependencies
+-r requirements.txt
+
 # Linting and formatting
 pylint
 flake8
