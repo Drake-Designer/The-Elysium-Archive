@@ -22,10 +22,9 @@ No downloads. No loose files. Just secrets.
 - [Database Design](#database-design)
 - [Testing and Bug Fixes](#testing-and-bug-fixes)
 - [Running the Project Locally](#running-the-project-locally)
-- [Deployment](#deployment)
-- [Behind the Scenes: My Development Journey](#behind-the-scenes-my-development-journey)
+- [Heroku Deployment](#heroku-deployment)
 - [Future Improvements](#future-improvements)
-- [Credits](#credits)
+- [Credits and Acknowledgements](#credits-and-acknowledgements)
 
 ## Project Overview
 
@@ -230,10 +229,15 @@ This section documents implemented features organised by category.
 
 ### User Authentication
 
-- **Registration**: Users can create an account with username and password validation
-- **Login**: Secure authentication with session management
-- **Logout**: Safe logout via POST request to prevent CSRF attacks
-- **Auth State**: Navbar dynamically reflects login status
+- **Registration** – Create account with username, email, and password validation
+- **Email Verification** – Mandatory email verification via SendGrid
+- **Login** – Secure authentication with username or email
+- **Password Reset** – Complete password reset flow with email link
+- **Password Change** – Users can change password when logged in
+- **Email Management** – Add and manage multiple email addresses
+- **Account Deletion** – Permanent account deletion with proper cleanup
+- **Custom Styling** – All auth pages themed to match dark fantasy design
+- **Allauth Integration** – Professional email templates with SendGrid
 
 ### Public Pages
 
@@ -261,13 +265,37 @@ This section documents implemented features organised by category.
 
 ## Technical Overview
 
-The project uses a modular Django architecture.  
-Each app handles a specific area of functionality.
+### Architecture Decision: Switching to Django-Allauth
+
+During mid-project development, the authentication system was refactored to use **django-allauth** instead of custom authentication logic.
+
+**Why the switch?**
+
+The initial approach used a custom `accounts` app with basic Django auth views. However, production requirements for professional email management, password resets, and secure authentication workflows made django-allauth the better choice. This is the same approach used successfully in previous projects (PP3).
+
+**What changed:**
+
+- Replaced custom login/register views with allauth's built-in views
+- Integrated SendGrid for professional email delivery
+- Added email verification, password reset, and account management flows
+- Implemented allauth's email templates with custom dark fantasy branding
+
+**How the accounts app evolved:**
+
+Rather than removing the `accounts` app, it was preserved and enhanced to complement allauth with domain-specific functionality:
+
+- **UserProfile model** – Extended user profiles with display names and metadata
+- **my_archive view** – Displays user's purchased archive entries
+- **profile view** – Allows users to edit display names and manage account settings
+- **account_delete view** – Safe account deletion with proper cleanup
+- **Custom forms** – ElysiumSignupForm and ElysiumLoginForm styled with Bootstrap
+
+This hybrid approach keeps authentication professional while maintaining custom business logic within the accounts app.
 
 ### Django Apps Structure
 
 - `home` – Public-facing pages and layout
-- `accounts` – Authentication and profile management
+- `accounts` – User profiles, archive access, and account management
 - `products` – Product catalog and protected archive content
 - `cart` – Shopping cart logic
 - `checkout` – Stripe checkout handling
@@ -324,7 +352,22 @@ Static assets are organised to support both development and production environme
 - Video assets are stored in `static/video`
 - Favicon assets are stored in `static/img/favicon`
 
-All static files are collected using Django’s `collectstatic` command and are fully compatible with Heroku deployment.
+All static files are collected using Django’s `collectstatic` command and are fully compatible with Heroku deployment.### Email Templates and Notifications
+
+All emails sent via SendGrid use custom HTML templates styled to match the dark fantasy theme:
+
+- **Email Verification** – Sent when users register (mandatory verification)
+- **Password Reset** – Sent when users request password reset
+- **Password Reset Complete** – Confirmation after successful reset
+- **Email Change Notification** – Sent when users update their email address
+
+Each template:
+
+- Uses dark theme colors and gothic styling
+- Is fully responsive on mobile and desktop
+- Has a plaintext fallback for clients that don't support HTML
+- Uses SendGrid's infrastructure for reliable delivery
+- Maintains consistency with website branding
 
 ### Favicon Support
 
@@ -352,14 +395,55 @@ The implementation avoids unintended cropping by using intelligent scaling with 
 
 ## Technologies Used
 
-- HTML, CSS, JavaScript
-- Python and Django
-- PostgreSQL
-- Stripe (test mode)
-- Bootstrap
-- Cloudinary (media storage and optimisation)
-- Font Awesome (iconography)
-- Bootstrap Carousel (customised)
+### Core Framework and Language
+
+- **Django 6.0** – Backend framework
+- **Python 3.14** – Programming language
+- **PostgreSQL** – Production database
+- **SQLite3** – Development database
+
+### Authentication and User Management
+
+- **django-allauth 65.13.1** – Professional authentication system
+  - User registration, login, logout
+  - Email verification via SendGrid
+  - Password reset and change functionality
+  - Email address management
+  - Social authentication ready
+
+### Frontend and Styling
+
+- **HTML5, CSS3, JavaScript (Vanilla)**
+- **Bootstrap 5.3** – Responsive layout and components
+- **Font Awesome 6.5** – Icon library
+- **Google Fonts** – Playfair Display, Inter, Cinzel
+
+### Backend Services and Integrations
+
+- **Stripe 14.1.0** – Payment processing (test mode)
+- **Cloudinary 1.44.1** – Media storage and image optimization
+- **SendGrid (via django-allauth)** – Email delivery
+
+### Admin and Development
+
+- **django-jazzmin 3.0.1** – Enhanced Django admin UI
+- **whitenoise 6.11.0** – Static file serving
+- **gunicorn 23.0.0** – Production WSGI server
+- **dj-database-url 3.0.1** – Database URL parsing
+
+### Development and Testing Tools
+
+- **pytest 9.0.2** – Testing framework
+- **pytest-django 4.11.1** – Django testing plugin
+- **black 25.12.0** – Code formatter
+- **flake8 7.3.0** – Linter
+- **bandit 1.9.2** – Security linter
+
+### Deployment
+
+- **Heroku** – Cloud hosting platform
+- **Heroku PostgreSQL** – Production database
+- **Git** – Version control
 
 ## Admin Panel Setup
 
@@ -436,6 +520,88 @@ Each entity and relationship is designed to be Django-friendly and simple to rea
 
 The database follows a relational structure implemented using Django ORM and PostgreSQL.
 
+Currently, the project uses a minimal, focused data model:
+
+**Core Models:**
+
+- **User** – Django's built-in authentication model (via django-allauth), manages all authentication.
+- **UserProfile** – One-to-one extension of User; stores display names and profile metadata.
+- **Product** – Represents a purchasable archive entry with title, description, price, and image.
+
+**Future Models (planned):**
+
+- **Order** – Will store purchase records and order history.
+- **OrderLineItem** – Will link orders to products.
+- **Review** – Will allow verified buyers to leave reviews on products.
+- **AccessEntitlement** – Will explicitly grant user access to purchased products after payment.
+
+**Note:** This section will be updated as new models are added to the project.
+
+### Current Relationships
+
+- **User to UserProfile**: One-to-one relationship for extended profile data.
+- **Product to User**: Access relationship (currently unimplemented; will use AccessEntitlement when orders are implemented).
+
+This minimal structure keeps the foundation clean and makes it easy to add purchase and review functionality when needed.
+
+### ERD (Entity Relationship Diagram)
+
+The Entity Relationship Diagram (ERD) below illustrates the current database structure.
+
+It shows the main entities, their fields, and relationships. Future models (Order, Review, AccessEntitlement) are listed but not yet implemented.
+
+The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagramming tool that allows database relationships to be defined using clear, readable syntax and exported as an image.
+
+```mermaid
+erDiagram
+    USER ||--|| USERPROFILE : has
+    USER ||--o{ PRODUCT : "accesses (via future transactions)"
+    PRODUCT ||--o{ REVIEW : "has (future)"
+    USER ||--o{ REVIEW : "writes (future)"
+
+    USERPROFILE {
+        int id PK
+        int user_id FK
+        string display_name
+        datetime created_at
+        datetime updated_at
+    }
+
+    USER {
+        int id PK
+        string username
+        string email
+        string password
+        boolean is_active
+        boolean is_staff
+    }
+
+    PRODUCT {
+        int id PK
+        string title
+        string slug UK
+        string tagline
+        text description
+        decimal price
+        string image_url
+        string image_alt
+        boolean is_active
+        boolean is_featured
+        datetime created_at
+        datetime updated_at
+    }
+
+    REVIEW {
+        int id PK "future"
+        int user_id FK "future"
+        int product_id FK "future"
+        text content "future"
+        int rating "future"
+    }
+```
+
+The database follows a relational structure implemented using Django ORM and PostgreSQL.
+
 Each model uses Django’s default primary key. Relationships are defined using foreign keys and one-to-one fields where appropriate.
 
 **Key design choices:**
@@ -458,24 +624,12 @@ Each model uses Django’s default primary key. Relationships are defined using 
 
 This structure keeps access control simple, auditable, and aligned with Django best practices.
 
-### ERD (Entity Relationship Diagram)
+### ERD (Full Entity Relationship Diagram)
 
 The Entity Relationship Diagram (ERD) below illustrates the structure of the database used in this project.
 
 It shows the main entities, their primary and foreign keys, and how they relate to each other.  
 The diagram reflects the relational data model implemented using Django ORM and PostgreSQL.
-
-The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagramming tool that allows database relationships to be defined using clear, readable syntax and exported as an image.
-
-Key aspects highlighted in the ERD:
-
-- One-to-one relationship between User and UserProfile.
-- One-to-many relationships for orders and order line items.
-- Explicit many-to-many relationship between users and products via AccessEntitlement.
-- Access-based control of premium content.
-- Reviews linked to verified purchases only.
-
-![ERD Diagram](documentation/erd.png)
 
 ## Testing and Bug Fixes
 
@@ -520,7 +674,7 @@ DEBUG is controlled by an environment variable:
 - If `DEBUG` is not set, the project defaults to DEBUG True in local development.
 - On Heroku, DEBUG is set to False using a config var.
 
-## Deployment
+## Heroku Deployment
 
 The project will be deployed on Heroku.
 
@@ -545,11 +699,9 @@ Production must always set:
 
 This keeps Django debug mode disabled in production while keeping local development convenient.
 
-## Behind the Scenes: My Development Journey
-
 ## Future Improvements
 
-## Credits
+## Credits and Acknowledgements
 
 ### Media and Visual Assets
 
