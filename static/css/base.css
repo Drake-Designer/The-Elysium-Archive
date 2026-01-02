@@ -133,7 +133,6 @@ main .container,
   animation: bloody-pulse 5.5s ease-in-out infinite;
   transition: transform 0.3s ease;
   white-space: nowrap;
-  max-width: clamp(7rem, 60vw, 18rem);
   flex-shrink: 0;
 }
 
@@ -183,8 +182,7 @@ main .container,
 }
 
 /* Nav spacing */
-.site-nav-links,
-.site-nav-auth {
+.site-nav-links {
   gap: var(--sp-nav-gap);
 }
 
@@ -433,7 +431,6 @@ main .container,
 /* Video */
 .video-wrapper {
   position: relative;
-  display: block;
 }
 
 .video {

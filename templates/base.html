@@ -97,7 +97,7 @@
           <!-- Collapsible content -->
           <div class="collapse navbar-collapse" id="primaryNav">
             <!-- Main menu items (centered on desktop) -->
-            <ul class="navbar-nav mx-auto">
+            <ul class="navbar-nav mx-auto site-nav-links">
               <li class="nav-item">
                 <a class="nav-link site-nav-link"
                    href="{% url 'home' %}"
@@ -123,7 +123,7 @@
             <!-- Divider for mobile only -->
             <hr class="d-lg-none border-secondary my-2">
             <!-- Auth items (right on desktop) -->
-            <ul class="navbar-nav align-items-lg-center">
+            <ul class="navbar-nav align-items-lg-center site-nav-auth">
               {% if user.is_authenticated %}
                 <!-- Authenticated user: icon only -->
                 <li class="nav-item">
@@ -137,7 +137,9 @@
                   <form method="post" action="{% url 'logout' %}" class="d-inline">
                     {% csrf_token %}
                     <button type="submit" class="nav-link site-nav-link site-logout-btn">
-                      <span class="site-nav-link-text"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</span>
+                      <span class="site-nav-link-text">
+                        <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
+                      </span>
                     </button>
                   </form>
                 </li>
@@ -145,15 +147,21 @@
                 <!-- Anonymous user menu -->
                 <li class="nav-item">
                   <a class="nav-link site-nav-link" href="{% url 'login' %}">
-                    <span class="site-nav-link-text"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</span>
+                    <span class="site-nav-link-text">
+                      <i class="fa-solid fa-right-to-bracket me-1"></i>Login
+                    </span>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link site-nav-link d-lg-none" href="{% url 'register' %}">
-                    <span class="site-nav-link-text"><i class="fa-solid fa-user-plus me-1"></i>Register</span>
+                    <span class="site-nav-link-text">
+                      <i class="fa-solid fa-user-plus me-1"></i>Register
+                    </span>
                   </a>
                   <a class="btn btn-outline-light site-cta d-none d-lg-inline-flex"
-                     href="{% url 'register' %}"><i class="fa-solid fa-user-plus me-1"></i>Register</a>
+                     href="{% url 'register' %}">
+                    <i class="fa-solid fa-user-plus me-1"></i>Register
+                  </a>
                 </li>
               {% endif %}
               <!-- Effects toggle button DESKTOP (visible only on large screens, at the right) -->
