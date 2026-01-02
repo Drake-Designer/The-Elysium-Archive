@@ -3,59 +3,61 @@ Views for accounts app.
 """
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import login, logout
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
+from .forms import LoginForm, RegisterForm
+
 
 def register(request):
-    """Handle user registration with Django built-in form."""
-    # Redirect authenticated users to home.
+    """Handle user registration with a custom register form."""
+    # Redirect authenticated users to home
     if request.user.is_authenticated:
         messages.info(request, "You are already registered and logged in.")
         return redirect("home")
 
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(
                 request,
-                "Your account has been created. You may now enter the Archive.",
+                "Account created successfully. You can now sign in.",
             )
             return redirect("login")
-        else:
-            messages.error(
-                request,
-                "Registration failed. Please correct the errors below.",
-            )
+
+        messages.error(
+            request,
+            "Registration failed. Please correct the errors below.",
+        )
     else:
-        form = UserCreationForm()
+        form = RegisterForm()
 
     return render(request, "accounts/register.html", {"form": form})
 
 
 def user_login(request):
-    """Handle user login with Django built-in form."""
-    # Redirect authenticated users to home.
+    """Handle user login with a custom login form."""
+    # Redirect authenticated users to home
     if request.user.is_authenticated:
         messages.info(request, "You are already logged in.")
         return redirect("home")
 
     if request.method == "POST":
-        form = AuthenticationForm(request, data=request.POST)
+        form = LoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             messages.success(request, f"Welcome back, {user.username}.")
-            # Redirect to next parameter or home.
+
+            # Redirect to next parameter or home
             next_url = request.GET.get("next", "home")
             return redirect(next_url)
-        else:
-            messages.error(request, "Invalid username or password.")
+
+        messages.error(request, "Invalid username or password. Please try again.")
     else:
-        form = AuthenticationForm()
+        form = LoginForm()
 
     return render(request, "accounts/login.html", {"form": form})
 
@@ -64,7 +66,5 @@ def user_login(request):
 def user_logout(request):
     """Handle user logout via POST request only."""
     logout(request)
-    messages.success(
-        request, "You have been logged out. The Archive awaits your return."
-    )
+    messages.info(request, "You have been logged out. See you soon.")
     return redirect("home")
