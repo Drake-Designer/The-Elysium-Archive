@@ -1,0 +1,40 @@
+{% if messages %}
+    <div class="site-messages" aria-live="polite" aria-atomic="true">
+        {% for message in messages %}
+            {% if 'error' in message.tags %}
+                {% with alert_class="danger" %}
+                    <div class="alert alert-{{ alert_class }} alert-dismissible fade show js-django-message mb-2"
+                         role="alert">
+                        {{ message }}
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                    </div>
+                {% endwith %}
+            {% elif message.tags %}
+                {% with alert_class=message.tags %}
+                    <div class="alert alert-{{ alert_class }} alert-dismissible fade show js-django-message mb-2"
+                         role="alert">
+                        {{ message }}
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                    </div>
+                {% endwith %}
+            {% else %}
+                {% with alert_class="secondary" %}
+                    <div class="alert alert-{{ alert_class }} alert-dismissible fade show js-django-message mb-2"
+                         role="alert">
+                        {{ message }}
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                    </div>
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}
