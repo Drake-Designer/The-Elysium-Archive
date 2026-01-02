@@ -36,6 +36,10 @@ DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
 
 # Hosts / CSRF
 ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", default=[])
+IS_HEROKU = os.environ.get("DYNO") is not None
+
+if not ALLOWED_HOSTS and IS_HEROKU:
+    ALLOWED_HOSTS = [".herokuapp.com"]
 
 if DEBUG:
     for host in ("localhost", "127.0.0.1"):
@@ -43,6 +47,9 @@ if DEBUG:
             ALLOWED_HOSTS.append(host)
 
 CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", default=[])
+
+if not CSRF_TRUSTED_ORIGINS and IS_HEROKU:
+    CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com"]
 
 # Heroku / reverse proxy HTTPS header
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
