@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    My Archive | The Elysium Archive
+{% endblock title %}
+{% block content %}
+    <section class="container py-5">
+        <div class="panel p-4 p-lg-5">
+            <h1 class="h3 mb-4">
+                <i class="fa-solid fa-book-skull me-2"></i>My Archive
+            </h1>
+            <p class="muted mb-4">Your unlocked entries from The Elysium Archive.</p>
+            {% if unlocked_products %}
+                <div class="row g-3">
+                    {% for product in unlocked_products %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="entry-card h-100">
+                                <div class="entry-card-img">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}"
+                                             alt="{{ product.image_alt|default:product.title }}"
+                                             class="w-100 h-100 object-fit-cover">
+                                    {% else %}
+                                        <div class="entry-card-img-placeholder"></div>
+                                    {% endif %}
+                                </div>
+                                <div class="entry-card-body">
+                                    <div class="entry-card-head">
+                                        <h3 class="h5 mb-0">{{ product.title }}</h3>
+                                    </div>
+                                    <p class="muted small mb-0">{{ product.description|truncatewords:20 }}</p>
+                                </div>
+                                <div class="entry-card-footer">
+                                    <span class="badge badge-sealed">
+                                        <i class="fa-solid fa-lock"></i>Purchased
+                                    </span>
+                                    {# TODO: Add product_detail URL when implemented #}
+                                    {# <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-light btn-icon">
+                                        <i class="fa-solid fa-book-open"></i>Read Entry
+                                    </a> #}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-lock-open fa-3x muted mb-3"></i>
+                    <p class="muted mb-3">No unlocked entries yet.</p>
+                    <p class="muted mb-4">Browse the Archive to discover forbidden knowledge.</p>
+                    <a href="{% url 'archive' %}" class="btn btn-primary btn-icon">
+                        <i class="fa-solid fa-scroll"></i>Explore Archive
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock content %}

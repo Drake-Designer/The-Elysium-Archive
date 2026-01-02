@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}
+    Profile | The Elysium Archive
+{% endblock title %}
+{% block content %}
+    <section class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="panel p-4 p-lg-5">
+                    <h1 class="h3 mb-4">
+                        <i class="fa-solid fa-user-circle me-2"></i>Profile Settings
+                    </h1>
+                    <div class="mb-4">
+                        <h2 class="h5 mb-3">Account Information</h2>
+                        <div class="panel p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="muted">Username:</span>
+                                <strong>{{ user.username }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="muted">Email:</span>
+                                <strong>{{ user.email }}</strong>
+                            </div>
+                        </div>
+                        <a href="{% url 'account_email' %}"
+                           class="btn btn-sm btn-outline-light btn-icon">
+                            <i class="fa-solid fa-envelope"></i>Manage Email Addresses
+                        </a>
+                        <a href="{% url 'account_change_password' %}"
+                           class="btn btn-sm btn-outline-light btn-icon">
+                            <i class="fa-solid fa-key"></i>Change Password
+                        </a>
+                    </div>
+                    <hr class="my-4 border-secondary">
+                    <h2 class="h5 mb-3">Display Name</h2>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_display_name" class="form-label">Display Name</label>
+                            <input type="text"
+                                   name="display_name"
+                                   id="id_display_name"
+                                   class="form-control {% if form.display_name.errors %}is-invalid{% endif %}"
+                                   value="{{ form.display_name.value|default:'' }}"
+                                   placeholder="Enter a display name (optional)">
+                            {% if form.display_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.display_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text muted">Optional display name shown in your profile</div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-icon">
+                                <i class="fa-solid fa-save"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                    <hr class="my-4 border-secondary">
+                    <div class="text-center">
+                        <a href="{% url 'account_delete' %}"
+                           class="btn btn-sm btn-outline-danger btn-icon">
+                            <i class="fa-solid fa-trash"></i>Delete Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

@@ -125,12 +125,13 @@
             <!-- Auth items (right on desktop) -->
             <ul class="navbar-nav align-items-lg-center site-nav-auth">
               {% if user.is_authenticated %}
-                <!-- Authenticated user: icon only -->
+                <!-- Authenticated user: icon links to My Archive -->
                 <li class="nav-item">
-                  <span class="nav-link site-nav-link site-user-icon"
-                        aria-label="User account">
+                  <a href="{% url 'my_archive' %}"
+                     class="nav-link site-nav-link site-user-icon"
+                     aria-label="My Archive">
                     <i class="fa-solid fa-user"></i>
-                  </span>
+                  </a>
                 </li>
                 <!-- Logout form (POST with CSRF) -->
                 <li class="nav-item">
