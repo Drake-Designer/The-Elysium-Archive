@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+{% block title %}
+    Account Dashboard | The Elysium Archive
+{% endblock title %}
+{% block content %}
+    <section class="container-fluid py-4 py-lg-5">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Sidebar Navigation -->
+                <div class="col-12 col-lg-3">
+                    <div class="dashboard-sidebar">
+                        <!-- Profile Card Header -->
+                        <div class="sidebar-profile-card mb-4 p-3 rounded-3">
+                            <div class="text-center">
+                                <div class="mb-3">
+                                    <i class="fa-solid fa-user-circle sidebar-profile-icon"></i>
+                                </div>
+                                <h3 class="h6 mb-1">{{ user.username }}</h3>
+                                <p class="small muted mb-0">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        <!-- Sidebar Menu -->
+                        <nav class="dashboard-nav flex-column">
+                            <button class="dashboard-nav-item active"
+                                    id="profile-nav-btn"
+                                    data-dashboard-tab="profile"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="profile"
+                                    aria-selected="true">
+                                <i class="fa-solid fa-id-card"></i>
+                                <span>Profile</span>
+                            </button>
+                            <button class="dashboard-nav-item"
+                                    id="archive-nav-btn"
+                                    data-dashboard-tab="archive"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="archive"
+                                    aria-selected="false">
+                                <i class="fa-solid fa-book-skull"></i>
+                                <span>My Archive</span>
+                            </button>
+                            <button class="dashboard-nav-item"
+                                    id="delete-nav-btn"
+                                    data-dashboard-tab="delete"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="delete"
+                                    aria-selected="false">
+                                <i class="fa-solid fa-trash"></i>
+                                <span>Delete Account</span>
+                            </button>
+                            <button class="dashboard-nav-item"
+                                    id="logout-nav-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#logoutModal"
+                                    type="button">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Logout</span>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+                <!-- Main Content -->
+                <div class="col-12 col-lg-9">
+                    <div class="tab-content" id="dashboardContent">
+                        <script>
+(function() {
+    'use strict';
+    
+    const tabContainer = document.getElementById('dashboardContent');
+    const buttons = document.querySelectorAll('[data-dashboard-tab]');
+    
+    if (!tabContainer || !buttons.length) {
+        return;
+    }
+    
+    // Attach listeners directly to each button
+    buttons.forEach((button) => {
+        button.addEventListener('click', function(event) {
+            const tabName = this.getAttribute('data-dashboard-tab');
+            
+            if (!tabName || tabName === 'logout') {
+                return;
+            }
+            
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Hide all panes
+            const allPanes = tabContainer.querySelectorAll('.tab-pane');
+            allPanes.forEach(pane => {
+                pane.classList.remove('active', 'show');
+            });
+            
+            // Show target pane
+            const targetPane = document.getElementById(tabName);
+            if (targetPane) {
+                targetPane.classList.add('active', 'show');
+            }
+            
+            // Update button states
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            
+            this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
+        });
+    });
+})();
+                        </script>
+                        <!-- Profile Tab -->
+                        <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                            <div class="panel p-4 p-lg-5">
+                                <h1 class="h4 mb-4">
+                                    <i class="fa-solid fa-id-card me-2 icon-relic-gold"></i>Profile
+                                </h1>
+                                <div class="mb-4">
+                                    <h2 class="h5 mb-3">Account Information</h2>
+                                    <div class="panel p-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="muted">Username:</span>
+                                            <strong>{{ user.username }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="muted">Email:</span>
+                                            <strong>{{ user.email }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <a href="{% url 'account_email' %}"
+                                           class="btn btn-sm btn-outline-light btn-icon">
+                                            <i class="fa-solid fa-envelope"></i>Manage Email
+                                        </a>
+                                        <a href="{% url 'account_change_password' %}"
+                                           class="btn btn-sm btn-outline-light btn-icon">
+                                            <i class="fa-solid fa-key"></i>Change Password
+                                        </a>
+                                    </div>
+                                </div>
+                                <hr class="my-4 border-secondary">
+                                <h2 class="h5 mb-3">Display Name</h2>
+                                <form method="post" novalidate>
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="id_display_name" class="form-label">Display Name</label>
+                                        <input type="text"
+                                               name="display_name"
+                                               id="id_display_name"
+                                               class="form-control {% if form.display_name.errors %}is-invalid{% endif %}"
+                                               value="{{ form.display_name.value|default:'' }}"
+                                               placeholder="Enter a display name (optional)">
+                                        {% if form.display_name.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.display_name.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text muted">Optional display name shown in your profile</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-icon">
+                                        <i class="fa-solid fa-save"></i>Save Changes
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Archive Tab -->
+                        <div class="tab-pane fade" id="archive" role="tabpanel">
+                            <div class="panel p-4 p-lg-5">
+                                <h1 class="h4 mb-4">
+                                    <i class="fa-solid fa-book-skull me-2 icon-relic-gold"></i>My Archive
+                                </h1>
+                                {% if unlocked_products %}
+                                    <div class="row g-3">
+                                        {% for product in unlocked_products %}
+                                            <div class="col-12 col-md-6">
+                                                <div class="entry-card h-100">
+                                                    <div class="entry-card-img">
+                                                        {% if product.image %}
+                                                            <img src="{{ product.image.url }}"
+                                                                 alt="{{ product.image_alt|default:product.title }}"
+                                                                 width="100%"
+                                                                 height="auto"
+                                                                 class="w-100 h-100 object-fit-cover">
+                                                        {% else %}
+                                                            <div class="entry-card-img-placeholder"></div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="entry-card-body">
+                                                        <div class="entry-card-head">
+                                                            <h3 class="h5 mb-0">{{ product.title }}</h3>
+                                                        </div>
+                                                        <p class="muted small mb-0">{{ product.description|truncatewords:20 }}</p>
+                                                    </div>
+                                                    <div class="entry-card-footer">
+                                                        <span class="badge badge-sealed">
+                                                            <i class="fa-solid fa-lock"></i>Purchased
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-5">
+                                        <i class="fa-solid fa-lock-open fa-3x muted mb-3"></i>
+                                        <p class="muted mb-3">No unlocked entries yet.</p>
+                                        <p class="muted mb-4">Browse the Archive to discover forbidden knowledge.</p>
+                                        <a href="{% url 'archive' %}" class="btn btn-primary btn-icon">
+                                            <i class="fa-solid fa-scroll"></i>Explore Archive
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Delete Account Tab -->
+                        <div class="tab-pane fade" id="delete" role="tabpanel">
+                            <div class="panel p-4 p-lg-5">
+                                <h1 class="h4 mb-4">
+                                    <i class="fa-solid fa-trash me-2 icon-blood-crimson"></i>Delete Account
+                                </h1>
+                                <div class="alert alert-danger" role="alert">
+                                    <strong>Warning:</strong> This action cannot be undone.
+                                </div>
+                                <p class="muted mb-4">Deleting your account will permanently remove:</p>
+                                <ul class="muted mb-4">
+                                    <li>Your profile and account information</li>
+                                    <li>Your purchase history and access to unlocked entries</li>
+                                    <li>All associated data</li>
+                                </ul>
+                                <p class="muted mb-4">If you're sure you want to proceed, click the button below.</p>
+                                <form method="post" action="{% url 'account_delete' %}">
+                                    {% csrf_token %}
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-danger btn-icon">
+                                            <i class="fa-solid fa-trash"></i>Delete My Account
+                                        </button>
+                                        <a href="{% url 'home' %}" class="btn btn-outline-light">
+                                            <i class="fa-solid fa-arrow-left me-1"></i>Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade"
+         id="logoutModal"
+         tabindex="-1"
+         aria-labelledby="logoutModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-dashboard">
+                <div class="modal-header modal-header-dashboard">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="logout-icon-circle">
+                            <i class="fa-solid fa-right-from-bracket icon-blood-crimson icon-lg"></i>
+                        </div>
+                        <h1 class="modal-title fs-5 mb-0" id="logoutModalLabel">Confirm Logout</h1>
+                    </div>
+                    <button type="button"
+                            class="btn-close btn-close-white btn-close-icon-hover"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body modal-body-dashboard">
+                    <p class="mb-0">
+                        You are about to end your session. You will be logged out and will need to sign in again to access your account.
+                    </p>
+                </div>
+                <div class="modal-footer modal-footer-dashboard">
+                    <button type="button"
+                            class="btn btn-outline-light btn-close-danger"
+                            data-bs-dismiss="modal">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Stay
+                    </button>
+                    <form method="post" action="{% url 'account_logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-logout-danger">
+                            <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+<script>console.log('SCRIPT STARTED IMMEDIATELY');</script>
+<script>
+(function() {
+    console.log('DOMContentLoaded fired');
+    'use strict';
+    
+    console.log('Dashboard script loaded');
+    
+    const tabContainer = document.getElementById('dashboardContent');
+    const buttons = document.querySelectorAll('[data-dashboard-tab]');
+    
+    console.log('tabContainer:', tabContainer);
+    console.log('Found', buttons.length, 'buttons with data-dashboard-tab');
+    
+    if (!tabContainer || !buttons.length) {
+        console.error('Missing required elements');
+        return;
+    }
+    
+    // Attach listeners directly to each button
+    buttons.forEach((button, index) => {
+        console.log('Button', index, ':', button.getAttribute('data-dashboard-tab'));
+        
+        button.addEventListener('click', function(event) {
+            console.log('✓ Button clicked!');
+            
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const tabName = this.getAttribute('data-dashboard-tab');
+            console.log('Tab name:', tabName);
+            
+            if (!tabName || tabName === 'logout') {
+                console.log('Skipping logout or invalid tab');
+                return;
+            }
+            
+            // Hide all panes
+            const allPanes = tabContainer.querySelectorAll('.tab-pane');
+            console.log('Hiding', allPanes.length, 'panes');
+            allPanes.forEach(pane => {
+                pane.classList.remove('active', 'show');
+            });
+            
+            // Show target pane
+            const targetPane = document.getElementById(tabName);
+            console.log('Showing pane:', tabName, '✓');
+            
+            if (targetPane) {
+                targetPane.classList.add('active', 'show');
+            }
+            
+            // Update button states
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            
+            this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
+            
+            console.log('✓✓✓ Tab switched to:', tabName);
+        });
+    });
+    
+    console.log('Dashboard initialized ✓');
+})();
+</script>

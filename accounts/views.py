@@ -9,6 +9,56 @@ from .forms import ProfileForm
 
 
 @login_required
+def dashboard(request):
+    """Account dashboard with tabs for profile, archive, delete."""
+    user_profile = request.user.profile
+    unlocked_products = []
+
+    # Get unlocked products
+    try:
+        from orders.models import OrderLineItem
+
+        line_items = OrderLineItem.objects.filter(
+            order__user=request.user,
+            order__status="completed",
+        ).select_related("product")
+        unlocked_products = [item.product for item in line_items]
+    except (ImportError, AttributeError):
+        pass
+
+    if not unlocked_products:
+        try:
+            from products.models import AccessEntitlement
+
+            entitlements = AccessEntitlement.objects.filter(
+                user=request.user
+            ).select_related("product")
+            unlocked_products = [e.product for e in entitlements]
+        except (ImportError, AttributeError):
+            pass
+
+    # Handle profile form submission
+    if request.method == "POST" and "display_name" in request.POST:
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            user_profile.display_name = form.cleaned_data["display_name"]
+            user_profile.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect("account_dashboard")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = ProfileForm(initial={"display_name": user_profile.display_name})
+
+    context = {
+        "user_profile": user_profile,
+        "form": form,
+        "unlocked_products": unlocked_products,
+    }
+    return render(request, "accounts/dashboard.html", context)
+
+
+@login_required
 def my_archive(request):
     """Display user's unlocked archive entries (purchased products)."""
     unlocked_products = []
@@ -20,7 +70,6 @@ def my_archive(request):
 
         line_items = OrderLineItem.objects.filter(
             order__user=request.user,
-            order__status="completed",
         ).select_related("product")
         unlocked_products = [item.product for item in line_items]
     except (ImportError, AttributeError):

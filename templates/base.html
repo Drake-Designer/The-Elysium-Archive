@@ -125,24 +125,13 @@
             <!-- Auth items (right on desktop) -->
             <ul class="navbar-nav align-items-lg-center site-nav-auth">
               {% if user.is_authenticated %}
-                <!-- Authenticated user: icon links to My Archive -->
+                <!-- Authenticated user: icon links to dashboard -->
                 <li class="nav-item">
-                  <a href="{% url 'my_archive' %}"
+                  <a href="{% url 'account_dashboard' %}"
                      class="nav-link site-nav-link site-user-icon"
-                     aria-label="My Archive">
+                     aria-label="Account dashboard">
                     <i class="fa-solid fa-user"></i>
                   </a>
-                </li>
-                <!-- Logout form (POST with CSRF) -->
-                <li class="nav-item">
-                  <form method="post" action="{% url 'account_logout' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-link site-nav-link site-logout-btn">
-                      <span class="site-nav-link-text">
-                        <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
-                      </span>
-                    </button>
-                  </form>
                 </li>
               {% else %}
                 <!-- Anonymous user menu -->

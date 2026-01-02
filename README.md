@@ -239,6 +239,13 @@ This section documents implemented features organised by category.
 - **Custom Styling** – All auth pages themed to match dark fantasy design
 - **Allauth Integration** – Professional email templates with SendGrid
 
+### User Profiles
+
+- **Profile Page** – View account username, email, and manage display name
+- **Edit Display Name** – Optional custom display name with validation
+- **Delete Account** – Permanent account deletion with confirmation page
+- **Email Management** – Add, remove, and manage multiple email addresses
+
 ### Public Pages
 
 - **Homepage**: Hero section, featured entries carousel, membership information
@@ -258,9 +265,12 @@ This section documents implemented features organised by category.
 | Home | `/` | Public | Landing page with hero, carousel, and membership info |
 | Archive | `/archive/` | Public | Browse all archive entries |
 | Lore | `/lore/` | Public | World-building and story content |
-| Register | `/accounts/register/` | Anonymous only | Create a new account |
+| Register | `/accounts/signup/` | Anonymous only | Create a new account |
 | Login | `/accounts/login/` | Anonymous only | Sign in to existing account |
 | Logout | `/accounts/logout/` | Authenticated | Sign out (POST only) |
+| Profile | `/accounts/profile/` | Authenticated | View and edit account settings |
+| My Archive | `/accounts/archive/` | Authenticated | Browse purchased archive entries |
+| Delete Account | `/accounts/delete/` | Authenticated | Permanently delete account |
 | Admin | `/admin/` | Staff only | Django admin panel |
 
 ## Technical Overview
