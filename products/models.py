@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from cloudinary.models import CloudinaryField
 
 
@@ -10,6 +11,16 @@ class Product(models.Model):
 
     tagline = models.CharField(max_length=120, blank=True)
     description = models.TextField()
+    content = models.TextField(
+        blank=True,
+        default="",
+        help_text="Full archive text, visible only after purchase"
+    )
+    category = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Archive category (e.g., Lore, Rituals, Chronicles)",
+    )
 
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
@@ -30,3 +41,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        """Return the URL for the product detail page."""
+        return reverse("product_detail", kwargs={"slug": self.slug})
