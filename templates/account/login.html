@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}
+    Login | The Elysium Archive
+{% endblock title %}
+{% block content %}
+    <section class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5">
+                <div class="panel p-4 p-lg-5">
+                    <h1 class="h3 text-center mb-4">
+                        <i class="fa-solid fa-door-open me-2"></i>Login
+                    </h1>
+                    <form method="post" action="{% url 'account_login' %}" novalidate>
+                        {% csrf_token %}
+                        {# allauth uses redirect_field_name/redirect_field_value for ?next=... #}
+                        {% if redirect_field_value %}
+                            <input type="hidden"
+                                   name="{{ redirect_field_name }}"
+                                   value="{{ redirect_field_value }}">
+                        {% endif %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <!-- Username or Email -->
+                        <div class="mb-3">
+                            <label for="id_login" class="form-label">Username or Email</label>
+                            <input type="text"
+                                   name="login"
+                                   id="id_login"
+                                   class="form-control {% if form.login.errors %}is-invalid{% endif %}"
+                                   value="{{ form.login.value|default:'' }}"
+                                   placeholder="Enter your username or email"
+                                   autocomplete="username"
+                                   required>
+                            {% if form.login.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.login.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Password</label>
+                            <input type="password"
+                                   name="password"
+                                   id="id_password"
+                                   class="form-control {% if form.password.errors %}is-invalid{% endif %}"
+                                   placeholder="Enter your password"
+                                   autocomplete="current-password"
+                                   required>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <!-- Remember me (only if field exists) -->
+                        {% if form.remember %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="remember"
+                                       id="id_remember"
+                                       {% if form.remember.value %}checked{% endif %}>
+                                <label class="form-check-label" for="id_remember">Remember me</label>
+                            </div>
+                        {% endif %}
+                        <!-- Submit -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-icon">
+                                <i class="fa-solid fa-right-to-bracket"></i>Sign In
+                            </button>
+                        </div>
+                        <!-- Forgot password -->
+                        <div class="text-center mt-3">
+                            <a class="text-decoration-none"
+                               href="{% url 'account_reset_password' %}">
+                                <i class="fa-solid fa-key me-1"></i>Forgot password?
+                            </a>
+                        </div>
+                    </form>
+                    <hr class="my-4 border-secondary">
+                    <div class="text-center">
+                        <p class="muted mb-2">Don't have an account?</p>
+                        <a class="btn btn-outline-light btn-icon"
+                           href="{% url 'account_signup' %}">
+                            <i class="fa-solid fa-user-plus"></i>Sign up now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

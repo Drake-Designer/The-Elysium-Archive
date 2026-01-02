@@ -134,7 +134,7 @@
                 </li>
                 <!-- Logout form (POST with CSRF) -->
                 <li class="nav-item">
-                  <form method="post" action="{% url 'logout' %}" class="d-inline">
+                  <form method="post" action="{% url 'account_logout' %}" class="d-inline">
                     {% csrf_token %}
                     <button type="submit" class="nav-link site-nav-link site-logout-btn">
                       <span class="site-nav-link-text">
@@ -146,20 +146,21 @@
               {% else %}
                 <!-- Anonymous user menu -->
                 <li class="nav-item">
-                  <a class="nav-link site-nav-link" href="{% url 'login' %}">
+                  <a class="nav-link site-nav-link" href="{% url 'account_login' %}">
                     <span class="site-nav-link-text">
                       <i class="fa-solid fa-right-to-bracket me-1"></i>Login
                     </span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link site-nav-link d-lg-none" href="{% url 'register' %}">
+                  <a class="nav-link site-nav-link d-lg-none"
+                     href="{% url 'account_signup' %}">
                     <span class="site-nav-link-text">
                       <i class="fa-solid fa-user-plus me-1"></i>Register
                     </span>
                   </a>
                   <a class="btn btn-outline-light site-cta d-none d-lg-inline-flex"
-                     href="{% url 'register' %}">
+                     href="{% url 'account_signup' %}">
                     <i class="fa-solid fa-user-plus me-1"></i>Register
                   </a>
                 </li>

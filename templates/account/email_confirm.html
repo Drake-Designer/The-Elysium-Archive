@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}
+    Confirm Email | The Elysium Archive
+{% endblock title %}
+{% block content %}
+    <section class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5">
+                <div class="panel p-4 p-lg-5">
+                    <h1 class="h3 text-center mb-4">
+                        <i class="fa-solid fa-check-circle me-2"></i>Confirm Email Address
+                    </h1>
+                    <p class="text-center muted mb-4">
+                        Please confirm that <strong>{{ email }}</strong> is your email address by clicking the button below.
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-icon">
+                                <i class="fa-solid fa-envelope-circle-check"></i>Confirm Email
+                            </button>
+                        </div>
+                    </form>
+                    <hr class="my-4 border-secondary">
+                    <p class="text-center muted mb-0">
+                        <a href="{% url 'home' %}">Return to home</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

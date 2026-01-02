@@ -24,6 +24,12 @@
   --radius: 12px;
   --border: 1px solid rgba(230, 230, 235, 0.12);
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  /* Form theme */
+  --field-bg: rgba(11, 11, 15, 0.55);
+  --field-border: rgba(230, 230, 235, 0.18);
+  --field-border-focus: rgba(194, 161, 77, 0.65);
+  --field-placeholder: rgba(230, 230, 235, 0.45);
 }
 
 /* =========================================================
@@ -49,6 +55,10 @@ h6 {
   letter-spacing: 0.2px;
 }
 
+.muted {
+  color: rgba(230, 230, 235, 0.7);
+}
+
 /* Links (scoped) */
 .site-body a {
   color: var(--ash-white);
@@ -63,7 +73,9 @@ h6 {
 .site-body a:focus-visible,
 .site-body button:focus-visible,
 .site-body .btn:focus-visible,
-.site-body input:focus-visible {
+.site-body input:focus-visible,
+.site-body select:focus-visible,
+.site-body textarea:focus-visible {
   outline: 2px solid rgba(194, 161, 77, 0.65);
   outline-offset: 3px;
 }
@@ -96,13 +108,8 @@ main .container,
   max-width: var(--content-max);
 }
 
-/* Muted text */
-.muted {
-  color: rgba(230, 230, 235, 0.7);
-}
-
 /* =========================================================
-   Layout: Navbar
+   Navbar
    ========================================================= */
 .site-navbar {
   background-color: rgba(11, 11, 15, 0.97);
@@ -113,12 +120,11 @@ main .container,
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Container gap for top-row items */
 .site-navbar .container {
   gap: clamp(0.15rem, 0.1rem + 0.25vw, 0.35rem);
 }
 
-/* Brand - fluid sizing for all screens */
+/* Brand */
 .site-brand {
   font-family: var(--font-brand);
   font-size: var(--fs-nav-brand);
@@ -158,13 +164,12 @@ main .container,
   pointer-events: none;
 }
 
-/* Toggler - fluid sizing */
+/* Toggler */
 .site-toggler {
   border: 1px solid rgba(194, 161, 77, 0.3);
   padding: clamp(0.2rem, 0.15rem + 0.2vw, 0.35rem) clamp(0.3rem, 0.25rem + 0.25vw, 0.55rem);
 }
 
-/* Push hamburger and effects button to the right */
 .site-toggler-fixed {
   margin-left: auto;
   margin-right: clamp(0.3rem, 0.2rem + 0.25vw, 0.5rem);
@@ -228,7 +233,7 @@ main .container,
   transform: translateX(0);
 }
 
-/* Hamburger mode underline fix (for navbar-expand-lg) */
+/* Mobile underline fix (navbar-expand-lg) */
 @media (max-width: 991.98px) {
   .site-nav-link::after {
     content: none;
@@ -256,9 +261,18 @@ main .container,
   .site-nav-link:focus .site-nav-link-text::after {
     width: 100%;
   }
+
+  .site-navbar .navbar-collapse {
+    padding-top: clamp(0.5rem, 0.4rem + 0.3vw, 0.75rem);
+  }
 }
 
-/* Logout button styling */
+/* Auth icon */
+.site-user-icon {
+  font-size: clamp(0.9rem, 0.8rem + 0.3vw, 1.1rem);
+}
+
+/* Logout button */
 .site-logout-btn {
   background: none;
   border: none;
@@ -293,7 +307,51 @@ main .container,
   transform: translateY(-2px);
 }
 
-/* Unified button styles - Theme colors */
+/* Effects toggle button */
+.effects-toggle-btn {
+  width: clamp(26px, 22px + 1.5vw, 40px);
+  height: clamp(26px, 22px + 1.5vw, 40px);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--relic-gold);
+  background: transparent;
+  color: var(--relic-gold);
+  font-size: clamp(0.65rem, 0.55rem + 0.5vw, 1rem);
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.site-effects-toggle-mobile,
+.site-effects-toggle-desktop {
+  z-index: 1031;
+  position: relative;
+}
+
+.effects-toggle-btn:hover,
+.effects-toggle-btn:focus {
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+  color: var(--ash-white);
+}
+
+.effects-toggle-btn.is-active {
+  background-color: rgba(139, 30, 45, 0.25);
+  border-color: var(--blood-crimson);
+  color: var(--blood-crimson);
+}
+
+.effects-toggle-btn.is-active:hover,
+.effects-toggle-btn.is-active:focus {
+  background-color: var(--blood-crimson);
+  color: var(--ash-white);
+}
+
+/* =========================================================
+   Buttons (theme)
+   ========================================================= */
 .btn-primary {
   background-color: var(--relic-gold);
   border-color: var(--relic-gold);
@@ -330,7 +388,6 @@ main .container,
   border-color: #6e1724;
 }
 
-/* Disabled buttons */
 .btn.disabled,
 .btn:disabled,
 .btn[aria-disabled='true'] {
@@ -338,7 +395,6 @@ main .container,
   pointer-events: none;
 }
 
-/* Buttons with icons */
 .btn-icon {
   display: inline-flex;
   align-items: center;
@@ -347,7 +403,7 @@ main .container,
   width: fit-content;
 }
 
-/* Prevent buttons from stretching full width in d-grid */
+/* Keep your “compact grid buttons” behavior site-wide */
 .d-grid .btn {
   width: fit-content;
 }
@@ -356,66 +412,72 @@ main .container,
   justify-items: center;
 }
 
-/* Effects toggle button (navbar) - fluid sizing */
-.effects-toggle-btn {
-  width: clamp(26px, 22px + 1.5vw, 40px);
-  height: clamp(26px, 22px + 1.5vw, 40px);
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 1.5px solid var(--relic-gold);
-  background: transparent;
-  color: var(--relic-gold);
-  font-size: clamp(0.65rem, 0.55rem + 0.5vw, 1rem);
-  transition: all 0.25s ease;
-  flex-shrink: 0;
-}
-
-/* Fixed positioning - always at right of navbar, outside hamburger */
-.site-effects-toggle-mobile {
-  z-index: 1031;
-  position: relative;
-}
-
-/* Desktop version - inside the navbar menu, at the right */
-.site-effects-toggle-desktop {
-  z-index: 1031;
-}
-
-.effects-toggle-btn:hover,
-.effects-toggle-btn:focus {
-  background-color: var(--blood-crimson);
-  border-color: var(--blood-crimson);
-  color: var(--ash-white);
-}
-
-.effects-toggle-btn.is-active {
-  background-color: rgba(139, 30, 45, 0.25);
-  border-color: var(--blood-crimson);
-  color: var(--blood-crimson);
-}
-
-.effects-toggle-btn.is-active:hover,
-.effects-toggle-btn.is-active:focus {
-  background-color: var(--blood-crimson);
-  color: var(--ash-white);
-}
-
 /* =========================================================
-   Navbar mobile adjustments (Bootstrap handles layout)
+   Forms (site theme)
    ========================================================= */
-@media (max-width: 991.98px) {
-  /* Collapse menu padding */
-  .site-navbar .navbar-collapse {
-    padding-top: clamp(0.5rem, 0.4rem + 0.3vw, 0.75rem);
-  }
+.site-body .form-label {
+  color: rgba(230, 230, 235, 0.9);
+  font-weight: 500;
 }
 
-/* User icon styling (authenticated state) */
-.site-user-icon {
-  font-size: clamp(0.9rem, 0.8rem + 0.3vw, 1.1rem);
+.site-body .form-control,
+.site-body .form-select,
+.site-body textarea.form-control {
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+  color: var(--ash-white);
+  border-radius: calc(var(--radius) - 4px);
+}
+
+.site-body .form-control::placeholder,
+.site-body .form-select::placeholder {
+  color: var(--field-placeholder);
+}
+
+.site-body .form-control:focus,
+.site-body .form-select:focus,
+.site-body textarea.form-control:focus {
+  background-color: rgba(11, 11, 15, 0.65);
+  border-color: var(--field-border-focus);
+  color: var(--ash-white);
+  box-shadow: 0 0 0 0.2rem rgba(194, 161, 77, 0.12);
+}
+
+.site-body .form-text {
+  color: rgba(230, 230, 235, 0.6);
+}
+
+.site-body .form-control.is-invalid,
+.site-body .form-select.is-invalid {
+  border-color: rgba(139, 30, 45, 0.75);
+}
+
+.site-body .invalid-feedback {
+  color: rgba(230, 230, 235, 0.85);
+}
+
+.site-body .form-check-input {
+  background-color: var(--field-bg);
+  border: 1px solid var(--field-border);
+}
+
+.site-body .form-check-input:checked {
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+}
+
+.site-body .form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(194, 161, 77, 0.12);
+  border-color: var(--field-border-focus);
+}
+
+/* Autofill fix (Chrome/Edge) */
+.site-body input:-webkit-autofill,
+.site-body input:-webkit-autofill:hover,
+.site-body input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ash-white);
+  -webkit-box-shadow: 0 0 0px 1000px rgba(11, 11, 15, 0.75) inset;
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 /* =========================================================
@@ -455,7 +517,7 @@ main .container,
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
 }
 
-/* Disable hover lift effect inside carousel to avoid animation glitch */
+/* Disable hover lift inside carousel */
 .entry-carousel .entry-card {
   transition: box-shadow 0.25s ease;
 }
@@ -478,6 +540,34 @@ main .container,
   object-fit: cover;
   object-position: center;
   display: block;
+}
+
+.entry-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(194, 161, 77, 0.14), rgba(139, 30, 45, 0.12));
+}
+
+.entry-card-body {
+  padding: 1rem;
+  flex: 1;
+}
+
+.entry-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.entry-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid rgba(230, 230, 235, 0.08);
 }
 
 .price {
@@ -511,7 +601,6 @@ main .container,
   text-transform: uppercase;
 }
 
-/* Home - Archive section header */
 .section-header {
   display: flex;
   align-items: flex-end;
@@ -535,7 +624,7 @@ main .container,
   line-height: 1;
 }
 
-/* Home - Featured entry card (single per slide) */
+/* Featured card */
 .entry-card--featured {
   display: flex;
   flex-direction: column;
@@ -611,36 +700,7 @@ main .container,
   }
 }
 
-/* Placeholder for missing product images */
-.entry-card-img-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(194, 161, 77, 0.14), rgba(139, 30, 45, 0.12));
-}
-
-.entry-card-body {
-  padding: 1rem;
-  flex: 1;
-}
-
-.entry-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.entry-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem 1rem;
-  border-top: 1px solid rgba(230, 230, 235, 0.08);
-}
-
-/* Home - Sealed badge */
+/* Sealed badge */
 .badge-sealed {
   background: rgba(194, 161, 77, 0.12);
   border: 1px solid rgba(194, 161, 77, 0.35);
@@ -652,7 +712,7 @@ main .container,
   padding: 0.35rem 0.55rem;
 }
 
-/* Home - Carousel dots */
+/* Carousel dots */
 .entry-carousel-dots {
   display: flex;
   justify-content: center;
@@ -670,7 +730,7 @@ main .container,
   opacity: 1;
 }
 
-/* Home - How cards */
+/* How cards */
 .how-card-img {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -681,7 +741,7 @@ main .container,
   border: 1px solid rgba(194, 161, 77, 0.25);
 }
 
-/* Home - Coming Next cards */
+/* Coming next */
 .coming-card {
   text-align: center;
   display: flex;
@@ -714,7 +774,7 @@ main .container,
   margin-top: auto;
 }
 
-/* Home - Membership media */
+/* Membership media */
 .membership-media {
   border-radius: var(--radius);
   overflow: hidden;
@@ -731,7 +791,7 @@ main .container,
   display: block;
 }
 
-/* Home - Compact auth buttons */
+/* Compact auth buttons (home section) */
 .site-auth-btn {
   padding: 0.55rem 1.1rem;
   white-space: nowrap;
