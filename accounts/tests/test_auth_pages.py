@@ -3,8 +3,6 @@ from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
 
-User = get_user_model()
-
 
 @pytest.mark.django_db
 class TestAuthPages:
@@ -28,6 +26,7 @@ class TestAuthPages:
 
     def test_logout_post(self):
         """Test that POST /accounts/logout/ logs out user and redirects."""
+        User = get_user_model()
         # Create a test user
         user = User.objects.create_user(
             username="testuser",
@@ -47,6 +46,7 @@ class TestAuthPages:
 
     def test_login_page_authenticated_redirect(self):
         """Test that authenticated users cannot access login page (if configured)."""
+        User = get_user_model()
         # Create and log in a user
         user = User.objects.create_user(
             username="testuser",
@@ -64,6 +64,7 @@ class TestAuthPages:
 
     def test_signup_page_authenticated_redirect(self):
         """Test that authenticated users cannot access signup page (if configured)."""
+        User = get_user_model()
         # Create and log in a user
         user = User.objects.create_user(
             username="testuser",
