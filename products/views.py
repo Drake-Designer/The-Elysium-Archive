@@ -1,10 +1,35 @@
-"""
-Views for the products app
-"""
+"""Views for the products app."""
 
-from django.shortcuts import render
+from django.views.generic import DetailView, ListView
+
+from .models import Product
 
 
-def archive_list_view(request):
-    """Render the public archive catalog page"""
-    return render(request, "products/archive_list.html")
+class ProductListView(ListView):
+    """Public archive catalog with pagination."""
+
+    model = Product
+    template_name = "products/product_list.html"
+    context_object_name = "products"
+    paginate_by = 12
+
+    def get_queryset(self):
+        return Product.objects.filter(is_active=True).order_by("-created_at")
+
+
+class ProductDetailView(DetailView):
+    """Archive preview page with purchase call to action."""
+
+    model = Product
+    template_name = "products/product_detail.html"
+    context_object_name = "product"
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
+
+    def get_queryset(self):
+        return Product.objects.filter(is_active=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["purchased"] = False  # Replace with entitlement check when orders exist
+        return context

@@ -19,7 +19,9 @@
                                     {% if product.image %}
                                         <img src="{{ product.image.url }}"
                                              alt="{{ product.image_alt|default:product.title }}"
-                                             class="w-100 h-100 object-fit-cover">
+                                             class="w-100 h-100 object-fit-cover"
+                                             width="300"
+                                             height="200">
                                     {% else %}
                                         <div class="entry-card-img-placeholder"></div>
                                     {% endif %}
@@ -34,10 +36,10 @@
                                     <span class="badge badge-sealed">
                                         <i class="fa-solid fa-lock"></i>Purchased
                                     </span>
-                                    {# TODO: Add product_detail URL when implemented #}
-                                    {# <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-light btn-icon">
+                                    <a href="{% url 'product_detail' product.slug %}"
+                                       class="btn btn-sm btn-outline-light btn-icon">
                                         <i class="fa-solid fa-book-open"></i>Read Entry
-                                    </a> #}
+                                    </a>
                                 </div>
                             </div>
                         </div>

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Archive | The Elysium Archive
+{% endblock title %}
+{% block meta_description %}
+    Browse the public archive catalog. Each purchase unlocks permanent on-site access to a private entry.
+{% endblock meta_description %}
+{% block content %}
+    <section class="container py-5">
+        <div class="row g-4 align-items-center mb-4">
+            <div class="col-12 col-lg-7">
+                <div class="panel p-4">
+                    <h1 class="display-6 mb-2">The Archive Catalog</h1>
+                    <p class="muted mb-3">
+                        Browse sealed entries before you join. Each purchase unlocks a private page tied to your account.
+                    </p>
+                    <ul class="mb-0">
+                        <li>No downloads and no external files.</li>
+                        <li>Read on site anytime after unlock.</li>
+                        <li>Access stays linked to your account.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-12 col-lg-5">
+                <div class="panel p-4 text-center">
+                    <p class="muted mb-3">Some doors open only for members.</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                            <i class="fa-solid fa-lock-open"></i>Register to unlock
+                        </a>
+                        <a class="btn btn-outline-light btn-icon" href="{% url 'lore' %}">
+                            <i class="fa-solid fa-scroll"></i>Read the Lore
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel p-4 mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-lg-8">
+                    <h2 class="h4 mb-1">Browse entries</h2>
+                    <p class="muted mb-0">This is a public catalog. Full content unlocks only after login and purchase.</p>
+                </div>
+                <div class="col-12 col-lg-4 text-lg-end">
+                    <span class="badge text-bg-secondary">12 per page</span>
+                </div>
+            </div>
+        </div>
+        <!-- Products Grid -->
+        <div class="row g-3">
+            {% for product in products %}
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="entry-card h-100">
+                        {% if product.image %}
+                            <div class="entry-card-media">
+                                <img src="{{ product.image.url }}"
+                                     alt="{{ product.image_alt }}"
+                                     class="entry-card-img"
+                                     width="100%"
+                                     height="200">
+                            </div>
+                        {% else %}
+                            <div class="entry-card-media entry-card-img-placeholder">
+                                <i class="fa-solid fa-book fa-2x placeholder-icon"></i>
+                            </div>
+                        {% endif %}
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <div>
+                                    <h3 class="h5 mb-1">{{ product.title }}</h3>
+                                    {% if product.category %}
+                                        <span class="badge text-bg-danger small">{{ product.category.name }}</span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary small">Uncategorized</span>
+                                    {% endif %}
+                                </div>
+                                {% if product.is_featured %}
+                                    <span class="badge text-bg-warning text-dark">Featured</span>
+                                {% else %}
+                                    <span class="badge text-bg-secondary">Locked</span>
+                                {% endif %}
+                            </div>
+                            <p class="small muted mb-3">{{ product.tagline }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="price">{{ product.price }} €</span>
+                                <a class="btn btn-sm btn-outline-light btn-icon"
+                                   href="{% url 'product_detail' slug=product.slug %}">
+                                    <i class="fa-solid fa-lock-open"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="muted">No archive entries available at this time.</p>
+                </div>
+            {% endfor %}
+        </div>
+        {% if is_paginated %}
+            <nav aria-label="Page navigation"
+                 class="mt-5 d-flex justify-content-center">
+                <ul class="pagination">
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+        {% endif %}
+        <div class="panel p-4 mt-4 text-center">
+            <h2 class="h4 mb-2">Ready to unlock your first entry?</h2>
+            <p class="muted mb-3">Register, then purchase an Archive to reveal the private page inside The Elysium.</p>
+            <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                <i class="fa-solid fa-key"></i>Become a Member
+            </a>
+        </div>
+    </section>
+{% endblock content %}

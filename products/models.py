@@ -1,6 +1,23 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
 from cloudinary.models import CloudinaryField
+
+
+class Category(models.Model):
+    """Group archives by domain."""
+
+    name = models.CharField(max_length=80, unique=True)
+    slug = models.SlugField(max_length=120, unique=True)
+    description = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
 
 
 class Product(models.Model):
@@ -14,15 +31,23 @@ class Product(models.Model):
     content = models.TextField(
         blank=True,
         default="",
-        help_text="Full archive text, visible only after purchase"
+        help_text="Full archive text, visible only after purchase",
     )
-    category = models.CharField(
-        max_length=50,
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name="products",
+        null=True,
         blank=True,
-        help_text="Archive category (e.g., Lore, Rituals, Chronicles)",
+        help_text="Archive category such as Lore, Rituals, or Chronicles",
     )
 
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(0.01)],
+        help_text="Price must be a positive value",
+    )
 
     image = CloudinaryField("image", blank=True, null=True)
 

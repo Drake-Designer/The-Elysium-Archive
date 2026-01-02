@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    {{ product.title }} - The Elysium Archive
+{% endblock title %}
+{% block content %}
+    <section class="container py-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'archive' %}">Archive</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
+            </ol>
+        </nav>
+        <div class="row g-4">
+            <!-- Product Image -->
+            <div class="col-12 col-lg-6">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}"
+                         alt="{{ product.image_alt }}"
+                         class="img-fluid rounded shadow product-hero-img"
+                         width="100%"
+                         height="500">
+                {% else %}
+                    <div class="product-hero-placeholder rounded shadow d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-book text-muted fa-5x"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- Product Details -->
+            <div class="col-12 col-lg-6">
+                <div class="panel p-4 h-100">
+                    <!-- Category & Featured Badges -->
+                    <div class="mb-3">
+                        {% if product.category %}<span class="badge text-bg-danger">{{ product.category.name }}</span>{% endif %}
+                        {% if product.is_featured %}<span class="badge text-bg-warning text-dark ms-2">Featured</span>{% endif %}
+                    </div>
+                    <!-- Title -->
+                    <h1 class="display-6 mb-2">{{ product.title }}</h1>
+                    <!-- Tagline -->
+                    {% if product.tagline %}<p class="lead fst-italic mb-4 product-tagline">{{ product.tagline }}</p>{% endif %}
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5 class="text-danger mb-3">
+                            <i class="fa-solid fa-scroll me-2"></i>Archive Overview
+                        </h5>
+                        <p class="lh-lg">{{ product.description }}</p>
+                    </div>
+                    <!-- Price & Purchase Section -->
+                    <div class="border-top border-bottom py-4 mb-4">
+                        <div class="row align-items-center g-3">
+                            <div class="col-auto">
+                                <span class="display-5 text-danger fw-bold">{{ product.price }} €</span>
+                            </div>
+                            <div class="col">
+                                {% if purchased %}
+                                    <a href="#full-content" class="btn btn-success btn-lg w-100">
+                                        <i class="fa-solid fa-book-open me-2"></i>Read Full Archive
+                                    </a>
+                                {% else %}
+                                    <form method="post" action="{% url 'add_to_cart' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-danger btn-lg w-100">
+                                            <i class="fa-solid fa-shopping-cart me-2"></i>Add to Cart
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Status Message -->
+                    {% if purchased %}
+                        <div class="alert alert-success" role="alert">
+                            <i class="fa-solid fa-unlock me-2"></i>
+                            You have full access to this archive. Scroll down to read the complete entry.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning muted-gold-alert" role="alert">
+                            <i class="fa-solid fa-lock me-2"></i>
+                            <strong>Full archive content unlocks after purchase.</strong> This content will be permanently accessible in your account.
+                        </div>
+                    {% endif %}
+                    <!-- Additional Info -->
+                    <div class="mt-4 pt-4 border-top">
+                        <dl class="row small mb-0">
+                            <dt class="col-sm-4">Created:</dt>
+                            <dd class="col-sm-8">
+                                {{ product.created_at|date:"F d, Y" }}
+                            </dd>
+                            <dt class="col-sm-4">Category:</dt>
+                            <dd class="col-sm-8">
+                                {{ product.category.name|default:"Uncategorized" }}
+                            </dd>
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8">
+                                {% if product.is_active %}
+                                    <span class="badge text-bg-success">Available</span>
+                                {% else %}
+                                    <span class="badge text-bg-secondary">Unavailable</span>
+                                {% endif %}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Full Archive Content (Protected) -->
+        {% if purchased %}
+            <div class="row mt-5 pt-5">
+                <div class="col-12">
+                    <div id="full-content" class="panel p-5">
+                        <h2 class="text-center mb-5 text-danger">
+                            <i class="fa-solid fa-book-open me-3"></i>Full Archive Entry
+                        </h2>
+                        <div class="archive-content">{{ product.content|linebreaks }}</div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="panel p-5 text-center locked-panel">
+                        <i class="fa-solid fa-lock fa-3x mb-4 locked-icon"></i>
+                        <h3 class="mb-3 locked-title">Full Content Locked</h3>
+                        <p class="mb-4 locked-text">
+                            Purchase this archive to unlock the complete entry and gain permanent access to all its secrets.
+                        </p>
+                        <a href="{% url 'archive' %}" class="btn btn-outline-light">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Back to Catalog
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </section>
+{% endblock content %}

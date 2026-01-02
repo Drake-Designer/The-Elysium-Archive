@@ -2,7 +2,7 @@
 
 import pytest
 from django.contrib.auth import get_user_model
-from products.models import Product
+from products.models import Category, Product
 
 
 User = get_user_model()
@@ -14,12 +14,15 @@ class TestProductCRUD:
 
     def setup_method(self):
         """Create test data."""
+        self.category = Category.objects.create(name="Test Lore", slug="test-lore")
+
         self.product = Product.objects.create(
             title="Test Forbidden Knowledge",
             slug="test-forbidden",
             description="A test product",
             price=29.99,
             image_alt="A forbidden artifact",
+            category=self.category,
             is_active=True,
         )
 
@@ -31,6 +34,7 @@ class TestProductCRUD:
             description="A forbidden artifact",
             price=49.99,
             image_alt="New relic image",
+            category=self.category,
             is_active=True,
         )
         assert product.pk is not None
