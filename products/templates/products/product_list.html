@@ -27,9 +27,6 @@
                     <p class="muted mb-3">Some doors open only for members.</p>
                     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
                         {% if user.is_authenticated %}
-                            <a class="btn btn-primary btn-icon" href="#products-grid">
-                                <i class="fa-solid fa-book-open"></i>Browse entries
-                            </a>
                             <a class="btn btn-outline-light btn-icon" href="{% url 'lore' %}">
                                 <i class="fa-solid fa-scroll"></i>Read the Lore
                             </a>

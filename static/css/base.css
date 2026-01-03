@@ -1406,3 +1406,47 @@ body.reduced-effects .entry-card:hover {
 .btn-close-white {
   filter: invert(1) grayscale(100%) brightness(200%);
 }
+
+/* Rules of Access icons */
+.rules-icon {
+  font-size: 1.5rem;
+  display: block;
+}
+
+.rules-icon-danger {
+  color: var(--blood-crimson);
+}
+
+.rules-icon-gold {
+  color: var(--relic-gold);
+}
+
+/* Lore page images - unified style */
+.lore-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.lore-image-container {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: var(--obsidian-grey);
+  border: 1px solid rgba(194, 161, 77, 0.25);
+  border-radius: calc(var(--radius) - 4px);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.lore-image-media {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background-color: var(--obsidian-grey);
+  border: 1px solid rgba(194, 161, 77, 0.25);
+  border-radius: calc(var(--radius) - 4px);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}

@@ -19,17 +19,17 @@
                     <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
                         <i class="fa-solid fa-key"></i>Become a Member
                     </a>
+                    <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
+                        <i class="fa-solid fa-book-open"></i>Browse the Archive
+                    </a>
                 {% endif %}
-                <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
-                    <i class="fa-solid fa-book-open"></i>Browse the Archive
-                </a>
             </div>
             <p class="small muted mt-3 mb-0">No downloads. No external files. Access is the product.</p>
         </div>
         <!-- Premise -->
-        <div class="row g-4 align-items-stretch mb-4">
-            <div class="col-12 col-lg-7">
-                <div class="panel p-4 h-100">
+        <div class="panel p-4 p-lg-5 mb-4">
+            <div class="row g-4 align-items-stretch">
+                <div class="col-12 col-lg-6">
                     <h2 class="h3 mb-3">The Premise</h2>
                     <p class="muted">
                         The Elysium Archive is not a shop of files. It is a sealed library of forbidden entries, kept behind ritual
@@ -40,15 +40,14 @@
                         their personal collection, readable online anytime, but never downloadable.
                     </p>
                 </div>
-            </div>
-            <div class="col-12 col-lg-5">
-                <div class="panel p-4 h-100">
-                    <h2 class="h5 mb-3">Image slot</h2>
-                    <div class="entry-card-media rounded mb-3" aria-hidden="true"></div>
-                    <p class="small muted mb-0">
-                        Add a lore image later in <strong>static/img/lore/</strong>.
-                        This slot is ready for a library, manuscript, or wax seal visual.
-                    </p>
+                <div class="col-12 col-lg-6">
+                    <div class="lore-image-container">
+                        <img src="{% static 'img/lore/lore-pic.jpg' %}"
+                             alt="Ancient library with sealed archives and forbidden texts"
+                             class="lore-image"
+                             loading="lazy"
+                             decoding="async">
+                    </div>
                 </div>
             </div>
         </div>
@@ -58,24 +57,36 @@
             <div class="row g-3">
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="panel p-3 h-100">
+                        <div class="mb-2">
+                            <i class="fa-solid fa-ban rules-icon rules-icon-danger"></i>
+                        </div>
                         <h3 class="h6 mb-2">No downloads</h3>
                         <p class="muted mb-0">Entries are readable only inside the website.</p>
                     </div>
                 </div>
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="panel p-3 h-100">
+                        <div class="mb-2">
+                            <i class="fa-solid fa-user-lock rules-icon rules-icon-gold"></i>
+                        </div>
                         <h3 class="h6 mb-2">Account bound</h3>
                         <p class="muted mb-0">Access is tied to the member who unlocks it.</p>
                     </div>
                 </div>
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="panel p-3 h-100">
+                        <div class="mb-2">
+                            <i class="fa-solid fa-infinity rules-icon rules-icon-gold"></i>
+                        </div>
                         <h3 class="h6 mb-2">Permanent access</h3>
                         <p class="muted mb-0">Pay once, keep the entry in your private archive.</p>
                     </div>
                 </div>
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="panel p-3 h-100">
+                        <div class="mb-2">
+                            <i class="fa-solid fa-circle-xmark rules-icon rules-icon-danger"></i>
+                        </div>
                         <h3 class="h6 mb-2">No refunds</h3>
                         <p class="muted mb-0">Access is granted immediately after payment.</p>
                     </div>
@@ -130,7 +141,13 @@
                             <h3 class="h5 mb-0">The Scribes of Ash</h3>
                             <span class="badge text-bg-secondary">Order</span>
                         </div>
-                        <div class="entry-card-media rounded mb-3" aria-hidden="true"></div>
+                        <div class="lore-image-media overflow-hidden">
+                            <img src="{% static 'img/lore/scribes-of-ash.jpg' %}"
+                                 alt="The Scribes of Ash order guarding forbidden knowledge"
+                                 class="lore-image"
+                                 loading="lazy"
+                                 decoding="async">
+                        </div>
                         <p class="muted mb-0">They catalogue what must not be forgotten, and erase what must never be spoken.</p>
                     </div>
                 </div>
@@ -140,7 +157,13 @@
                             <h3 class="h5 mb-0">The Crimson Oath</h3>
                             <span class="badge text-bg-secondary">Order</span>
                         </div>
-                        <div class="entry-card-media rounded mb-3" aria-hidden="true"></div>
+                        <div class="lore-image-media overflow-hidden">
+                            <img src="{% static 'img/lore/crimson-oath.jpg' %}"
+                                 alt="The Crimson Oath binding blood and name"
+                                 class="lore-image"
+                                 loading="lazy"
+                                 decoding="async">
+                        </div>
                         <p class="muted mb-0">They bind access to blood and name. An Archive opened is an Archive owned.</p>
                     </div>
                 </div>
@@ -150,7 +173,13 @@
                             <h3 class="h5 mb-0">The Relic Keepers</h3>
                             <span class="badge text-bg-secondary">Order</span>
                         </div>
-                        <div class="entry-card-media rounded mb-3" aria-hidden="true"></div>
+                        <div class="lore-image-media overflow-hidden">
+                            <img src="{% static 'img/lore/relic-keepers.jpg' %}"
+                                 alt="The Relic Keepers protecting vaults and seals"
+                                 class="lore-image"
+                                 loading="lazy"
+                                 decoding="async">
+                        </div>
                         <p class="muted mb-0">They protect the vaults, the seals, and the quiet promise of no loose files.</p>
                     </div>
                 </div>
@@ -159,7 +188,7 @@
         <!-- Timeline -->
         <div class="panel p-4 mb-4">
             <h2 class="h3 mb-3">Timeline of the Archive</h2>
-            <div class="row g-3">
+            <div class="row g-3 align-items-center">
                 <div class="col-12 col-lg-6">
                     <ol class="list-group list-group-numbered">
                         <li class="list-group-item bg-transparent text-light border-secondary">
@@ -181,10 +210,12 @@
                     </ol>
                 </div>
                 <div class="col-12 col-lg-6">
-                    <div class="panel p-4 h-100">
-                        <h3 class="h5 mb-3">Image slot</h3>
-                        <div class="entry-card-media rounded mb-3" aria-hidden="true"></div>
-                        <p class="small muted mb-0">This slot fits a parchment texture, an old map, or a gothic corridor image.</p>
+                    <div class="lore-image-container">
+                        <img src="{% static 'img/lore/lore-pic.jpg' %}"
+                             alt="Timeline of the Archive spanning ancient seals to crimson index records"
+                             class="lore-image"
+                             loading="lazy"
+                             decoding="async">
                     </div>
                 </div>
             </div>
@@ -192,17 +223,25 @@
         <!-- Oaths and warnings -->
         <div class="panel p-4 mb-4">
             <h2 class="h3 mb-3">Oaths and Warnings</h2>
-            <p class="muted mb-3">
+            <p class="muted mb-4">
                 The Archive does not leave the Archive. What you unlock is yours to read, but never to download.
             </p>
-            <div class="panel p-4">
-                <p class="mb-2">
-                    <strong>The Oath</strong>
-                </p>
-                <p class="muted mb-0">
-                    I accept that access is granted instantly after payment, and I understand there are no refunds.
-                    I read within the walls of The Elysium, and I do not seek loose files.
-                </p>
+            <div class="row g-4 align-items-center">
+                <div class="col-12 col-lg-6">
+                    <div class="lore-image-container">
+                        <img src="{% static 'img/lore/the-oath.jpg' %}"
+                             alt="The Oath binding member access and responsibility"
+                             class="lore-image"
+                             loading="lazy"
+                             decoding="async">
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <h3 class="h5 mb-3">The Oath</h3>
+                    <p class="muted mb-0">
+                        I accept that access is granted instantly after payment, and I understand there are no refunds. I read within the walls of The Elysium, and I do not seek loose files.
+                    </p>
+                </div>
             </div>
         </div>
         <!-- FAQ -->
@@ -335,8 +374,8 @@
                 <h2 class="h3 mb-2">Welcome back</h2>
                 <p class="muted mb-4">Head to the Archive and continue your reading.</p>
                 <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                    <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
-                        <i class="fa-solid fa-book-open"></i>Browse the Archive
+                    <a class="btn btn-outline-light btn-icon" href="{% url 'lore' %}">
+                        <i class="fa-solid fa-scroll"></i>Read the Lore
                     </a>
                 </div>
             </div>
