@@ -2,14 +2,14 @@
 
 from django.contrib import messages
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
+from .decorators import verified_email_required
 from .forms import ProfileForm
 from .models import UserProfile
 
 
-@login_required
+@verified_email_required
 def dashboard(request):
     """Render the account dashboard."""
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -45,7 +45,7 @@ def dashboard(request):
     return render(request, "accounts/dashboard.html", context)
 
 
-@login_required
+@verified_email_required
 def my_archive(request):
     """Render the user's unlocked archive entries."""
     context = {
@@ -54,7 +54,7 @@ def my_archive(request):
     return render(request, "accounts/my_archive.html", context)
 
 
-@login_required
+@verified_email_required
 def profile(request):
     """Render and update the user profile."""
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -88,7 +88,7 @@ def profile(request):
     return render(request, "accounts/profile.html", context)
 
 
-@login_required
+@verified_email_required
 def account_delete(request):
     """Delete the current user account."""
     # Prevent superusers from deleting their accounts

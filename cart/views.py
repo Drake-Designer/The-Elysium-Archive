@@ -1,3 +1,5 @@
+"""Handle shopping cart interactions for authenticated users."""
+
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -9,6 +11,7 @@ from .cart import (
     get_cart_total,
     remove_from_cart as remove_product_from_cart,
 )
+from accounts.decorators import verified_email_required
 
 
 def _parse_int(value, default):
@@ -18,6 +21,7 @@ def _parse_int(value, default):
         return default
 
 
+@verified_email_required
 def add_to_cart(request):
     """Add a product to the shopping cart."""
     if request.method != "POST":
@@ -41,6 +45,7 @@ def add_to_cart(request):
     return redirect("product_detail", slug=product.slug)
 
 
+@verified_email_required
 def cart_view(request):
     """Render the shopping cart view."""
     cart_items = get_cart_items(request.session)
@@ -51,6 +56,7 @@ def cart_view(request):
     return render(request, "cart/cart.html", context)
 
 
+@verified_email_required
 def remove_from_cart(request):
     """Remove a product from the shopping cart."""
     if request.method != "POST":

@@ -242,9 +242,18 @@ This section documents implemented features organised by category.
 ### User Profiles
 
 - **Profile Page** – View account username, email, and manage display name
-- **Edit Display Name** – Optional custom display name with validation
+- **Edit Display Name** – Optional custom display name with validation (max 20 characters)
+- **Profile Picture** – Upload, replace, or remove a profile picture via Cloudinary
 - **Delete Account** – Permanent account deletion with confirmation page
 - **Email Management** – Add, remove, and manage multiple email addresses
+- **Per-Email Resend** – Resend verification link only for unverified email addresses
+
+### Verified Email Access Control
+
+- **Verified Email Gate** – All member-only areas (profile, dashboard, cart, checkout, archive) require a verified email address
+- **Smart Redirects** – Unverified users are directed to email management with a clear, user-friendly message
+- **Consistent Styling** – Verification messages use Django messages framework with dark fantasy theme
+- **Superuser Protection** – Superuser accounts cannot be deleted via the UI; deletion attempts show a system message
 
 ### Public Pages
 
@@ -378,6 +387,8 @@ Each template:
 - Has a plaintext fallback for clients that don't support HTML
 - Uses SendGrid's infrastructure for reliable delivery
 - Maintains consistency with website branding
+
+**Important:** All email templates use **inline CSS styles** instead of external stylesheets or `<style>` tags. This is intentional and required because most email clients (Gmail, Outlook, Apple Mail, etc.) do not support external stylesheets or document-level styles. Without inline styles, emails would appear unstyled to users, making them difficult to read. This is a standard practice in professional email marketing and confirmation workflows.
 
 ### Favicon Support
 
@@ -535,7 +546,7 @@ Currently, the project uses a minimal, focused data model:
 **Core Models:**
 
 - **User** – Django's built-in authentication model (via django-allauth), manages all authentication.
-- **UserProfile** – One-to-one extension of User; stores display names and profile metadata.
+- **UserProfile** – One-to-one extension of User; stores display names, profile pictures, and profile metadata.
 - **Product** – Represents a purchasable archive entry with title, description, price, and image.
 
 **Future Models (planned):**
@@ -572,7 +583,8 @@ erDiagram
     USERPROFILE {
         int id PK
         int user_id FK
-        string display_name
+        string display_name "max 20 characters"
+        string profile_picture "URL via Cloudinary"
         datetime created_at
         datetime updated_at
     }
@@ -698,6 +710,7 @@ The following values are required on Heroku:
 - `DEBUG=False`
 - `SECRET_KEY`
 - `DATABASE_URL`
+- `CLOUDINARY_URL` – Required for profile picture storage and image optimization
 
 More config vars are added as the project grows (Stripe keys, webhook secret, and other settings).
 
