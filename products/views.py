@@ -1,6 +1,7 @@
 """Views for the products app."""
 
 from django.views.generic import DetailView, ListView
+from django.db.models import Q
 
 from .models import Product
 
@@ -14,7 +15,21 @@ class ProductListView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return Product.objects.filter(is_active=True).order_by("-created_at")
+        queryset = Product.objects.filter(is_active=True).order_by("-created_at")
+        search_query = self.request.GET.get("q", "").strip()
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query)
+                | Q(description__icontains=search_query)
+                | Q(tagline__icontains=search_query)
+                | Q(category__name__icontains=search_query)
+            ).distinct()
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "").strip()
+        return context
 
 
 class ProductDetailView(DetailView):

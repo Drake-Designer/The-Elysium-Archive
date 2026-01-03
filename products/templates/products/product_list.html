@@ -26,18 +26,27 @@
                 <div class="panel p-4 text-center">
                     <p class="muted mb-3">Some doors open only for members.</p>
                     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                        <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
-                            <i class="fa-solid fa-lock-open"></i>Register to unlock
-                        </a>
-                        <a class="btn btn-outline-light btn-icon" href="{% url 'lore' %}">
-                            <i class="fa-solid fa-scroll"></i>Read the Lore
-                        </a>
+                        {% if user.is_authenticated %}
+                            <a class="btn btn-primary btn-icon" href="#products-grid">
+                                <i class="fa-solid fa-book-open"></i>Browse entries
+                            </a>
+                            <a class="btn btn-outline-light btn-icon" href="{% url 'lore' %}">
+                                <i class="fa-solid fa-scroll"></i>Read the Lore
+                            </a>
+                        {% else %}
+                            <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                                <i class="fa-solid fa-lock-open"></i>Register to unlock
+                            </a>
+                            <a class="btn btn-outline-light btn-icon" href="{% url 'lore' %}">
+                                <i class="fa-solid fa-scroll"></i>Read the Lore
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
         <div class="panel p-4 mb-4">
-            <div class="row g-3 align-items-end">
+            <div class="row g-3 align-items-end mb-3">
                 <div class="col-12 col-lg-8">
                     <h2 class="h4 mb-1">Browse entries</h2>
                     <p class="muted mb-0">This is a public catalog. Full content unlocks only after login and purchase.</p>
@@ -46,9 +55,32 @@
                     <span class="badge text-bg-secondary">12 per page</span>
                 </div>
             </div>
+            <!-- Search Bar -->
+            <form method="get" class="d-flex gap-2">
+                <input type="text"
+                       name="q"
+                       class="form-control"
+                       placeholder="Search by title, category, or description..."
+                       value="{{ search_query }}"
+                       aria-label="Search products">
+                <button type="submit" class="btn btn-primary btn-icon" aria-label="Search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                {% if search_query %}
+                    <a href="{% url 'archive' %}"
+                       class="btn btn-outline-light btn-icon"
+                       aria-label="Clear search">
+                        <i class="fa-solid fa-times"></i>
+                    </a>
+                {% endif %}
+            </form>
+            {% if search_query %}
+                <p class="small muted mt-2 mb-0">
+                    Results for "<strong>{{ search_query }}</strong>"
+                </p>
+            {% endif %}
         </div>
-        <!-- Products Grid -->
-        <div class="row g-3">
+        <div class="row g-3" id="products-grid">
             {% for product in products %}
                 <div class="col-12 col-md-6 col-xl-4">
                     <div class="entry-card h-100">
@@ -116,12 +148,14 @@
                 </ul>
             </nav>
         {% endif %}
-        <div class="panel p-4 mt-4 text-center">
-            <h2 class="h4 mb-2">Ready to unlock your first entry?</h2>
-            <p class="muted mb-3">Register, then purchase an Archive to reveal the private page inside The Elysium.</p>
-            <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
-                <i class="fa-solid fa-key"></i>Become a Member
-            </a>
-        </div>
+        {% if not user.is_authenticated %}
+            <div class="panel p-4 mt-4 text-center">
+                <h2 class="h4 mb-2">Ready to unlock your first entry?</h2>
+                <p class="muted mb-3">Register, then purchase an Archive to reveal the private page inside The Elysium.</p>
+                <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                    <i class="fa-solid fa-key"></i>Become a Member
+                </a>
+            </div>
+        {% endif %}
     </section>
 {% endblock content %}

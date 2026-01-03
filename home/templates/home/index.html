@@ -32,9 +32,11 @@
             <a class="btn btn-primary btn-icon" href="{% url 'archive' %}">
               <i class="fa-solid fa-book-open"></i>Browse the Archive
             </a>
-            <a class="btn btn-outline-light btn-icon" href="#membership">
-              <i class="fa-solid fa-key"></i>Become a Member
-            </a>
+            {% if not user.is_authenticated %}
+              <a class="btn btn-outline-light btn-icon" href="#membership">
+                <i class="fa-solid fa-key"></i>Become a Member
+              </a>
+            {% endif %}
           </div>
           <p class="small muted mt-3 mb-0">No downloads. No external files. Access is the product.</p>
         </div>
@@ -100,7 +102,8 @@
                       </div>
                       <div class="entry-card-footer entry-card-footer--featured">
                         <span class="price price--featured">€{{ product.price }}</span>
-                        <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
+                        <a class="btn btn-outline-light btn-icon"
+                           href="{% url 'product_detail' slug=product.slug %}">
                           <i class="fa-solid fa-eye"></i>View Entry
                         </a>
                       </div>

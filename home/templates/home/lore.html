@@ -15,9 +15,11 @@
                 A secret library for the initiated. Every Archive is a sealed text, revealed only to those who unlock it.
             </p>
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
-                    <i class="fa-solid fa-key"></i>Become a Member
-                </a>
+                {% if not user.is_authenticated %}
+                    <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+                        <i class="fa-solid fa-key"></i>Become a Member
+                    </a>
+                {% endif %}
                 <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
                     <i class="fa-solid fa-book-open"></i>Browse the Archive
                 </a>
@@ -314,18 +316,30 @@
             </div>
         </div>
         <!-- Final CTA -->
-        <div class="panel p-4 text-center">
-            <h2 class="h3 mb-2">Enter The Elysium</h2>
-            <p class="muted mb-4">Join the archive, unlock your first entry, and read what the world was not meant to remember.</p>
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a class="btn btn-primary btn-icon" href="{% url 'account_signup' %}">
-                    <i class="fa-solid fa-user-plus"></i>Register
-                </a>
-                <a class="btn btn-outline-light btn-icon"
-                   href="{% url 'account_login' %}">
-                    <i class="fa-solid fa-right-to-bracket"></i>Login
-                </a>
+        {% if not user.is_authenticated %}
+            <div class="panel p-4 text-center">
+                <h2 class="h3 mb-2">Enter The Elysium</h2>
+                <p class="muted mb-4">Join the archive, unlock your first entry, and read what the world was not meant to remember.</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a class="btn btn-primary btn-icon" href="{% url 'account_signup' %}">
+                        <i class="fa-solid fa-user-plus"></i>Register
+                    </a>
+                    <a class="btn btn-outline-light btn-icon"
+                       href="{% url 'account_login' %}">
+                        <i class="fa-solid fa-right-to-bracket"></i>Login
+                    </a>
+                </div>
             </div>
-        </div>
+        {% else %}
+            <div class="panel p-4 text-center">
+                <h2 class="h3 mb-2">Welcome back</h2>
+                <p class="muted mb-4">Head to the Archive and continue your reading.</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
+                        <i class="fa-solid fa-book-open"></i>Browse the Archive
+                    </a>
+                </div>
+            </div>
+        {% endif %}
     </section>
 {% endblock content %}
