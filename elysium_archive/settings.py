@@ -1,18 +1,15 @@
-"""
-Django settings for elysium_archive project.
-"""
+"""Django settings for elysium_archive project."""
 
 import os
 from pathlib import Path
 
 import dj_database_url
+from django.contrib.messages import constants as messages
 
-# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load local environment variables (dev only)
 if (BASE_DIR / "env.py").exists():
-    import env  # noqa: F401
+    import env
 
 
 def _env_bool(value, default=False):
@@ -30,11 +27,9 @@ def _env_list(name, default=None):
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
-# Security
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
 
-# Hosts / CSRF
 ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", default=[])
 IS_HEROKU = os.environ.get("DYNO") is not None
 
@@ -51,7 +46,6 @@ CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", default=[])
 if not CSRF_TRUSTED_ORIGINS and IS_HEROKU:
     CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com"]
 
-# Heroku / reverse proxy HTTPS header
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG:
@@ -59,12 +53,8 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
-
-# Application definition
 INSTALLED_APPS = [
-    # Admin theme
     "jazzmin",
-    # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -72,12 +62,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-    # Third-party
     "allauth",
     "allauth.account",
     "cloudinary_storage",
     "cloudinary",
-    # Project apps
     "accounts.apps.AccountsConfig",
     "home",
     "products",
@@ -87,10 +75,8 @@ INSTALLED_APPS = [
     "reviews",
 ]
 
-# Sites framework
 SITE_ID = int(os.environ.get("SITE_ID", "1"))
 
-# Jazzmin configuration
 JAZZMIN_SETTINGS = {
     "site_title": "The Elysium Archive Admin",
     "site_header": "The Elysium Archive",
@@ -128,9 +114,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Messages framework configuration
-from django.contrib.messages import constants as messages
-
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",
     messages.INFO: "info",
@@ -159,8 +142,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
 
-
-# Database
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -175,8 +156,6 @@ if os.environ.get("DATABASE_URL"):
     )
     DATABASES["default"] = dict(db_config) if db_config is not None else {}
 
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -186,50 +165,43 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
-# Internationalization
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Europe/Dublin"
 USE_I18N = True
 USE_TZ = True
 
-
-# Static files
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Media files (Cloudinary)
 MEDIA_URL = "/media/"
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Auth redirects
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
-# Auth backend
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# Allauth settings
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get(
+    "ACCOUNT_EMAIL_VERIFICATION",
+    "mandatory",
+)
 
-# Custom allauth forms
 ACCOUNT_FORMS = {
     "signup": "accounts.forms.ElysiumSignupForm",
     "login": "accounts.forms.ElysiumLoginForm",
 }
 
-# Email backend (dev prints to console, prod uses SMTP later)
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:

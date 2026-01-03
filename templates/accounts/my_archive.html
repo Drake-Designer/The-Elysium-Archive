@@ -4,6 +4,7 @@
     My Archive | The Elysium Archive
 {% endblock title %}
 {% block content %}
+    <!-- My archive listing -->
     <section class="container py-5">
         <div class="panel p-4 p-lg-5">
             <h1 class="h3 mb-4">
@@ -11,6 +12,7 @@
             </h1>
             <p class="muted mb-4">Your unlocked entries from The Elysium Archive.</p>
             {% if unlocked_products %}
+                <!-- Purchased entries grid -->
                 <div class="row g-3">
                     {% for product in unlocked_products %}
                         <div class="col-12 col-md-6 col-lg-4">
@@ -46,6 +48,7 @@
                     {% endfor %}
                 </div>
             {% else %}
+                <!-- Empty archive message -->
                 <div class="text-center py-5">
                     <i class="fa-solid fa-lock-open fa-3x muted mb-3"></i>
                     <p class="muted mb-3">No unlocked entries yet.</p>

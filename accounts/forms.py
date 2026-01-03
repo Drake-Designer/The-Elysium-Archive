@@ -1,81 +1,67 @@
-"""Custom forms for accounts app and django-allauth integration."""
+"""Custom forms for account workflows."""
 
 from allauth.account.forms import LoginForm, SignupForm
 from django import forms
 
 
 class ElysiumSignupForm(SignupForm):
-    """Custom signup form with Bootstrap styling and proper field order."""
+    """Style the signup form fields."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Field order: username, email, password1, password2
         self.fields["username"].widget.attrs.update(
             {
+                "autocomplete": "username",
                 "class": "form-control",
                 "placeholder": "Choose a username",
-                "autocomplete": "username",
             }
         )
         self.fields["email"].widget.attrs.update(
             {
+                "autocomplete": "email",
                 "class": "form-control",
                 "placeholder": "your@email.com",
-                "autocomplete": "email",
             }
         )
         self.fields["password1"].widget.attrs.update(
             {
+                "autocomplete": "new-password",
                 "class": "form-control",
                 "placeholder": "Create a secure password",
-                "autocomplete": "new-password",
             }
         )
         self.fields["password2"].widget.attrs.update(
             {
+                "autocomplete": "new-password",
                 "class": "form-control",
                 "placeholder": "Repeat your password",
-                "autocomplete": "new-password",
             }
         )
 
-        # Ensure all required
-        self.fields["username"].required = True
-        self.fields["email"].required = True
-        self.fields["password1"].required = True
-        self.fields["password2"].required = True
-
 
 class ElysiumLoginForm(LoginForm):
-    """Custom login form with Bootstrap styling (email-only login)."""
+    """Style the login form fields."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Update login field (email or username)
         self.fields["login"].widget.attrs.update(
             {
+                "autocomplete": "username",
                 "class": "form-control",
                 "placeholder": "Email or username",
-                "autocomplete": "username",
             }
         )
         self.fields["password"].widget.attrs.update(
             {
+                "autocomplete": "current-password",
                 "class": "form-control",
                 "placeholder": "Password",
-                "autocomplete": "current-password",
             }
         )
 
-        # Ensure required
-        self.fields["login"].required = True
-        self.fields["password"].required = True
-
 
 class ProfileForm(forms.Form):
-    """Form for editing user profile display name."""
+    """Collect a display name update."""
 
     display_name = forms.CharField(
         max_length=60,

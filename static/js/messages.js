@@ -1,7 +1,9 @@
-// Auto hide Django messages
+// Message auto-dismiss handler
 document.addEventListener('DOMContentLoaded', () => {
   const messages = document.querySelectorAll('.js-django-message');
-  if (!messages.length) return;
+  if (!messages.length) {
+    return;
+  }
 
   setTimeout(() => {
     messages.forEach((el) => {
@@ -12,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Fallback close without Bootstrap
         el.classList.remove('show');
         el.addEventListener('transitionend', () => el.remove(), { once: true });
         setTimeout(() => el.remove(), 600);

@@ -3,6 +3,7 @@
     Login | The Elysium Archive
 {% endblock title %}
 {% block content %}
+    <!-- Login form page -->
     <section class="container py-5">
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-5">
@@ -10,9 +11,9 @@
                     <h1 class="h3 text-center mb-4">
                         <i class="fa-solid fa-door-open me-2"></i>Login
                     </h1>
+                    <!-- Login form -->
                     <form method="post" action="{% url 'account_login' %}" novalidate>
                         {% csrf_token %}
-                        {# allauth uses redirect_field_name/redirect_field_value for ?next=... #}
                         {% if redirect_field_value %}
                             <input type="hidden"
                                    name="{{ redirect_field_name }}"
@@ -23,7 +24,6 @@
                                 {% for err in form.non_field_errors %}{{ err }}{% endfor %}
                             </div>
                         {% endif %}
-                        <!-- Username or Email -->
                         <div class="mb-3">
                             <label for="id_login" class="form-label">Username or Email</label>
                             <input type="text"
@@ -40,7 +40,6 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <!-- Password -->
                         <div class="mb-3">
                             <label for="id_password" class="form-label">Password</label>
                             <input type="password"
@@ -56,7 +55,6 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <!-- Remember me (only if field exists) -->
                         {% if form.remember %}
                             <div class="form-check mb-3">
                                 <input class="form-check-input"
@@ -67,13 +65,11 @@
                                 <label class="form-check-label" for="id_remember">Remember me</label>
                             </div>
                         {% endif %}
-                        <!-- Submit -->
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-icon">
                                 <i class="fa-solid fa-right-to-bracket"></i>Sign In
                             </button>
                         </div>
-                        <!-- Forgot password -->
                         <div class="text-center mt-3">
                             <a class="text-decoration-none"
                                href="{% url 'account_reset_password' %}">

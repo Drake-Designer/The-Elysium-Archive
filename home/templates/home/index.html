@@ -5,16 +5,15 @@
   Home | The Elysium Archive
 {% endblock title %}
 {% block content %}
+  <!-- Hero and featured entries -->
   <section class="container py-5">
     <div class="row g-4 align-items-center">
-      <!-- Hero section -->
       <div class="col-12 col-lg-5">
         <div class="panel p-4 text-center hero-panel">
           <h1 class="display-5 mb-3">The Elysium Archive</h1>
           <p class="muted mb-4">
             A forbidden archive reserved for invited members only. Unlock entries and read them online forever.
           </p>
-          <!-- Loop intro video -->
           <div class="video-wrapper mb-3">
             <video class="video w-100"
                    autoplay
@@ -41,15 +40,14 @@
           <p class="small muted mt-3 mb-0">No downloads. No external files. Access is the product.</p>
         </div>
       </div>
-      <!-- Archive entries -->
       <div class="col-12 col-lg-7">
+        <!-- Archive carousel preview -->
         <div class="section-header mb-3" id="archives">
           <div class="section-header-text">
             <h2 class="h3 mb-1 section-title">Archive Entries</h2>
             <p class="small muted mb-0">A rotating selection of sealed previews from the public catalog.</p>
           </div>
           {% if featured_products %}
-            <!-- Carousel navigation -->
             <div class="section-header-actions">
               <button class="btn btn-sm btn-outline-light section-nav-btn"
                       type="button"
@@ -66,7 +64,6 @@
         </div>
         <div class="panel p-3 p-lg-4">
           {% if featured_products %}
-            <!-- Single-slide carousel: one product per slide, auto-advances every 5s -->
             <div id="entryCarousel"
                  class="carousel slide entry-carousel"
                  data-bs-ride="carousel"
@@ -111,7 +108,6 @@
                   </div>
                 {% endfor %}
               </div>
-              <!-- Carousel indicators -->
               <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
                 {% for product in featured_products %}
                   <button type="button"
@@ -123,7 +119,6 @@
               </div>
             </div>
           {% else %}
-            <!-- No featured products fallback -->
             <div class="text-center py-4">
               <p class="muted mb-0">No featured entries available at the moment. Check back soon.</p>
             </div>
@@ -134,7 +129,7 @@
         </div>
       </div>
     </div>
-    <!-- How access works -->
+    <!-- Access steps -->
     <div class="py-5" id="how-access-works">
       <h2 class="text-center mb-4">How Access Works</h2>
       <div class="row g-3">
@@ -173,7 +168,7 @@
         </div>
       </div>
     </div>
-    <!-- Membership -->
+    <!-- Membership details -->
     <div class="py-5" id="membership">
       <div class="panel p-4 p-lg-5">
         <div class="row g-4 align-items-center">
@@ -225,7 +220,7 @@
         </div>
       </div>
     </div>
-    <!-- Coming Next -->
+    <!-- Upcoming features -->
     <div class="py-5" id="coming-next">
       <h2 class="text-center mb-3">What Lies Ahead</h2>
       <p class="text-center muted mb-4">The Archive continues to expand. New secrets await those who remain patient.</p>

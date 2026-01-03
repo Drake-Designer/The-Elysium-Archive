@@ -7,6 +7,7 @@
     Browse the public archive catalog. Each purchase unlocks permanent on-site access to a private entry.
 {% endblock meta_description %}
 {% block content %}
+    <!-- Archive catalog layout -->
     <section class="container py-5">
         <div class="row g-4 align-items-center mb-4">
             <div class="col-12 col-lg-7">
@@ -42,6 +43,7 @@
                 </div>
             </div>
         </div>
+        <!-- Search and filter bar -->
         <div class="panel p-4 mb-4">
             <div class="row g-3 align-items-end mb-3">
                 <div class="col-12 col-lg-8">
@@ -52,7 +54,6 @@
                     <span class="badge text-bg-secondary">12 per page</span>
                 </div>
             </div>
-            <!-- Search Bar -->
             <form method="get" class="d-flex gap-2">
                 <input type="text"
                        name="q"
@@ -128,6 +129,7 @@
             {% endfor %}
         </div>
         {% if is_paginated %}
+            <!-- Pagination controls -->
             <nav aria-label="Page navigation"
                  class="mt-5 d-flex justify-content-center">
                 <ul class="pagination">
@@ -146,6 +148,7 @@
             </nav>
         {% endif %}
         {% if not user.is_authenticated %}
+            <!-- Guest conversion card -->
             <div class="panel p-4 mt-4 text-center">
                 <h2 class="h4 mb-2">Ready to unlock your first entry?</h2>
                 <p class="muted mb-3">Register, then purchase an Archive to reveal the private page inside The Elysium.</p>

@@ -3,6 +3,7 @@
     Register | The Elysium Archive
 {% endblock title %}
 {% block content %}
+    <!-- Registration form page -->
     <section class="container py-5">
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-5">
@@ -10,6 +11,7 @@
                     <h1 class="h3 text-center mb-4">
                         <i class="fa-solid fa-user-plus me-2"></i>Create Account
                     </h1>
+                    <!-- Signup form -->
                     <form method="post" action="{% url 'account_signup' %}" novalidate>
                         {% csrf_token %}
                         {% if redirect_field_value %}
@@ -22,7 +24,6 @@
                                 {% for err in form.non_field_errors %}{{ err }}{% endfor %}
                             </div>
                         {% endif %}
-                        <!-- Username -->
                         <div class="mb-3">
                             <label for="id_username" class="form-label">Username</label>
                             <input type="text"
@@ -39,7 +40,6 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <!-- Email -->
                         <div class="mb-3">
                             <label for="id_email" class="form-label">Email</label>
                             <input type="email"
@@ -57,7 +57,6 @@
                             {% endif %}
                             <div class="form-text muted">Helps with account recovery</div>
                         </div>
-                        <!-- Password -->
                         <div class="mb-3">
                             <label for="id_password1" class="form-label">Password</label>
                             <input type="password"
@@ -73,7 +72,6 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <!-- Confirm Password -->
                         <div class="mb-4">
                             <label for="id_password2" class="form-label">Confirm Password</label>
                             <input type="password"
@@ -89,7 +87,6 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <!-- Submit -->
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-icon">
                                 <i class="fa-solid fa-user-plus"></i>Sign Up

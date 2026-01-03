@@ -1,15 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
     Account Dashboard | The Elysium Archive
 {% endblock title %}
 {% block content %}
+    <!-- Dashboard layout wrapper -->
     <section class="container-fluid py-4 py-lg-5">
         <div class="container">
             <div class="row g-4">
-                <!-- Sidebar Navigation -->
                 <div class="col-12 col-lg-3">
+                    <!-- Sidebar navigation -->
                     <div class="dashboard-sidebar">
-                        <!-- Profile Card Header -->
                         <div class="sidebar-profile-card mb-4 p-3 rounded-3">
                             <div class="text-center">
                                 <div class="mb-3">
@@ -19,7 +20,6 @@
                                 <p class="small muted mb-0">{{ user.email }}</p>
                             </div>
                         </div>
-                        <!-- Sidebar Menu -->
                         <nav class="dashboard-nav flex-column">
                             <button class="dashboard-nav-item active"
                                     id="profile-nav-btn"
@@ -62,58 +62,11 @@
                         </nav>
                     </div>
                 </div>
-                <!-- Main Content -->
                 <div class="col-12 col-lg-9">
+                    <!-- Dashboard tab content -->
                     <div class="tab-content" id="dashboardContent">
-                        <script>
-(function() {
-    'use strict';
-    
-    const tabContainer = document.getElementById('dashboardContent');
-    const buttons = document.querySelectorAll('[data-dashboard-tab]');
-    
-    if (!tabContainer || !buttons.length) {
-        return;
-    }
-    
-    // Attach listeners directly to each button
-    buttons.forEach((button) => {
-        button.addEventListener('click', function(event) {
-            const tabName = this.getAttribute('data-dashboard-tab');
-            
-            if (!tabName || tabName === 'logout') {
-                return;
-            }
-            
-            event.preventDefault();
-            event.stopPropagation();
-            
-            // Hide all panes
-            const allPanes = tabContainer.querySelectorAll('.tab-pane');
-            allPanes.forEach(pane => {
-                pane.classList.remove('active', 'show');
-            });
-            
-            // Show target pane
-            const targetPane = document.getElementById(tabName);
-            if (targetPane) {
-                targetPane.classList.add('active', 'show');
-            }
-            
-            // Update button states
-            buttons.forEach(btn => {
-                btn.classList.remove('active');
-                btn.setAttribute('aria-selected', 'false');
-            });
-            
-            this.classList.add('active');
-            this.setAttribute('aria-selected', 'true');
-        });
-    });
-})();
-                        </script>
-                        <!-- Profile Tab -->
                         <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                            <!-- Profile tab -->
                             <div class="panel p-4 p-lg-5">
                                 <h1 class="h4 mb-4">
                                     <i class="fa-solid fa-id-card me-2 icon-relic-gold"></i>Profile
@@ -166,8 +119,8 @@
                                 </form>
                             </div>
                         </div>
-                        <!-- Archive Tab -->
                         <div class="tab-pane fade" id="archive" role="tabpanel">
+                            <!-- Archive tab -->
                             <div class="panel p-4 p-lg-5">
                                 <h1 class="h4 mb-4">
                                     <i class="fa-solid fa-book-skull me-2 icon-relic-gold"></i>My Archive
@@ -215,8 +168,8 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <!-- Delete Account Tab -->
                         <div class="tab-pane fade" id="delete" role="tabpanel">
+                            <!-- Delete account tab -->
                             <div class="panel p-4 p-lg-5">
                                 <h1 class="h4 mb-4">
                                     <i class="fa-solid fa-trash me-2 icon-blood-crimson"></i>Delete Account
@@ -249,7 +202,7 @@
             </div>
         </div>
     </section>
-    <!-- Logout Confirmation Modal -->
+    <!-- Logout confirmation modal -->
     <div class="modal fade"
          id="logoutModal"
          tabindex="-1"
@@ -291,71 +244,7 @@
         </div>
     </div>
 {% endblock content %}
-<script>console.log('SCRIPT STARTED IMMEDIATELY');</script>
-<script>
-(function() {
-    console.log('DOMContentLoaded fired');
-    'use strict';
-    
-    console.log('Dashboard script loaded');
-    
-    const tabContainer = document.getElementById('dashboardContent');
-    const buttons = document.querySelectorAll('[data-dashboard-tab]');
-    
-    console.log('tabContainer:', tabContainer);
-    console.log('Found', buttons.length, 'buttons with data-dashboard-tab');
-    
-    if (!tabContainer || !buttons.length) {
-        console.error('Missing required elements');
-        return;
-    }
-    
-    // Attach listeners directly to each button
-    buttons.forEach((button, index) => {
-        console.log('Button', index, ':', button.getAttribute('data-dashboard-tab'));
-        
-        button.addEventListener('click', function(event) {
-            console.log('✓ Button clicked!');
-            
-            event.preventDefault();
-            event.stopPropagation();
-            
-            const tabName = this.getAttribute('data-dashboard-tab');
-            console.log('Tab name:', tabName);
-            
-            if (!tabName || tabName === 'logout') {
-                console.log('Skipping logout or invalid tab');
-                return;
-            }
-            
-            // Hide all panes
-            const allPanes = tabContainer.querySelectorAll('.tab-pane');
-            console.log('Hiding', allPanes.length, 'panes');
-            allPanes.forEach(pane => {
-                pane.classList.remove('active', 'show');
-            });
-            
-            // Show target pane
-            const targetPane = document.getElementById(tabName);
-            console.log('Showing pane:', tabName, '✓');
-            
-            if (targetPane) {
-                targetPane.classList.add('active', 'show');
-            }
-            
-            // Update button states
-            buttons.forEach(btn => {
-                btn.classList.remove('active');
-                btn.setAttribute('aria-selected', 'false');
-            });
-            
-            this.classList.add('active');
-            this.setAttribute('aria-selected', 'true');
-            
-            console.log('✓✓✓ Tab switched to:', tabName);
-        });
-    });
-    
-    console.log('Dashboard initialized ✓');
-})();
-</script>
+{% block extra_js %}
+    <!-- Dashboard scripts -->
+    <script src="{% static 'js/dashboard.js' %}" defer></script>
+{% endblock extra_js %}

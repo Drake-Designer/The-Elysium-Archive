@@ -7,16 +7,15 @@ from .models import UserProfile
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Auto-create UserProfile when a User is created."""
+    """Create a profile when a user is created."""
     if created:
         UserProfile.objects.create(user=instance)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_user_profile(sender, instance, **kwargs):
-    """Save UserProfile when User is saved."""
-    # Ensure profile exists (in case signal was missed)
-    if not hasattr(instance, "profile"):
-        UserProfile.objects.create(user=instance)
-    else:
+    """Save the profile when the user is saved."""
+    if hasattr(instance, "profile"):
         instance.profile.save()
+    else:
+        UserProfile.objects.create(user=instance)

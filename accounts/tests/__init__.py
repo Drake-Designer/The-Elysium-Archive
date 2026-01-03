@@ -1,1 +1,1 @@
-# Tests for accounts app authentication pages
+"""Tests for the accounts app."""

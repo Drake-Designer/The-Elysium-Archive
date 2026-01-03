@@ -1,11 +1,7 @@
 """Tests for Product model CRUD operations and permissions."""
 
 import pytest
-from django.contrib.auth import get_user_model
 from products.models import Category, Product
-
-
-User = get_user_model()
 
 
 @pytest.mark.django_db

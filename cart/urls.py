@@ -1,6 +1,4 @@
-"""
-URL configuration for the cart app
-"""
+"""URL configuration for the cart app."""
 
 from django.urls import path
 

@@ -1,128 +1,48 @@
-{% load account %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Confirm Your Email - The Elysium Archive</title>
-        <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: #0a0e27;
-            color: #e0e0e0;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .email-wrapper {
-            background-color: #1a1f3a;
-            border: 1px solid #c9a961;
-            border-radius: 8px;
-            padding: 40px;
-            margin: 20px 0;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-            font-family: 'Cinzel', serif;
-            font-size: 24px;
-            color: #c9a961;
-            letter-spacing: 2px;
-        }
-        h1 {
-            font-family: 'Cinzel', serif;
-            color: #c9a961;
-            font-size: 24px;
-            margin: 30px 0 20px 0;
-            text-align: center;
-        }
-        .content {
-            color: #b0b0b0;
-            margin: 25px 0;
-            text-align: center;
-        }
-        .info-box {
-            background-color: rgba(201, 169, 97, 0.1);
-            border-left: 4px solid #c9a961;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .cta-button {
-            display: inline-block;
-            background-color: #c9a961;
-            color: #0a0e27;
-            padding: 14px 32px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
-            margin: 20px 0;
-            transition: background-color 0.3s;
-        }
-        .cta-button:hover {
-            background-color: #d4b96f;
-        }
-        .link-text {
-            color: #c9a961;
-            word-break: break-all;
-            font-size: 12px;
-            margin-top: 15px;
-        }
-        .footer {
-            text-align: center;
-            color: #666;
-            font-size: 12px;
-            margin-top: 40px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-        }
-        .divider {
-            border: 0;
-            height: 1px;
-            background-color: #333;
-            margin: 30px 0;
-        }
-        .warning {
-            color: #ff6b6b;
-            font-size: 13px;
-            font-style: italic;
-        }
-        </style>
+        <link rel="stylesheet" href="{% static 'css/email.css' %}">
     </head>
     <body>
+        <!-- Email layout wrapper -->
         <div class="container">
             <div class="email-wrapper">
-                <div class="logo">🗝️ THE ELYSIUM ARCHIVE</div>
+                <!-- Brand header -->
+                <div class="logo">??? THE ELYSIUM ARCHIVE</div>
                 <h1>Verify Your Email Address</h1>
+                <!-- Email body copy -->
                 <div class="content">
                     <p>Welcome to The Elysium Archive, {{ user.get_username }}.</p>
                     <p>
                         To complete your registration and unlock the forbidden knowledge, please verify your email address by clicking the button below.
                     </p>
                 </div>
-                <div style="text-align: center;">
+                <!-- Primary verification button -->
+                <div class="email-center">
                     <a href="{% url 'account_confirm_email' confirmation.key %}"
-                       class="cta-button">✓ Confirm Email Address</a>
+                       class="cta-button">V Confirm Email Address</a>
                 </div>
+                <!-- Security reminder -->
                 <div class="info-box">
                     <p>
                         <strong>If you don't recognize this account,</strong> please discard this message and let us know immediately.
                     </p>
                 </div>
                 <hr class="divider">
-                <div style="text-align: center; color: #888; font-size: 12px;">
+                <!-- Backup link note -->
+                <div class="email-note">
                     <p>Or copy and paste this link into your browser:</p>
                     <div class="link-text">{% url 'account_confirm_email' confirmation.key %}</div>
                 </div>
                 <hr class="divider">
+                <!-- Footer note -->
                 <div class="footer">
                     <p>The Elysium Archive &mdash; No downloads. No refunds. Access is the product.</p>
-                    <p>© 2026 The Elysium Archive. All secrets reserved.</p>
+                    <p>¸ 2026 The Elysium Archive. All secrets reserved.</p>
                 </div>
             </div>
         </div>

@@ -1,6 +1,8 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+
 from products.models import Product
+
 from .cart import (
     add_to_cart as add_product_to_cart,
     get_cart_items,
@@ -9,63 +11,65 @@ from .cart import (
 )
 
 
+def _parse_int(value, default):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def add_to_cart(request):
-    """Add a product to the shopping cart (session-based)."""
-    if request.method == "POST":
-        product_id = request.POST.get("product_id")
-        quantity = int(request.POST.get("quantity", 1))
+    """Add a product to the shopping cart."""
+    if request.method != "POST":
+        return redirect("archive")
 
-        # Get product for message (validate exists and is active)
-        product = get_object_or_404(Product, id=product_id, is_active=True)
+    product_id = _parse_int(request.POST.get("product_id"), None)
+    if product_id is None:
+        messages.error(request, "Product not found.")
+        return redirect("archive")
 
-        # Add to cart using helper function
-        if add_product_to_cart(request.session, product_id, quantity):
-            messages.success(
-                request,
-                f"✓ {product.title} added to cart!",
-            )
-        else:
-            messages.error(
-                request,
-                f"Could not add {product.title} to cart.",
-            )
+    quantity = _parse_int(request.POST.get("quantity"), 1)
+    if quantity < 1:
+        quantity = 1
 
-        # Redirect back to product detail
-        return redirect("product_detail", slug=product.slug)
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    if add_product_to_cart(request.session, product_id, quantity):
+        messages.success(request, f"V {product.title} added to cart!")
+    else:
+        messages.error(request, f"Could not add {product.title} to cart.")
 
-    # If not POST, redirect to archive
-    return redirect("archive")
+    return redirect("product_detail", slug=product.slug)
 
 
 def cart_view(request):
-    """Display the shopping cart with items and totals."""
+    """Render the shopping cart view."""
+    cart_items = get_cart_items(request.session)
     context = {
-        "cart_items": get_cart_items(request.session),
-        "cart_total": get_cart_total(request.session),
+        "cart_items": cart_items,
+        "cart_total": get_cart_total(request.session, cart_items),
     }
     return render(request, "cart/cart.html", context)
 
 
 def remove_from_cart(request):
     """Remove a product from the shopping cart."""
-    if request.method == "POST":
-        product_id = request.POST.get("product_id")
+    if request.method != "POST":
+        return redirect("cart")
 
-        # Get product for message
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            messages.error(request, "Product not found.")
-            return redirect("cart")
+    product_id = _parse_int(request.POST.get("product_id"), None)
+    if product_id is None:
+        messages.error(request, "Product not found.")
+        return redirect("cart")
 
-        # Remove from cart using helper function
-        if remove_product_from_cart(request.session, product_id):
-            messages.success(
-                request,
-                f"✓ {product.title} removed from cart.",
-            )
-        else:
-            messages.info(request, f"{product.title} was not in your cart.")
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        messages.error(request, "Product not found.")
+        return redirect("cart")
 
-    # Redirect back to cart view
+    if remove_product_from_cart(request.session, product_id):
+        messages.success(request, f"V {product.title} removed from cart.")
+    else:
+        messages.info(request, f"{product.title} was not in your cart.")
+
     return redirect("cart")

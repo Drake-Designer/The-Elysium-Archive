@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}
+    Checkout | The Elysium Archive
+{% endblock title %}
+{% block meta_description %}
+    Confirm your purchase and unlock access to your selected archives.
+{% endblock meta_description %}
+{% block content %}
+    <section class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="panel p-5 text-center">
+                    <h1 class="display-6 mb-3">Checkout</h1>
+                    <p class="muted mb-4">This checkout flow is not yet implemented. Your selected items remain in the cart.</p>
+                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                        <a href="{% url 'cart' %}" class="btn btn-outline-light btn-icon">
+                            <i class="fa-solid fa-arrow-left"></i>Return to Cart
+                        </a>
+                        <a href="{% url 'archive' %}" class="btn btn-primary btn-icon">
+                            <i class="fa-solid fa-book-open"></i>Browse the Archive
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

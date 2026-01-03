@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Metadata -->
+    <!-- Page metadata and SEO -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
@@ -10,14 +10,13 @@
         The Elysium Archive
       {% endblock title %}
     </title>
-    <!-- SEO metadata -->
     <meta name="description"
           content="{% block meta_description %}A dark fantasy archive where each purchase unlocks private on site content{% endblock meta_description %}">
     <meta name="keywords"
           content="{% block meta_keywords %}dark fantasy, vampires, archive, premium content, ecommerce{% endblock meta_keywords %}">
     {% block meta %}
     {% endblock meta %}
-    <!-- Favicon -->
+    <!-- Site icons and manifest -->
     <link rel="icon"
           type="image/x-icon"
           href="{% static 'img/favicon/favicon.ico' %}">
@@ -41,29 +40,27 @@
           sizes="512x512"
           href="{% static 'img/favicon/android-chrome-512x512.png' %}">
     <link rel="manifest" href="{% static 'img/favicon/site.webmanifest' %}">
-    <!-- Google fonts -->
+    <!-- External fonts and vendors -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
           rel="stylesheet">
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet"
           integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
           crossorigin="anonymous">
-    <!-- FontAwesome icons -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
           crossorigin="anonymous"
           referrerpolicy="no-referrer">
-    <!-- Project CSS -->
+    <!-- Site styles -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block extra_css %}
     {% endblock extra_css %}
   </head>
   <body class="d-flex flex-column min-vh-100 site-body">
-    <!-- Skip link for accessibility -->
+    <!-- Accessibility skip link -->
     <a class="site-skip-link" href="#main-content">Skip to main content</a>
     <!-- Main navigation -->
     <header>
@@ -71,32 +68,8 @@
            data-bs-theme="dark"
            aria-label="Primary navigation">
         <div class="container">
-          <!-- Brand -->
           <a class="navbar-brand site-brand" href="{% url 'home' %}">The Elysium Archive</a>
-          <!-- Hamburger toggler (pushed to right with margin-left auto) -->
-          <button class="navbar-toggler site-toggler site-toggler-fixed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#primaryNav"
-                  aria-controls="primaryNav"
-                  aria-expanded="false"
-                  aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <!-- Effects toggle button MOBILE (visible only on small screens, next to hamburger) -->
-          <button class="btn effects-toggle-btn site-effects-toggle-mobile d-lg-none"
-                  type="button"
-                  id="effectsToggleGlobal"
-                  aria-label="Toggle visual effects"
-                  aria-pressed="false"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="bottom"
-                  title="Effects: On">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-          </button>
-          <!-- Collapsible content -->
           <div class="collapse navbar-collapse" id="primaryNav">
-            <!-- Main menu items (centered on desktop) -->
             <ul class="navbar-nav mx-auto site-nav-links">
               <li class="nav-item">
                 <a class="nav-link site-nav-link"
@@ -120,26 +93,22 @@
                 </a>
               </li>
             </ul>
-            <!-- Divider for mobile only -->
             <hr class="d-lg-none border-secondary my-2">
-            <!-- Auth items (right on desktop) -->
             <ul class="navbar-nav align-items-lg-center site-nav-auth">
-              <!-- Shopping Cart icon (for all users) -->
-              <li class="nav-item">
-                <a href="{% url 'cart' %}"
-                   class="nav-link site-nav-link position-relative"
-                   aria-label="Shopping cart">
-                  <i class="fa-solid fa-shopping-cart"></i>
-                  {% if cart_count > 0 %}
+              {% if cart_count|default:0 > 0 %}
+                <li class="nav-item d-none d-lg-block">
+                  <a href="{% url 'cart' %}"
+                     class="nav-link site-nav-link position-relative"
+                     aria-label="Shopping cart">
+                    <i class="fa-solid fa-shopping-cart"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
                       {{ cart_count }}
                     </span>
-                  {% endif %}
-                </a>
-              </li>
+                  </a>
+                </li>
+              {% endif %}
               {% if user.is_authenticated %}
-                <!-- Authenticated user: icon links to dashboard -->
-                <li class="nav-item">
+                <li class="nav-item d-none d-lg-block">
                   <a href="{% url 'account_dashboard' %}"
                      class="nav-link site-nav-link site-user-icon"
                      aria-label="Account dashboard">
@@ -147,8 +116,7 @@
                   </a>
                 </li>
               {% else %}
-                <!-- Anonymous user menu -->
-                <li class="nav-item">
+                <li class="nav-item d-none d-lg-block">
                   <a class="nav-link site-nav-link" href="{% url 'account_login' %}">
                     <span class="site-nav-link-text">
                       <i class="fa-solid fa-right-to-bracket me-1"></i>Login
@@ -168,32 +136,75 @@
                   </a>
                 </li>
               {% endif %}
-              <!-- Effects toggle button DESKTOP (visible only on large screens, at the right) -->
-              <li class="nav-item d-none d-lg-inline-flex">
-                <button class="btn effects-toggle-btn site-effects-toggle-desktop ms-2"
-                        type="button"
-                        id="effectsToggleGlobalDesktop"
-                        aria-label="Toggle visual effects"
-                        aria-pressed="false"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="Effects: On">
-                  <i class="fa-solid fa-wand-magic-sparkles"></i>
-                </button>
-              </li>
             </ul>
+          </div>
+          <div class="site-nav-right">
+            <div class="site-nav-mobile-actions d-lg-none">
+              <ul class="navbar-nav site-nav-auth site-nav-auth-mobile">
+                {% if cart_count|default:0 > 0 %}
+                  <li class="nav-item">
+                    <a href="{% url 'cart' %}"
+                       class="nav-link site-nav-link position-relative"
+                       aria-label="Shopping cart">
+                      <i class="fa-solid fa-shopping-cart"></i>
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
+                        {{ cart_count }}
+                      </span>
+                    </a>
+                  </li>
+                {% endif %}
+                {% if user.is_authenticated %}
+                  <li class="nav-item">
+                    <a href="{% url 'account_dashboard' %}"
+                       class="nav-link site-nav-link site-user-icon"
+                       aria-label="Account dashboard">
+                      <i class="fa-solid fa-user"></i>
+                    </a>
+                  </li>
+                {% else %}
+                  <li class="nav-item">
+                    <a class="nav-link site-nav-link"
+                       href="{% url 'account_login' %}"
+                       aria-label="Login">
+                      <i class="fa-solid fa-right-to-bracket"></i>
+                    </a>
+                  </li>
+                {% endif %}
+              </ul>
+              <button class="navbar-toggler site-toggler"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#primaryNav"
+                      aria-controls="primaryNav"
+                      aria-expanded="false"
+                      aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+            </div>
+            <button class="btn effects-toggle-btn site-effects-toggle-desktop"
+                    type="button"
+                    id="effectsToggleGlobal"
+                    aria-label="Toggle visual effects"
+                    aria-pressed="false"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    title="Effects: On">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
           </div>
         </div>
       </nav>
-      <!-- Django messages -->
-      <div class="container py-3">{% include "includes/messages.html" %}</div>
+      {% if messages %}
+        <!-- Flash message area -->
+        <div class="container py-3">{% include "includes/messages.html" %}</div>
+      {% endif %}
     </header>
-    <!-- Page content -->
+    <!-- Page content outlet -->
     <main id="main-content" class="flex-grow-1">
       {% block content %}
       {% endblock content %}
     </main>
-    <!-- Footer -->
+    <!-- Site footer -->
     <footer class="mt-auto site-footer" data-bs-theme="dark">
       <div class="container py-4">
         <div class="row align-items-center g-3">
@@ -217,13 +228,11 @@
         </div>
       </div>
     </footer>
-    <!-- Bootstrap JS -->
+    <!-- Core scripts and page hooks -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
             crossorigin="anonymous"></script>
-    <!-- Django messages -->
     <script src="{% static 'js/messages.js' %}" defer></script>
-    <!-- Global effects toggle -->
     <script src="{% static 'js/effects-toggle.js' %}" defer></script>
     {% block extra_js %}
     {% endblock extra_js %}

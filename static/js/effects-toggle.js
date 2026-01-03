@@ -1,12 +1,13 @@
-// Toggle reduced effects for motion-sensitive users
-
+// Effects toggle feature
 (() => {
-  const storageKey = 'elysium_reduced_effects';
-  const toggleMobile = document.getElementById('effectsToggleGlobal');
-  const toggleDesktop = document.getElementById('effectsToggleGlobalDesktop');
-  const heroVideo = document.querySelector('[data-hero-video]');
+  'use strict';
 
-  const buttons = [toggleMobile, toggleDesktop].filter(Boolean);
+  const storageKey = 'elysium_reduced_effects';
+  const toggle = document.getElementById('effectsToggleGlobal');
+  const heroVideo = document.querySelector('[data-hero-video]');
+  if (!toggle) {
+    return;
+  }
 
   const safeGet = () => {
     try {
@@ -19,17 +20,20 @@
   const safeSet = (value) => {
     try {
       localStorage.setItem(storageKey, value);
-    } catch (err) {
-      // Ignore storage errors (e.g., blocked storage).
-    }
+    } catch (err) {}
   };
 
-  const updateTooltip = (toggle, isReduced) => {
-    const Tooltip = window.bootstrap?.Tooltip;
-    if (!Tooltip) return;
+  const tooltipApi = window.bootstrap && window.bootstrap.Tooltip ? window.bootstrap.Tooltip : null;
 
-    const tooltip = Tooltip.getInstance(toggle);
-    if (!tooltip || typeof tooltip.setContent !== 'function') return;
+  const updateTooltip = (isReduced) => {
+    if (!tooltipApi) {
+      return;
+    }
+
+    const tooltip = tooltipApi.getInstance(toggle);
+    if (!tooltip || typeof tooltip.setContent !== 'function') {
+      return;
+    }
 
     tooltip.setContent({ '.tooltip-inner': isReduced ? 'Effects: Off' : 'Effects: On' });
   };
@@ -37,24 +41,20 @@
   const applyState = (isReduced) => {
     document.body.classList.toggle('reduced-effects', isReduced);
     document.documentElement.classList.toggle('reduced-effects', isReduced);
+    toggle.setAttribute('aria-pressed', String(isReduced));
+    toggle.setAttribute('title', isReduced ? 'Effects: Off' : 'Effects: On');
+    toggle.classList.toggle('is-active', isReduced);
 
-    // Update both buttons (mobile and desktop)
-    buttons.forEach((toggle) => {
-      toggle.setAttribute('aria-pressed', String(isReduced));
-      toggle.setAttribute('title', isReduced ? 'Effects: Off' : 'Effects: On');
-      toggle.classList.toggle('is-active', isReduced);
+    const icon = toggle.querySelector('i');
+    if (icon) {
+      icon.className = isReduced ? 'fa-solid fa-eye-slash' : 'fa-solid fa-wand-magic-sparkles';
+    }
 
-      // Update icon based on state
-      const icon = toggle.querySelector('i');
-      if (icon) {
-        icon.className = isReduced ? 'fa-solid fa-eye-slash' : 'fa-solid fa-wand-magic-sparkles';
-      }
+    updateTooltip(isReduced);
 
-      // Update Bootstrap tooltip if initialized
-      updateTooltip(toggle, isReduced);
-    });
-
-    if (!heroVideo) return;
+    if (!heroVideo) {
+      return;
+    }
 
     if (isReduced) {
       heroVideo.pause();
@@ -67,25 +67,18 @@
     }
   };
 
-  // Initialize tooltips for both buttons
-  const Tooltip = window.bootstrap?.Tooltip;
-  if (Tooltip) {
-    buttons.forEach((toggle) => {
-      Tooltip.getOrCreateInstance(toggle);
-    });
+  if (tooltipApi) {
+    tooltipApi.getOrCreateInstance(toggle);
   }
 
   const initial = safeGet() === '1';
   applyState(initial);
 
-  // Attach click handlers to both buttons
   const handleClick = () => {
     const next = !document.body.classList.contains('reduced-effects');
     safeSet(next ? '1' : '0');
     applyState(next);
   };
 
-  buttons.forEach((toggle) => {
-    toggle.addEventListener('click', handleClick);
-  });
+  toggle.addEventListener('click', handleClick);
 })();

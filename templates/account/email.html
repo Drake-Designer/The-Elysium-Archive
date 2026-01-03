@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% load allauth %}
 {% block title %}
     Manage Email Addresses | The Elysium Archive
 {% endblock title %}
 {% block content %}
+    <!-- Email management page -->
     <section class="container py-5">
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8">
@@ -13,6 +13,7 @@
                     </h1>
                     <p class="muted mb-4">Manage the email addresses associated with your account.</p>
                     {% if emailaddresses %}
+                        <!-- Email list management -->
                         <div class="mb-4">
                             <h2 class="h5 mb-3">Your Email Addresses</h2>
                             <form method="post" action="{% url 'account_email' %}">
@@ -67,7 +68,7 @@
                             You currently have no email addresses set up.
                         </div>
                     {% endif %}
-                    <!-- Add Email Form -->
+                    <!-- Add email form -->
                     <div class="mt-5">
                         <h2 class="h5 mb-3">Add Email Address</h2>
                         <form method="post" action="{% url 'account_email' %}" novalidate>
@@ -103,7 +104,6 @@
                             </div>
                         </form>
                     </div>
-                    <!-- Back to profile -->
                     <div class="text-center mt-4">
                         <a class="text-decoration-none" href="{% url 'account_profile' %}">
                             <i class="fa-solid fa-arrow-left me-1"></i>Back to Profile

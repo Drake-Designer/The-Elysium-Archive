@@ -1,7 +1,7 @@
 """Views for the products app."""
 
-from django.views.generic import DetailView, ListView
 from django.db.models import Q
+from django.views.generic import DetailView, ListView
 
 from .models import Product
 
@@ -46,5 +46,5 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["purchased"] = False  # Replace with entitlement check when orders exist
+        context["purchased"] = False
         return context

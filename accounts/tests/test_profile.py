@@ -28,7 +28,6 @@ class TestProfileView:
     def test_profile_requires_login(self):
         """Test that profile view requires authentication."""
         response = self.client.get(reverse("account_profile"))
-        # Should redirect to login
         assert response.status_code == 302
         assert "/accounts/login/" in response.url
 
@@ -62,10 +61,8 @@ class TestProfileView:
             follow=True,
         )
         assert response.status_code == 200
-        # Refresh from DB
         self.profile.refresh_from_db()
         assert self.profile.display_name == "Lord Dracula"
-        # Check for success message
         messages = list(response.context["messages"])
         assert any("updated successfully" in str(m) for m in messages)
 
@@ -86,15 +83,13 @@ class TestProfileView:
     def test_profile_edit_display_name_max_length(self):
         """Test that display_name respects max_length validation."""
         self.client.login(username="testuser", password="testpass123")
-        long_name = "A" * 100  # Exceeds max_length of 60
+        long_name = "A" * 100
         response = self.client.post(
             reverse("account_profile"),
             {"display_name": long_name},
         )
-        # Form should have errors
         assert response.status_code == 200
         self.profile.refresh_from_db()
-        # display_name should not be updated
         assert self.profile.display_name != long_name
 
 
@@ -114,7 +109,6 @@ class TestAccountDelete:
     def test_delete_account_requires_login(self):
         """Test that delete account view requires authentication."""
         response = self.client.get(reverse("account_delete"))
-        # Should redirect to login
         assert response.status_code == 302
         assert "/accounts/login/" in response.url
 
@@ -135,23 +129,19 @@ class TestAccountDelete:
         user_id = self.user.id
         self.client.login(username="testuser", password="testpass123")
         response = self.client.post(reverse("account_delete"), follow=True)
-        # Should redirect to home
         assert response.status_code == 200
-        # User should be deleted
         assert not User.objects.filter(id=user_id).exists()
 
     def test_delete_account_post_logs_out_user(self):
         """Test that POST logs out the user."""
         self.client.login(username="testuser", password="testpass123")
         response = self.client.post(reverse("account_delete"), follow=True)
-        # After redirect, user should not be authenticated
         assert response.wsgi_request.user.is_authenticated is False
 
     def test_delete_account_post_redirects_home(self):
         """Test that POST redirects to home page."""
         self.client.login(username="testuser", password="testpass123")
         response = self.client.post(reverse("account_delete"), follow=True)
-        # Should redirect to home
         final_url = response.request["PATH_INFO"]
         assert final_url == reverse("home")
 
@@ -167,5 +157,4 @@ class TestAccountDelete:
         profile_id = self.user.profile.id
         self.client.login(username="testuser", password="testpass123")
         self.client.post(reverse("account_delete"), follow=True)
-        # Profile should be deleted (cascade delete)
         assert not UserProfile.objects.filter(id=profile_id).exists()
