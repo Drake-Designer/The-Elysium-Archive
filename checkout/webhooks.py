@@ -3,7 +3,7 @@
 import logging
 
 import stripe
-from stripe.error import SignatureVerificationError
+from stripe import SignatureVerificationError
 
 from django.conf import settings
 from django.http import JsonResponse
