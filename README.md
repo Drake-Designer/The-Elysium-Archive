@@ -482,6 +482,10 @@ The payment flow follows this sequence:
 
 Stripe sessions are created server-side using `stripe.checkout.Session.create`. The integration is configured to accept card payments only via `payment_method_types=["card"]`.
 
+### Webhook Confirmation
+
+Payments are confirmed server side via Stripe webhooks at `/checkout/wh/`. Orders are marked paid and access entitlements are granted only after Stripe signature verification succeeds.
+
 ### Test Mode
 
 All Stripe operations in this project run in test mode. This means:
@@ -507,6 +511,13 @@ Follow these steps to test the checkout flow:
 8. **Enter test card details** – Use the test card number below
 9. **Submit payment** – Complete the Stripe form and submit
 10. **View confirmation** – You will be redirected back to the success page
+
+### Webhook Testing (optional)
+
+- Install Stripe CLI and run `stripe login`
+- Start a listener with `stripe listen --forward-to localhost:8000/checkout/wh/`
+- Complete a test checkout to let `checkout.session.completed` post back
+- Ensure `STRIPE_WH_SECRET` is set from the CLI output before running locally
 
 ### Test Card Details
 

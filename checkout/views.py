@@ -1,6 +1,6 @@
 """Views for the checkout app."""
 
-from decimal import Decimal
+import logging
 
 import stripe
 from stripe import StripeError
@@ -17,6 +17,8 @@ from products.models import Product
 
 # Initialize Stripe with secret key from settings.
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+logger = logging.getLogger(__name__)
 
 
 @verified_email_required
@@ -74,6 +76,7 @@ def checkout_view(request):
             line_items=line_items,
             mode="payment",
             metadata={"order_id": str(order.pk)},
+            client_reference_id=str(order.pk),
             success_url=request.build_absolute_uri(
                 reverse("checkout_success") + f"?order_id={order.pk}"
             ),
@@ -93,18 +96,20 @@ def checkout_view(request):
         clear_cart(request.session)
         return redirect("cart")
 
-    except StripeError:
+    except StripeError as err:
+        logger.warning("Stripe error during checkout: %s", err)
         messages.error(request, "Payment error occurred. Please try again.")
         return redirect("cart")
 
-    except Exception:
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Unexpected checkout error: %s", exc)
         messages.error(request, "An error occurred during checkout. Please try again.")
         return redirect("cart")
 
 
 @verified_email_required
 def checkout_success(request):
-    """Display order confirmation and clear cart on successful payment."""
+    """Display order confirmation with status awareness."""
     order_id = request.GET.get("order_id")
 
     # Redirect safely if order id is missing.
@@ -119,15 +124,16 @@ def checkout_success(request):
         messages.warning(request, "Order not found.")
         return redirect("home")
 
-    # Update order status to completed.
-    order.status = "completed"
-    order.save()
-
-    # Clear cart from session.
-    clear_cart(request.session)
-
-    # Show success message.
-    messages.success(request, "Payment successful! Your archives are now unlocked.")
+    if order.status == "paid":
+        clear_cart(request.session)
+        messages.success(request, "Payment successful! Your archives are now unlocked.")
+    elif order.status == "pending":
+        messages.info(
+            request,
+            "Payment is being confirmed. Refresh in a moment if it does not update.",
+        )
+    else:
+        messages.error(request, "Payment failed or was cancelled. Please try again.")
 
     context = {"order": order}
     return render(request, "checkout/checkout_success.html", context)

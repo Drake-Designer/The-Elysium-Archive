@@ -4,7 +4,7 @@
     Checkout Successful | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Your payment has been processed successfully. Your archive access unlocks immediately.
+    Review your order confirmation and payment status after checkout.
 {% endblock meta_description %}
 {% block content %}
     <!-- Checkout success page -->
@@ -17,16 +17,26 @@
                 <li class="breadcrumb-item active" aria-current="page">Order Confirmation</li>
             </ol>
         </nav>
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="text-center mb-5">
-                    <i class="fa-solid fa-check-circle fa-5x text-success mb-3"></i>
-                    <h1 class="display-6 mb-2">Payment Successful!</h1>
-                    <p class="lead muted">Your archive access unlocks immediately.</p>
+        {% if order %}
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="text-center mb-5">
+                        {% if order.status == "paid" %}
+                            <i class="fa-solid fa-check-circle fa-5x text-success mb-3"></i>
+                            <h1 class="display-6 mb-2">Payment Successful</h1>
+                            <p class="lead muted">Your archive access unlocks immediately.</p>
+                        {% elif order.status == "pending" %}
+                            <i class="fa-solid fa-hourglass-half fa-5x text-warning mb-3"></i>
+                            <h1 class="display-6 mb-2">Payment Processing</h1>
+                            <p class="lead muted">Payment is being confirmed. Refresh shortly.</p>
+                        {% else %}
+                            <i class="fa-solid fa-circle-xmark fa-5x text-danger mb-3"></i>
+                            <h1 class="display-6 mb-2">Payment Failed</h1>
+                            <p class="lead muted">No charges were captured. Please try again.</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-        {% if order %}
             <!-- Order confirmation summary -->
             <div class="row">
                 <div class="col-12 col-lg-8 mx-auto">

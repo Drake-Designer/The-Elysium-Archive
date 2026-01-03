@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from .models import Order, OrderLineItem
+from .models import AccessEntitlement, Order, OrderLineItem
 
 
 class OrderLineItemInline(admin.TabularInline):
@@ -28,7 +28,14 @@ class OrderAdmin(admin.ModelAdmin):
         (
             "Order Information",
             {
-                "fields": ("order_number", "user", "status", "total"),
+                "fields": (
+                    "order_number",
+                    "user",
+                    "status",
+                    "total",
+                    "stripe_session_id",
+                    "stripe_pid",
+                ),
             },
         ),
         (
@@ -54,3 +61,18 @@ class OrderLineItemAdmin(admin.ModelAdmin):
     list_filter = ("order__status", "order__created_at")
     search_fields = ("product_title", "order__order_number")
     readonly_fields = ("line_total",)
+
+
+@admin.register(AccessEntitlement)
+class AccessEntitlementAdmin(admin.ModelAdmin):
+    """Admin interface for access entitlements."""
+
+    list_display = ("user", "product", "order", "granted_at")
+    list_filter = ("granted_at", "order__status")
+    search_fields = (
+        "user__username",
+        "user__email",
+        "product__title",
+        "order__order_number",
+    )
+    readonly_fields = ("granted_at",)

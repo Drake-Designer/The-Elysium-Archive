@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.views.generic import DetailView, ListView
 
 from .models import Product
+from orders.models import AccessEntitlement
 
 
 class ProductListView(ListView):
@@ -46,10 +47,16 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["purchased"] = False
-
         product = self.get_object()
+
+        purchased = False
+        if self.request.user.is_authenticated:
+            purchased = AccessEntitlement.objects.filter(
+                user=self.request.user, product=product
+            ).exists()
+
         cart_product_ids = set(self.request.session.get("cart", {}).keys())
         context["in_cart"] = str(product.id) in cart_product_ids
+        context["purchased"] = purchased
 
         return context

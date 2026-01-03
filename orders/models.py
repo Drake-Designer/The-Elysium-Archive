@@ -10,11 +10,11 @@ from products.models import Product
 
 
 class Order(models.Model):
-    """Store a completed purchase order."""
+    """Store a purchase order."""
 
     STATUS_CHOICES = [
         ("pending", "Pending"),
-        ("completed", "Completed"),
+        ("paid", "Paid"),
         ("failed", "Failed"),
     ]
 
@@ -33,6 +33,19 @@ class Order(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0)],
         default=Decimal("0.00"),
+    )
+
+    stripe_session_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Store Stripe checkout session id for tracing.",
+    )
+    stripe_pid = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Store Stripe payment intent id for auditing.",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -92,3 +105,37 @@ class OrderLineItem(models.Model):
         """Calculate line total before saving."""
         self.line_total = self.product_price * self.quantity
         super().save(*args, **kwargs)
+
+
+class AccessEntitlement(models.Model):
+    """Grant a user access to a purchased product."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="entitlements",
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="entitlements",
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="entitlements",
+    )
+    granted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "product"], name="unique_entitlement_per_user_product"
+            )
+        ]
+        ordering = ["-granted_at"]
+
+    def __str__(self):
+        return f"{self.user} -> {self.product}"

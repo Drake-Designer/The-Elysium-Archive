@@ -57,6 +57,7 @@ if not CSRF_TRUSTED_ORIGINS and IS_HEROKU:
     CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
@@ -297,3 +298,4 @@ STRIPE_PUBLIC_KEY = os.environ.get(
 STRIPE_SECRET_KEY = os.environ.get(
     "STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev"
 )
+STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")

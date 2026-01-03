@@ -7,13 +7,17 @@ from django.shortcuts import redirect, render
 from .decorators import verified_email_required
 from .forms import ProfileForm
 from .models import UserProfile
+from orders.models import AccessEntitlement
 
 
 @verified_email_required
 def dashboard(request):
     """Render the account dashboard."""
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    unlocked_products = []
+    entitlements = AccessEntitlement.objects.filter(user=request.user).select_related(
+        "product"
+    )
+    unlocked_products = [item.product for item in entitlements if item.product]
 
     if request.method == "POST":
         form = ProfileForm(request.POST, request.FILES)
@@ -48,8 +52,13 @@ def dashboard(request):
 @verified_email_required
 def my_archive(request):
     """Render the user's unlocked archive entries."""
+    entitlements = AccessEntitlement.objects.filter(user=request.user).select_related(
+        "product"
+    )
+    unlocked_products = [item.product for item in entitlements if item.product]
+
     context = {
-        "unlocked_products": [],
+        "unlocked_products": unlocked_products,
     }
     return render(request, "accounts/my_archive.html", context)
 
