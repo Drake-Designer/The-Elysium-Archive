@@ -63,14 +63,19 @@
                                         <i class="fa-solid fa-book-open me-2"></i>Read Full Archive
                                     </a>
                                 {% else %}
-                                    <form method="post" action="{% url 'add_to_cart' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="product_id" value="{{ product.id }}">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="btn btn-danger btn-lg w-100">
-                                            <i class="fa-solid fa-shopping-cart me-2"></i>Add to Cart
-                                        </button>
-                                    </form>
+                                    <div class="d-grid gap-2 d-sm-flex">
+                                        <form method="post" action="{% url 'add_to_cart' %}" class="flex-grow-1">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn btn-danger btn-lg w-100">
+                                                <i class="fa-solid fa-shopping-cart me-2"></i>Add to Cart
+                                            </button>
+                                        </form>
+                                        <a href="{% url 'cart' %}" class="btn btn-outline-light btn-lg">
+                                            <i class="fa-solid fa-shopping-bag me-2"></i>View Cart
+                                        </a>
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>

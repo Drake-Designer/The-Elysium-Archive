@@ -1450,3 +1450,31 @@ body.reduced-effects .entry-card:hover {
   overflow: hidden;
   margin-bottom: 1rem;
 }
+/* Cart page table column widths */
+.cart-qty-col {
+  width: 120px;
+}
+
+.cart-price-col {
+  width: 140px;
+}
+
+.cart-action-col {
+  width: 80px;
+}
+
+/* Cart form inline display */
+.cart-remove-form {
+  display: inline;
+}
+
+/* Cart summary sticky positioning */
+.cart-summary-sidebar {
+  top: 100px;
+}
+
+/* Cart navbar badge */
+.site-nav-link .badge {
+  font-size: 0.65rem;
+  padding: 0.25rem 0.4rem;
+}

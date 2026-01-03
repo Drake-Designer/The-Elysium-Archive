@@ -124,6 +124,19 @@
             <hr class="d-lg-none border-secondary my-2">
             <!-- Auth items (right on desktop) -->
             <ul class="navbar-nav align-items-lg-center site-nav-auth">
+              <!-- Shopping Cart icon (for all users) -->
+              <li class="nav-item">
+                <a href="{% url 'cart' %}"
+                   class="nav-link site-nav-link position-relative"
+                   aria-label="Shopping cart">
+                  <i class="fa-solid fa-shopping-cart"></i>
+                  {% if cart_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
+                      {{ cart_count }}
+                    </span>
+                  {% endif %}
+                </a>
+              </li>
               {% if user.is_authenticated %}
                 <!-- Authenticated user: icon links to dashboard -->
                 <li class="nav-item">
