@@ -6,10 +6,15 @@ from pathlib import Path
 import dj_database_url
 from django.contrib.messages import constants as messages
 
+# Base directory and local environment loading
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 if (BASE_DIR / "env.py").exists():
-    import env
+    import env  # noqa: F401
+
+
+# Environment helper functions
 
 
 def _env_bool(value, default=False):
@@ -27,11 +32,16 @@ def _env_list(name, default=None):
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+# Core security and environment flags
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
+IS_HEROKU = os.environ.get("DYNO") is not None
+
+
+# Hosts and CSRF configuration
 
 ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", default=[])
-IS_HEROKU = os.environ.get("DYNO") is not None
 
 if not ALLOWED_HOSTS and IS_HEROKU:
     ALLOWED_HOSTS = [".herokuapp.com"]
@@ -53,8 +63,11 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
+
+# Installed applications
+
 INSTALLED_APPS = [
-    "jazzmin",
+    # Django core applications
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -62,10 +75,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
+    # Third party applications
+    "jazzmin",
     "allauth",
     "allauth.account",
-    "cloudinary_storage",
     "cloudinary",
+    "cloudinary_storage",
+    # Local project applications
     "accounts.apps.AccountsConfig",
     "home",
     "products",
@@ -77,17 +93,15 @@ INSTALLED_APPS = [
 
 SITE_ID = int(os.environ.get("SITE_ID", "1"))
 
+
+# Admin interface configuration
+
 JAZZMIN_SETTINGS = {
     "site_title": "The Elysium Archive Admin",
     "site_header": "The Elysium Archive",
     "site_brand": "The Elysium Archive",
-    "site_logo": None,
     "welcome_sign": "Welcome to the Elysium Archive admin panel.",
-    "copyright": "The Elysium Archive",
-    "search_model": [
-        "auth.User",
-        "auth.Group",
-    ],
+    "search_model": ["auth.User", "auth.Group"],
     "topmenu_links": [
         {"name": "View site", "url": "/", "new_window": False},
         {"model": "auth.User"},
@@ -102,6 +116,9 @@ JAZZMIN_SETTINGS = {
     },
 }
 
+
+# Middleware configuration
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -114,6 +131,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
+# Django message tag mapping
+
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",
     messages.INFO: "info",
@@ -121,6 +141,9 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",
 }
+
+
+# URL and template configuration
 
 ROOT_URLCONF = "elysium_archive.urls"
 
@@ -142,6 +165,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
 
+
+# Database configuration
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -150,11 +176,13 @@ DATABASES = {
 }
 
 if os.environ.get("DATABASE_URL"):
-    db_config = dj_database_url.config(
+    DATABASES["default"] = dj_database_url.config(
         conn_max_age=600,
         ssl_require=True,
     )
-    DATABASES["default"] = dict(db_config) if db_config is not None else {}
+
+
+# Password validation
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -165,30 +193,69 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+
+# Internationalization settings
+
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Europe/Dublin"
 USE_I18N = True
 USE_TZ = True
+
+
+# Static files configuration
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+
+# Media files and storage configuration
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+if os.environ.get("CLOUDINARY_URL"):
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
+
+# Default model field configuration
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Authentication redirects
 
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
+
+# Authentication backends
+
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+
+
+# Allauth configuration
 
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
@@ -202,6 +269,9 @@ ACCOUNT_FORMS = {
     "signup": "accounts.forms.ElysiumSignupForm",
     "login": "accounts.forms.ElysiumLoginForm",
 }
+
+
+# Email configuration
 
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
