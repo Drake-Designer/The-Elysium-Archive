@@ -11,18 +11,29 @@
                     <h1 class="h3 text-center mb-4">
                         <i class="fa-solid fa-check-circle me-2"></i>Confirm Email Address
                     </h1>
-                    <!-- Email confirmation form -->
-                    <p class="text-center muted mb-4">
-                        Please confirm that <strong>{{ email }}</strong> is your email address by clicking the button below.
-                    </p>
-                    <form method="post">
-                        {% csrf_token %}
+                    {% if confirmation %}
+                        <!-- Email confirmation form -->
+                        <p class="text-center muted mb-4">
+                            Please confirm that <strong>{{ confirmation.email_address.email }}</strong> is your email address by clicking the button below.
+                        </p>
+                        <form method="post"
+                              action="{% url 'account_confirm_email' confirmation.key %}">
+                            {% csrf_token %}
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-icon">
+                                    <i class="fa-solid fa-envelope-circle-check"></i>Confirm Email
+                                </button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <!-- Email confirmation fallback -->
+                        <p class="text-center muted mb-4">This confirmation link is invalid or has already been used.</p>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-icon">
-                                <i class="fa-solid fa-envelope-circle-check"></i>Confirm Email
-                            </button>
+                            <a class="btn btn-primary btn-icon" href="{% url 'account_email' %}">
+                                <i class="fa-solid fa-paper-plane"></i>Request a new confirmation email
+                            </a>
                         </div>
-                    </form>
+                    {% endif %}
                     <hr class="my-4 border-secondary">
                     <p class="text-center muted mb-0">
                         <a href="{% url 'home' %}">Return to home</a>
