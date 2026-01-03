@@ -14,10 +14,18 @@
                         <div class="sidebar-profile-card mb-4 p-3 rounded-3">
                             <div class="text-center">
                                 <div class="mb-3">
-                                    <i class="fa-solid fa-user-circle sidebar-profile-icon"></i>
+                                    {% if user.profile.profile_picture %}
+                                        <img src="{{ user.profile.profile_picture.url }}"
+                                             alt="Profile picture"
+                                             class="rounded-circle profile-pic-sidebar"
+                                             width="80"
+                                             height="80">
+                                    {% else %}
+                                        <i class="fa-solid fa-user-circle sidebar-profile-icon"></i>
+                                    {% endif %}
                                 </div>
-                                <h3 class="h6 mb-1">{{ user.username }}</h3>
-                                <p class="small muted mb-0">{{ user.email }}</p>
+                                <h3 class="h6 mb-1">{{ user.profile.get_display_name }}</h3>
+                                <p class="small muted mb-0 text-break">{{ user.email }}</p>
                             </div>
                         </div>
                         <nav class="dashboard-nav flex-column">
@@ -41,16 +49,18 @@
                                 <i class="fa-solid fa-book-skull"></i>
                                 <span>My Archive</span>
                             </button>
-                            <button class="dashboard-nav-item"
-                                    id="delete-nav-btn"
-                                    data-dashboard-tab="delete"
-                                    type="button"
-                                    role="tab"
-                                    aria-controls="delete"
-                                    aria-selected="false">
-                                <i class="fa-solid fa-trash"></i>
-                                <span>Delete Account</span>
-                            </button>
+                            {% if not user.is_superuser %}
+                                <button class="dashboard-nav-item"
+                                        id="delete-nav-btn"
+                                        data-dashboard-tab="delete"
+                                        type="button"
+                                        role="tab"
+                                        aria-controls="delete"
+                                        aria-selected="false">
+                                    <i class="fa-solid fa-trash"></i>
+                                    <span>Delete Account</span>
+                                </button>
+                            {% endif %}
                             <button class="dashboard-nav-item"
                                     id="logout-nav-btn"
                                     data-bs-toggle="modal"
@@ -78,9 +88,13 @@
                                             <span class="muted">Username:</span>
                                             <strong>{{ user.username }}</strong>
                                         </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="muted">Display Name:</span>
+                                            <strong>{{ user.profile.get_display_name }}</strong>
+                                        </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="muted">Email:</span>
-                                            <strong>{{ user.email }}</strong>
+                                            <strong class="text-break">{{ user.email }}</strong>
                                         </div>
                                     </div>
                                     <div class="d-flex gap-2 flex-wrap">
@@ -95,9 +109,32 @@
                                     </div>
                                 </div>
                                 <hr class="my-4 border-secondary">
-                                <h2 class="h5 mb-3">Display Name</h2>
-                                <form method="post" novalidate>
+                                <h2 class="h5 mb-3">Profile Settings</h2>
+                                <form method="post" enctype="multipart/form-data" novalidate>
                                     {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="id_profile_picture" class="form-label">Profile Picture</label>
+                                        <input type="file"
+                                               name="profile_picture"
+                                               id="id_profile_picture"
+                                               class="form-control {% if form.profile_picture.errors %}is-invalid{% endif %}"
+                                               accept="image/*">
+                                        {% if form.profile_picture.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.profile_picture.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text muted">Upload JPG or PNG (max 5MB)</div>
+                                    </div>
+                                    {% if user.profile.profile_picture %}
+                                        <div class="form-check mb-3">
+                                            <input type="checkbox"
+                                                   name="remove_picture"
+                                                   id="id_remove_picture_dash"
+                                                   class="form-check-input">
+                                            <label for="id_remove_picture_dash" class="form-check-label">Remove current picture</label>
+                                        </div>
+                                    {% endif %}
                                     <div class="mb-3">
                                         <label for="id_display_name" class="form-label">Display Name</label>
                                         <input type="text"
@@ -105,13 +142,14 @@
                                                id="id_display_name"
                                                class="form-control {% if form.display_name.errors %}is-invalid{% endif %}"
                                                value="{{ form.display_name.value|default:'' }}"
-                                               placeholder="Enter a display name (optional)">
+                                               placeholder="Enter a display name (optional)"
+                                               maxlength="20">
                                         {% if form.display_name.errors %}
                                             <div class="invalid-feedback">
                                                 {% for error in form.display_name.errors %}{{ error }}{% endfor %}
                                             </div>
                                         {% endif %}
-                                        <div class="form-text muted">Optional display name shown in your profile</div>
+                                        <div class="form-text muted">Max 20 characters (letters, numbers, symbols, spaces allowed)</div>
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-icon">
                                         <i class="fa-solid fa-save"></i>Save Changes
@@ -174,27 +212,34 @@
                                 <h1 class="h4 mb-4">
                                     <i class="fa-solid fa-trash me-2 icon-blood-crimson"></i>Delete Account
                                 </h1>
-                                <div class="alert alert-danger" role="alert">
-                                    <strong>Warning:</strong> This action cannot be undone.
-                                </div>
-                                <p class="muted mb-4">Deleting your account will permanently remove:</p>
-                                <ul class="muted mb-4">
-                                    <li>Your profile and account information</li>
-                                    <li>Your purchase history and access to unlocked entries</li>
-                                    <li>All associated data</li>
-                                </ul>
-                                <p class="muted mb-4">If you're sure you want to proceed, click the button below.</p>
-                                <form method="post" action="{% url 'account_delete' %}">
-                                    {% csrf_token %}
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-danger btn-icon">
-                                            <i class="fa-solid fa-trash"></i>Delete My Account
-                                        </button>
-                                        <a href="{% url 'home' %}" class="btn btn-outline-light">
-                                            <i class="fa-solid fa-arrow-left me-1"></i>Cancel
-                                        </a>
+                                {% if user.is_superuser %}
+                                    <div class="alert alert-warning" role="alert">
+                                        <strong>Notice:</strong> Superuser accounts cannot be deleted through this interface.
+                                        Contact the system administrator for account management.
                                     </div>
-                                </form>
+                                {% else %}
+                                    <div class="alert alert-danger" role="alert">
+                                        <strong>Warning:</strong> This action cannot be undone.
+                                    </div>
+                                    <p class="muted mb-4">Deleting your account will permanently remove:</p>
+                                    <ul class="muted mb-4">
+                                        <li>Your profile and account information</li>
+                                        <li>Your purchase history and access to unlocked entries</li>
+                                        <li>All associated data</li>
+                                    </ul>
+                                    <p class="muted mb-4">If you're sure you want to proceed, click the button below.</p>
+                                    <form method="post" action="{% url 'account_delete' %}">
+                                        {% csrf_token %}
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-danger btn-icon">
+                                                <i class="fa-solid fa-trash"></i>Delete My Account
+                                            </button>
+                                            <a href="{% url 'home' %}" class="btn btn-outline-light">
+                                                <i class="fa-solid fa-arrow-left me-1"></i>Cancel
+                                            </a>
+                                        </div>
+                                    </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

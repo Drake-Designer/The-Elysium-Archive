@@ -16,9 +16,20 @@ def dashboard(request):
     unlocked_products = []
 
     if request.method == "POST":
-        form = ProfileForm(request.POST)
+        form = ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             user_profile.display_name = form.cleaned_data["display_name"]
+
+            # Handle profile picture removal
+            if form.cleaned_data.get("remove_picture") and user_profile.profile_picture:
+                user_profile.profile_picture.delete(save=False)
+                user_profile.profile_picture = None
+            # Handle profile picture upload
+            elif form.cleaned_data.get("profile_picture"):
+                if user_profile.profile_picture:
+                    user_profile.profile_picture.delete(save=False)
+                user_profile.profile_picture = form.cleaned_data["profile_picture"]
+
             user_profile.save()
             messages.success(request, "Profile updated successfully.")
             return redirect("account_dashboard")
@@ -49,9 +60,20 @@ def profile(request):
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
-        form = ProfileForm(request.POST)
+        form = ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             user_profile.display_name = form.cleaned_data["display_name"]
+
+            # Handle profile picture removal
+            if form.cleaned_data.get("remove_picture") and user_profile.profile_picture:
+                user_profile.profile_picture.delete(save=False)
+                user_profile.profile_picture = None
+            # Handle profile picture upload
+            elif form.cleaned_data.get("profile_picture"):
+                if user_profile.profile_picture:
+                    user_profile.profile_picture.delete(save=False)
+                user_profile.profile_picture = form.cleaned_data["profile_picture"]
+
             user_profile.save()
             messages.success(request, "Profile updated successfully.")
             return redirect("account_profile")
@@ -69,6 +91,14 @@ def profile(request):
 @login_required
 def account_delete(request):
     """Delete the current user account."""
+    # Prevent superusers from deleting their accounts
+    if request.user.is_superuser:
+        messages.error(
+            request,
+            "Superuser accounts cannot be deleted. Contact system administrator.",
+        )
+        return redirect("account_profile")
+
     if request.method == "POST":
         user = request.user
         logout(request)

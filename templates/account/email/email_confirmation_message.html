@@ -23,8 +23,7 @@
                 </div>
                 <!-- Primary verification button -->
                 <div class="email-center">
-                    <a href="{% url 'account_confirm_email' confirmation.key %}"
-                       class="cta-button">V Confirm Email Address</a>
+                    <a href="{{ activate_url }}" class="cta-button">Confirm Email Address</a>
                 </div>
                 <!-- Security reminder -->
                 <div class="info-box">
@@ -36,7 +35,7 @@
                 <!-- Backup link note -->
                 <div class="email-note">
                     <p>Or copy and paste this link into your browser:</p>
-                    <div class="link-text">{% url 'account_confirm_email' confirmation.key %}</div>
+                    <div class="link-text">{{ activate_url }}</div>
                 </div>
                 <hr class="divider">
                 <!-- Footer note -->

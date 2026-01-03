@@ -7,6 +7,18 @@
 {% block content %}
   <!-- Hero and featured entries -->
   <section class="container py-5">
+    {% if user.is_authenticated %}
+      <!-- Greeting for authenticated users -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="alert alert-dark text-center user-greeting-banner">
+            <h2 class="h3 mb-0 user-greeting-title">
+              <i class="fa-solid fa-crown me-2"></i>Welcome back, {{ user.profile.get_display_name }}!
+            </h2>
+          </div>
+        </div>
+      </div>
+    {% endif %}
     <div class="row g-4 align-items-center">
       <div class="col-12 col-lg-5">
         <div class="panel p-4 text-center hero-panel">
@@ -192,7 +204,9 @@
             </ul>
             <div class="panel p-4">
               {% if user.is_authenticated %}
-                <h3 class="h5 mb-2">Welcome back, {{ user.username }}</h3>
+                <h3 class="h4 mb-3">
+                  <strong>Welcome back, {{ user.profile.get_display_name }}!</strong>
+                </h3>
                 <p class="muted mb-3">You are a member of the Archive. Explore and unlock forbidden knowledge.</p>
                 <div class="d-grid gap-2 d-sm-flex">
                   <a class="btn btn-primary site-auth-btn btn-icon"

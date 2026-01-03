@@ -29,7 +29,7 @@
                                                        value="{{ emailaddress.email }}"
                                                        {% if emailaddress.primary %}checked{% endif %}>
                                                 <label class="form-check-label" for="email_radio_{{ forloop.counter }}">
-                                                    <span class="fw-bold">{{ emailaddress.email }}</span>
+                                                    <span class="fw-bold text-break">{{ emailaddress.email }}</span>
                                                     {% if emailaddress.primary %}<span class="badge bg-primary ms-2">Primary</span>{% endif %}
                                                     {% if emailaddress.verified %}
                                                         <span class="badge bg-success ms-2">
@@ -45,19 +45,17 @@
                                         </div>
                                     {% endfor %}
                                 </div>
-                                <div class="d-flex gap-2 mt-3">
-                                    <button type="submit" name="action_primary" class="btn btn-primary btn-icon">
-                                        <i class="fa-solid fa-star"></i>Make Primary
+                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                    <button type="submit" name="action_primary" class="btn btn-sm btn-primary">
+                                        <i class="fa-solid fa-star me-1"></i>Make Primary
                                     </button>
-                                    <button type="submit"
-                                            name="action_send"
-                                            class="btn btn-outline-light btn-icon">
-                                        <i class="fa-solid fa-paper-plane"></i>Re-send Verification
+                                    <button type="submit" name="action_send" class="btn btn-sm btn-outline-light">
+                                        <i class="fa-solid fa-paper-plane me-1"></i>Re-send
                                     </button>
                                     <button type="submit"
                                             name="action_remove"
-                                            class="btn btn-outline-danger btn-icon">
-                                        <i class="fa-solid fa-trash"></i>Remove
+                                            class="btn btn-sm btn-outline-danger">
+                                        <i class="fa-solid fa-trash me-1"></i>Remove
                                     </button>
                                 </div>
                             </form>

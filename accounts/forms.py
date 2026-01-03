@@ -61,16 +61,31 @@ class ElysiumLoginForm(LoginForm):
 
 
 class ProfileForm(forms.Form):
-    """Collect a display name update."""
+    """Collect profile updates."""
 
     display_name = forms.CharField(
-        max_length=60,
+        max_length=20,
         required=False,
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
                 "placeholder": "Enter a display name (optional)",
+                "maxlength": "20",
             }
         ),
-        help_text="Optional display name shown in your profile",
+        help_text="Max 20 characters (letters, numbers, symbols, spaces allowed)",
+    )
+    profile_picture = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(
+            attrs={
+                "class": "form-control",
+                "accept": "image/*",
+            }
+        ),
+        help_text="Upload a profile picture (JPG, PNG, max 5MB)",
+    )
+    remove_picture = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )

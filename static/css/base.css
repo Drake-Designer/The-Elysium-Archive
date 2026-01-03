@@ -1207,6 +1207,37 @@ main .container,
   top: 100px;
 }
 
+/* Cart product thumbnail */
+.cart-product-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.cart-product-thumb-placeholder {
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+}
+
+/* Profile picture sizes */
+.profile-pic-sidebar {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border: 2px solid var(--color-relic-gold);
+}
+
+/* User greeting banner */
+.user-greeting-banner {
+  background: linear-gradient(135deg, rgba(184, 134, 11, 0.15), rgba(139, 0, 0, 0.15));
+  border: 1px solid var(--color-relic-gold);
+}
+
+.user-greeting-title {
+  color: var(--color-relic-gold);
+}
+
 .muted {
   color: rgba(230, 230, 235, 0.85) !important;
 }

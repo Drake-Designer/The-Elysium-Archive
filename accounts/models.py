@@ -11,9 +11,15 @@ class UserProfile(models.Model):
         related_name="profile",
     )
     display_name = models.CharField(
-        max_length=60,
+        max_length=20,
         blank=True,
         help_text="Optional display name (defaults to username)",
+    )
+    profile_picture = models.ImageField(
+        upload_to="profile_pictures/",
+        blank=True,
+        null=True,
+        help_text="Profile picture (optional)",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

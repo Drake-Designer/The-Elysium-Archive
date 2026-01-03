@@ -6,4 +6,4 @@ If you do not recognize the user, please discard this message and let us know by
 
 If you are the user, please click on the link below to confirm your address is valid and active:
 
-{% url 'account_confirm_email' confirmation.key %}
+{{ activate_url }}

@@ -37,15 +37,11 @@
                                         {% if item.product.image %}
                                             <img src="{{ item.product.image.url }}"
                                                  alt="{{ item.product.image_alt }}"
-                                                 class="rounded"
-                                                 style="width: 80px;
-                                                        height: 80px;
-                                                        object-fit: cover">
+                                                 class="rounded cart-product-thumb"
+                                                 width="80"
+                                                 height="80">
                                         {% else %}
-                                            <div class="d-flex align-items-center justify-content-center rounded bg-dark"
-                                                 style="width: 80px;
-                                                        height: 80px;
-                                                        min-width: 80px">
+                                            <div class="d-flex align-items-center justify-content-center rounded bg-dark cart-product-thumb-placeholder">
                                                 <i class="fa-solid fa-book text-muted fa-2x"></i>
                                             </div>
                                         {% endif %}
@@ -79,7 +75,7 @@
                 </div>
                 <div class="col-12 col-lg-4">
                     <!-- Order summary sidebar -->
-                    <div class="panel p-4 sticky-top" style="top: 90px;">
+                    <div class="panel p-4 sticky-top cart-summary">
                         <h3 class="h5 mb-4 pb-3 border-bottom">Order Summary</h3>
                         <div class="d-flex justify-content-between mb-3">
                             <span class="muted">Archives in cart:</span>

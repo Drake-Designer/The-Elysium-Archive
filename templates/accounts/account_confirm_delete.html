@@ -11,27 +11,39 @@
                     <h1 class="h3 text-center mb-4">
                         <i class="fa-solid fa-exclamation-triangle me-2 text-danger"></i>Delete Account
                     </h1>
-                    <div class="alert alert-danger" role="alert">
-                        <strong>Warning:</strong> This action cannot be undone.
-                    </div>
-                    <p class="muted mb-4">Deleting your account will permanently remove:</p>
-                    <ul class="muted mb-4">
-                        <li>Your profile and account information</li>
-                        <li>Your purchase history and access to unlocked entries</li>
-                        <li>All associated data</li>
-                    </ul>
-                    <p class="muted mb-4">If you're sure you want to proceed, click the button below.</p>
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger btn-icon">
-                                <i class="fa-solid fa-trash"></i>Delete My Account
-                            </button>
+                    {% if user.is_superuser %}
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Notice:</strong> Superuser accounts cannot be deleted through this interface.
+                            Contact the system administrator for account management.
+                        </div>
+                        <div class="text-center mt-4">
                             <a href="{% url 'account_profile' %}" class="btn btn-outline-light">
-                                <i class="fa-solid fa-arrow-left me-1"></i>Cancel
+                                <i class="fa-solid fa-arrow-left me-1"></i>Back to Profile
                             </a>
                         </div>
-                    </form>
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Warning:</strong> This action cannot be undone.
+                        </div>
+                        <p class="muted mb-4">Deleting your account will permanently remove:</p>
+                        <ul class="muted mb-4">
+                            <li>Your profile and account information</li>
+                            <li>Your purchase history and access to unlocked entries</li>
+                            <li>All associated data</li>
+                        </ul>
+                        <p class="muted mb-4">If you're sure you want to proceed, click the button below.</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-danger btn-icon">
+                                    <i class="fa-solid fa-trash"></i>Delete My Account
+                                </button>
+                                <a href="{% url 'account_profile' %}" class="btn btn-outline-light">
+                                    <i class="fa-solid fa-arrow-left me-1"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
