@@ -94,6 +94,32 @@ def get_cart_total(session, cart_items=None):
     return total
 
 
+def update_cart_quantity(session, product_id, quantity):
+    """Update the quantity of a product in the cart."""
+    try:
+        quantity = int(quantity)
+    except (TypeError, ValueError):
+        return False
+
+    if quantity < 1:
+        return False
+
+    try:
+        Product.objects.get(id=product_id, is_active=True)
+    except Product.DoesNotExist:
+        return False
+
+    cart = get_cart(session)
+    product_id_str = str(product_id)
+
+    if product_id_str in cart:
+        cart[product_id_str] = quantity
+        session.modified = True
+        return True
+
+    return False
+
+
 def clear_cart(session):
     """Clear all cart items from the session."""
     session["cart"] = {}

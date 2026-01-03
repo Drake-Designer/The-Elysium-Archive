@@ -8,6 +8,7 @@ from .cart import (
     get_cart_items,
     get_cart_total,
     remove_from_cart as remove_product_from_cart,
+    update_cart_quantity as update_product_quantity,
 )
 
 
@@ -71,5 +72,34 @@ def remove_from_cart(request):
         messages.success(request, f"V {product.title} removed from cart.")
     else:
         messages.info(request, f"{product.title} was not in your cart.")
+
+    return redirect("cart")
+
+
+def update_cart_quantity(request):
+    """Update the quantity of a product in the shopping cart."""
+    if request.method != "POST":
+        return redirect("cart")
+
+    product_id = _parse_int(request.POST.get("product_id"), None)
+    if product_id is None:
+        messages.error(request, "Product not found.")
+        return redirect("cart")
+
+    quantity = _parse_int(request.POST.get("quantity"), 1)
+    if quantity < 1:
+        messages.error(request, "Quantity must be at least 1.")
+        return redirect("cart")
+
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        messages.error(request, "Product not found.")
+        return redirect("cart")
+
+    if update_product_quantity(request.session, product_id, quantity):
+        messages.success(request, f"V {product.title} quantity updated!")
+    else:
+        messages.error(request, f"Could not update {product.title} quantity.")
 
     return redirect("cart")

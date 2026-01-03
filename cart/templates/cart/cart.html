@@ -42,7 +42,8 @@
                                 </thead>
                                 <tbody>
                                     {% for item in cart_items %}
-                                        <tr class="align-middle">
+                                        <tr class="align-middle cart-item-row"
+                                            data-product-id="{{ item.product.id }}">
                                             <td class="px-4 py-4">
                                                 <a href="{% url 'product_detail' slug=item.product.slug %}"
                                                    class="text-decoration-none">
@@ -51,13 +52,31 @@
                                                 </a>
                                             </td>
                                             <td class="text-center py-4">
-                                                <span class="badge text-bg-dark">{{ item.quantity }}</span>
+                                                <form method="post"
+                                                      action="{% url 'update_cart_quantity' %}"
+                                                      class="cart-update-form d-inline-flex align-items-center gap-2">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                                    <input type="number"
+                                                           name="quantity"
+                                                           value="{{ item.quantity }}"
+                                                           min="1"
+                                                           max="99"
+                                                           class="form-control form-control-sm cart-quantity-input"
+                                                           style="width: 70px"
+                                                           aria-label="Quantity for {{ item.product.title }}">
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-primary cart-update-btn"
+                                                            title="Update quantity">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
+                                                </form>
                                             </td>
                                             <td class="text-end py-4">
                                                 <span class="text-danger fw-bold">€{{ item.product.price }}</span>
                                             </td>
                                             <td class="text-end py-4">
-                                                <span class="text-warning fw-bold">€{{ item.line_total|floatformat:2 }}</span>
+                                                <span class="text-warning fw-bold cart-line-total">€{{ item.line_total|floatformat:2 }}</span>
                                             </td>
                                             <td class="text-center py-4">
                                                 <form method="post"
@@ -126,3 +145,6 @@
         {% endif %}
     </section>
 {% endblock content %}
+{% block extra_js %}
+    <script src="{% static 'js/cart-update.js' %}"></script>
+{% endblock extra_js %}
