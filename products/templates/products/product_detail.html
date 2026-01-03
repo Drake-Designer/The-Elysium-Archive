@@ -58,12 +58,24 @@
                                     <a href="#full-content" class="btn btn-success btn-lg w-100">
                                         <i class="fa-solid fa-book-open me-2"></i>Read Full Archive
                                     </a>
+                                {% elif in_cart %}
+                                    <div class="d-grid gap-2 d-sm-flex">
+                                        <a href="{% url 'cart' %}" class="btn btn-danger btn-lg flex-grow-1">
+                                            <i class="fa-solid fa-lock-open me-2"></i>Proceed to Checkout
+                                        </a>
+                                        <form method="post" action="{% url 'remove_from_cart' %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                                            <button type="submit" class="btn btn-outline-danger btn-lg">
+                                                <i class="fa-solid fa-trash me-2"></i>Remove
+                                            </button>
+                                        </form>
+                                    </div>
                                 {% else %}
                                     <div class="d-grid gap-2 d-sm-flex">
                                         <form method="post" action="{% url 'add_to_cart' %}" class="flex-grow-1">
                                             {% csrf_token %}
                                             <input type="hidden" name="product_id" value="{{ product.id }}">
-                                            <input type="hidden" name="quantity" value="1">
                                             <button type="submit" class="btn btn-danger btn-lg w-100">
                                                 <i class="fa-solid fa-shopping-cart me-2"></i>Add to Cart
                                             </button>

@@ -47,4 +47,9 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["purchased"] = False
+
+        product = self.get_object()
+        cart_product_ids = set(self.request.session.get("cart", {}).keys())
+        context["in_cart"] = str(product.id) in cart_product_ids
+
         return context

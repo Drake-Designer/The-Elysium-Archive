@@ -24,7 +24,7 @@ def create_order_from_cart(session, user=None):
             product=item["product"],
             product_title=item["product"].title,
             product_price=item["product"].price,
-            quantity=item["quantity"],
+            quantity=1,
         )
         order_total += line_item.line_total
 
