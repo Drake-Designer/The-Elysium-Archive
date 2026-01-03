@@ -1,18 +1,148 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Email Address Changed - The Elysium Archive</title>
-        <link rel="stylesheet" href="{% static 'css/email.css' %}">
+        <style>
+            body {
+                background-color: #0a0e27;
+                color: #e0e0e0;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                line-height: 1.6;
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                margin: 0 auto;
+                max-width: 600px;
+                padding: 20px;
+            }
+
+            .email-wrapper {
+                background-color: #1a1f3a;
+                border: 1px solid #c9a961;
+                border-radius: 8px;
+                margin: 20px 0;
+                padding: 40px;
+            }
+
+            .logo {
+                color: #c9a961;
+                font-family: 'Cinzel', serif;
+                font-size: 24px;
+                letter-spacing: 2px;
+                margin-bottom: 30px;
+                text-align: center;
+            }
+
+            h1 {
+                color: #c9a961;
+                font-family: 'Cinzel', serif;
+                font-size: 24px;
+                margin: 30px 0 20px;
+                text-align: center;
+            }
+
+            .content {
+                color: #b0b0b0;
+                margin: 25px 0;
+                text-align: center;
+            }
+
+            .warning-box {
+                background-color: rgba(255, 107, 107, 0.1);
+                border-left: 4px solid #ff6b6b;
+                border-radius: 4px;
+                margin: 20px 0;
+                padding: 15px;
+            }
+
+            .warning-box p {
+                color: #ff9999;
+                margin: 0;
+            }
+
+            .info-box {
+                background-color: rgba(201, 169, 97, 0.1);
+                border-left: 4px solid #c9a961;
+                border-radius: 4px;
+                margin: 20px 0;
+                padding: 15px;
+            }
+
+            .success-box {
+                background-color: rgba(76, 175, 80, 0.1);
+                border-left: 4px solid #4caf50;
+                border-radius: 4px;
+                margin: 20px 0;
+                padding: 15px;
+            }
+
+            .success-box p {
+                color: #81c784;
+                margin: 0;
+            }
+
+            .cta-button {
+                background-color: #c9a961;
+                border-radius: 4px;
+                color: #0a0e27;
+                display: inline-block;
+                font-weight: bold;
+                margin: 20px 0;
+                padding: 14px 32px;
+                text-decoration: none;
+            }
+
+            .link-text {
+                color: #c9a961;
+                font-size: 12px;
+                margin-top: 15px;
+                word-break: break-all;
+            }
+
+            .footer {
+                border-top: 1px solid #333;
+                color: #666;
+                font-size: 12px;
+                margin-top: 40px;
+                padding-top: 20px;
+                text-align: center;
+            }
+
+            .divider {
+                background-color: #333;
+                border: 0;
+                height: 1px;
+                margin: 30px 0;
+            }
+
+            .expiry {
+                color: #999;
+                font-size: 12px;
+                font-style: italic;
+                margin-top: 10px;
+            }
+
+            .email-center {
+                text-align: center;
+            }
+
+            .email-note {
+                color: #888;
+                font-size: 12px;
+                text-align: center;
+            }
+        </style>
     </head>
     <body>
         <!-- Email layout wrapper -->
         <div class="container">
             <div class="email-wrapper">
                 <!-- Brand header -->
-                <div class="logo">V THE ELYSIUM ARCHIVE</div>
+                <div class="logo">THE ELYSIUM ARCHIVE</div>
                 <h1>Email Address Changed</h1>
                 <!-- Email body copy -->
                 <div class="content">
