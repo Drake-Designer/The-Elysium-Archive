@@ -19,6 +19,7 @@ No downloads. No loose files. Just secrets.
 - [Technical Overview](#technical-overview)
 - [Frontend Structure and Static Assets](#frontend-structure-and-static-assets)
 - [Technologies Used](#technologies-used)
+- [Stripe Payments](#stripe-payments)
 - [Database Design](#database-design)
 - [Testing and Bug Fixes](#testing-and-bug-fixes)
 - [Running the Project Locally](#running-the-project-locally)
@@ -465,6 +466,74 @@ The implementation avoids unintended cropping by using intelligent scaling with 
 - **Heroku** – Cloud hosting platform
 - **Heroku PostgreSQL** – Production database
 - **Git** – Version control
+
+## Stripe Payments
+
+### Overview
+
+The Elysium Archive uses Stripe Checkout (hosted) for secure payment processing. All payments are handled in test mode, meaning no real money is processed during development and testing.
+
+The payment flow follows this sequence:
+
+1. **Cart** – User adds archive entries to the shopping cart
+2. **Checkout** – User reviews the order and confirms purchase intent
+3. **Stripe Hosted Page** – User is redirected to Stripe's secure payment form
+4. **Success or Cancel** – User returns to the site with confirmation or cancellation
+
+Stripe sessions are created server-side using `stripe.checkout.Session.create`. The integration is configured to accept card payments only via `payment_method_types=["card"]`.
+
+### Test Mode
+
+All Stripe operations in this project run in test mode. This means:
+
+- No real credit cards are charged
+- No actual money moves
+- Test card numbers are used for checkout
+- Webhooks and payment confirmation can be simulated
+
+Test mode allows safe development, testing, and demonstration without financial risk.
+
+### How to Test a Payment
+
+Follow these steps to test the checkout flow:
+
+1. **Register an account** – Create a new account or log in to an existing one
+2. **Verify your email** – Check your email inbox and verify your account (required for checkout)
+3. **Browse the archive** – Go to the Archive page and select a product
+4. **Add to cart** – Click "Add to Cart" on a product detail page
+5. **View cart** – Review your cart at `/cart/`
+6. **Proceed to checkout** – Click "Proceed to Checkout"
+7. **Complete purchase** – Click "Complete Purchase" to redirect to Stripe
+8. **Enter test card details** – Use the test card number below
+9. **Submit payment** – Complete the Stripe form and submit
+10. **View confirmation** – You will be redirected back to the success page
+
+### Test Card Details
+
+Use the following test card details on the Stripe checkout page:
+
+- **Card Number:** `4242 4242 4242 4242`
+- **Expiry Date:** Any future date (e.g., `12/34`)
+- **CVC:** Any 3-digit number (e.g., `123`)
+- **ZIP/Postal Code:** Any valid format (e.g., `12345`)
+
+This is Stripe's official test card for successful payments. Other test cards for error scenarios can be found in [Stripe's testing documentation](https://docs.stripe.com/testing).
+
+### Stripe Link Note
+
+During checkout, you may see a "Pay with Link" button or a checkbox for "Save my information for faster checkout" on the Stripe hosted page.
+
+This is part of Stripe's UI for accelerated checkout and autofill features, often displayed in test mode as an optional convenience. However, the payment session is explicitly configured to accept **card payments only** via `payment_method_types=["card"]`.
+
+The presence of these UI elements does not change the payment methods accepted by the integration. They are standard Stripe Checkout interface components and do not enable alternative payment methods unless explicitly configured in the session creation code.
+
+### Developer Note
+
+This project uses my personal Stripe account, which is also connected to my professional website [drakedrumstudio.ie](https://drakedrumstudio.ie).
+
+The Elysium Archive served as a learning project for integrating Stripe Checkout into a Django application. The knowledge and implementation patterns developed here will be applied to my personal site in the future, where Stripe payments are planned but not yet active.
+
+All Stripe keys and configuration are stored in environment variables and are never committed to version control. Test mode ensures safe development without financial consequences.
 
 ## Admin Panel Setup
 

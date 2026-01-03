@@ -1,27 +1,49 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
     Checkout | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Confirm your purchase and unlock access to your selected archives.
+    Review and confirm your purchase before redirecting to secure payment.
 {% endblock meta_description %}
 {% block content %}
+    <!-- Checkout page with final confirmation -->
     <section class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-8">
-                <div class="panel p-5 text-center">
-                    <h1 class="display-6 mb-3">Checkout</h1>
-                    <p class="muted mb-4">This checkout flow is not yet implemented. Your selected items remain in the cart.</p>
-                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                        <a href="{% url 'cart' %}" class="btn btn-outline-light btn-icon">
-                            <i class="fa-solid fa-arrow-left"></i>Return to Cart
-                        </a>
-                        <a href="{% url 'archive' %}" class="btn btn-primary btn-icon">
-                            <i class="fa-solid fa-book-open"></i>Browse the Archive
-                        </a>
-                    </div>
-                </div>
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'cart' %}">Shopping Cart</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+            </ol>
+        </nav>
+        <div class="row mb-5">
+            <div class="col-12">
+                <h1 class="display-6 mb-2">Secure Checkout</h1>
+                <p class="muted">You will be redirected to Stripe for secure payment processing.</p>
             </div>
         </div>
-    </section>
-{% endblock content %}
+        <div class="row">
+            <div class="col-12 col-lg-8 mx-auto">
+                <!-- Show NO REFUNDS policy prominently -->
+                {% include "includes/no_refunds_policy.html" %}
+                <!-- Checkout form (auto-submits to Stripe) -->
+                <form method="post" action="{% url 'checkout' %}" class="mt-4">
+                    {% csrf_token %}
+                    <div class="alert alert-info">
+                        <p class="mb-0">Click "Complete Purchase" to proceed to secure payment.</p>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-lg w-100">
+                        <i class="fa-solid fa-check me-2"></i>Complete Purchase
+                    </button>
+                </form>
+                <a href="{% url 'cart' %}"
+                   class="btn btn-outline-light btn-lg w-100 mt-3">
+                    <i class="fa-solid fa-arrow-left me-2"></i>Return to Cart
+                </a>
+            </div>
+        </section>
+    {% endblock content %}

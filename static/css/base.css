@@ -1438,3 +1438,9 @@ body.reduced-effects .entry-card:hover {
     transition: none;
   }
 }
+/* NO REFUNDS policy styling. */
+.no-refunds-policy-alert {
+  background-color: rgba(139, 30, 45, 0.15);
+  border-color: rgba(139, 30, 45, 0.35);
+  color: var(--ash-white);
+}
