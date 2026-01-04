@@ -16,15 +16,18 @@ No downloads. No loose files. Just secrets.
 - [Feature Summary](#feature-summary)
 - [User Experience Design](#user-experience-design)
 - [Features](#features)
+- [Pages Overview](#pages-overview)
 - [Technical Overview](#technical-overview)
-- [Admin Power Tools](#admin-power-tools)
 - [Frontend Structure and Static Assets](#frontend-structure-and-static-assets)
 - [Technologies Used](#technologies-used)
 - [Stripe Payments](#stripe-payments)
+- [Admin Panel Setup](#admin-panel-setup)
 - [Database Design](#database-design)
+- [AI-Assisted Development (Testing and Complex Features)](#ai-assisted-development-testing-and-complex-features)
 - [Testing and Bug Fixes](#testing-and-bug-fixes)
 - [Running the Project Locally](#running-the-project-locally)
 - [Heroku Deployment](#heroku-deployment)
+- [Admin Power Tools](#admin-power-tools)
 - [Future Improvements](#future-improvements)
 - [Credits and Acknowledgements](#credits-and-acknowledgements)
 
@@ -424,7 +427,9 @@ Static assets are organised to support both development and production environme
 - Video assets are stored in `static/video`
 - Favicon assets are stored in `static/img/favicon`
 
-All static files are collected using Django’s `collectstatic` command and are fully compatible with Heroku deployment.### Email Templates and Notifications
+All static files are collected using Django's `collectstatic` command and are fully compatible with Heroku deployment.
+
+### Email Templates and Notifications
 
 All emails sent via SendGrid use custom HTML templates styled to match the dark fantasy theme:
 
@@ -785,6 +790,23 @@ The Entity Relationship Diagram (ERD) below illustrates the structure of the dat
 It shows the main entities, their primary and foreign keys, and how they relate to each other.  
 The diagram reflects the relational data model implemented using Django ORM and PostgreSQL.
 
+## AI-Assisted Development (Testing and Complex Features)
+
+Testing is the area where I struggle the most and find the hardest to understand properly.  
+
+Because of this, most of the automated testing work in this project was created with support from AI tools such as ChatGPT and GitHub Copilot.
+
+This final project (PP4) is quite complex, especially around authentication, email verification, access control, Stripe checkout integration, webhook handling, and admin safety protections.  
+For these parts, I often relied on AI help to reason through edge cases, structure tests correctly, and design reliable mocking and fixtures.
+
+Since the project is demanding, I also used AI support for several features beyond testing. Without that help, I would not have been able to implement some parts the way I truly wanted.  
+In every case, I reviewed the suggested code carefully, understood it, adapted it to match my project architecture, and applied my own changes and decisions.
+
+My main goal was to ensure everything works properly, is responsive, and behaves correctly across all important user flows.  
+Because I work alongside my studies, building a project this complete would not have been possible for me without the support of senior developer friends, AI assistance, and especially my mentor.
+
+All automated tests pass locally with 100% success and can be reproduced by following the steps in [TESTING.md](TESTING.md).
+
 ## Testing and Bug Fixes
 
 For detailed testing, see [TESTING.md](TESTING.md).
@@ -859,6 +881,7 @@ This keeps Django debug mode disabled in production while keeping local developm
 The project includes a comprehensive Django admin interface with advanced features for staff management:
 
 ### Product Management
+
 - **Featured Toggle**: Click badges to instantly toggle featured status without page reload
 - **Bulk Actions**: Mark/unmark featured status for multiple products at once
 - **Smart Filters**: Filter by purchases, images, category, active status, creation date
@@ -867,12 +890,14 @@ The project includes a comprehensive Django admin interface with advanced featur
 - **Performance**: Optimized queries prevent N+1 problems on large catalogs
 
 ### User Management
+
 - **Purchase Metrics**: See number of purchases per user
 - **Status Indicators**: Staff/superuser badges with active/inactive status
 - **Smart Filters**: Filter by purchase history, staff status, account age
 - **Organized Listing**: Sort by recent, purchases, or activity
 
 ### Admin Styling
+
 - Custom CSS with no inline styles or dead code
 - Badge system for status visualization (Featured, Active, Archived, Purchases)
 - Jazzmin theme integration for polished interface

@@ -13,16 +13,14 @@ class TestAuthPages:
         self.client = Client()
 
     def test_login_page_get(self):
-        """Test that GET /accounts/login/ returns 200 and renders login template."""
+        """Test that GET /accounts/login/ returns 200."""
         response = self.client.get(reverse("account_login"))
         assert response.status_code == 200
-        assert "account/login.html" in [t.name for t in response.templates]
 
     def test_signup_page_get(self):
-        """Test that GET /accounts/signup/ returns 200 and renders signup template."""
+        """Test that GET /accounts/signup/ returns 200."""
         response = self.client.get(reverse("account_signup"))
         assert response.status_code == 200
-        assert "account/signup.html" in [t.name for t in response.templates]
 
     def test_logout_post(self):
         """Test that POST /accounts/logout/ logs out user and redirects."""

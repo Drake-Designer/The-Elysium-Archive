@@ -45,23 +45,23 @@ class ProductDetailView(DetailView):
     slug_url_kwarg = "slug"
 
     def get_queryset(self):
-        # Show only active products to everyone (regular behavior)
-        return Product.objects.filter(is_active=True)
+        # Include all products; get_object() will enforce access control.
+        return Product.objects.all()
 
     def get_object(self, queryset=None):
-        # Allow staff/superusers to see inactive products
-        # Allow owners to see their purchased inactive products
+        # Allow staff/superusers to see inactive products.
+        # Allow owners to see their purchased inactive products.
         obj = super().get_object(queryset)
 
         if obj.is_active:
             return obj
 
-        # If product is inactive, check if user is staff or owner
+        # If product is inactive, check if user is staff or owner.
         if self.request.user.is_staff or self.request.user.is_superuser:
             return obj
 
         if self.request.user.is_authenticated:
-            # Check if user owns this product via AccessEntitlement
+            # Check if user owns this product via AccessEntitlement.
             from orders.models import AccessEntitlement
 
             if AccessEntitlement.objects.filter(
@@ -69,7 +69,7 @@ class ProductDetailView(DetailView):
             ).exists():
                 return obj
 
-        # User is not authorized to view this inactive product
+        # User is not authorized to view this inactive product.
         from django.http import Http404
 
         raise Http404("Product not found")
