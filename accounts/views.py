@@ -15,9 +15,17 @@ def dashboard(request):
     """Render the account dashboard."""
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
     entitlements = AccessEntitlement.objects.filter(user=request.user).select_related(
-        "product"
+        "product", "order"
     )
-    unlocked_products = [item.product for item in entitlements if item.product]
+    unlocked_products = [
+        {
+            "product": item.product,
+            "order": item.order,
+            "purchase_date": item.granted_at,
+        }
+        for item in entitlements
+        if item.product
+    ]
 
     if request.method == "POST":
         form = ProfileForm(request.POST, request.FILES)
@@ -53,9 +61,17 @@ def dashboard(request):
 def my_archive(request):
     """Render the user's unlocked archive entries."""
     entitlements = AccessEntitlement.objects.filter(user=request.user).select_related(
-        "product"
+        "product", "order"
     )
-    unlocked_products = [item.product for item in entitlements if item.product]
+    unlocked_products = [
+        {
+            "product": item.product,
+            "order": item.order,
+            "purchase_date": item.granted_at,
+        }
+        for item in entitlements
+        if item.product
+    ]
 
     context = {
         "unlocked_products": unlocked_products,

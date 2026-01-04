@@ -68,7 +68,9 @@ if not DEBUG:
 # Installed applications
 
 INSTALLED_APPS = [
-    # Django core applications
+    # Admin theme
+    "jazzmin",
+    # Django core
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -76,13 +78,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-    # Third party applications
-    "jazzmin",
+    # Third party
     "allauth",
     "allauth.account",
     "cloudinary",
     "cloudinary_storage",
-    # Local project applications
+    # Local apps
     "accounts.apps.AccountsConfig",
     "home",
     "products",
@@ -91,6 +92,7 @@ INSTALLED_APPS = [
     "orders",
     "reviews",
 ]
+
 
 SITE_ID = int(os.environ.get("SITE_ID", "1"))
 

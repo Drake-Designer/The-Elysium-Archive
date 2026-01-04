@@ -210,7 +210,7 @@
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="lore-image-container">
-                        <img src="{% static 'img/lore/lore-pic.jpg' %}"
+                        <img src="{% static 'img/lore/timeline-archive.jpg' %}"
                              alt="Timeline of the Archive spanning ancient seals to crimson index records"
                              class="lore-image"
                              loading="lazy"
@@ -365,17 +365,6 @@
                     <a class="btn btn-outline-light btn-icon"
                        href="{% url 'account_login' %}">
                         <i class="fa-solid fa-right-to-bracket"></i>Login
-                    </a>
-                </div>
-            </div>
-        {% else %}
-            <!-- Member call to action -->
-            <div class="panel p-4 text-center">
-                <h2 class="h3 mb-2">Welcome back</h2>
-                <p class="muted mb-4">Head to the Archive and continue your reading.</p>
-                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                    <a class="btn btn-outline-light btn-icon" href="{% url 'lore' %}">
-                        <i class="fa-solid fa-scroll"></i>Read the Lore
                     </a>
                 </div>
             </div>

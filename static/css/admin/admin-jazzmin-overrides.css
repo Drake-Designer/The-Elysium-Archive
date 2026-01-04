@@ -1,0 +1,139 @@
+/* Jazzmin specific overrides and admin UI polish. */
+
+/* Improve Jazzmin sidebar readability. */
+.jazzmin-sidebar {
+  background-color: var(--admin-bg);
+  border-right: 1px solid var(--admin-border);
+}
+
+.jazzmin-sidebar a {
+  color: var(--admin-text);
+}
+
+.jazzmin-sidebar a:hover {
+  color: var(--admin-gold);
+  background-color: rgba(194, 161, 77, 0.05);
+}
+
+/* Improve admin header contrast. */
+.jazzmin-header {
+  background-color: var(--admin-panel);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+/* Better admin form field styling. */
+.jazzmin-form input[type='text'],
+.jazzmin-form input[type='email'],
+.jazzmin-form input[type='password'],
+.jazzmin-form input[type='number'],
+.jazzmin-form textarea,
+.jazzmin-form select {
+  background-color: rgba(230, 230, 235, 0.05);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+}
+
+.jazzmin-form input[type='text']:focus,
+.jazzmin-form input[type='email']:focus,
+.jazzmin-form input[type='password']:focus,
+.jazzmin-form input[type='number']:focus,
+.jazzmin-form textarea:focus,
+.jazzmin-form select:focus {
+  border-color: var(--admin-gold);
+  outline: none;
+  background-color: rgba(194, 161, 77, 0.05);
+}
+
+/* Nicer admin cards / modules spacing. */
+.jazzmin-module {
+  background-color: var(--admin-panel);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.jazzmin-module h2,
+.jazzmin-module h3 {
+  color: var(--admin-text);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+/* Consistent admin border radius throughout. */
+.jazzmin-button,
+.jazzmin-input {
+  border-radius: 4px;
+}
+
+/* Tighten admin table density. */
+.jazzmin-table {
+  font-size: 0.9rem;
+}
+
+.jazzmin-table th {
+  background-color: rgba(194, 161, 77, 0.08);
+  color: var(--admin-text);
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.jazzmin-table td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.jazzmin-table tbody tr:hover {
+  background-color: rgba(194, 161, 77, 0.05);
+}
+
+/* Badge alignment in list display. */
+.admin-list-field-badge {
+  display: inline-block;
+}
+
+/* Improve admin messages styling. */
+.jazzmin-messages {
+  margin-bottom: 1.5rem;
+}
+
+.jazzmin-message {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.jazzmin-message-error {
+  background-color: rgba(139, 30, 45, 0.12);
+  border: 1px solid rgba(139, 30, 45, 0.35);
+  color: var(--admin-danger);
+}
+
+.jazzmin-message-success {
+  background-color: rgba(76, 175, 80, 0.12);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  color: var(--admin-success);
+}
+
+.jazzmin-message-warning {
+  background-color: rgba(255, 152, 0, 0.12);
+  border: 1px solid rgba(255, 152, 0, 0.35);
+  color: var(--admin-warning);
+}
+
+/* Better admin action buttons. */
+.jazzmin-action-button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jazzmin-action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--admin-shadow);
+}

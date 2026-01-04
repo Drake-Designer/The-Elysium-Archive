@@ -1,0 +1,190 @@
+/* Admin UI components: badges, chips, typography improvements. */
+
+/* Badge base styling for admin. */
+.badge {
+  display: inline-block;
+  font-weight: 700;
+  padding: 0.35rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+/* Gold badge for purchase counts. */
+.badge-gold {
+  background-color: var(--admin-gold-soft);
+  border: 1px solid var(--admin-gold-border);
+  color: var(--admin-gold);
+}
+
+/* Muted badge for archived/inactive status. */
+.badge-muted {
+  background-color: rgba(160, 160, 168, 0.12);
+  border: 1px solid rgba(160, 160, 168, 0.35);
+  color: var(--admin-muted);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Success badge for active status. */
+.badge-success {
+  background-color: rgba(76, 175, 80, 0.18);
+  border: 1px solid rgba(76, 175, 80, 0.45);
+  color: var(--admin-success);
+  font-weight: 600;
+}
+
+/* Danger badge for blocked/error status. */
+.badge-danger {
+  background-color: rgba(139, 30, 45, 0.12);
+  border: 1px solid rgba(139, 30, 45, 0.35);
+  color: var(--admin-danger);
+}
+
+/* Featured badge for prominent products. */
+.badge-featured {
+  background-color: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.45);
+  color: #ffc107;
+  font-weight: 600;
+}
+
+/* Not featured badge - neutral gray. */
+.badge-not-featured {
+  background-color: rgba(100, 100, 110, 0.08);
+  border: 1px solid rgba(100, 100, 110, 0.25);
+  color: var(--admin-muted);
+  font-weight: 500;
+}
+
+/* Image badge - indicates media present. */
+.badge-image {
+  background-color: rgba(25, 103, 210, 0.12);
+  border: 1px solid rgba(25, 103, 210, 0.35);
+  color: #1967d2;
+  font-weight: 600;
+}
+
+/* No image badge - indicates missing media. */
+.badge-no-image {
+  background-color: rgba(160, 160, 168, 0.08);
+  border: 1px solid rgba(160, 160, 168, 0.25);
+  color: var(--admin-muted);
+  font-weight: 500;
+}
+
+/* Pill/chip style for small labels. */
+.chip {
+  background-color: var(--admin-panel);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Improve admin list display table readability. */
+.admin-list-table tbody tr {
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-list-table tbody tr:hover {
+  background-color: rgba(194, 161, 77, 0.05);
+}
+
+.admin-list-table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+/* Admin header typography. */
+.admin-h3,
+.admin-title {
+  color: var(--admin-text);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Admin help text styling. */
+.admin-help-text {
+  color: var(--admin-muted);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Admin form label improvements. */
+.admin-label {
+  color: var(--admin-text);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Admin toggle button styling - click to toggle featured status. */
+.admin-btn-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  outline: none;
+}
+
+.admin-btn-toggle:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+}
+
+.admin-btn-toggle:active {
+  transform: scale(0.98);
+}
+
+.admin-btn-toggle:focus-visible {
+  outline: 2px solid var(--admin-gold-border);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Inline form for toggle button. */
+form.admin-inline-form {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+/* Admin inline form button - minimal styling. */
+.admin-inline-form button {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+/* Admin card/module spacing. */
+.admin-module {
+  background-color: var(--admin-panel);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Admin breadcrumb improvements. */
+.admin-breadcrumb {
+  color: var(--admin-muted);
+  font-size: 0.9rem;
+}
+
+.admin-breadcrumb a {
+  color: var(--admin-gold);
+  text-decoration: none;
+}
+
+.admin-breadcrumb a:hover {
+  text-decoration: underline;
+}

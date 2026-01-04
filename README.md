@@ -17,6 +17,7 @@ No downloads. No loose files. Just secrets.
 - [User Experience Design](#user-experience-design)
 - [Features](#features)
 - [Technical Overview](#technical-overview)
+- [Admin Power Tools](#admin-power-tools)
 - [Frontend Structure and Static Assets](#frontend-structure-and-static-assets)
 - [Technologies Used](#technologies-used)
 - [Stripe Payments](#stripe-payments)
@@ -103,8 +104,9 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 
 ### Reviews (Verified Buyers Only)
 
-- Reviews available only after purchase
-- Displayed on product pages
+- Reviews visible to everyone on product pages
+- Only buyers with verified email can submit reviews
+- One review per user per product enforced server-side
 - Simple validation for clean feedback
 
 ### Profiles
@@ -268,6 +270,35 @@ This section documents implemented features organised by category.
 - **Form Validation**: Inline error feedback on registration and login forms
 - **Accessible Alerts**: Bootstrap-styled alerts with proper ARIA roles
 
+### Verified Reviews
+
+- **Buyer-Only Reviews** – Only verified users who purchased a specific product can leave reviews
+- **One Review Per Product** – Database constraint prevents duplicate reviews from the same user
+- **Star Rating** – Reviews include a 1-5 star rating
+- **Optional Title** – Review title is optional; defaults to "Untitled Review"
+- **Review Body** – Text field for detailed feedback (no character limit)
+- **Verified Badge** – Reviews display the buyer's display name with a "Verified purchase" indicator
+- **Public Display** – All reviews are visible to everyone on product pages; only buyers can submit
+- **Immutable Reviews** – Once submitted, reviews cannot be edited or deleted by the user (admin-only removal)
+- **Admin Moderation** – Reviews are registered in Django admin with filters for rating, product, and date
+
+### My Archive – Permanent Access Management
+
+- **Unified Access Source** – AccessEntitlement model is the single source of truth for purchased products
+- **Purchase Date Display** – Each unlocked product shows the unlock date on archive cards
+- **Two-Section View** – My Archive appears as a dedicated page and in the dashboard as a tabbed section
+- **Consistent Card Layout** – Archive cards display product image, title, description, and unlock date
+- **Clear Access Button** – Each card includes an "Access" button that navigates to the unlocked product page
+- **Empty State** – When no products are purchased, displays a friendly message and link to the archive catalog
+- **Permanent Retention** – Once purchased, products remain in My Archive indefinitely; no expiration or revocation
+
+### Unlocked Product Pages
+
+- **Single Template Design** – One `product_detail.html` template handles both locked and unlocked views
+- **Conditional Content** – View automatically detects user's access level via entitlements
+- **Full Archive Text** – Unlocked users see the complete archive entry below the product details
+- **Review Section** – Visible to everyone; buyers can submit one review per product via form
+
 ## Pages Overview
 
 | Page | URL | Access | Description |
@@ -281,9 +312,30 @@ This section documents implemented features organised by category.
 | Profile | `/accounts/profile/` | Authenticated | View and edit account settings |
 | My Archive | `/accounts/archive/` | Authenticated | Browse purchased archive entries |
 | Delete Account | `/accounts/delete/` | Authenticated | Permanently delete account |
+| Product Detail | `/archive/<slug>/` | Public | View product with conditional full content |
+| Submit Review | `/archive/<slug>/review/` | Authenticated (POST) | Submit review for purchased product |
 | Admin | `/admin/` | Staff only | Django admin panel |
 
 ## Technical Overview
+
+### Access Control & Entitlements Architecture
+
+The project uses an **AccessEntitlement** model as the single source of truth for product ownership and access:
+
+- **One-to-One Relationship**: Each AccessEntitlement uniquely links a user to a purchased product
+- **Database Constraint**: Unique constraint (`unique_entitlement_per_user_product`) prevents duplicate entitlements
+- **Centralized Helper**: `user_has_access(user, product)` function in `elysium_archive/helpers.py` provides consistent access checks
+- **Consistent Usage**: All views (ProductDetailView, accounts views, reviews) use the helper for access logic
+- **No Manual URL Manipulation**: Protected content cannot be accessed via guessed URLs; server-side checks are mandatory
+
+### Review System & Eligibility
+
+Reviews use the same AccessEntitlement model to verify purchase eligibility:
+
+- **Eligibility Check**: `create_review` view confirms the user has an AccessEntitlement for the product
+- **Idempotent Prevention**: Unique constraint prevents users from submitting multiple reviews for the same product
+- **Immutable Records**: Reviews are stored with `created_at` timestamp; no user edit/delete, admin moderation only
+- **Display Logic**: Reviews appear only to users who have purchased the product
 
 ### Architecture Decision: Switching to Django-Allauth
 
@@ -801,6 +853,32 @@ Production must always set:
 - `DEBUG=False`
 
 This keeps Django debug mode disabled in production while keeping local development convenient.
+
+## Admin Power Tools
+
+The project includes a comprehensive Django admin interface with advanced features for staff management:
+
+### Product Management
+- **Featured Toggle**: Click badges to instantly toggle featured status without page reload
+- **Bulk Actions**: Mark/unmark featured status for multiple products at once
+- **Smart Filters**: Filter by purchases, images, category, active status, creation date
+- **Purchase Tracking**: See number of users who purchased each product
+- **Delete Protection**: Prevents deletion of purchased products; suggests soft-delete instead
+- **Performance**: Optimized queries prevent N+1 problems on large catalogs
+
+### User Management
+- **Purchase Metrics**: See number of purchases per user
+- **Status Indicators**: Staff/superuser badges with active/inactive status
+- **Smart Filters**: Filter by purchase history, staff status, account age
+- **Organized Listing**: Sort by recent, purchases, or activity
+
+### Admin Styling
+- Custom CSS with no inline styles or dead code
+- Badge system for status visualization (Featured, Active, Archived, Purchases)
+- Jazzmin theme integration for polished interface
+- Toggle buttons with hover/focus states
+
+For detailed admin features, see [ADMIN_FEATURES.md](ADMIN_FEATURES.md).
 
 ## Future Improvements
 
