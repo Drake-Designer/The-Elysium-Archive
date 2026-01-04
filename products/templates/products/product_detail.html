@@ -201,7 +201,7 @@
                                     </a>
                                     <form method="post"
                                           action="{% url 'delete_review' product.slug user_review.id %}"
-                                          style="display: inline"
+                                          class="review-actions-inline-form"
                                           onsubmit="return confirm('Are you sure you want to delete your review? This action cannot be undone.');">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-sm btn-outline-danger btn-icon">

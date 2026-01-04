@@ -628,7 +628,7 @@ main .container,
   align-items: center;
   border-top: 1px solid rgba(230, 230, 235, 0.08);
   display: flex;
-  gap: 0.75rem;
+  gap: 1.5rem;
   justify-content: space-between;
   padding: 0.75rem 1rem 1rem;
 }
@@ -1445,4 +1445,24 @@ body.reduced-effects .entry-card:hover {
   background-color: rgba(139, 30, 45, 0.15);
   border-color: rgba(139, 30, 45, 0.35);
   color: var(--ash-white);
+}
+
+/* Archive reading page specific styles */
+.archive-hero-image {
+  max-height: 400px;
+  object-fit: cover;
+}
+
+.archive-reading-content > div {
+  font-size: 1.1rem;
+}
+
+/* Review management inline forms */
+.review-actions-inline-form {
+  display: inline;
+}
+
+/* Large error icon for error pages */
+.error-icon-lg {
+  font-size: 5rem;
 }

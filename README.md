@@ -4,7 +4,7 @@
 
 ![The Elysium Archive homepage screenshot](documentation/validation/am-i-responsive.webp)
 
-Live Site: Coming soon
+**Live Site:** [https://the-elysium-archive-7eb9e72e6d71.herokuapp.com/](https://the-elysium-archive-7eb9e72e6d71.herokuapp.com/)
 
 The Elysium Archive is a dark fantasy ecommerce site where each purchase unlocks a private archive page you can only access on the website.  
 No downloads. No loose files. Just secrets.
@@ -541,6 +541,65 @@ The implementation avoids unintended cropping by using intelligent scaling with 
 - **Heroku** – Cloud hosting platform
 - **Heroku PostgreSQL** – Production database
 - **Git** – Version control
+
+## Security and Error Handling
+
+### Security Configuration
+
+The Elysium Archive implements industry-standard security headers and Django best practices:
+
+**Production Security Headers:**
+- `X_FRAME_OPTIONS = "DENY"` – Prevents clickjacking attacks
+- `SECURE_HSTS_SECONDS = 31536000` – HTTP Strict Transport Security (1 year)
+- `SECURE_HSTS_INCLUDE_SUBDOMAINS = True` – HSTS for all subdomains
+- `SECURE_HSTS_PRELOAD = True` – HSTS preload list eligibility
+- `SECURE_CONTENT_TYPE_NOSNIFF = True` – Prevents MIME type sniffing
+- `SECURE_BROWSER_XSS_FILTER = True` – XSS filter activation
+- `SECURE_SSL_REDIRECT = True` – Force HTTPS in production
+- `SESSION_COOKIE_SECURE = True` – Secure session cookies
+- `CSRF_COOKIE_SECURE = True` – Secure CSRF cookies
+
+All security headers are **conditional on `DEBUG=False`** to ensure they only apply in production.
+
+**Environment Variable Protection:**
+- All secrets stored in environment variables
+- `env.py` excluded from version control
+- Heroku Config Vars used for production
+- No hardcoded API keys, tokens, or passwords
+
+**Access Control:**
+- Server-side authentication checks on all protected views
+- Email verification required for sensitive operations
+- Ownership verification for user-specific resources
+- AccessEntitlement model as single source of truth for content access
+
+### Custom Error Pages
+
+Professional error pages maintain the dark fantasy theme and provide clear navigation:
+
+- **400 - Bad Request** – Invalid request format handling
+- **403 - Forbidden** – Access denied with login/purchase prompts
+- **404 - Page Not Found** – Missing resources with helpful navigation
+- **500 - Server Error** – Internal errors with self-contained styling
+
+All error templates extend `base.html` (except 500, which uses inline critical CSS for reliability).
+
+Error handlers are configured in `elysium_archive/urls.py` and work in both development and production.
+
+### Inline Styles Policy
+
+The project follows a **strict no-inline-styles policy** with **one documented exception**:
+
+#### Eccezione: Email Templates
+
+Email templates (`templates/account/email/*.html`) usano **solo CSS inline**. Questo è intenzionale e necessario perché:
+
+- La maggior parte dei client email (Gmail, Outlook, Apple Mail) non supporta fogli di stile esterni
+- I tag `<style>` a livello documento vengono rimossi da molti provider
+- Gli stili inline sono l'unico modo affidabile per garantire la resa corretta delle email
+- È prassi standard nelle email di marketing e transazionali
+
+Tutti gli altri template usano solo classi CSS definite in `static/css/base.css`.
 
 ## Stripe Payments
 

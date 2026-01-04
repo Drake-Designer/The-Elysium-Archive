@@ -517,6 +517,52 @@ Available pytest fixtures in `conftest.py`:
 
 ---
 
+## Manual Testing Checklist
+
+### Error Pages Testing
+
+To verify custom error pages work correctly in production:
+
+1. **Test 404 Page:**
+   - Navigate to `/nonexistent-url/`
+   - Verify custom 404 page displays with dark fantasy styling
+   - Check navigation links (Home, Archive, My Archive) work
+   - Confirm page extends base template (has navbar, footer)
+
+2. **Test 403 Page:**
+   - Try accessing `/archive/<slug>/read/` without purchase
+   - Verify custom 403 page displays
+   - Check login/purchase prompts appear for non-authenticated users
+   - Confirm "My Archive" link appears for authenticated users
+
+3. **Test 500 Page:**
+   - Temporarily introduce a server error (e.g., in a view)
+   - Verify custom 500 page displays with inline styles
+   - Check page works even when static files fail to load
+   - Confirm basic navigation links work (no Django template tags)
+
+4. **Test 400 Page:**
+   - Send malformed POST request (e.g., missing CSRF token)
+   - Verify custom 400 page displays
+   - Check error message is clear and user-friendly
+
+**Note:** Error pages should only be tested with `DEBUG=False` in settings.
+
+### Security Headers Verification
+
+Test security headers are properly set in production:
+
+1. Open browser DevTools → Network tab
+2. Load any page on live site
+3. Check Response Headers for:
+   - `X-Frame-Options: DENY`
+   - `X-Content-Type-Options: nosniff`
+   - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+
+Use online tools like [securityheaders.com](https://securityheaders.com/) for comprehensive analysis.
+
+---
+
 ## Performance Notes
 
 - **Full test suite:** ~1.5 seconds (110 tests)
