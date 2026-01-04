@@ -61,7 +61,8 @@
                                         <strong>This archive entry is no longer available for purchase.</strong>
                                     </div>
                                 {% elif purchased %}
-                                    <a href="#full-content" class="btn btn-success btn-lg w-100">
+                                    <a href="{% url 'archive_read' product.slug %}"
+                                       class="btn btn-success btn-lg w-100">
                                         <i class="fa-solid fa-book-open me-2"></i>Read Full Archive
                                     </a>
                                 {% elif in_cart %}
@@ -97,7 +98,7 @@
                     {% if purchased %}
                         <div class="alert alert-success" role="alert">
                             <i class="fa-solid fa-unlock me-2"></i>
-                            You have full access to this archive. Scroll down to read the complete entry.
+                            You have full access to this archive. Click the button above to read the complete entry.
                         </div>
                     {% else %}
                         <div class="alert alert-warning muted-gold-alert" role="alert">
@@ -128,19 +129,6 @@
                 </div>
             </div>
         </div>
-        {% if purchased %}
-            <!-- Purchased full content -->
-            <div class="row mt-5 pt-5">
-                <div class="col-12">
-                    <div id="full-content" class="panel p-5">
-                        <h2 class="text-center mb-5 text-danger">
-                            <i class="fa-solid fa-book-open me-3"></i>Full Archive Entry
-                        </h2>
-                        <div class="archive-content">{{ product.content|linebreaks }}</div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
         <!-- Reviews section (visible to everyone) -->
         <div class="row mt-5 pt-5">
             <div class="col-12">
@@ -206,6 +194,21 @@
                                     <small class="muted">{{ user_review.created_at|date:"M d, Y" }}</small>
                                 </div>
                                 <p class="muted">{{ user_review.body }}</p>
+                                <div class="mt-3 d-flex gap-2">
+                                    <a href="{% url 'edit_review' product.slug user_review.id %}"
+                                       class="btn btn-sm btn-outline-primary btn-icon">
+                                        <i class="fa-solid fa-edit me-1"></i>Edit Review
+                                    </a>
+                                    <form method="post"
+                                          action="{% url 'delete_review' product.slug user_review.id %}"
+                                          style="display: inline"
+                                          onsubmit="return confirm('Are you sure you want to delete your review? This action cannot be undone.');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-icon">
+                                            <i class="fa-solid fa-trash me-1"></i>Delete Review
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     {% endif %}

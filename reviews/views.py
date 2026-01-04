@@ -52,3 +52,65 @@ def create_review(request, slug):
     # If form invalid, redirect back with error.
     messages.error(request, "Please correct the errors in your review.")
     return redirect("product_detail", slug=slug)
+
+
+@verified_email_required
+@require_http_methods(["GET", "POST"])
+def edit_review(request, slug, review_id):
+    """Edit an existing review for a purchased product."""
+    try:
+        product = Product.objects.get(slug=slug)
+    except Product.DoesNotExist:
+        messages.error(request, "Product not found.")
+        return redirect("archive")
+
+    # Get review and verify ownership
+    try:
+        review = Review.objects.get(id=review_id, user=request.user, product=product)
+    except Review.DoesNotExist:
+        messages.error(
+            request, "Review not found or you don't have permission to edit it."
+        )
+        return redirect("product_detail", slug=slug)
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your review has been updated.")
+            return redirect("product_detail", slug=slug)
+        else:
+            messages.error(request, "Please correct the errors in your review.")
+    else:
+        form = ReviewForm(instance=review)
+
+    context = {
+        "form": form,
+        "product": product,
+        "review": review,
+        "is_edit": True,
+    }
+    return render(request, "reviews/edit_review.html", context)
+
+
+@verified_email_required
+@require_http_methods(["POST"])
+def delete_review(request, slug, review_id):
+    """Delete an existing review."""
+    try:
+        product = Product.objects.get(slug=slug)
+    except Product.DoesNotExist:
+        messages.error(request, "Product not found.")
+        return redirect("archive")
+
+    # Get review and verify ownership
+    try:
+        review = Review.objects.get(id=review_id, user=request.user, product=product)
+        review.delete()
+        messages.success(request, "Your review has been deleted.")
+    except Review.DoesNotExist:
+        messages.error(
+            request, "Review not found or you don't have permission to delete it."
+        )
+
+    return redirect("product_detail", slug=slug)

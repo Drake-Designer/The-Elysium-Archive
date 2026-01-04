@@ -120,6 +120,28 @@ python_files = tests.py test_*.py *_tests.py
 
 ---
 
+#### Archive Reading Pages and Content Separation
+
+**File:** `products/tests/test_archive_read.py` (12 tests)
+
+**Coverage:**
+
+- Anonymous users redirected to login when accessing reading page
+- Authenticated users without entitlement receive 403 error
+- Users with unverified email redirected to email verification
+- Owners with entitlement can access reading page (200 status)
+- Reading page displays full archive content
+- Preview page never displays full content, even for owners
+- Preview page shows "Read Full Archive" button for owners
+- Preview page shows purchase CTA for non-owners
+- My Archive links directly to reading page, not preview
+- Reading page includes navigation back to My Archive
+- Reading page includes link to product preview page
+
+**Key assertions:** Access control enforcement, content separation, navigation links, permission denied handling
+
+---
+
 #### Shopping Cart and Session Behavior
 
 **File:** `cart/tests.py` (11 tests)
@@ -191,7 +213,7 @@ python_files = tests.py test_*.py *_tests.py
 
 #### Reviews and User-Generated Content
 
-**File:** `reviews/tests.py` (13 tests)
+**File:** `reviews/tests.py` (19 tests)
 
 **Coverage:**
 
@@ -205,8 +227,14 @@ python_files = tests.py test_*.py *_tests.py
 - Review title is optional (blank=True)
 - Review deleted when user deleted (cascade delete)
 - Review deleted when product deleted (cascade delete)
+- **Edit Reviews:** Users can edit their own reviews via dedicated edit page
+- **Edit Permission:** Users cannot edit other users' reviews (ownership verification)
+- **Edit Form:** GET request to edit page shows pre-filled form with current values
+- **Delete Reviews:** Users can delete their own reviews
+- **Delete Permission:** Users cannot delete other users' reviews (ownership verification)
+- **Delete Method:** Delete requires POST method (405 on GET)
 
-**Key assertions:** Access control based on purchase history, unique constraints, content display, cascade deletes
+**Key assertions:** Access control based on purchase history, unique constraints, content display, cascade deletes, ownership verification for edit/delete
 
 ---
 
@@ -335,11 +363,33 @@ Manual tests verify user-facing functionality that automated tests may not fully
 - [ ] Admin edits product form → saves changes
 - [ ] Admin deactivates product → removed from catalog for users
 
+#### Archive Reading Experience
+
+- [ ] Owner clicks "Read" in My Archive → opens reading page with full content
+- [ ] Owner clicks "Read Full Archive" on preview page → opens reading page
+- [ ] Preview page never shows full content, even for owners
+- [ ] Anonymous user tries to access `/archive/<slug>/read/` → redirected to login
+- [ ] Non-owner tries to access reading page → 403 Forbidden
+- [ ] Reading page displays hero image, title, and complete archive text
+- [ ] Reading page has "Back to My Archive" link
+- [ ] Reading page has "View Details" link to preview page
+
+#### Review Management
+
+- [ ] Buyer submits review → appears on product page with "Verified purchase" badge
+- [ ] User sees "Edit Review" and "Delete Review" buttons on their own review
+- [ ] User clicks "Edit Review" → opens edit page with pre-filled form
+- [ ] User edits review and saves → changes appear immediately on product page
+- [ ] User clicks "Delete Review" → confirmation prompt appears
+- [ ] User confirms deletion → review removed from product page
+- [ ] User tries to edit another user's review → access denied
+- [ ] User tries to delete another user's review → access denied
+
 ---
 
 ## Known Issues
 
-None. All 110 automated tests pass.
+None. All 128 automated tests pass.
 
 ---
 

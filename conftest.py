@@ -86,6 +86,7 @@ def product_active(db, category):
         slug="active-product",
         description="A test product",
         tagline="Test tagline for product",
+        content="This is the full archive content that should only appear on the reading page.",
         price=Decimal("9.99"),
         category=category,
         is_active=True,

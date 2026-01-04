@@ -282,7 +282,10 @@ This section documents implemented features organised by category.
 - **Review Body** – Text field for detailed feedback (no character limit)
 - **Verified Badge** – Reviews display the buyer's display name with a "Verified purchase" indicator
 - **Public Display** – All reviews are visible to everyone on product pages; only buyers can submit
-- **Immutable Reviews** – Once submitted, reviews cannot be edited or deleted by the user (admin-only removal)
+- **Edit and Delete** – Users can edit or delete their own reviews at any time
+- **Edit Page** – Dedicated edit page with pre-filled form showing current review values
+- **Delete Confirmation** – JavaScript confirmation prompt before deleting a review to prevent accidents
+- **Ownership Verification** – Users can only modify their own reviews; attempts to edit others' reviews are blocked
 - **Admin Moderation** – Reviews are registered in Django admin with filters for rating, product, and date
 
 ### My Archive – Permanent Access Management
@@ -291,16 +294,28 @@ This section documents implemented features organised by category.
 - **Purchase Date Display** – Each unlocked product shows the unlock date on archive cards
 - **Two-Section View** – My Archive appears as a dedicated page and in the dashboard as a tabbed section
 - **Consistent Card Layout** – Archive cards display product image, title, description, and unlock date
-- **Clear Access Button** – Each card includes an "Access" button that navigates to the unlocked product page
+- **Direct Reading Access** – Each card includes a "Read" button that opens the dedicated reading page
 - **Empty State** – When no products are purchased, displays a friendly message and link to the archive catalog
 - **Permanent Retention** – Once purchased, products remain in My Archive indefinitely; no expiration or revocation
 
-### Unlocked Product Pages
+### Product Preview Pages
 
-- **Single Template Design** – One `product_detail.html` template handles both locked and unlocked views
-- **Conditional Content** – View automatically detects user's access level via entitlements
-- **Full Archive Text** – Unlocked users see the complete archive entry below the product details
-- **Review Section** – Visible to everyone; buyers can submit one review per product via form
+- **Public Browsing** – Product detail pages serve as previews for both anonymous and authenticated users
+- **Purchase Flow** – Non-owners see pricing, add-to-cart button, and purchase call-to-action
+- **Access Indicator** – Owners see a "Read Full Archive" button instead of purchase options
+- **Content Separation** – Full archive content is never displayed on preview pages, ensuring clean separation
+- **Review Display** – All reviews visible to everyone; only verified buyers can submit reviews
+- **No Spoilers** – Preview pages show only description, price, and metadata; content remains locked until accessed
+
+### Archive Reading Pages
+
+- **Dedicated Reading Experience** – Separate page (`/archive/<slug>/read/`) for immersive content consumption
+- **Access Control** – Requires authentication, verified email, and AccessEntitlement for the specific product
+- **Immersive Layout** – Clean, distraction-free design focused on reading the complete archive entry
+- **Full Content Display** – Complete archive text displayed with elegant formatting and generous spacing
+- **Navigation** – Clear links back to My Archive and product preview page
+- **No Purchase Elements** – Reading page contains no cart, pricing, or purchase CTAs
+- **Permission Denied** – Users without access receive 403 error; anonymous users redirected to login
 
 ## Pages Overview
 
@@ -315,8 +330,11 @@ This section documents implemented features organised by category.
 | Profile | `/accounts/profile/` | Authenticated | View and edit account settings |
 | My Archive | `/accounts/archive/` | Authenticated | Browse purchased archive entries |
 | Delete Account | `/accounts/delete/` | Authenticated | Permanently delete account |
-| Product Detail | `/archive/<slug>/` | Public | View product with conditional full content |
+| Product Preview | `/archive/<slug>/` | Public | Preview page with purchase flow |
+| Archive Reading | `/archive/<slug>/read/` | Owners only | Dedicated reading page for purchased content |
 | Submit Review | `/archive/<slug>/review/` | Authenticated (POST) | Submit review for purchased product |
+| Edit Review | `/archive/<slug>/review/<id>/edit/` | Review owner | Edit your own review |
+| Delete Review | `/archive/<slug>/review/<id>/delete/` | Review owner (POST) | Delete your own review |
 | Admin | `/admin/` | Staff only | Django admin panel |
 
 ## Technical Overview

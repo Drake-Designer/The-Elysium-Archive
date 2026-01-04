@@ -305,3 +305,182 @@ class TestReviewModel:
         product_active.delete()
 
         assert not Review.objects.filter(id=review.id).exists()
+
+
+@pytest.mark.django_db
+class TestReviewEdit:
+    """Test review editing functionality."""
+
+    def test_owner_can_edit_review(self, client, verified_user, product_active):
+        """User can edit their own review."""
+        from orders.models import AccessEntitlement
+
+        AccessEntitlement.objects.create(user=verified_user, product=product_active)
+        review = Review.objects.create(
+            user=verified_user,
+            product=product_active,
+            rating=4,
+            title="Good",
+            body="Nice product",
+        )
+
+        client.force_login(verified_user)
+        response = client.post(
+            reverse("edit_review", args=[product_active.slug, review.id]),
+            {
+                "rating": 5,
+                "title": "Excellent",
+                "body": "Amazing product",
+            },
+        )
+
+        assert response.status_code == 302
+        review.refresh_from_db()
+        assert review.rating == 5
+        assert review.title == "Excellent"
+        assert review.body == "Amazing product"
+
+    def test_non_owner_cannot_edit_review(
+        self, client, verified_user, product_active, category
+    ):
+        """User cannot edit someone else's review."""
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        other_user = User.objects.create_user(
+            username="other", email="other@example.com", password="testpass123"
+        )
+        from allauth.account.models import EmailAddress
+
+        EmailAddress.objects.create(
+            user=other_user, email=other_user.email, verified=True, primary=True
+        )
+
+        review = Review.objects.create(
+            user=other_user,
+            product=product_active,
+            rating=4,
+            title="Good",
+            body="Nice product",
+        )
+
+        client.force_login(verified_user)
+        response = client.post(
+            reverse("edit_review", args=[product_active.slug, review.id]),
+            {
+                "rating": 5,
+                "title": "Hacked",
+                "body": "Hacked",
+            },
+        )
+
+        # Should redirect with error
+        assert response.status_code == 302
+        review.refresh_from_db()
+        # Review should not be changed
+        assert review.rating == 4
+        assert review.title == "Good"
+
+    def test_edit_review_get_shows_form(self, client, verified_user, product_active):
+        """GET request to edit review shows form with current values."""
+        from orders.models import AccessEntitlement
+
+        AccessEntitlement.objects.create(user=verified_user, product=product_active)
+        review = Review.objects.create(
+            user=verified_user,
+            product=product_active,
+            rating=4,
+            title="Good",
+            body="Nice product",
+        )
+
+        client.force_login(verified_user)
+        response = client.get(
+            reverse("edit_review", args=[product_active.slug, review.id])
+        )
+
+        assert response.status_code == 200
+        assert "form" in response.context
+        assert response.context["review"] == review
+
+
+@pytest.mark.django_db
+class TestReviewDelete:
+    """Test review deletion functionality."""
+
+    def test_owner_can_delete_review(self, client, verified_user, product_active):
+        """User can delete their own review."""
+        from orders.models import AccessEntitlement
+
+        AccessEntitlement.objects.create(user=verified_user, product=product_active)
+        review = Review.objects.create(
+            user=verified_user,
+            product=product_active,
+            rating=4,
+            title="Good",
+            body="Nice product",
+        )
+
+        client.force_login(verified_user)
+        response = client.post(
+            reverse("delete_review", args=[product_active.slug, review.id])
+        )
+
+        assert response.status_code == 302
+        assert not Review.objects.filter(id=review.id).exists()
+
+    def test_non_owner_cannot_delete_review(
+        self, client, verified_user, product_active
+    ):
+        """User cannot delete someone else's review."""
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        other_user = User.objects.create_user(
+            username="other", email="other@example.com", password="testpass123"
+        )
+        from allauth.account.models import EmailAddress
+
+        EmailAddress.objects.create(
+            user=other_user, email=other_user.email, verified=True, primary=True
+        )
+
+        review = Review.objects.create(
+            user=other_user,
+            product=product_active,
+            rating=4,
+            title="Good",
+            body="Nice product",
+        )
+
+        client.force_login(verified_user)
+        response = client.post(
+            reverse("delete_review", args=[product_active.slug, review.id])
+        )
+
+        # Should redirect with error
+        assert response.status_code == 302
+        # Review should still exist
+        assert Review.objects.filter(id=review.id).exists()
+
+    def test_delete_review_requires_post(self, client, verified_user, product_active):
+        """DELETE review requires POST method."""
+        from orders.models import AccessEntitlement
+
+        AccessEntitlement.objects.create(user=verified_user, product=product_active)
+        review = Review.objects.create(
+            user=verified_user,
+            product=product_active,
+            rating=4,
+            body="Nice product",
+        )
+
+        client.force_login(verified_user)
+        response = client.get(
+            reverse("delete_review", args=[product_active.slug, review.id])
+        )
+
+        # Should be rejected (405 Method Not Allowed)
+        assert response.status_code == 405
+        # Review should still exist
+        assert Review.objects.filter(id=review.id).exists()
