@@ -3,7 +3,7 @@ cloudinary==1.44.1
 dj-database-url==3.0.1
 Django==6.0
 django-allauth==65.13.1
-django-ckeditor==6.7.3
+django-ckeditor-5==0.2.19
 django-cloudinary-storage==0.3.0
 django-jazzmin==3.0.1
 django-js-asset==3.1.2

@@ -9,9 +9,8 @@ urlpatterns = [
     path("archive/", include("products.urls")),
     path("cart/", include("cart.urls")),
     path("checkout/", include("checkout.urls")),
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
     path("", include("home.urls")),
-    # CKEditor uploader
-    path("ckeditor/", include("ckeditor_uploader.urls")),
 ]
 
 if settings.DEBUG:

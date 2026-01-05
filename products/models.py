@@ -1,9 +1,8 @@
 from cloudinary.models import CloudinaryField
-from ckeditor.fields import RichTextField
-
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class Category(models.Model):
@@ -31,9 +30,10 @@ class Product(models.Model):
     tagline = models.CharField(max_length=120, blank=True)
     description = models.TextField()
 
-    content = RichTextField(
+    content = CKEditor5Field(
         blank=True,
         default="",
+        config_name="product_content",
         help_text="Full archive text, visible only after purchase",
     )
 

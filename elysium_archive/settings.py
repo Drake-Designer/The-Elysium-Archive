@@ -97,8 +97,7 @@ INSTALLED_APPS = [
     # Third party
     "allauth",
     "allauth.account",
-    "ckeditor",
-    "ckeditor_uploader",
+    "django_ckeditor_5",
     "cloudinary",
     "cloudinary_storage",
     # Local apps
@@ -180,7 +179,7 @@ TEMPLATES = [
                 "elysium_archive.context_processors.cart_context",
             ],
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
@@ -242,6 +241,7 @@ if os.environ.get("CLOUDINARY_URL"):
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
+    CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 else:
     STORAGES = {
         "default": {
@@ -251,6 +251,7 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
+    CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 
 # Default model field configuration
@@ -318,25 +319,59 @@ STRIPE_SECRET_KEY = os.environ.get(
 )
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")
 
-# CKEditor configuration
 
-CKEDITOR_UPLOAD_PATH = "ckeditor/"
+# CKEditor 5 configuration
 
-CKEDITOR_CONFIGS = {
+CKEDITOR_5_UPLOAD_PATH = "ckeditor5/"
+
+CKEDITOR_5_CONFIGS = {
     "product_content": {
-        "toolbar": "Custom",
-        "toolbar_Custom": [
-            ["Bold", "Italic", "Underline", "Strike"],
-            ["NumberedList", "BulletedList", "-", "Outdent", "Indent"],
-            ["Blockquote", "CodeSnippet"],
-            ["Link", "Unlink"],
-            ["Image", "Table", "HorizontalRule"],
-            ["EmojiPanel"],
-            ["RemoveFormat"],
-            ["Source"],
+        "toolbar": [
+            "heading",
+            "|",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "link",
+            "|",
+            "bulletedList",
+            "numberedList",
+            "todoList",
+            "|",
+            "outdent",
+            "indent",
+            "alignment",
+            "|",
+            "blockQuote",
+            "codeBlock",
+            "horizontalLine",
+            "pageBreak",
+            "insertTable",
+            "imageUpload",
+            "mediaEmbed",
+            "|",
+            "undo",
+            "redo",
         ],
-        "height": 500,
-        "width": "100%",
-        "allowedContent": True,
+        "image": {
+            "toolbar": [
+                "imageTextAlternative",
+                "toggleImageCaption",
+                "imageStyle:inline",
+                "imageStyle:block",
+                "imageStyle:side",
+            ],
+        },
+        "table": {
+            "contentToolbar": [
+                "tableColumn",
+                "tableRow",
+                "mergeTableCells",
+                "tableProperties",
+                "tableCellProperties",
+            ],
+        },
+        "height": "500px",
     }
 }

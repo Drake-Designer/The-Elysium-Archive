@@ -1,4 +1,3 @@
-from django import forms
 from django.contrib import admin
 from django.contrib.messages import error, success
 from django.db.models import Count
@@ -8,8 +7,6 @@ from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
-
-from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
 from .models import Category, Product
 
@@ -61,19 +58,6 @@ class HasImageFilter(admin.SimpleListFilter):
         return queryset
 
 
-class ProductAdminForm(forms.ModelForm):
-    """Use CKEditor only for Product.content in admin."""
-
-    content = forms.CharField(
-        required=False,
-        widget=CKEditorUploadingWidget(config_name="product_content"),
-    )
-
-    class Meta:
-        model = Product
-        fields = "__all__"
-
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     """Manage archive categories."""
@@ -86,8 +70,6 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Manage products in admin panel with powerful tools."""
-
-    form = ProductAdminForm
 
     list_display = (
         "title",
@@ -200,18 +182,17 @@ class ProductAdmin(admin.ModelAdmin):
     def featured_toggle(self, obj):
         """Display featured status with toggle link."""
         if obj.is_featured:
-            badge = '<span class="badge badge-featured">⭐ Featured</span>'
+            badge = '<span class="badge badge-featured">? Featured</span>'
         else:
             badge = '<span class="badge badge-not-featured">Not featured</span>'
 
-        # Generate POST form for toggle (CSRF safe via Django admin middleware)
+        # Generate POST form for toggle
         toggle_url = reverse(
             "admin:products_product_toggle_featured",
             args=[obj.pk],
         )
-        # Django admin handles CSRF automatically when using admin_site.admin_view()
         form_html = (
-            f'<form method="post" action="{toggle_url}" style="display:inline;">'
+            f'<form method="post" action="{toggle_url}" class="admin-toggle-form">'
             f'<button type="submit" class="admin-btn-toggle" title="Click to toggle featured status">'
             f"{badge}</button></form>"
         )
@@ -222,7 +203,7 @@ class ProductAdmin(admin.ModelAdmin):
     def has_image_badge(self, obj):
         """Display image presence as badge."""
         if obj.image:
-            return mark_safe('<span class="badge badge-image">📷 Has image</span>')
+            return mark_safe('<span class="badge badge-image">?? Has image</span>')
         else:
             return mark_safe('<span class="badge badge-no-image">No image</span>')
 
