@@ -2,9 +2,11 @@
 
 import os
 from pathlib import Path
+from typing import Any, cast
 
 import dj_database_url
 from django.contrib.messages import constants as messages
+from django.core.exceptions import ImproperlyConfigured
 
 # Base directory and local environment loading
 
@@ -36,6 +38,12 @@ def _env_list(name, default=None):
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
+
+if not DEBUG and (not SECRET_KEY or SECRET_KEY == "unsafe-dev-secret-key"):
+    raise ImproperlyConfigured(
+        "SECRET_KEY must be set to a secure value when DEBUG=False."
+    )
+
 IS_HEROKU = os.environ.get("DYNO") is not None
 
 
@@ -89,6 +97,8 @@ INSTALLED_APPS = [
     # Third party
     "allauth",
     "allauth.account",
+    "ckeditor",
+    "ckeditor_uploader",
     "cloudinary",
     "cloudinary_storage",
     # Local apps
@@ -100,7 +110,6 @@ INSTALLED_APPS = [
     "orders",
     "reviews",
 ]
-
 
 SITE_ID = int(os.environ.get("SITE_ID", "1"))
 
@@ -179,7 +188,7 @@ WSGI_APPLICATION = "elysium_archive.wsgi.application"
 
 # Database configuration
 
-DATABASES = {
+DATABASES: dict[str, Any] = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
@@ -187,10 +196,8 @@ DATABASES = {
 }
 
 if os.environ.get("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.config(
-        conn_max_age=600,
-        ssl_require=True,
-    )
+    db_config = dj_database_url.config(conn_max_age=600, ssl_require=True)
+    DATABASES["default"] = cast(dict[str, Any], db_config)
 
 
 # Password validation
@@ -300,6 +307,7 @@ EMAIL_USE_TLS = _env_bool(os.environ.get("EMAIL_USE_TLS"), default=True)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "apikey")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
+
 # Stripe configuration
 
 STRIPE_PUBLIC_KEY = os.environ.get(
@@ -309,3 +317,26 @@ STRIPE_SECRET_KEY = os.environ.get(
     "STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev"
 )
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")
+
+# CKEditor configuration
+
+CKEDITOR_UPLOAD_PATH = "ckeditor/"
+
+CKEDITOR_CONFIGS = {
+    "product_content": {
+        "toolbar": "Custom",
+        "toolbar_Custom": [
+            ["Bold", "Italic", "Underline", "Strike"],
+            ["NumberedList", "BulletedList", "-", "Outdent", "Indent"],
+            ["Blockquote", "CodeSnippet"],
+            ["Link", "Unlink"],
+            ["Image", "Table", "HorizontalRule"],
+            ["EmojiPanel"],
+            ["RemoveFormat"],
+            ["Source"],
+        ],
+        "height": 500,
+        "width": "100%",
+        "allowedContent": True,
+    }
+}

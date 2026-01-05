@@ -4,7 +4,7 @@
 
 ![The Elysium Archive homepage screenshot](documentation/validation/am-i-responsive.webp)
 
-**Live Site:** [https://the-elysium-archive-7eb9e72e6d71.herokuapp.com/](https://the-elysium-archive-7eb9e72e6d71.herokuapp.com/)
+**Live Site:** [The Elysium Archive](https://the-elysium-archive-a51393fa9431.herokuapp.com/)
 
 The Elysium Archive is a dark fantasy ecommerce site where each purchase unlocks a private archive page you can only access on the website.  
 No downloads. No loose files. Just secrets.
@@ -58,7 +58,7 @@ The dark fantasy theme supports the core logic of the platform by providing a na
 - A themed product catalog (digital content)
 - Secure account system (register, login, logout)
 - Stripe checkout in test mode
-- Order confirmation and order history
+- Order confirmation and My Archive access
 - A private “My Archive” area with unlocked entries
 - Protected archive pages
 - Verified buyer reviews
@@ -115,7 +115,7 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 ### Profiles
 
 - Edit account details
-- View order history
+- Manage email and password
 - Delete account permanently
 
 ## User Experience Design
@@ -151,7 +151,7 @@ The site structure was designed to support a clear journey from public browsing 
 - Order confirmation
 - My Archive area
 - Protected archive pages
-- User profile and order history
+- User profile
 
 Restricted areas require authentication and verified purchases.
 
@@ -355,8 +355,8 @@ Reviews use the same AccessEntitlement model to verify purchase eligibility:
 
 - **Eligibility Check**: `create_review` view confirms the user has an AccessEntitlement for the product
 - **Idempotent Prevention**: Unique constraint prevents users from submitting multiple reviews for the same product
-- **Immutable Records**: Reviews are stored with `created_at` timestamp; no user edit/delete, admin moderation only
-- **Display Logic**: Reviews appear only to users who have purchased the product
+- **Edit/Delete**: Users can edit or delete their own reviews; ownership is enforced in views.
+- **Display Logic**: Reviews are visible to all visitors on product pages; only verified buyers can submit.
 
 ### Architecture Decision: Switching to Django-Allauth
 
@@ -549,6 +549,7 @@ The implementation avoids unintended cropping by using intelligent scaling with 
 The Elysium Archive implements industry-standard security headers and Django best practices:
 
 **Production Security Headers:**
+
 - `X_FRAME_OPTIONS = "DENY"` – Prevents clickjacking attacks
 - `SECURE_HSTS_SECONDS = 31536000` – HTTP Strict Transport Security (1 year)
 - `SECURE_HSTS_INCLUDE_SUBDOMAINS = True` – HSTS for all subdomains
@@ -562,12 +563,14 @@ The Elysium Archive implements industry-standard security headers and Django bes
 All security headers are **conditional on `DEBUG=False`** to ensure they only apply in production.
 
 **Environment Variable Protection:**
+
 - All secrets stored in environment variables
 - `env.py` excluded from version control
 - Heroku Config Vars used for production
 - No hardcoded API keys, tokens, or passwords
 
 **Access Control:**
+
 - Server-side authentication checks on all protected views
 - Email verification required for sensitive operations
 - Ownership verification for user-specific resources
@@ -763,19 +766,19 @@ Currently, the project uses a minimal, focused data model:
 - **UserProfile** – One-to-one extension of User; stores display names, profile pictures, and profile metadata.
 - **Product** – Represents a purchasable archive entry with title, description, price, and image.
 
-**Future Models (planned):**
+**Additional Core Models:**
 
-- **Order** – Will store purchase records and order history.
-- **OrderLineItem** – Will link orders to products.
-- **Review** – Will allow verified buyers to leave reviews on products.
-- **AccessEntitlement** – Will explicitly grant user access to purchased products after payment.
+- **Order** - Stores purchase records and status.
+- **OrderLineItem** - Links orders to products.
+- **Review** - Verified-buyer product reviews.
+- **AccessEntitlement** - Grants user access after payment.
 
 **Note:** This section will be updated as new models are added to the project.
 
 ### Current Relationships
 
 - **User to UserProfile**: One-to-one relationship for extended profile data.
-- **Product to User**: Access relationship (currently unimplemented; will use AccessEntitlement when orders are implemented).
+- **User to Product**: Many-to-many via AccessEntitlement.
 
 This minimal structure keeps the foundation clean and makes it easy to add purchase and review functionality when needed.
 
@@ -783,7 +786,7 @@ This minimal structure keeps the foundation clean and makes it easy to add purch
 
 The Entity Relationship Diagram (ERD) below illustrates the current database structure.
 
-It shows the main entities, their fields, and relationships. Future models (Order, Review, AccessEntitlement) are listed but not yet implemented.
+The ERD includes Order, Review, and AccessEntitlement as implemented models.
 
 The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagramming tool that allows database relationships to be defined using clear, readable syntax and exported as an image.
 

@@ -1,5 +1,3 @@
-"""URL configuration for the elysium_archive project."""
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -12,6 +10,8 @@ urlpatterns = [
     path("cart/", include("cart.urls")),
     path("checkout/", include("checkout.urls")),
     path("", include("home.urls")),
+    # CKEditor uploader
+    path("ckeditor/", include("ckeditor_uploader.urls")),
 ]
 
 if settings.DEBUG:

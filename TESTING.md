@@ -51,7 +51,7 @@ pytest -v -s
 Tests use a dedicated test settings module (`elysium_archive/settings_test.py`) that:
 
 - Uses simple `StaticFilesStorage` instead of manifest-based storage.
-- Disables WhiteNoise for cleaner test isolation.
+- Uses StaticFilesStorage in settings_test; WhiteNoise middleware is removed in the conftest autouse fixture.
 - Uses in-memory email backend (no real emails sent).
 - Uses fast MD5 password hasher for speed.
 
@@ -175,7 +175,7 @@ python_files = tests.py test_*.py *_tests.py
 - Order total calculated from cart
 - Empty cart shows warning message
 - Success page displays order details
-- Success page updates order status to paid
+- Success page displays order status; paid status is set by the webhook.
 - Cancel page shows cancellation message
 
 **Test setup:** Uses `@patch('stripe.checkout.Session.create')` to mock Stripe without real API calls
@@ -192,7 +192,7 @@ python_files = tests.py test_*.py *_tests.py
 
 - Webhook `checkout.session.completed` creates AccessEntitlements
 - Webhook updates order status to paid
-- Webhook stores Stripe session ID and customer ID
+- Webhook stores Stripe session ID and payment intent ID.
 - **Idempotency:** Same webhook event twice creates only one AccessEntitlement (verified using `get_or_create`)
 - Payment failure webhook sets order status to failed
 - Invalid webhook signature rejected (signature verification)

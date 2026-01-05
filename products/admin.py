@@ -1,11 +1,15 @@
+from django import forms
 from django.contrib import admin
-from django.contrib.messages import success, error
-from django.db.models import Count, Q
+from django.contrib.messages import error, success
+from django.db.models import Count
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
-from django.utils.html import format_html, format_html_join, mark_safe
+from django.utils.html import format_html, format_html_join
+from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
+
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
 from .models import Category, Product
 
@@ -57,6 +61,19 @@ class HasImageFilter(admin.SimpleListFilter):
         return queryset
 
 
+class ProductAdminForm(forms.ModelForm):
+    """Use CKEditor only for Product.content in admin."""
+
+    content = forms.CharField(
+        required=False,
+        widget=CKEditorUploadingWidget(config_name="product_content"),
+    )
+
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     """Manage archive categories."""
@@ -69,6 +86,8 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Manage products in admin panel with powerful tools."""
+
+    form = ProductAdminForm
 
     list_display = (
         "title",

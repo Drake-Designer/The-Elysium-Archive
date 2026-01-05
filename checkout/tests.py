@@ -5,6 +5,7 @@ from django.urls import reverse
 from decimal import Decimal
 from unittest.mock import patch, MagicMock
 from orders.models import Order, OrderLineItem
+from stripe import StripeError
 
 
 @pytest.mark.django_db
@@ -145,6 +146,22 @@ class TestCheckoutOrderCreation:
 
         assert response.status_code == 302
         assert stripe_url in response.url
+
+    @patch("checkout.views.stripe.checkout.Session.create")
+    def test_checkout_cleans_order_on_stripe_error(
+        self, mock_stripe_session, verified_user, client, product_active
+    ):
+        """Checkout cleans up order records when Stripe session fails."""
+        client.force_login(verified_user)
+        mock_stripe_session.side_effect = StripeError("Stripe failure")
+
+        client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
+        response = client.post(reverse("checkout"), follow=False)
+
+        assert response.status_code == 302
+        assert reverse("cart") in response.url
+        assert Order.objects.filter(user=verified_user).count() == 0
+        assert OrderLineItem.objects.count() == 0
 
     def test_checkout_empty_cart_shows_warning(self, client, verified_user):
         """Checkout with empty cart shows warning and redirects."""

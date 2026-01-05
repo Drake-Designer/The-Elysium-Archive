@@ -71,17 +71,28 @@ def checkout_view(request):
             )
 
         # Create Stripe Session with order metadata.
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=line_items,
-            mode="payment",
-            metadata={"order_id": str(order.pk)},
-            client_reference_id=str(order.pk),
-            success_url=request.build_absolute_uri(
-                reverse("checkout_success") + f"?order_id={order.pk}"
-            ),
-            cancel_url=request.build_absolute_uri(reverse("checkout_cancel")),
-        )
+        try:
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=line_items,
+                mode="payment",
+                metadata={"order_id": str(order.pk)},
+                client_reference_id=str(order.pk),
+                success_url=request.build_absolute_uri(
+                    reverse("checkout_success") + f"?order_id={order.pk}"
+                ),
+                cancel_url=request.build_absolute_uri(reverse("checkout_cancel")),
+            )
+        except StripeError as err:
+            logger.warning("Stripe error during checkout: %s", err)
+            order.delete()
+            messages.error(request, "Payment error occurred. Please try again.")
+            return redirect("cart")
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("Unexpected checkout error: %s", exc)
+            order.delete()
+            messages.error(request, "An error occurred during checkout. Please try again.")
+            return redirect("cart")
 
         # Handle missing session URL safely.
         if not session.url:
@@ -94,11 +105,6 @@ def checkout_view(request):
     except Product.DoesNotExist:
         messages.error(request, "One or more items in your cart no longer exist.")
         clear_cart(request.session)
-        return redirect("cart")
-
-    except StripeError as err:
-        logger.warning("Stripe error during checkout: %s", err)
-        messages.error(request, "Payment error occurred. Please try again.")
         return redirect("cart")
 
     except Exception as exc:  # noqa: BLE001
