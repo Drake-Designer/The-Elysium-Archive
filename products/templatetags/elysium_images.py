@@ -23,6 +23,11 @@ def build_cloudinary_fill_url(image, width, height):
             logger.warning(f"cloudinary_fill: Empty URL for image {image}")
             return ""
 
+        # Force HTTPS for mixed content prevention
+        if base_url.startswith("http://"):
+            base_url = base_url.replace("http://", "https://", 1)
+            logger.debug(f"cloudinary_fill: Converted HTTP to HTTPS")
+
         # Check if it's a Cloudinary URL
         if "/upload/" not in base_url:
             logger.warning(

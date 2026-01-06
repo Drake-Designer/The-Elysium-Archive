@@ -9,22 +9,17 @@ from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
 
 # Base directory and local environment loading
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 if (BASE_DIR / "env.py").exists():
     import env  # noqa: F401
 
-
 # Environment helper functions
-
-
 def _env_bool(value, default=False):
     """Parse a boolean environment variable."""
     if value is None:
         return default
     return str(value).strip().lower() in ("true", "1", "yes", "y", "on")
-
 
 def _env_list(name, default=None):
     """Parse a comma-separated environment variable into a list."""
@@ -33,9 +28,7 @@ def _env_list(name, default=None):
         return default or []
     return [item.strip() for item in raw.split(",") if item.strip()]
 
-
 # Core security and environment flags
-
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
 
@@ -46,9 +39,7 @@ if not DEBUG and (not SECRET_KEY or SECRET_KEY == "unsafe-dev-secret-key"):
 
 IS_HEROKU = os.environ.get("DYNO") is not None
 
-
 # Hosts and CSRF configuration
-
 ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", default=[])
 
 if not ALLOWED_HOSTS and IS_HEROKU:
@@ -80,9 +71,7 @@ X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 
-
 # Installed applications
-
 INSTALLED_APPS = [
     # Admin theme
     "jazzmin",
@@ -110,11 +99,10 @@ INSTALLED_APPS = [
     "reviews",
 ]
 
+
 SITE_ID = int(os.environ.get("SITE_ID", "1"))
 
-
 # Admin interface configuration
-
 JAZZMIN_SETTINGS = {
     "site_title": "The Elysium Archive Admin",
     "site_header": "The Elysium Archive",
@@ -135,9 +123,7 @@ JAZZMIN_SETTINGS = {
     },
 }
 
-
 # Middleware configuration
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -150,9 +136,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-
 # Django message tag mapping
-
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",
     messages.INFO: "info",
@@ -161,9 +145,7 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
-
 # URL and template configuration
-
 ROOT_URLCONF = "elysium_archive.urls"
 
 TEMPLATES = [
@@ -184,9 +166,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
 
-
 # Database configuration
-
 DATABASES: dict[str, Any] = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -198,9 +178,7 @@ if os.environ.get("DATABASE_URL"):
     db_config = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES["default"] = cast(dict[str, Any], db_config)
 
-
 # Password validation
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -210,25 +188,19 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
 # Internationalization settings
-
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Europe/Dublin"
 USE_I18N = True
 USE_TZ = True
 
-
 # Static files configuration
-
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-
 # Media files and storage configuration
-
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -242,6 +214,10 @@ if os.environ.get("CLOUDINARY_URL"):
         },
     }
     CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    
+    # Force HTTPS for Cloudinary URLs to prevent mixed content errors
+    import cloudinary
+    cloudinary.config(secure=True)
 else:
     STORAGES = {
         "default": {
@@ -253,29 +229,21 @@ else:
     }
     CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
-
 # Default model field configuration
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
 # Authentication redirects
-
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
-
 # Authentication backends
-
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-
 # Allauth configuration
-
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
@@ -289,9 +257,7 @@ ACCOUNT_FORMS = {
     "login": "accounts.forms.ElysiumLoginForm",
 }
 
-
 # Email configuration
-
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
@@ -308,9 +274,7 @@ EMAIL_USE_TLS = _env_bool(os.environ.get("EMAIL_USE_TLS"), default=True)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "apikey")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
-
 # Stripe configuration
-
 STRIPE_PUBLIC_KEY = os.environ.get(
     "STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev"
 )
@@ -319,9 +283,7 @@ STRIPE_SECRET_KEY = os.environ.get(
 )
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")
 
-
 # CKEditor 5 configuration
-
 CKEDITOR_5_UPLOAD_PATH = "ckeditor5/"
 
 CKEDITOR_5_CONFIGS = {
