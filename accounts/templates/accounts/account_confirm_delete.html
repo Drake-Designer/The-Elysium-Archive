@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}
+    Delete Account | The Elysium Archive
+{% endblock title %}
+{% block content %}
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="panel p-4">
+                    <h1 class="h3 mb-4">Delete My Account</h1>
+                    <div class="alert alert-danger">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone. All your data will be permanently deleted.
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fa-solid fa-trash me-2"></i>Confirm Delete Account
+                            </button>
+                            <a href="{% url 'profile' %}" class="btn btn-secondary">
+                                <i class="fa-solid fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

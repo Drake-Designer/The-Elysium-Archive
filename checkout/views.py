@@ -1,152 +1,175 @@
-"""Views for the checkout app."""
+"""Views for checkout and Stripe integration."""
 
-import logging
-
+import os
 import stripe
-from stripe import StripeError
-
-from django.conf import settings
+from decimal import Decimal
 from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 from accounts.decorators import verified_email_required
-from cart.cart import clear_cart, get_cart_items, get_cart_total
-from orders.models import Order, OrderLineItem
+from cart.cart import get_cart_items, get_cart_total, clear_cart
+from orders.models import AccessEntitlement, Order, OrderLineItem
 from products.models import Product
 
-# Initialize Stripe with secret key from settings.
-stripe.api_key = settings.STRIPE_SECRET_KEY
-
-logger = logging.getLogger(__name__)
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 
 
 @verified_email_required
-def checkout_view(request):
-    """Build Stripe session and redirect to hosted checkout page."""
+@require_http_methods(["POST"])
+def checkout(request):
+    """Create Stripe checkout session and redirect user to payment."""
     cart_items = get_cart_items(request.session)
 
-    # Validate cart is not empty.
     if not cart_items:
-        messages.warning(request, "Your cart is empty. Add archives before checkout.")
+        messages.warning(request, "Your cart is empty.")
         return redirect("cart")
 
-    try:
-        # Create pending Order record.
-        order = Order.objects.create(
-            user=request.user,
-            status="pending",
-            total=get_cart_total(request.session, cart_items),
+    total = get_cart_total(request.session, cart_items)
+    order = Order.objects.create(
+        user=request.user,
+        total=total,
+        status="pending",
+    )
+
+    line_items = []
+    for item in cart_items:
+        product = item["product"]
+        OrderLineItem.objects.create(
+            order=order,
+            product=product,
+            product_title=product.title,
+            product_price=product.price,
+            quantity=1,
+            line_total=product.price,
         )
 
-        # Create OrderLineItem records for each cart item.
-        for item in cart_items:
-            product = item["product"]
-            OrderLineItem.objects.create(
-                order=order,
-                product=product,
-                product_title=product.title,
-                product_price=product.price,
-                quantity=1,
-            )
-
-        # Build Stripe line items from cart.
-        line_items = []
-        for item in cart_items:
-            product = item["product"]
-            unit_amount_cents = int(product.price * 100)
-            line_items.append(
-                {
-                    "price_data": {
-                        "currency": "eur",
-                        "unit_amount": unit_amount_cents,
-                        "product_data": {
-                            "name": product.title,
-                            "description": product.tagline or "",
-                            "metadata": {"product_id": str(product.pk)},
-                        },
+        line_items.append(
+            {
+                "price_data": {
+                    "currency": "eur",
+                    "product_data": {
+                        "name": product.title,
+                        "description": product.tagline or "",
                     },
-                    "quantity": 1,
-                }
-            )
+                    "unit_amount": int(product.price * 100),
+                },
+                "quantity": 1,
+            }
+        )
 
-        # Create Stripe Session with order metadata.
-        try:
-            session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                line_items=line_items,
-                mode="payment",
-                metadata={"order_id": str(order.pk)},
-                client_reference_id=str(order.pk),
-                success_url=request.build_absolute_uri(
-                    reverse("checkout_success") + f"?order_id={order.pk}"
-                ),
-                cancel_url=request.build_absolute_uri(reverse("checkout_cancel")),
-            )
-        except StripeError as err:
-            logger.warning("Stripe error during checkout: %s", err)
-            order.delete()
-            messages.error(request, "Payment error occurred. Please try again.")
-            return redirect("cart")
-        except Exception as exc:  # noqa: BLE001
-            logger.exception("Unexpected checkout error: %s", exc)
-            order.delete()
-            messages.error(request, "An error occurred during checkout. Please try again.")
-            return redirect("cart")
+    try:
+        session = stripe.checkout.Session.create(
+            line_items=line_items,
+            mode="payment",
+            success_url=request.build_absolute_uri(
+                reverse("checkout_success", kwargs={"order_number": order.order_number})
+            ),
+            cancel_url=request.build_absolute_uri(reverse("checkout_cancel")),
+            client_reference_id=order.order_number,
+            metadata={"order_number": order.order_number},
+        )
 
-        # Handle missing session URL safely.
-        if not session.url:
-            messages.error(request, "Payment session could not be created. Try again.")
-            return redirect("cart")
+        order.stripe_session_id = session.id
+        order.save()
 
-        # Redirect user to Stripe hosted checkout.
-        return redirect(session.url)
+        if session.url:
+            return redirect(session.url, code=303)
+        else:
+            raise Exception("Stripe session URL is missing")
 
-    except Product.DoesNotExist:
-        messages.error(request, "One or more items in your cart no longer exist.")
-        clear_cart(request.session)
-        return redirect("cart")
-
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("Unexpected checkout error: %s", exc)
-        messages.error(request, "An error occurred during checkout. Please try again.")
+    except Exception as e:
+        messages.error(
+            request, f"Payment initialization failed: {str(e)}. Please try again."
+        )
+        order.delete()
         return redirect("cart")
 
 
 @verified_email_required
-def checkout_success(request):
-    """Display order confirmation with status awareness."""
-    order_id = request.GET.get("order_id")
-
-    # Redirect safely if order id is missing.
-    if not order_id:
-        messages.warning(request, "Order not found.")
-        return redirect("home")
-
-    # Retrieve order from database.
+def checkout_success(request, order_number):
+    """Display order confirmation after successful payment."""
     try:
-        order = Order.objects.get(pk=order_id, user=request.user)
+        order = Order.objects.get(order_number=order_number, user=request.user)
     except Order.DoesNotExist:
-        messages.warning(request, "Order not found.")
-        return redirect("home")
+        messages.error(request, "Order not found.")
+        return redirect("product_list")
 
-    if order.status == "paid":
-        clear_cart(request.session)
-        messages.success(request, "Payment successful! Your archives are now unlocked.")
-    elif order.status == "pending":
-        messages.info(
-            request,
-            "Payment is being confirmed. Refresh in a moment if it does not update.",
-        )
-    else:
-        messages.error(request, "Payment failed or was cancelled. Please try again.")
+    if order.status == "pending" and order.stripe_session_id:
+        try:
+            session = stripe.checkout.Session.retrieve(order.stripe_session_id)
+            if session.payment_status == "paid":
+                order.status = "paid"
+                order.save()
+
+                for line_item in order.line_items.all():
+                    if line_item.product:
+                        AccessEntitlement.objects.get_or_create(
+                            user=request.user, product=line_item.product, order=order
+                        )
+
+                clear_cart(request.session)
+
+        except stripe.error.StripeError:
+            pass
 
     context = {"order": order}
-    return render(request, "checkout/checkout_success.html", context)
+    return render(request, "checkout/success.html", context)
 
 
-@verified_email_required
 def checkout_cancel(request):
-    """Display cancellation message and allow return to cart."""
-    messages.info(request, "Checkout cancelled. Your cart is saved.")
-    return render(request, "checkout/checkout_cancel.html")
+    """Display cancellation message when user cancels payment."""
+    messages.info(request, "Payment was cancelled. Your cart is still available.")
+    return render(request, "checkout/cancel.html")
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def stripe_webhook(request):
+    """Handle Stripe webhook events for payment processing."""
+    payload = request.body
+    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+    webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except ValueError:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError:
+        return HttpResponse(status=400)
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        order_number = session.get("metadata", {}).get("order_number")
+
+        if order_number:
+            try:
+                order = Order.objects.get(order_number=order_number)
+                order.status = "paid"
+                order.stripe_payment_intent_id = session.get("payment_intent")
+                order.save()
+
+                for line_item in order.line_items.all():
+                    if line_item.product:
+                        AccessEntitlement.objects.get_or_create(
+                            user=order.user,
+                            product=line_item.product,
+                            order=order,
+                        )
+
+            except Order.DoesNotExist:
+                return HttpResponse(status=404)
+
+    elif event["type"] == "payment_intent.payment_failed":
+        payment_intent = event["data"]["object"]
+        try:
+            order = Order.objects.get(stripe_payment_intent_id=payment_intent["id"])
+            order.status = "failed"
+            order.save()
+        except Order.DoesNotExist:
+            pass
+
+    return JsonResponse({"status": "success"})

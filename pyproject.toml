@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ['py314']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.venv
+  | migrations
+)/
+'''
+
+[tool.isort]
+profile = "black"
+skip_gitignore = true
+extend_skip_glob = ["*/migrations/*"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "elysium_archive.settings_test"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+testpaths = ["accounts/tests", "products/tests", "cart", "checkout", "orders", "reviews", "home"]
+
+[tool.mypy]
+python_version = "3.14"
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = false
+check_untyped_defs = true
+no_implicit_reexport = true
+plugins = ["mypy_django_plugin.main"]
+
+[[tool.mypy.overrides]]
+module = [
+    "cloudinary.*",
+    "django_ckeditor_5.*",
+    "allauth.*",
+    "stripe.*",
+    "cloudinary_storage.*",
+    "django_jazzmin.*"
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "*.models"
+disable_error_code = ["var-annotated"]
+
+[[tool.mypy.overrides]]
+module = "*.migrations.*"
+ignore_errors = true
+
+[tool.django-stubs]
+django_settings_module = "elysium_archive.settings"
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "manage.py",
+    "*/settings*.py",
+]

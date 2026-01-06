@@ -1,12 +1,17 @@
 """Models for the orders app."""
 
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
 from products.models import Product
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+    from django.contrib.auth.models import AbstractUser
 
 
 class Order(models.Model):
@@ -17,6 +22,23 @@ class Order(models.Model):
         ("paid", "Paid"),
         ("failed", "Failed"),
     ]
+
+    # Type hints for fields
+    order_number: models.CharField
+    status: models.CharField
+    total: models.DecimalField
+    stripe_session_id: models.CharField
+    stripe_payment_intent_id: models.CharField
+    created_at: models.DateTimeField
+    updated_at: models.DateTimeField
+    
+    # Django auto-generated
+    id: int
+    
+    # Reverse relations
+    if TYPE_CHECKING:
+        line_items: "QuerySet[OrderLineItem]"
+        entitlements: "QuerySet[AccessEntitlement]"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -38,14 +60,14 @@ class Order(models.Model):
     stripe_session_id = models.CharField(
         max_length=255,
         blank=True,
-        null=True,
-        help_text="Store Stripe checkout session id for tracing.",
+        default="",
+        help_text="Stripe checkout session ID for tracing"
     )
-    stripe_pid = models.CharField(
+    stripe_payment_intent_id = models.CharField(
         max_length=255,
         blank=True,
-        null=True,
-        help_text="Store Stripe payment intent id for auditing.",
+        default="",
+        help_text="Stripe payment intent ID for auditing"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -54,10 +76,10 @@ class Order(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Order {self.order_number}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         """Generate order number before saving."""
         if not self.order_number:
             import uuid
@@ -68,6 +90,15 @@ class Order(models.Model):
 
 class OrderLineItem(models.Model):
     """Store individual products within an order."""
+
+    # Type hints for fields
+    product_title: models.CharField
+    product_price: models.DecimalField
+    quantity: models.PositiveIntegerField
+    line_total: models.DecimalField
+    
+    # Django auto-generated
+    id: int
 
     order = models.ForeignKey(
         Order,
@@ -96,12 +127,12 @@ class OrderLineItem(models.Model):
         validators=[MinValueValidator(0)],
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"{self.quantity}x {self.product_title} (Order {self.order.order_number})"
         )
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         """Calculate line total before saving."""
         self.line_total = self.product_price * self.quantity
         super().save(*args, **kwargs)
@@ -109,6 +140,12 @@ class OrderLineItem(models.Model):
 
 class AccessEntitlement(models.Model):
     """Grant a user access to a purchased product."""
+
+    # Type hints for fields
+    granted_at: models.DateTimeField
+    
+    # Django auto-generated
+    id: int
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -137,5 +174,5 @@ class AccessEntitlement(models.Model):
         ]
         ordering = ["-granted_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} -> {self.product}"

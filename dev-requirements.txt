@@ -12,8 +12,13 @@ isort==7.0.0
 
 # Testing / security
 pytest==9.0.2
+pytest-cov==7.0.0
 pytest-django==4.11.1
 bandit==1.9.2
+
+# Type checking
+django-stubs[compatible-mypy]==5.2.8
+types-stripe==14.1.0.20250101
 
 # Optional formatting utilities
 cssbeautifier==1.15.4

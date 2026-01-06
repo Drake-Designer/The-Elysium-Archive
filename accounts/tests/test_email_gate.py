@@ -27,7 +27,7 @@ class TestEmailVerificationGate:
     def test_unverified_user_cannot_access_profile(self, client, unverified_user):
         """Unverified user gets redirected from profile to verify email."""
         client.force_login(unverified_user)
-        response = client.get(reverse("account_profile"))
+        response = client.get(reverse("profile"))
 
         assert response.status_code == 302
         assert reverse("account_email") in response.url

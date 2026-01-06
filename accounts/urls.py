@@ -1,13 +1,12 @@
-"""URL configuration for the accounts app."""
+"""URL configuration for accounts app."""
 
-from django.urls import include, path
+from django.urls import path
 
 from . import views
 
 urlpatterns = [
     path("dashboard/", views.dashboard, name="account_dashboard"),
-    path("archive/", views.my_archive, name="my_archive"),
-    path("profile/", views.profile, name="account_profile"),
-    path("delete/", views.account_delete, name="account_delete"),
-    path("", include("allauth.urls")),
+    path("my-archive/", views.my_archive, name="my_archive"),
+    path("profile/", views.profile, name="profile"),
+    path("delete/", views.delete_account, name="account_delete"),
 ]

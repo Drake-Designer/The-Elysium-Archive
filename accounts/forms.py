@@ -3,6 +3,8 @@
 from allauth.account.forms import LoginForm, SignupForm
 from django import forms
 
+from .models import UserProfile
+
 
 class ElysiumSignupForm(SignupForm):
     """Style the signup form fields."""
@@ -60,32 +62,42 @@ class ElysiumLoginForm(LoginForm):
         )
 
 
-class ProfileForm(forms.Form):
-    """Collect profile updates."""
+class UserProfileForm(forms.ModelForm):
+    """Form for editing user profile information."""
 
-    display_name = forms.CharField(
-        max_length=20,
-        required=False,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Enter a display name (optional)",
-                "maxlength": "20",
-            }
-        ),
-        help_text="Max 20 characters (letters, numbers, symbols, spaces allowed)",
-    )
-    profile_picture = forms.ImageField(
-        required=False,
-        widget=forms.FileInput(
-            attrs={
-                "class": "form-control",
-                "accept": "image/*",
-            }
-        ),
-        help_text="Upload a profile picture (JPG, PNG, max 5MB)",
-    )
     remove_picture = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        label="Remove profile picture"
     )
+
+    class Meta:
+        model = UserProfile
+        fields = ["display_name", "profile_picture"]
+        widgets = {
+            "display_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter a display name (optional)",
+                    "maxlength": "20",
+                }
+            ),
+            "profile_picture": forms.FileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": "image/*",
+                }
+            ),
+        }
+        labels = {
+            "display_name": "Display Name",
+            "profile_picture": "Profile Picture",
+        }
+        help_texts = {
+            "display_name": "Max 20 characters (letters, numbers, symbols, spaces allowed)",
+            "profile_picture": "Upload a profile picture (JPG, PNG, max 5MB)",
+        }
+
+
+# Alias for backward compatibility if needed
+ProfileForm = UserProfileForm

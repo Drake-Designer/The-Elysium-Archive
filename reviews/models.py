@@ -1,10 +1,15 @@
 """Models for the reviews app."""
 
+from typing import TYPE_CHECKING, Any
+
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from products.models import Product
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractUser
 
 
 class Review(models.Model):
@@ -17,6 +22,17 @@ class Review(models.Model):
         (4, "4 - Excellent"),
         (5, "5 - Outstanding"),
     ]
+
+    user: models.ForeignKey
+    product: models.ForeignKey
+    rating: models.PositiveIntegerField
+    title: models.CharField
+    body: models.TextField
+    created_at: models.DateTimeField
+    updated_at: models.DateTimeField
+    
+    # Django auto-generated
+    id: int
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -51,5 +67,5 @@ class Review(models.Model):
         ]
         ordering = ["-created_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} reviewed {self.product}"

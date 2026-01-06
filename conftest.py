@@ -1,168 +1,139 @@
-"""Pytest configuration and shared test fixtures for all apps."""
+"""Pytest configuration and fixtures."""
 
-import os
 import pytest
-from decimal import Decimal
-from django.conf import settings
-from django.contrib.auth import get_user_model
 from allauth.account.models import EmailAddress
-from products.models import Product, Category
-from orders.models import Order, OrderLineItem, AccessEntitlement
+from decimal import Decimal
+from django.contrib.auth import get_user_model
+from typing import Any, cast
 
-
-@pytest.fixture(autouse=True)
-def disable_staticfiles(settings):
-    """Disable WhiteNoise staticfiles storage for tests."""
-    settings.STATICFILES_STORAGE = (
-        "django.contrib.staticfiles.storage.StaticFilesStorage"
-    )
-    # Remove WhiteNoise from middleware
-    settings.MIDDLEWARE = [
-        m for m in settings.MIDDLEWARE if "whitenoise" not in m.lower()
-    ]
-
+from orders.models import AccessEntitlement, Order
+from products.models import Category, Product
 
 User = get_user_model()
 
 
 @pytest.fixture
+def category():
+    """Create a test category."""
+    return Category.objects.create(name="Test Category", slug="test-category")
+
+
+@pytest.fixture
+def product_active(category):
+    """Create an active test product."""
+    return Product.objects.create(
+        title="Active Product",
+        slug="active-product",
+        description="A test product",
+        content="<p>This is the full premium content available after purchase.</p>",
+        price=Decimal("9.99"),
+        image_alt="Test image",
+        is_active=True,
+        category=category,
+    )
+
+
+@pytest.fixture
+def product_inactive(category):
+    """Create an inactive test product."""
+    return Product.objects.create(
+        title="Inactive Product",
+        slug="inactive-product",
+        description="An inactive test product",
+        price=Decimal("14.99"),
+        image_alt="Test image",
+        is_active=False,
+        category=category,
+    )
+
+
+@pytest.fixture
 def verified_user(db):
-    """Create a user with verified email."""
+    """Create a verified test user."""
     user = User.objects.create_user(
-        username="testuser",
-        email="test@example.com",
-        password="testpass123",
+        username="verified", email="verified@test.com", password="testpass123"
     )
-    EmailAddress.objects.create(
-        user=user,
-        email=user.email,
-        verified=True,
-        primary=True,
-    )
+    EmailAddress.objects.create(user=user, email=user.email, verified=True, primary=True)
     return user
 
 
 @pytest.fixture
 def unverified_user(db):
-    """Create a user without verified email."""
+    """Create an unverified test user."""
     user = User.objects.create_user(
-        username="unverified",
-        email="unverified@example.com",
-        password="testpass123",
+        username="unverified", email="unverified@test.com", password="testpass123"
     )
     EmailAddress.objects.create(
-        user=user,
-        email=user.email,
-        verified=False,
-        primary=True,
+        user=user, email=user.email, verified=False, primary=True
     )
     return user
 
 
 @pytest.fixture
 def staff_user(db):
-    """Create a staff/superuser."""
-    return User.objects.create_superuser(
-        username="staffuser",
-        email="staff@example.com",
+    """Create a staff user."""
+    return User.objects.create_user(
+        username="staff",
+        email="staff@test.com",
         password="testpass123",
+        is_staff=True,
+        is_superuser=True,
     )
 
 
 @pytest.fixture
-def category(db):
-    """Create a test category."""
-    return Category.objects.create(
-        name="Test Category",
-        slug="test-category",
-    )
-
-
-@pytest.fixture
-def product_active(db, category):
-    """Create an active product."""
-    return Product.objects.create(
-        title="Active Product",
-        slug="active-product",
-        description="A test product",
-        tagline="Test tagline for product",
-        content="This is the full archive content that should only appear on the reading page.",
-        price=Decimal("9.99"),
-        category=category,
-        is_active=True,
-        is_featured=False,
-    )
-
-
-@pytest.fixture
-def product_inactive(db, category):
-    """Create an inactive (unpublished) product."""
-    return Product.objects.create(
-        title="Inactive Product",
-        slug="inactive-product",
-        description="A test product",
-        price=Decimal("19.99"),
-        category=category,
-        is_active=False,
-        is_featured=False,
-    )
-
-
-@pytest.fixture
-def entitlement(db, verified_user, product_active):
-    """Create an AccessEntitlement for a user."""
-    return AccessEntitlement.objects.create(
-        user=verified_user,
-        product=product_active,
-    )
-
-
-@pytest.fixture
-def order_pending(db, verified_user, product_active):
-    """Create a pending order with line items."""
-    order = Order.objects.create(
-        user=verified_user,
-        status="pending",
-        total=Decimal("9.99"),
-    )
-    OrderLineItem.objects.create(
-        order=order,
-        product=product_active,
-        product_title=product_active.title,
-        product_price=product_active.price,
-        quantity=1,
-    )
-    return order
-
-
-@pytest.fixture
-def order_paid(db, verified_user, product_active):
-    """Create a paid order (with entitlements already granted)."""
-    order = Order.objects.create(
-        user=verified_user,
-        status="paid",
-        total=Decimal("9.99"),
-        stripe_session_id="cs_test123",
-        stripe_pid="pi_test123",
-    )
-    OrderLineItem.objects.create(
-        order=order,
-        product=product_active,
-        product_title=product_active.title,
-        product_price=product_active.price,
-        quantity=1,
-    )
-    # Create entitlement (as if webhook already ran)
-    AccessEntitlement.objects.create(
-        user=verified_user,
-        product=product_active,
-        order=order,
-    )
-    return order
-
-
-@pytest.fixture
-def client_with_cart(client, verified_user):
-    """Provide a client with a user session that has a cart."""
-    client.force_login(verified_user)
+def client_with_cart(client, product_active):
+    """Create a client with items in cart session."""
+    session = client.session
+    session["cart"] = {str(product_active.id): {"quantity": 1}}
+    session.save()
     return client
+
+
+@pytest.fixture
+def entitlement(verified_user, product_active):
+    """Create an entitlement (purchase) for a user."""
+    return AccessEntitlement.objects.create(
+        user=cast(Any, verified_user), product=product_active
+    )
+
+
+@pytest.fixture
+def order_pending(verified_user, product_active):
+    """Create a pending order."""
+    order = Order.objects.create(
+        user=cast(Any, verified_user), total=product_active.price, status="pending"
+    )
+    from orders.models import OrderLineItem
+
+    OrderLineItem.objects.create(
+        order=order,
+        product=product_active,
+        product_title=product_active.title,
+        product_price=product_active.price,
+        quantity=1,
+        line_total=product_active.price,
+    )
+    return order
+
+
+@pytest.fixture
+def order_paid(verified_user, product_active):
+    """Create a paid order with entitlement."""
+    order = Order.objects.create(
+        user=cast(Any, verified_user), total=product_active.price, status="paid"
+    )
+    from orders.models import OrderLineItem
+
+    OrderLineItem.objects.create(
+        order=order,
+        product=product_active,
+        product_title=product_active.title,
+        product_price=product_active.price,
+        quantity=1,
+        line_total=product_active.price,
+    )
+    AccessEntitlement.objects.create(
+        user=cast(Any, verified_user), product=product_active, order=order
+    )
+    return order

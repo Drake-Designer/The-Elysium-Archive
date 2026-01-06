@@ -1,3 +1,5 @@
+"""Admin interface for products app."""
+
 from django.contrib import admin
 from django.contrib.messages import error, success
 from django.db.models import Count
@@ -9,6 +11,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
 
 from .models import Category, Product
+from .admin_utils import admin_display
 
 
 # Custom filters for Products.
@@ -157,6 +160,7 @@ class ProductAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         return queryset.annotate(entitlement_total=Count("entitlements"))
 
+    @admin_display("Purchases")
     def entitlement_count(self, obj):
         """Display number of entitlements (purchases) as badge."""
         count = getattr(obj, "entitlement_total", 0) or 0
@@ -168,8 +172,7 @@ class ProductAdmin(admin.ModelAdmin):
             )
         return "-"
 
-    entitlement_count.short_description = "Purchases"
-
+    @admin_display("Status")
     def status_badge(self, obj):
         """Display active/archived status as a badge."""
         if obj.is_active:
@@ -177,12 +180,11 @@ class ProductAdmin(admin.ModelAdmin):
         else:
             return mark_safe('<span class="badge badge-muted">Archived</span>')
 
-    status_badge.short_description = "Status"
-
+    @admin_display("Featured")
     def featured_toggle(self, obj):
         """Display featured status with toggle link."""
         if obj.is_featured:
-            badge = '<span class="badge badge-featured">? Featured</span>'
+            badge = '<span class="badge badge-featured">⭐ Featured</span>'
         else:
             badge = '<span class="badge badge-not-featured">Not featured</span>'
 
@@ -198,30 +200,25 @@ class ProductAdmin(admin.ModelAdmin):
         )
         return mark_safe(form_html)
 
-    featured_toggle.short_description = "Featured"
-
+    @admin_display("Image")
     def has_image_badge(self, obj):
         """Display image presence as badge."""
         if obj.image:
-            return mark_safe('<span class="badge badge-image">?? Has image</span>')
+            return mark_safe('<span class="badge badge-image">🖼️ Has image</span>')
         else:
             return mark_safe('<span class="badge badge-no-image">No image</span>')
 
-    has_image_badge.short_description = "Image"
-
+    @admin_display("Mark selected as featured")
     def mark_as_featured(self, request, queryset):
         """Bulk action to mark products as featured."""
         updated = queryset.update(is_featured=True)
         success(request, f"Marked {updated} product(s) as featured.")
 
-    mark_as_featured.short_description = "Mark selected as featured"
-
+    @admin_display("Remove featured status")
     def remove_featured(self, request, queryset):
         """Bulk action to remove featured status."""
         updated = queryset.update(is_featured=False)
         success(request, f"Removed featured status from {updated} product(s).")
-
-    remove_featured.short_description = "Remove featured status"
 
     def get_actions(self, request):
         """Remove default delete_selected action; keep only safe_delete_products."""
@@ -282,6 +279,7 @@ class ProductAdmin(admin.ModelAdmin):
 
         super().delete_queryset(request, queryset)
 
+    @admin_display("Delete selected products (safe)")
     def safe_delete_products(self, request, queryset):
         """Custom bulk delete action with entitlement protection (ALL-OR-NOTHING)."""
         protected_titles = self._get_protected_titles(queryset)
@@ -295,23 +293,13 @@ class ProductAdmin(admin.ModelAdmin):
             error(
                 request,
                 format_html(
-                    "Delete blocked: {} {} purchased. "
-                    "Consider soft delete (set <strong>is_active=False</strong>) instead.",
+                    "Cannot delete: {} {} purchased. Use soft delete (set inactive) instead.",
                     titles_html,
                     "have been" if len(protected_titles) > 1 else "has been",
                 ),
             )
             return
 
-        count = queryset.count()
-        super().delete_queryset(request, queryset)
-        success(
-            request,
-            format_html(
-                "Successfully deleted <strong>{}</strong> product{}.",
-                count,
-                "s" if count != 1 else "",
-            ),
-        )
-
-    safe_delete_products.short_description = "Delete selected (protected)"
+        deleted_count = queryset.count()
+        queryset.delete()
+        success(request, f"Successfully deleted {deleted_count} product(s).")

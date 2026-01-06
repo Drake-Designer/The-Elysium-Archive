@@ -47,6 +47,21 @@ htmlcov/
 .pytest_cache/
 
 # --------------------
+# Type checking
+# --------------------
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# --------------------
+# Audit files
+# --------------------
+audit_*.txt
+audit_*.json
+audit_*.md
+AUDIT_*.md
+
+# --------------------
 # IDE / OS
 # --------------------
 .vscode/

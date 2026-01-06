@@ -1,136 +1,119 @@
-"""Account views for profiles, archives, and deletion."""
+"""Views for the accounts app."""
+
 
 from django.contrib import messages
 from django.contrib.auth import logout
-from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods
+from typing import Any
+
 
 from .decorators import verified_email_required
-from .forms import ProfileForm
+from .forms import UserProfileForm
 from .models import UserProfile
-from orders.models import AccessEntitlement
+
 
 
 @verified_email_required
 def dashboard(request):
-    """Render the account dashboard."""
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    entitlements = AccessEntitlement.objects.filter(user=request.user).select_related(
-        "product", "order"
-    )
-    unlocked_products = [
-        {
-            "product": item.product,
-            "order": item.order,
-            "purchase_date": item.granted_at,
-        }
-        for item in entitlements
-        if item.product
-    ]
-
+    """Display user dashboard with purchased archives."""
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    
+    # Handle profile form submission
     if request.method == "POST":
-        form = ProfileForm(request.POST, request.FILES)
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            user_profile.display_name = form.cleaned_data["display_name"]
-
-            # Handle profile picture removal
-            if form.cleaned_data.get("remove_picture") and user_profile.profile_picture:
-                user_profile.profile_picture.delete(save=False)
-                user_profile.profile_picture = None
-            # Handle profile picture upload
-            elif form.cleaned_data.get("profile_picture"):
-                if user_profile.profile_picture:
-                    user_profile.profile_picture.delete(save=False)
-                user_profile.profile_picture = form.cleaned_data["profile_picture"]
-
-            user_profile.save()
+            form.save()
             messages.success(request, "Profile updated successfully.")
             return redirect("account_dashboard")
-        messages.error(request, "Please correct the errors below.")
     else:
-        form = ProfileForm(initial={"display_name": user_profile.display_name})
+        form = UserProfileForm(instance=profile)
+    
+    entitlements_data = []
 
-    context = {
+
+    for entitlement in request.user.entitlements.select_related("product", "order"):
+        product = entitlement.product
+        order = entitlement.order
+        if product:
+            entitlements_data.append(
+                {
+                    "product": product,
+                    "order": order,
+                    "purchased_at": entitlement.granted_at,
+                }
+            )
+
+
+    context: dict[str, Any] = {
+        "entitlements": entitlements_data,
         "form": form,
-        "unlocked_products": unlocked_products,
-        "user_profile": user_profile,
+        "profile": profile,
     }
     return render(request, "accounts/dashboard.html", context)
 
 
+
 @verified_email_required
 def my_archive(request):
-    """Render the user's unlocked archive entries."""
-    entitlements = AccessEntitlement.objects.filter(user=request.user).select_related(
-        "product", "order"
-    )
-    unlocked_products = [
-        {
-            "product": item.product,
-            "order": item.order,
-            "purchase_date": item.granted_at,
-        }
-        for item in entitlements
-        if item.product
-    ]
+    """Display user's purchased archives."""
+    unlocked_products = []
 
-    context = {
+
+    for entitlement in request.user.entitlements.select_related("product", "order"):
+        product = entitlement.product
+        # Only show active products (or products user owns even if inactive)
+        if product and (product.is_active or True):
+            unlocked_products.append(
+                {
+                    "product": product,
+                    "purchase_date": entitlement.granted_at,
+                }
+            )
+
+
+    context: dict[str, Any] = {
         "unlocked_products": unlocked_products,
     }
     return render(request, "accounts/my_archive.html", context)
 
 
+
 @verified_email_required
 def profile(request):
-    """Render and update the user profile."""
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    """Display and edit user profile."""
+    profile_obj, _ = UserProfile.objects.get_or_create(user=request.user)
+
 
     if request.method == "POST":
-        form = ProfileForm(request.POST, request.FILES)
+        form = UserProfileForm(request.POST, request.FILES, instance=profile_obj)
         if form.is_valid():
-            user_profile.display_name = form.cleaned_data["display_name"]
-
-            # Handle profile picture removal
-            if form.cleaned_data.get("remove_picture") and user_profile.profile_picture:
-                user_profile.profile_picture.delete(save=False)
-                user_profile.profile_picture = None
-            # Handle profile picture upload
-            elif form.cleaned_data.get("profile_picture"):
-                if user_profile.profile_picture:
-                    user_profile.profile_picture.delete(save=False)
-                user_profile.profile_picture = form.cleaned_data["profile_picture"]
-
-            user_profile.save()
+            form.save()
             messages.success(request, "Profile updated successfully.")
-            return redirect("account_profile")
-        messages.error(request, "Please correct the errors below.")
+            return redirect("profile")
     else:
-        form = ProfileForm(initial={"display_name": user_profile.display_name})
+        form = UserProfileForm(instance=profile_obj)
+
 
     context = {
         "form": form,
-        "user_profile": user_profile,
+        "profile": profile_obj,
     }
     return render(request, "accounts/profile.html", context)
 
 
-@verified_email_required
-def account_delete(request):
-    """Delete the current user account."""
-    # Prevent superusers from deleting their accounts
-    if request.user.is_superuser:
-        messages.error(
-            request,
-            "Superuser accounts cannot be deleted. Contact system administrator.",
-        )
-        return redirect("account_profile")
 
+@login_required
+@require_http_methods(["GET", "POST"])
+def delete_account(request):
+    """Handle account deletion with confirmation."""
     if request.method == "POST":
         user = request.user
         logout(request)
         user.delete()
-        messages.info(
-            request,
-            "Your account has been deleted. We're sorry to see you go.",
+        messages.success(
+            request, "Your account has been successfully deleted. We're sorry to see you go."
         )
         return redirect("home")
 

@@ -16,21 +16,24 @@ class TestProfileView:
 
     def test_profile_requires_login(self, client):
         """Test that profile view requires authentication."""
-        response = client.get(reverse("account_profile"))
+        response = client.get(reverse("profile")
+)
         assert response.status_code == 302
         assert "/accounts/login/" in response.url
 
     def test_profile_get_authenticated(self, client, verified_user):
         """Test that authenticated user can view profile page."""
         client.force_login(verified_user)
-        response = client.get(reverse("account_profile"))
+        response = client.get(reverse("profile")
+)
         assert response.status_code == 200
         assert "accounts/profile.html" in [t.name for t in response.templates]
 
     def test_profile_displays_username_and_email(self, client, verified_user):
         """Test that profile page shows username and email read-only."""
         client.force_login(verified_user)
-        response = client.get(reverse("account_profile"))
+        response = client.get(reverse("profile")
+)
         content = response.content.decode()
         assert verified_user.username in content
         assert verified_user.email in content
@@ -38,14 +41,16 @@ class TestProfileView:
     def test_profile_edit_display_name_get(self, client, verified_user):
         """Test that profile form is displayed with empty or current display_name."""
         client.force_login(verified_user)
-        response = client.get(reverse("account_profile"))
+        response = client.get(reverse("profile")
+)
         assert "display_name" in response.content.decode()
 
     def test_profile_edit_display_name_post(self, client, verified_user):
         """Test that POST updates display_name and shows success message."""
         client.force_login(verified_user)
         response = client.post(
-            reverse("account_profile"),
+            reverse("profile")
+,
             {"display_name": "Lord Dracula"},
             follow=True,
         )
@@ -63,7 +68,8 @@ class TestProfileView:
         profile.save()
         client.force_login(verified_user)
         response = client.post(
-            reverse("account_profile"),
+            reverse("profile")
+,
             {"display_name": ""},
             follow=True,
         )
@@ -76,7 +82,8 @@ class TestProfileView:
         client.force_login(verified_user)
         long_name = "A" * 100
         response = client.post(
-            reverse("account_profile"),
+            reverse("profile")
+,
             {"display_name": long_name},
         )
         assert response.status_code == 200

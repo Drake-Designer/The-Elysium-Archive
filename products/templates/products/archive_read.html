@@ -8,6 +8,7 @@
 {% endblock meta_description %}
 {% block content %}
     <!-- Archive reading page - immersive layout -->
+    <!-- Navigation: my_archive -->
     <section class="container py-5">
         <!-- Navigation breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
@@ -54,7 +55,7 @@
                         <h2 class="h4 mb-4 text-danger">
                             <i class="fa-solid fa-book-open me-2"></i>Complete Archive Entry
                         </h2>
-                        <div class="lh-lg">{{ product.content|linebreaks }}</div>
+                        <div class="lh-lg">{{ product.content|safe }}</div>
                     </div>
                     <!-- Navigation footer -->
                     <footer class="mt-5 pt-4 border-top">

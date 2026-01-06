@@ -1,11 +1,9 @@
 """Tests for order management and Stripe webhook handling."""
 
 import pytest
-import json
 from decimal import Decimal
 from unittest.mock import patch
 from django.urls import reverse
-from django.http import QueryDict
 from orders.models import Order, AccessEntitlement
 
 
@@ -18,7 +16,6 @@ class TestWebhookHandling:
         self, mock_construct, client, verified_user, order_pending
     ):
         """Webhook on checkout.session.completed creates AccessEntitlements."""
-        # Mock the webhook event
         mock_construct.return_value = {
             "type": "checkout.session.completed",
             "data": {
@@ -30,10 +27,8 @@ class TestWebhookHandling:
             },
         }
 
-        # Verify no entitlements yet
         assert AccessEntitlement.objects.filter(user=verified_user).count() == 0
 
-        # POST webhook
         response = client.post(
             reverse("stripe_webhook"),
             data="{}",
@@ -43,7 +38,6 @@ class TestWebhookHandling:
 
         assert response.status_code == 200
 
-        # Entitlements should be created
         entitlements = AccessEntitlement.objects.filter(user=verified_user)
         assert entitlements.count() == 1
 
@@ -99,7 +93,7 @@ class TestWebhookHandling:
 
         order_pending.refresh_from_db()
         assert order_pending.stripe_session_id == session_id
-        assert order_pending.stripe_pid == payment_id
+        assert order_pending.stripe_payment_intent_id == payment_id
 
     @patch("checkout.webhooks.stripe.Webhook.construct_event")
     def test_webhook_idempotent_same_event_twice(
@@ -117,7 +111,6 @@ class TestWebhookHandling:
             },
         }
 
-        # First webhook
         client.post(
             reverse("stripe_webhook"),
             data="{}",
@@ -127,7 +120,6 @@ class TestWebhookHandling:
 
         assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
 
-        # Second webhook (same event)
         client.post(
             reverse("stripe_webhook"),
             data="{}",
@@ -135,7 +127,6 @@ class TestWebhookHandling:
             HTTP_STRIPE_SIGNATURE="test_sig",
         )
 
-        # Still only 1 entitlement (due to get_or_create in webhook handler)
         assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
 
     @patch("checkout.webhooks.stripe.Webhook.construct_event")
@@ -166,7 +157,7 @@ class TestWebhookHandling:
     def test_webhook_invalid_signature_rejected(
         self, mock_construct, client, order_pending
     ):
-        """Webhook with invalid signature is rejected (ValueError from construct_event)."""
+        """Webhook with invalid signature is rejected."""
         from stripe import SignatureVerificationError
 
         mock_construct.side_effect = SignatureVerificationError("Invalid", "sig")
@@ -195,7 +186,7 @@ class TestWebhookHandling:
                 "object": {
                     "id": "cs_test123",
                     "payment_intent": "pi_test123",
-                    "metadata": {"order_id": "99999"},  # Non-existent order
+                    "metadata": {"order_id": "99999"},
                 }
             },
         }
@@ -207,7 +198,6 @@ class TestWebhookHandling:
             HTTP_STRIPE_SIGNATURE="test_sig",
         )
 
-        # Should still return 200 (webhook acknowledged) even if order not found
         assert response.status_code == 200
 
 
@@ -245,8 +235,6 @@ class TestOrderModel:
     def test_order_default_status(self):
         """New order defaults to pending status."""
         order = Order(status=None)
-        # Status field should default to 'pending'
-        # This depends on model definition
 
     def test_order_timestamps(self, verified_user):
         """Order records created_at and updated_at."""
@@ -270,7 +258,6 @@ class TestAccessEntitlementModel:
 
         AccessEntitlement.objects.create(user=verified_user, product=product_active)
 
-        # Trying to create again should fail
         with pytest.raises(IntegrityError):
             AccessEntitlement.objects.create(user=verified_user, product=product_active)
 
@@ -278,8 +265,6 @@ class TestAccessEntitlementModel:
         """User with entitlement can access inactive product."""
         assert product_inactive.is_active is False
 
-        # No entitlement -> would be 404
-        # With entitlement -> should be 200
         AccessEntitlement.objects.create(user=verified_user, product=product_inactive)
 
         entitlements = AccessEntitlement.objects.filter(

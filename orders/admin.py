@@ -34,7 +34,7 @@ class OrderAdmin(admin.ModelAdmin):
                     "status",
                     "total",
                     "stripe_session_id",
-                    "stripe_pid",
+                    "stripe_payment_intent_id",
                 ),
             },
         ),

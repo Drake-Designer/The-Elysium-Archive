@@ -2,12 +2,15 @@
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
+from django.db.models import Q, QuerySet
+from django.http import Http404
+from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView
+from typing import Any, cast
 
 from .models import Product
 from elysium_archive.helpers import user_has_access
-from reviews.models import Review
+from elysium_archive.type_guards import is_authenticated_user
 from reviews.forms import ReviewForm
 
 
@@ -19,9 +22,11 @@ class ProductListView(ListView):
     context_object_name = "products"
     paginate_by = 12
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Product]:
+        """Return active products, optionally filtered by search query."""
         queryset = Product.objects.filter(is_active=True).order_by("-created_at")
         search_query = self.request.GET.get("q", "").strip()
+        
         if search_query:
             queryset = queryset.filter(
                 Q(title__icontains=search_query)
@@ -29,9 +34,11 @@ class ProductListView(ListView):
                 | Q(tagline__icontains=search_query)
                 | Q(category__name__icontains=search_query)
             ).distinct()
+        
         return queryset
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Add search query to context for template."""
         context = super().get_context_data(**kwargs)
         context["search_query"] = self.request.GET.get("q", "").strip()
         return context
@@ -46,51 +53,54 @@ class ProductDetailView(DetailView):
     slug_field = "slug"
     slug_url_kwarg = "slug"
 
-    def get_queryset(self):
-        # Include all products; get_object() will enforce access control.
+    def get_queryset(self) -> QuerySet[Product]:
+        """Return all products (access control happens in get_object)."""
         return Product.objects.all()
 
-    def get_object(self, queryset=None):
-        # Allow staff/superusers to see inactive products.
-        # Allow owners to see their purchased inactive products.
-        obj = super().get_object(queryset)
+    def get_object(self, queryset: QuerySet[Product] | None = None) -> Product:
+        """Return product if accessible, raise 404 otherwise."""
+        obj: Product = super().get_object(queryset)
 
+        # Active products are visible to everyone
         if obj.is_active:
             return obj
 
-        # If product is inactive, check if user is staff or owner.
-        if self.request.user.is_staff or self.request.user.is_superuser:
+        # Inactive products: check staff/superuser access
+        if is_authenticated_user(self.request.user) and (
+            self.request.user.is_staff or self.request.user.is_superuser  # type: ignore[attr-defined]
+        ):
             return obj
 
-        if self.request.user.is_authenticated:
-            # Check if user owns this product via AccessEntitlement.
+        # Inactive products: check if user owns it via entitlement
+        if is_authenticated_user(self.request.user):
             from orders.models import AccessEntitlement
 
             if AccessEntitlement.objects.filter(
-                user=self.request.user, product=obj
+                user=cast(Any, self.request.user), product=obj
             ).exists():
                 return obj
 
-        # User is not authorized to view this inactive product.
-        from django.http import Http404
-
+        # No access: raise 404
         raise Http404("Product not found")
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Add cart, purchase status, and reviews to context."""
         context = super().get_context_data(**kwargs)
-        product = self.get_object()
+        product: Product = self.get_object()
 
+        # Check ownership and cart status
         purchased = user_has_access(self.request.user, product)
         cart_product_ids = set(self.request.session.get("cart", {}).keys())
 
-        # Reviews are visible to everyone, but only buyers can submit.
+        # Get reviews from reverse relation
         reviews = product.reviews.all()
         user_review = None
         can_review = False
         form = None
 
-        if self.request.user.is_authenticated and purchased:
-            user_review = product.reviews.filter(user=self.request.user).first()
+        # Authenticated buyers can leave reviews
+        if is_authenticated_user(self.request.user) and purchased:
+            user_review = product.reviews.filter(user=cast(Any, self.request.user)).first()
             can_review = not user_review
             if can_review:
                 form = ReviewForm()
@@ -117,16 +127,18 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """Check email verification before processing request."""
-        # Check if user email is verified
-        if request.user.is_authenticated:
+        # Superusers bypass email verification
+        if is_authenticated_user(request.user) and request.user.is_superuser:  # type: ignore[attr-defined]
+            return super().dispatch(request, *args, **kwargs)
+
+        # Regular users must have verified email
+        if is_authenticated_user(request.user):
             from allauth.account.models import EmailAddress
+            from django.contrib import messages
 
             if not EmailAddress.objects.filter(
                 user=request.user, verified=True
             ).exists():
-                from django.shortcuts import redirect
-                from django.contrib import messages
-
                 messages.warning(
                     request,
                     "Please verify your email address to access archive content.",
@@ -135,18 +147,22 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset: QuerySet[Product] | None = None) -> Product:
         """Return product and verify user has access."""
-        obj = super().get_object(queryset)
+        obj: Product = super().get_object(queryset)
 
-        # Verify user has purchased this product
+        # Superusers have unlimited access
+        if is_authenticated_user(self.request.user) and self.request.user.is_superuser:  # type: ignore[attr-defined]
+            return obj
+
+        # Regular users must own the product
         if not user_has_access(self.request.user, obj):
             raise PermissionDenied("You must purchase this archive to read it.")
 
         return obj
 
-    def get_context_data(self, **kwargs):
-        """Add navigation context."""
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Add navigation context for back button."""
         context = super().get_context_data(**kwargs)
         context["from_my_archive"] = self.request.GET.get("from") == "my_archive"
         return context

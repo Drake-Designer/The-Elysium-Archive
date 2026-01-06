@@ -52,11 +52,11 @@ def _handle_checkout_completed(data):
 
     order.status = "paid"
     if payment_intent:
-        order.stripe_pid = payment_intent
+        order.stripe_payment_intent_id = payment_intent
     if session_id:
         order.stripe_session_id = session_id
     order.save(
-        update_fields=["status", "stripe_pid", "stripe_session_id", "updated_at"]
+        update_fields=["status", "stripe_payment_intent_id", "stripe_session_id", "updated_at"]
     )
 
     _grant_entitlements(order)

@@ -18,10 +18,8 @@ class TestCheckoutAccess:
         """Unverified user is redirected from checkout."""
         client.force_login(unverified_user)
 
-        # Add to cart first
         client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
 
-        # Try to access checkout
         response = client.get(reverse("checkout"))
 
         assert response.status_code == 302
@@ -34,23 +32,21 @@ class TestCheckoutAccess:
         """Verified user can checkout and gets Stripe session redirect."""
         client.force_login(verified_user)
 
-        # Mock Stripe response
         mock_stripe_session.return_value = MagicMock(
             url="https://checkout.stripe.com/test123",
             id="cs_test123",
         )
 
         client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
-        response = client.get(reverse("checkout"))
+        response = client.post(reverse("checkout"))
 
-        # Should redirect to Stripe checkout URL
         assert response.status_code == 302
         assert response.url == "https://checkout.stripe.com/test123"
 
     def test_anonymous_user_redirects_to_login(self, client, product_active):
         """Anonymous user is redirected to login from checkout."""
         client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
-        response = client.get(reverse("checkout"), follow=False)
+        response = client.post(reverse("checkout"), follow=False)
 
         assert response.status_code == 302
         assert reverse("account_login") in response.url
@@ -67,22 +63,17 @@ class TestCheckoutOrderCreation:
         """Checkout creates Order and OrderLineItem records."""
         client.force_login(verified_user)
 
-        # Mock Stripe response
         mock_stripe_session.return_value = MagicMock(
             url="https://checkout.stripe.com/test123",
             id="cs_test123",
         )
 
-        # Add to cart
         client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
 
-        # Verify order doesn't exist yet
         assert Order.objects.filter(user=verified_user).count() == 0
 
-        # Checkout
         response = client.post(reverse("checkout"), follow=False)
 
-        # Order should be created
         assert Order.objects.filter(user=verified_user).count() == 1
         order = Order.objects.get(user=verified_user)
         assert order.status == "pending"
@@ -106,9 +97,12 @@ class TestCheckoutOrderCreation:
         line_items = OrderLineItem.objects.filter(order=order)
 
         assert line_items.count() == 1
-        assert line_items.first().product == product_active
-        assert line_items.first().product_title == product_active.title
-        assert line_items.first().product_price == product_active.price
+
+        line_item = line_items.first()
+        assert line_item is not None
+        assert line_item.product == product_active
+        assert line_item.product_title == product_active.title
+        assert line_item.product_price == product_active.price
 
     @patch("checkout.views.stripe.checkout.Session.create")
     def test_checkout_sets_order_total(
@@ -182,11 +176,11 @@ class TestCheckoutSuccess:
         client.force_login(verified_user)
 
         response = client.get(
-            f"{reverse('checkout_success')}?order_id={order_pending.id}"
+            reverse("checkout_success", kwargs={"order_number": order_pending.order_number})
         )
 
         assert response.status_code == 200
-        assert "checkout/checkout_success.html" in [t.name for t in response.templates]
+        assert "checkout/success.html" in [t.name for t in response.templates]
 
     def test_success_page_updates_status_on_paid(
         self, client, verified_user, order_pending
@@ -194,18 +188,14 @@ class TestCheckoutSuccess:
         """Success page handles pending->paid transition."""
         client.force_login(verified_user)
 
-        # Update order status to paid (simulating webhook)
         order_pending.status = "paid"
         order_pending.save()
 
         response = client.get(
-            f"{reverse('checkout_success')}?order_id={order_pending.id}"
+            reverse("checkout_success", kwargs={"order_number": order_pending.order_number})
         )
 
         assert response.status_code == 200
-        # Check that success message is shown
-        messages = list(response.context.get("messages", []))
-        # Should have a success message about payment
 
     def test_success_page_wrong_user_404(
         self, client, verified_user, unverified_user, order_pending
@@ -215,10 +205,9 @@ class TestCheckoutSuccess:
         client.force_login(other_user)
 
         response = client.get(
-            f"{reverse('checkout_success')}?order_id={order_pending.id}"
+            reverse("checkout_success", kwargs={"order_number": order_pending.order_number})
         )
 
-        # Should redirect or 404
         assert response.status_code in [302, 404]
 
 
@@ -233,7 +222,7 @@ class TestCheckoutCancel:
         response = client.get(reverse("checkout_cancel"))
 
         assert response.status_code == 200
-        assert "checkout/checkout_cancel.html" in [t.name for t in response.templates]
+        assert "checkout/cancel.html" in [t.name for t in response.templates]
 
     def test_cancel_page_shows_message(self, client, verified_user):
         """Cancel page shows cancellation message."""
@@ -241,6 +230,4 @@ class TestCheckoutCancel:
 
         response = client.get(reverse("checkout_cancel"))
 
-        # Check for cancellation message
         messages = list(response.context.get("messages", []))
-        # Cancel message should be present

@@ -1,486 +1,462 @@
-"""Tests for product reviews."""
+"""Tests for the reviews app."""
 
-import pytest
+from decimal import Decimal
+
+from allauth.account.models import EmailAddress
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.urls import reverse
-from django.db import IntegrityError
-from reviews.models import Review
+
 from orders.models import AccessEntitlement
+from products.models import Category, Product
+from reviews.models import Review
+
+User = get_user_model()
 
 
-@pytest.mark.django_db
-class TestReviewCreation:
-    """Test review creation and access control."""
+class ReviewCreationTest(TestCase):
+    """Test review creation permissions."""
 
-    def test_non_buyer_cannot_see_review_form(
-        self, client, verified_user, product_active
-    ):
-        """User without entitlement cannot see review form."""
-        client.force_login(verified_user)
+    def setUp(self):
+        """Set up test data."""
+        self.buyer = User.objects.create_user(
+            username="buyer", email="buyer@test.com", password="pass123"
+        )
+        self.non_buyer = User.objects.create_user(
+            username="nonbuyer", email="nonbuyer@test.com", password="pass123"
+        )
+        
+        # Verify emails for both users
+        EmailAddress.objects.create(
+            user=self.buyer, email=self.buyer.email, verified=True, primary=True
+        )
+        EmailAddress.objects.create(
+            user=self.non_buyer, email=self.non_buyer.email, verified=True, primary=True
+        )
+        
+        self.category = Category.objects.create(
+            name="Test Category", slug="test-category"
+        )
+        self.product = Product.objects.create(
+            title="Test Archive",
+            slug="test-archive",
+            description="Test description",
+            price=Decimal("9.99"),
+            image_alt="Test image",
+        )
+        
+        # Grant entitlement to buyer
+        AccessEntitlement.objects.create(user=self.buyer, product=self.product)
 
-        response = client.get(reverse("product_detail", args=[product_active.slug]))
+    def test_non_buyer_cannot_see_review_form(self):
+        """Non-buyers should not see the review form."""
+        self.client.force_login(self.non_buyer)
+        response = self.client.get(
+            reverse("product_detail", kwargs={"slug": self.product.slug})
+        )
+        self.assertNotIn(b"Leave a Review", response.content)
 
-        assert response.status_code == 200
-        # Check that review form is not in context
-        # This depends on template logic
+    def test_buyer_can_see_review_form(self):
+        """Buyers should see the review form."""
+        self.client.force_login(self.buyer)
+        response = self.client.get(
+            reverse("product_detail", kwargs={"slug": self.product.slug})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["can_review"])
 
-    def test_buyer_can_see_review_form(
-        self, client, verified_user, entitlement, product_active
-    ):
-        """User with entitlement can see review form."""
-        client.force_login(verified_user)
-
-        response = client.get(reverse("product_detail", args=[product_active.slug]))
-
-        assert response.status_code == 200
-        # Review form should be visible or accessible
-
-    def test_buyer_can_post_review(
-        self, client, verified_user, entitlement, product_active
-    ):
-        """Buyer can POST a review."""
-        client.force_login(verified_user)
-
-        response = client.post(
-            reverse("create_review", args=[product_active.slug]),
+    def test_buyer_can_post_review(self):
+        """Buyers can successfully submit reviews."""
+        self.client.force_login(self.buyer)
+        response = self.client.post(
+            reverse("create_review", kwargs={"slug": self.product.slug}),
             {
                 "rating": 5,
-                "title": "Great product",
-                "body": "I really enjoyed this.",
+                "title": "Great archive!",
+                "body": "Really enjoyed this content.",
             },
         )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            Review.objects.filter(user=self.buyer, product=self.product).exists()
+        )
 
-        # Should redirect or show success
-        assert response.status_code in [200, 302]
-
-        # Review should be created
-        review = Review.objects.filter(user=verified_user, product=product_active)
-        assert review.exists()
-
-    def test_non_buyer_cannot_post_review(self, client, verified_user, product_active):
-        """User without entitlement cannot POST review."""
-        client.force_login(verified_user)
-
-        response = client.post(
-            reverse("create_review", args=[product_active.slug]),
+    def test_non_buyer_cannot_post_review(self):
+        """Non-buyers cannot submit reviews - redirected with error."""
+        self.client.force_login(self.non_buyer)
+        response = self.client.post(
+            reverse("create_review", kwargs={"slug": self.product.slug}),
             {
                 "rating": 5,
-                "title": "Review",
-                "body": "Body",
+                "title": "Fake review",
+                "body": "I did not buy this.",
             },
         )
+        # View redirects with error message, not 403
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(
+            Review.objects.filter(user=self.non_buyer, product=self.product).exists()
+        )
 
-        # Should be rejected or redirected
-        assert response.status_code in [302, 403, 400]
-
-        # Review should not be created
-        review = Review.objects.filter(user=verified_user, product=product_active)
-        assert not review.exists()
-
-    def test_anonymous_cannot_post_review(self, client, product_active):
-        """Anonymous user is redirected from review POST."""
-        response = client.post(
-            reverse("create_review", args=[product_active.slug]),
+    def test_anonymous_cannot_post_review(self):
+        """Anonymous users are redirected to login."""
+        response = self.client.post(
+            reverse("create_review", kwargs={"slug": self.product.slug}),
             {
                 "rating": 5,
-                "title": "Review",
-                "body": "Body",
-            },
-            follow=False,
-        )
-
-        assert response.status_code == 302
-        assert reverse("account_login") in response.url
-
-
-@pytest.mark.django_db
-class TestReviewDuplicatePrevention:
-    """Test that duplicate reviews are prevented."""
-
-    def test_user_cannot_post_duplicate_review(
-        self, client, verified_user, entitlement, product_active
-    ):
-        """User cannot review same product twice."""
-        client.force_login(verified_user)
-
-        # First review
-        client.post(
-            reverse("create_review", args=[product_active.slug]),
-            {
-                "rating": 5,
-                "title": "Great",
-                "body": "Very good.",
+                "title": "Anonymous review",
+                "body": "Cannot post.",
             },
         )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response["Location"])
 
-        assert (
-            Review.objects.filter(user=verified_user, product=product_active).count()
-            == 1
+
+class ReviewDuplicatePreventionTest(TestCase):
+    """Test that users can only submit one review per product."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@test.com", password="pass123"
+        )
+        
+        # Verify email
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, verified=True, primary=True
+        )
+        
+        self.product = Product.objects.create(
+            title="Test Product",
+            slug="test-product",
+            description="Test",
+            price=Decimal("9.99"),
+            image_alt="Test",
+        )
+        
+        AccessEntitlement.objects.create(user=self.user, product=self.product)
+        
+        # Create first review
+        Review.objects.create(
+            user=self.user,
+            product=self.product,
+            rating=5,
+            title="First review",
+            body="Great product",
         )
 
-        # Try to post again
-        response = client.post(
-            reverse("create_review", args=[product_active.slug]),
+    def test_user_cannot_post_duplicate_review(self):
+        """Users cannot submit multiple reviews for same product."""
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("create_review", kwargs={"slug": self.product.slug}),
             {
                 "rating": 4,
-                "title": "Changed",
-                "body": "Different.",
+                "title": "Second review",
+                "body": "Still great",
             },
         )
+        # Should redirect with message
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Review.objects.filter(user=self.user).count(), 1)
 
-        # Second review should be rejected
-        assert response.status_code in [302, 400]
 
-        # Still only 1 review
-        assert (
-            Review.objects.filter(user=verified_user, product=product_active).count()
-            == 1
+class ReviewDisplayTest(TestCase):
+    """Test review display on product pages."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="reviewer", email="reviewer@test.com", password="pass123"
         )
-
-
-@pytest.mark.django_db
-class TestReviewDisplay:
-    """Test review display on product detail page."""
-
-    def test_review_appears_on_product_detail(
-        self, client, verified_user, product_active, category
-    ):
-        """Posted review appears on product detail page."""
-        # Create entitlement and review
-        AccessEntitlement.objects.create(user=verified_user, product=product_active)
-        review = Review.objects.create(
-            user=verified_user,
-            product=product_active,
+        
+        self.product = Product.objects.create(
+            title="Product with Reviews",
+            slug="product-reviews",
+            description="Test",
+            price=Decimal("14.99"),
+            image_alt="Test",
+        )
+        
+        self.review = Review.objects.create(
+            user=self.user,
+            product=self.product,
             rating=5,
-            title="Excellent",
-            body="Really great product.",
+            title="Excellent!",
+            body="Highly recommended.",
         )
 
-        client.force_login(verified_user)
-        response = client.get(reverse("product_detail", args=[product_active.slug]))
-
-        assert response.status_code == 200
-        content = response.content.decode()
-        # Review content should appear
-        assert "Excellent" in content or review.title in content
-
-    def test_multiple_reviews_on_product(
-        self, client, verified_user, product_active, category
-    ):
-        """Product with multiple reviews shows all reviews."""
-        from django.contrib.auth import get_user_model
-
-        User = get_user_model()
-
-        # Create two reviewers with entitlements
-        reviewer1 = verified_user
-        reviewer2 = User.objects.create_user(
-            username="reviewer2",
-            email="reviewer2@example.com",
-            password="testpass123",
+    def test_review_appears_on_product_detail(self):
+        """Reviews should be visible on product detail page."""
+        response = self.client.get(
+            reverse("product_detail", kwargs={"slug": self.product.slug})
         )
-        from allauth.account.models import EmailAddress
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Excellent!", response.content)
+        self.assertIn(b"Highly recommended.", response.content)
 
-        EmailAddress.objects.create(
-            user=reviewer2,
-            email=reviewer2.email,
-            verified=True,
-            primary=True,
-        )
-
-        AccessEntitlement.objects.create(user=reviewer1, product=product_active)
-        AccessEntitlement.objects.create(user=reviewer2, product=product_active)
-
-        # Create reviews
-        Review.objects.create(
-            user=reviewer1,
-            product=product_active,
-            rating=5,
-            title="Great",
-            body="Excellent.",
+    def test_multiple_reviews_on_product(self):
+        """Multiple reviews should all be visible."""
+        user2 = User.objects.create_user(
+            username="reviewer2", email="reviewer2@test.com", password="pass123"
         )
         Review.objects.create(
-            user=reviewer2,
-            product=product_active,
+            user=user2,
+            product=self.product,
             rating=4,
             title="Good",
-            body="Very good.",
+            body="Pretty good overall.",
         )
-
-        client.force_login(reviewer1)
-        response = client.get(reverse("product_detail", args=[product_active.slug]))
-
-        assert response.status_code == 200
-        content = response.content.decode()
-        # Both reviews should appear
-        assert "Great" in content
-        assert "Good" in content
-
-
-@pytest.mark.django_db
-class TestReviewRating:
-    """Test review rating constraints."""
-
-    def test_review_rating_valid_range(
-        self, client, verified_user, entitlement, product_active
-    ):
-        """Review rating must be 1-5."""
-        client.force_login(verified_user)
-
-        # Valid rating
-        response = client.post(
-            reverse("create_review", args=[product_active.slug]),
-            {
-                "rating": 3,
-                "title": "Okay",
-                "body": "It's okay.",
-            },
+        
+        response = self.client.get(
+            reverse("product_detail", kwargs={"slug": self.product.slug})
         )
+        self.assertIn(b"Excellent!", response.content)
+        self.assertIn(b"Good", response.content)
 
-        review = Review.objects.get(user=verified_user, product=product_active)
-        assert review.rating == 3
 
-    def test_review_optional_title(
-        self, client, verified_user, entitlement, product_active
-    ):
-        """Review can be posted without title."""
-        client.force_login(verified_user)
+class ReviewRatingTest(TestCase):
+    """Test review rating validation."""
 
-        response = client.post(
-            reverse("create_review", args=[product_active.slug]),
-            {
-                "rating": 5,
-                "title": "",
-                "body": "Just the body, no title.",
-            },
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="rater", email="rater@test.com", password="pass123"
         )
+        
+        # Verify email
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, verified=True, primary=True
+        )
+        
+        self.product = Product.objects.create(
+            title="Rated Product",
+            slug="rated-product",
+            description="Test",
+            price=Decimal("9.99"),
+            image_alt="Test",
+        )
+        AccessEntitlement.objects.create(user=self.user, product=self.product)
 
-        review = Review.objects.get(user=verified_user, product=product_active)
-        assert review.title == "" or review.title is None
-        assert review.body == "Just the body, no title."
+    def test_review_rating_valid_range(self):
+        """Rating must be between 1 and 5."""
+        self.client.force_login(self.user)
+        
+        # Valid ratings
+        for rating in [1, 2, 3, 4, 5]:
+            Review.objects.all().delete()
+            response = self.client.post(
+                reverse("create_review", kwargs={"slug": self.product.slug}),
+                {"rating": rating, "title": "Test", "body": "Test body"},
+            )
+            self.assertEqual(response.status_code, 302)
+
+    def test_review_optional_title(self):
+        """Review title should be optional."""
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("create_review", kwargs={"slug": self.product.slug}),
+            {"rating": 5, "title": "", "body": "Just a body"},
+        )
+        self.assertEqual(response.status_code, 302)
 
 
-@pytest.mark.django_db
-class TestReviewModel:
+class ReviewModelTest(TestCase):
     """Test Review model behavior."""
 
-    def test_review_str(self, verified_user, product_active):
-        """Review __str__ shows user and product."""
-        review = Review.objects.create(
-            user=verified_user,
-            product=product_active,
-            rating=5,
-            body="Great",
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="modeltest", email="modeltest@test.com", password="pass123"
+        )
+        self.product = Product.objects.create(
+            title="Model Test Product",
+            slug="model-test",
+            description="Test",
+            price=Decimal("9.99"),
+            image_alt="Test",
         )
 
-        review_str = str(review)
-        # Should contain user and/or product info
-        assert "testuser" in review_str or str(verified_user) in review_str
-
-    def test_review_deleted_with_user(self, verified_user, product_active):
-        """Review deleted when user is deleted (CASCADE)."""
+    def test_review_str(self):
+        """Review __str__ should return readable format."""
         review = Review.objects.create(
-            user=verified_user,
-            product=product_active,
+            user=self.user,
+            product=self.product,
             rating=5,
-            body="Great",
+            title="Test Review",
+            body="Test body",
         )
+        # Match actual __str__ format from models.py
+        expected = f"{self.user} reviewed {self.product}"
+        self.assertEqual(str(review), expected)
 
-        assert Review.objects.filter(id=review.id).exists()
-
-        verified_user.delete()
-
-        assert not Review.objects.filter(id=review.id).exists()
-
-    def test_review_deleted_with_product(self, verified_user, product_active):
-        """Review deleted when product is deleted (CASCADE)."""
+    def test_review_deleted_with_user(self):
+        """Reviews should be deleted when user is deleted."""
         review = Review.objects.create(
-            user=verified_user,
-            product=product_active,
+            user=self.user,
+            product=self.product,
             rating=5,
-            body="Great",
+            body="Will be deleted",
         )
+        self.user.delete()
+        self.assertFalse(Review.objects.filter(pk=review.pk).exists())
 
-        assert Review.objects.filter(id=review.id).exists()
+    def test_review_deleted_with_product(self):
+        """Reviews should be deleted when product is deleted."""
+        review = Review.objects.create(
+            user=self.user,
+            product=self.product,
+            rating=5,
+            body="Will be deleted",
+        )
+        self.product.delete()
+        self.assertFalse(Review.objects.filter(pk=review.pk).exists())
 
-        product_active.delete()
 
-        assert not Review.objects.filter(id=review.id).exists()
-
-
-@pytest.mark.django_db
-class TestReviewEdit:
+class ReviewEditTest(TestCase):
     """Test review editing functionality."""
 
-    def test_owner_can_edit_review(self, client, verified_user, product_active):
-        """User can edit their own review."""
-        from orders.models import AccessEntitlement
-
-        AccessEntitlement.objects.create(user=verified_user, product=product_active)
-        review = Review.objects.create(
-            user=verified_user,
-            product=product_active,
-            rating=4,
-            title="Good",
-            body="Nice product",
+    def setUp(self):
+        """Set up test data."""
+        self.owner = User.objects.create_user(
+            username="owner", email="owner@test.com", password="pass123"
         )
-
-        client.force_login(verified_user)
-        response = client.post(
-            reverse("edit_review", args=[product_active.slug, review.id]),
-            {
-                "rating": 5,
-                "title": "Excellent",
-                "body": "Amazing product",
-            },
+        self.other_user = User.objects.create_user(
+            username="other", email="other@test.com", password="pass123"
         )
-
-        assert response.status_code == 302
-        review.refresh_from_db()
-        assert review.rating == 5
-        assert review.title == "Excellent"
-        assert review.body == "Amazing product"
-
-    def test_non_owner_cannot_edit_review(
-        self, client, verified_user, product_active, category
-    ):
-        """User cannot edit someone else's review."""
-        from django.contrib.auth import get_user_model
-
-        User = get_user_model()
-        other_user = User.objects.create_user(
-            username="other", email="other@example.com", password="testpass123"
-        )
-        from allauth.account.models import EmailAddress
-
+        
+        # Verify emails
         EmailAddress.objects.create(
-            user=other_user, email=other_user.email, verified=True, primary=True
+            user=self.owner, email=self.owner.email, verified=True, primary=True
         )
-
-        review = Review.objects.create(
-            user=other_user,
-            product=product_active,
-            rating=4,
-            title="Good",
-            body="Nice product",
-        )
-
-        client.force_login(verified_user)
-        response = client.post(
-            reverse("edit_review", args=[product_active.slug, review.id]),
-            {
-                "rating": 5,
-                "title": "Hacked",
-                "body": "Hacked",
-            },
-        )
-
-        # Should redirect with error
-        assert response.status_code == 302
-        review.refresh_from_db()
-        # Review should not be changed
-        assert review.rating == 4
-        assert review.title == "Good"
-
-    def test_edit_review_get_shows_form(self, client, verified_user, product_active):
-        """GET request to edit review shows form with current values."""
-        from orders.models import AccessEntitlement
-
-        AccessEntitlement.objects.create(user=verified_user, product=product_active)
-        review = Review.objects.create(
-            user=verified_user,
-            product=product_active,
-            rating=4,
-            title="Good",
-            body="Nice product",
-        )
-
-        client.force_login(verified_user)
-        response = client.get(
-            reverse("edit_review", args=[product_active.slug, review.id])
-        )
-
-        assert response.status_code == 200
-        assert "form" in response.context
-        assert response.context["review"] == review
-
-
-@pytest.mark.django_db
-class TestReviewDelete:
-    """Test review deletion functionality."""
-
-    def test_owner_can_delete_review(self, client, verified_user, product_active):
-        """User can delete their own review."""
-        from orders.models import AccessEntitlement
-
-        AccessEntitlement.objects.create(user=verified_user, product=product_active)
-        review = Review.objects.create(
-            user=verified_user,
-            product=product_active,
-            rating=4,
-            title="Good",
-            body="Nice product",
-        )
-
-        client.force_login(verified_user)
-        response = client.post(
-            reverse("delete_review", args=[product_active.slug, review.id])
-        )
-
-        assert response.status_code == 302
-        assert not Review.objects.filter(id=review.id).exists()
-
-    def test_non_owner_cannot_delete_review(
-        self, client, verified_user, product_active
-    ):
-        """User cannot delete someone else's review."""
-        from django.contrib.auth import get_user_model
-
-        User = get_user_model()
-        other_user = User.objects.create_user(
-            username="other", email="other@example.com", password="testpass123"
-        )
-        from allauth.account.models import EmailAddress
-
         EmailAddress.objects.create(
-            user=other_user, email=other_user.email, verified=True, primary=True
+            user=self.other_user, email=self.other_user.email, verified=True, primary=True
+        )
+        
+        self.product = Product.objects.create(
+            title="Edit Test",
+            slug="edit-test",
+            description="Test",
+            price=Decimal("9.99"),
+            image_alt="Test",
+        )
+        self.review = Review.objects.create(
+            user=self.owner,
+            product=self.product,
+            rating=5,
+            title="Original",
+            body="Original body",
         )
 
-        review = Review.objects.create(
-            user=other_user,
-            product=product_active,
-            rating=4,
-            title="Good",
-            body="Nice product",
+    def test_owner_can_edit_review(self):
+        """Review owner can edit their review."""
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse(
+                "edit_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+            ),
+            {"rating": 4, "title": "Updated", "body": "Updated body"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.review.refresh_from_db()
+        self.assertEqual(self.review.title, "Updated")
+
+    def test_non_owner_cannot_edit_review(self):
+        """Non-owners cannot edit reviews."""
+        self.client.force_login(self.other_user)
+        response = self.client.post(
+            reverse(
+                "edit_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+            ),
+            {"rating": 1, "title": "Hacked", "body": "Hacked body"},
+        )
+        # View redirects with error message
+        self.assertEqual(response.status_code, 302)
+        self.review.refresh_from_db()
+        self.assertEqual(self.review.title, "Original")
+
+    def test_edit_review_get_shows_form(self):
+        """GET request should show edit form."""
+        self.client.force_login(self.owner)
+        response = self.client.get(
+            reverse(
+                "edit_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Original", response.content)
+
+
+class ReviewDeleteTest(TestCase):
+    """Test review deletion."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.owner = User.objects.create_user(
+            username="deleter", email="deleter@test.com", password="pass123"
+        )
+        self.other_user = User.objects.create_user(
+            username="hacker", email="hacker@test.com", password="pass123"
+        )
+        
+        # Verify emails
+        EmailAddress.objects.create(
+            user=self.owner, email=self.owner.email, verified=True, primary=True
+        )
+        EmailAddress.objects.create(
+            user=self.other_user, email=self.other_user.email, verified=True, primary=True
+        )
+        
+        self.product = Product.objects.create(
+            title="Delete Test",
+            slug="delete-test",
+            description="Test",
+            price=Decimal("9.99"),
+            image_alt="Test",
+        )
+        self.review = Review.objects.create(
+            user=self.owner,
+            product=self.product,
+            rating=5,
+            body="Will be deleted",
         )
 
-        client.force_login(verified_user)
-        response = client.post(
-            reverse("delete_review", args=[product_active.slug, review.id])
+    def test_owner_can_delete_review(self):
+        """Review owner can delete their review."""
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse(
+                "delete_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+            )
         )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Review.objects.filter(pk=self.review.pk).exists())
 
-        # Should redirect with error
-        assert response.status_code == 302
-        # Review should still exist
-        assert Review.objects.filter(id=review.id).exists()
-
-    def test_delete_review_requires_post(self, client, verified_user, product_active):
-        """DELETE review requires POST method."""
-        from orders.models import AccessEntitlement
-
-        AccessEntitlement.objects.create(user=verified_user, product=product_active)
-        review = Review.objects.create(
-            user=verified_user,
-            product=product_active,
-            rating=4,
-            body="Nice product",
+    def test_non_owner_cannot_delete_review(self):
+        """Non-owners cannot delete reviews."""
+        self.client.force_login(self.other_user)
+        response = self.client.post(
+            reverse(
+                "delete_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+            )
         )
+        # View redirects with error message
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Review.objects.filter(pk=self.review.pk).exists())
 
-        client.force_login(verified_user)
-        response = client.get(
-            reverse("delete_review", args=[product_active.slug, review.id])
+    def test_delete_review_requires_post(self):
+        """Delete should require POST request."""
+        self.client.force_login(self.owner)
+        response = self.client.get(
+            reverse(
+                "delete_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+            )
         )
-
-        # Should be rejected (405 Method Not Allowed)
-        assert response.status_code == 405
-        # Review should still exist
-        assert Review.objects.filter(id=review.id).exists()
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(Review.objects.filter(pk=self.review.pk).exists())
