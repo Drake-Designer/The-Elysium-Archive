@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Error Pages Test Dashboard | The Elysium Archive
+{% endblock title %}
+{% block content %}
+    <section class="container py-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="panel p-4">
+                    <h1 class="h3 mb-4">
+                        <i class="fa-solid fa-flask me-2"></i>Error Pages Test Dashboard
+                    </h1>
+                    <p class="muted mb-4">Test error page templates in production. Staff only.</p>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="panel p-3 h-100 text-center">
+                                <div class="mb-3">
+                                    <i class="fa-solid fa-exclamation-triangle fa-3x text-warning"></i>
+                                </div>
+                                <h3 class="h5">400 Bad Request</h3>
+                                <p class="small muted mb-3">Invalid request syntax</p>
+                                <a href="{% url 'test_error_400' %}"
+                                   class="btn btn-outline-light btn-sm w-100">Test 400</a>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="panel p-3 h-100 text-center">
+                                <div class="mb-3">
+                                    <i class="fa-solid fa-lock fa-3x text-danger"></i>
+                                </div>
+                                <h3 class="h5">403 Forbidden</h3>
+                                <p class="small muted mb-3">Access denied</p>
+                                <a href="{% url 'test_error_403' %}"
+                                   class="btn btn-outline-light btn-sm w-100">Test 403</a>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="panel p-3 h-100 text-center">
+                                <div class="mb-3">
+                                    <i class="fa-solid fa-question-circle fa-3x text-info"></i>
+                                </div>
+                                <h3 class="h5">404 Not Found</h3>
+                                <p class="small muted mb-3">Page does not exist</p>
+                                <a href="{% url 'test_error_404' %}"
+                                   class="btn btn-outline-light btn-sm w-100">Test 404</a>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="panel p-3 h-100 text-center">
+                                <div class="mb-3">
+                                    <i class="fa-solid fa-server fa-3x text-danger"></i>
+                                </div>
+                                <h3 class="h5">500 Server Error</h3>
+                                <p class="small muted mb-3">Internal server error</p>
+                                <a href="{% url 'test_error_500' %}"
+                                   class="btn btn-outline-light btn-sm w-100">Test 500</a>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="alert alert-dark">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        <strong>Note:</strong> These views are protected and only accessible to staff members.
+                        Regular users cannot access this dashboard.
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'admin:index' %}" class="btn btn-outline-light btn-sm">
+                            <i class="fa-solid fa-arrow-left me-1"></i>Back to Admin
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
