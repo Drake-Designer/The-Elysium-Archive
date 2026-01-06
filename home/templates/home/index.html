@@ -88,198 +88,210 @@
                     <article class="entry-card entry-card--featured">
                       <div class="entry-card-media entry-card-media--featured">
                         {% if product.image %}
-                          <img class="entry-card-img"
-                               src="{% cloudinary_fill product.image 800 450 %}"
-                               srcset="{% cloudinary_fill_srcset product.image 400 225 600 338 800 450 %}"
-                               sizes="(max-width: 575px) 100vw,
-                                      720px"
-                               alt="{{ product.image_alt|default:product.title }}"
-                               loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
-                               decoding="async">
-                        {% else %}
-                          <div class="entry-card-img-placeholder"
-                               role="img"
-                               aria-label="Image coming soon"></div>
-                        {% endif %}
+                          {% cloudinary_fill product.image 800 450 as img_src %}
+                          {% cloudinary_fill_srcset product.image 400 225 600 338 800 450 as img_srcset %}
+                          {% if img_src %}
+                            <img class="entry-card-img"
+                                 src="{{ img_src }}"
+                                 srcset="{{ img_srcset }}"
+                                 sizes="(max-width: 575px) 100vw,
+                                        720px"
+                                 alt="{{ product.image_alt|default:product.title }}"
+                                 loading="eager"
+                                 decoding="async"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'entry-card-img-placeholder\' role=\'img\' aria-label=\'Image unavailable\'></div>';">
+                            {% else %}
+                              <img class="entry-card-img"
+                                   src="{{ product.image.url }}"
+                                   alt="{{ product.image_alt|default:product.title }}"
+                                   loading="eager"
+                                   decoding="async"
+                                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'entry-card-img-placeholder\' role=\'img\' aria-label=\'Image unavailable\'></div>';">
+                              {% endif %}
+                            {% else %}
+                              <div class="entry-card-img-placeholder"
+                                   role="img"
+                                   aria-label="Image coming soon"></div>
+                            {% endif %}
+                          </div>
+                          <div class="entry-card-body entry-card-body--featured">
+                            <div class="entry-card-head">
+                              <h3 class="entry-card-title">{{ product.title }}</h3>
+                              <span class="badge badge-sealed">Sealed</span>
+                            </div>
+                            <p class="entry-card-desc muted">{{ product.tagline|default:product.description|truncatewords:25 }}</p>
+                          </div>
+                          <div class="entry-card-footer entry-card-footer--featured">
+                            <span class="price price--featured">€{{ product.price }}</span>
+                            <a class="btn btn-outline-light btn-icon"
+                               href="{% url 'product_detail' slug=product.slug %}">
+                              <i class="fa-solid fa-eye"></i>View Entry
+                            </a>
+                          </div>
+                        </article>
                       </div>
-                      <div class="entry-card-body entry-card-body--featured">
-                        <div class="entry-card-head">
-                          <h3 class="entry-card-title">{{ product.title }}</h3>
-                          <span class="badge badge-sealed">Sealed</span>
-                        </div>
-                        <p class="entry-card-desc muted">{{ product.tagline|default:product.description|truncatewords:25 }}</p>
-                      </div>
-                      <div class="entry-card-footer entry-card-footer--featured">
-                        <span class="price price--featured">€{{ product.price }}</span>
-                        <a class="btn btn-outline-light btn-icon"
-                           href="{% url 'product_detail' slug=product.slug %}">
-                          <i class="fa-solid fa-eye"></i>View Entry
-                        </a>
-                      </div>
-                    </article>
+                    {% endfor %}
                   </div>
-                {% endfor %}
-              </div>
-              <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
-                {% for product in featured_products %}
-                  <button type="button"
-                          data-bs-target="#entryCarousel"
-                          data-bs-slide-to="{{ forloop.counter0 }}"
-                          {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                          aria-label="Slide {{ forloop.counter }}"></button>
-                {% endfor %}
-              </div>
-            </div>
-          {% else %}
-            <div class="text-center py-4">
-              <p class="muted mb-0">No featured entries available at the moment. Check back soon.</p>
-            </div>
-          {% endif %}
-          <p class="small muted mt-3 mb-0">
-            These are public previews. Full entries unlock after membership and a successful payment.
-          </p>
-        </div>
-      </div>
-    </div>
-    <!-- Access steps -->
-    <div class="py-5" id="how-access-works">
-      <h2 class="text-center mb-4">How Access Works</h2>
-      <div class="row g-3">
-        <div class="col-12 col-md-4">
-          <div class="panel p-4 h-100 how-card">
-            <img class="how-card-img"
-                 src="{% static 'img/home/how/how-01-account.jpg' %}"
-                 alt="Creating an account"
-                 loading="lazy"
-                 decoding="async">
-            <h3 class="h5 mt-3">Create an account</h3>
-            <p class="muted mb-0">Register to become a member and unlock purchases to your profile.</p>
-          </div>
-        </div>
-        <div class="col-12 col-md-4">
-          <div class="panel p-4 h-100 how-card">
-            <img class="how-card-img"
-                 src="{% static 'img/home/how/how-02-seal.jpg' %}"
-                 alt="Sealed archive entry"
-                 loading="lazy"
-                 decoding="async">
-            <h3 class="h5 mt-3">Unlock archive entries</h3>
-            <p class="muted mb-0">Pay once via Stripe and the entry becomes yours permanently.</p>
-          </div>
-        </div>
-        <div class="col-12 col-md-4">
-          <div class="panel p-4 h-100 how-card">
-            <img class="how-card-img"
-                 src="{% static 'img/home/how/how-03-library.jpg' %}"
-                 alt="Private archive library"
-                 loading="lazy"
-                 decoding="async">
-            <h3 class="h5 mt-3">Access your private archive</h3>
-            <p class="muted mb-0">Read exclusive content online only, anytime you return.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Membership details -->
-    <div class="py-5" id="membership">
-      <div class="panel p-4 p-lg-5">
-        <div class="row g-4 align-items-center">
-          <div class="col-12 col-lg-5">
-            <div class="membership-media">
-              <img class="membership-img"
-                   src="{% static 'img/home/membership/membership.jpg' %}"
-                   alt="Membership access"
-                   loading="lazy"
-                   decoding="async">
-            </div>
-          </div>
-          <div class="col-12 col-lg-7">
-            <h2 class="h3 mb-3">Membership</h2>
-            <p class="muted mb-3">Membership is required to unlock entries. Your access is tied to your account, not to a file.</p>
-            <ul class="mb-4">
-              <li class="muted">Buy once, access forever on site</li>
-              <li class="muted">Unlocked entries live in your private archive</li>
-              <li class="muted">Verified buyers can leave reviews</li>
-              <li class="muted">No refunds after access is unlocked</li>
-            </ul>
-            <div class="panel p-4">
-              {% if user.is_authenticated %}
-                <h3 class="h4 mb-3">
-                  <strong>Welcome back, {{ user.profile.get_display_name }}!</strong>
-                </h3>
-                <p class="muted mb-3">You are a member of the Archive. Explore and unlock forbidden knowledge.</p>
-                <div class="d-grid gap-2 d-sm-flex">
-                  <a class="btn btn-primary site-auth-btn btn-icon"
-                     href="{% url 'archive' %}">
-                    <i class="fa-solid fa-book-open"></i>Browse Entries
-                  </a>
+                  <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
+                    {% for product in featured_products %}
+                      <button type="button"
+                              data-bs-target="#entryCarousel"
+                              data-bs-slide-to="{{ forloop.counter0 }}"
+                              {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                              aria-label="Slide {{ forloop.counter }}"></button>
+                    {% endfor %}
+                  </div>
                 </div>
               {% else %}
-                <h3 class="h5 mb-2">Ready to enter?</h3>
-                <p class="muted mb-3">Create an account to unlock archive entries and build your collection.</p>
-                <div class="d-grid gap-2 d-sm-flex">
-                  <a class="btn btn-primary site-auth-btn btn-icon"
-                     href="{% url 'account_signup' %}">
-                    <i class="fa-solid fa-user-plus"></i>Register
-                  </a>
-                  <a class="btn btn-outline-light site-auth-btn btn-icon"
-                     href="{% url 'account_login' %}">
-                    <i class="fa-solid fa-right-to-bracket"></i>Login
-                  </a>
+                <div class="text-center py-4">
+                  <p class="muted mb-0">No featured entries available at the moment. Check back soon.</p>
                 </div>
               {% endif %}
-              <p class="small muted mt-3 mb-0">You can browse the public catalog without an account.</p>
+              <p class="small muted mt-3 mb-0">
+                These are public previews. Full entries unlock after membership and a successful payment.
+              </p>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <!-- Upcoming features -->
-    <div class="py-5" id="coming-next">
-      <h2 class="text-center mb-3">What Lies Ahead</h2>
-      <p class="text-center muted mb-4">The Archive continues to expand. New secrets await those who remain patient.</p>
-      <div class="row g-3">
-        <div class="col-12 col-sm-6 col-lg-3">
-          <div class="panel p-4 h-100 coming-card">
-            <div class="coming-card-icon">
-              <i class="fa-solid fa-vault"></i>
+        <!-- Access steps -->
+        <div class="py-5" id="how-access-works">
+          <h2 class="text-center mb-4">How Access Works</h2>
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <div class="panel p-4 h-100 how-card">
+                <img class="how-card-img"
+                     src="{% static 'img/home/how/how-01-account.jpg' %}"
+                     alt="Creating an account"
+                     loading="lazy"
+                     decoding="async">
+                <h3 class="h5 mt-3">Create an account</h3>
+                <p class="muted mb-0">Register to become a member and unlock purchases to your profile.</p>
+              </div>
             </div>
-            <h3 class="h5 mt-3 mb-2">My Archive</h3>
-            <p class="small muted mb-3">A private vault where your unlocked entries live forever.</p>
-            <span class="badge badge-coming">Coming soon</span>
+            <div class="col-12 col-md-4">
+              <div class="panel p-4 h-100 how-card">
+                <img class="how-card-img"
+                     src="{% static 'img/home/how/how-02-seal.jpg' %}"
+                     alt="Sealed archive entry"
+                     loading="lazy"
+                     decoding="async">
+                <h3 class="h5 mt-3">Unlock archive entries</h3>
+                <p class="muted mb-0">Pay once via Stripe and the entry becomes yours permanently.</p>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="panel p-4 h-100 how-card">
+                <img class="how-card-img"
+                     src="{% static 'img/home/how/how-03-library.jpg' %}"
+                     alt="Private archive library"
+                     loading="lazy"
+                     decoding="async">
+                <h3 class="h5 mt-3">Access your private archive</h3>
+                <p class="muted mb-0">Read exclusive content online only, anytime you return.</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-          <div class="panel p-4 h-100 coming-card">
-            <div class="coming-card-icon">
-              <i class="fa-solid fa-star"></i>
+        <!-- Membership details -->
+        <div class="py-5" id="membership">
+          <div class="panel p-4 p-lg-5">
+            <div class="row g-4 align-items-center">
+              <div class="col-12 col-lg-5">
+                <div class="membership-media">
+                  <img class="membership-img"
+                       src="{% static 'img/home/membership/membership.jpg' %}"
+                       alt="Membership access"
+                       loading="lazy"
+                       decoding="async">
+                </div>
+              </div>
+              <div class="col-12 col-lg-7">
+                <h2 class="h3 mb-3">Membership</h2>
+                <p class="muted mb-3">Membership is required to unlock entries. Your access is tied to your account, not to a file.</p>
+                <ul class="mb-4">
+                  <li class="muted">Buy once, access forever on site</li>
+                  <li class="muted">Unlocked entries live in your private archive</li>
+                  <li class="muted">Verified buyers can leave reviews</li>
+                  <li class="muted">No refunds after access is unlocked</li>
+                </ul>
+                <div class="panel p-4">
+                  {% if user.is_authenticated %}
+                    <h3 class="h4 mb-3">
+                      <strong>Welcome back, {{ user.profile.get_display_name }}!</strong>
+                    </h3>
+                    <p class="muted mb-3">You are a member of the Archive. Explore and unlock forbidden knowledge.</p>
+                    <div class="d-grid gap-2 d-sm-flex">
+                      <a class="btn btn-primary site-auth-btn btn-icon"
+                         href="{% url 'archive' %}">
+                        <i class="fa-solid fa-book-open"></i>Browse Entries
+                      </a>
+                    </div>
+                  {% else %}
+                    <h3 class="h5 mb-2">Ready to enter?</h3>
+                    <p class="muted mb-3">Create an account to unlock archive entries and build your collection.</p>
+                    <div class="d-grid gap-2 d-sm-flex">
+                      <a class="btn btn-primary site-auth-btn btn-icon"
+                         href="{% url 'account_signup' %}">
+                        <i class="fa-solid fa-user-plus"></i>Register
+                      </a>
+                      <a class="btn btn-outline-light site-auth-btn btn-icon"
+                         href="{% url 'account_login' %}">
+                        <i class="fa-solid fa-right-to-bracket"></i>Login
+                      </a>
+                    </div>
+                  {% endif %}
+                  <p class="small muted mt-3 mb-0">You can browse the public catalog without an account.</p>
+                </div>
+              </div>
             </div>
-            <h3 class="h5 mt-3 mb-2">Verified Reviews</h3>
-            <p class="small muted mb-3">Only those who have unlocked an entry may speak of its contents.</p>
-            <span class="badge badge-coming">Coming soon</span>
           </div>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-          <div class="panel p-4 h-100 coming-card">
-            <div class="coming-card-icon">
-              <i class="fa-solid fa-user-gear"></i>
+        <!-- Upcoming features -->
+        <div class="py-5" id="coming-next">
+          <h2 class="text-center mb-3">What Lies Ahead</h2>
+          <p class="text-center muted mb-4">The Archive continues to expand. New secrets await those who remain patient.</p>
+          <div class="row g-3">
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="panel p-4 h-100 coming-card">
+                <div class="coming-card-icon">
+                  <i class="fa-solid fa-vault"></i>
+                </div>
+                <h3 class="h5 mt-3 mb-2">My Archive</h3>
+                <p class="small muted mb-3">A private vault where your unlocked entries live forever.</p>
+                <span class="badge badge-coming">Coming soon</span>
+              </div>
             </div>
-            <h3 class="h5 mt-3 mb-2">Profile Management</h3>
-            <p class="small muted mb-3">Control your identity, view history, or vanish without a trace.</p>
-            <span class="badge badge-coming">Coming soon</span>
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="panel p-4 h-100 coming-card">
+                <div class="coming-card-icon">
+                  <i class="fa-solid fa-star"></i>
+                </div>
+                <h3 class="h5 mt-3 mb-2">Verified Reviews</h3>
+                <p class="small muted mb-3">Only those who have unlocked an entry may speak of its contents.</p>
+                <span class="badge badge-coming">Coming soon</span>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="panel p-4 h-100 coming-card">
+                <div class="coming-card-icon">
+                  <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <h3 class="h5 mt-3 mb-2">Profile Management</h3>
+                <p class="small muted mb-3">Control your identity, view history, or vanish without a trace.</p>
+                <span class="badge badge-coming">Coming soon</span>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="panel p-4 h-100 coming-card">
+                <div class="coming-card-icon">
+                  <i class="fa-solid fa-scroll"></i>
+                </div>
+                <h3 class="h5 mt-3 mb-2">New Entries</h3>
+                <p class="small muted mb-3">Fresh secrets are inscribed into the Archive as the darkness grows.</p>
+                <span class="badge badge-coming">Coming soon</span>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-          <div class="panel p-4 h-100 coming-card">
-            <div class="coming-card-icon">
-              <i class="fa-solid fa-scroll"></i>
-            </div>
-            <h3 class="h5 mt-3 mb-2">New Entries</h3>
-            <p class="small muted mb-3">Fresh secrets are inscribed into the Archive as the darkness grows.</p>
-            <span class="badge badge-coming">Coming soon</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-{% endblock content %}
+      </section>
+    {% endblock content %}
