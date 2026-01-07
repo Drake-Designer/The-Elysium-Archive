@@ -6,14 +6,20 @@ from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.http import Http404
 from products.models import Product
 
+
 def home_view(request):
-    """Render the homepage with featured archive entries."""
+    """Render the homepage with featured archive entries and dynamic sections."""
     featured_products = Product.objects.filter(
         is_active=True, is_featured=True
     ).order_by("created_at")[:6]
 
+    latest_products = Product.objects.filter(
+        is_active=True
+    ).order_by("-created_at")[:3]
+
     context = {
         "featured_products": featured_products,
+        "latest_products": latest_products,
     }
 
     return render(request, "home/index.html", context)

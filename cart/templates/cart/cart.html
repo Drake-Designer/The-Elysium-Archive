@@ -86,9 +86,12 @@
                             <span class="h4 text-danger mb-0">€{{ cart_total|floatformat:2 }}</span>
                         </div>
                         {% include "includes/no_refunds_policy.html" %}
-                        <a href="{% url 'checkout' %}" class="btn btn-danger w-100 btn-lg mb-3">
-                            <i class="fa-solid fa-lock-open me-2"></i>Proceed to Checkout
-                        </a>
+                        <form method="post" action="{% url 'checkout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger w-100 btn-lg mb-3">
+                                <i class="fa-solid fa-lock-open me-2"></i>Proceed to Checkout
+                            </button>
+                        </form>
                         <a href="{% url 'archive' %}" class="btn btn-outline-light w-100">
                             <i class="fa-solid fa-arrow-left me-2"></i>Continue Shopping
                         </a>

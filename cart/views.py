@@ -38,7 +38,7 @@ def add_to_cart(request):
     if result is True:
         messages.success(request, f"✓ {product.title} added to cart!")
     elif result == "already_in_cart":
-        messages.info(request, f"This archive is already in your cart.")
+        messages.info(request, "This archive is already in your cart.")
     else:
         messages.error(request, f"Could not add {product.title} to cart.")
 
@@ -67,14 +67,10 @@ def remove_from_cart(request):
         messages.error(request, "Product not found.")
         return redirect("cart")
 
-    try:
-        product = Product.objects.get(id=product_id)
-    except Product.DoesNotExist:
-        messages.error(request, "Product not found.")
-        return redirect("cart")
+    product = get_object_or_404(Product, id=product_id)
 
     if remove_product_from_cart(request.session, product_id):
-        messages.success(request, f"V {product.title} removed from cart.")
+        messages.success(request, f"✓ {product.title} removed from cart.")
     else:
         messages.info(request, f"{product.title} was not in your cart.")
 

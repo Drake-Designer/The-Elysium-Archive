@@ -19,18 +19,28 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 def _get_order_from_metadata(data):
     """Return order from Stripe metadata."""
     metadata = data.get("metadata", {}) if isinstance(data, dict) else {}
+
     order_id = metadata.get("order_id")
-    if not order_id:
-        return None
-    try:
-        return Order.objects.get(pk=order_id)
-    except Order.DoesNotExist:
-        return None
+    if order_id:
+        try:
+            return Order.objects.get(pk=order_id)
+        except Order.DoesNotExist:
+            return None
+
+    # Backward compatible fallback if some sessions were created with order_number only
+    order_number = metadata.get("order_number")
+    if order_number:
+        try:
+            return Order.objects.get(order_number=order_number)
+        except Order.DoesNotExist:
+            return None
+
+    return None
 
 
 def _grant_entitlements(order):
     """Create entitlements for purchased products."""
-    for line in order.line_items.select_related("product"):
+    for line in order.line_items.select_related("product").all():
         if not line.product:
             continue
         AccessEntitlement.objects.get_or_create(

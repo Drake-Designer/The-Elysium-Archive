@@ -87,7 +87,8 @@
                     {% include "includes/no_refunds_policy.html" %}
                     <!-- Call-to-action buttons -->
                     <div class="d-grid gap-3">
-                        <a href="{% url 'my_archive' %}" class="btn btn-danger btn-lg">
+                        <a href="{% url 'account_dashboard' %}?tab=my-archive"
+                           class="btn btn-danger btn-lg">
                             <i class="fa-solid fa-book-open me-2"></i>View My Archive
                         </a>
                         <a href="{% url 'archive' %}" class="btn btn-outline-light btn-lg">
@@ -103,7 +104,8 @@
                     <div class="alert alert-info">
                         <p>Payment was successful. Your archive access is being activated.</p>
                     </div>
-                    <a href="{% url 'my_archive' %}" class="btn btn-danger btn-lg w-100">
+                    <a href="{% url 'account_dashboard' %}?tab=my-archive"
+                       class="btn btn-danger btn-lg w-100">
                         <i class="fa-solid fa-book-open me-2"></i>View My Archive
                     </a>
                 </div>

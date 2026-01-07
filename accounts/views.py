@@ -1,120 +1,95 @@
-"""Views for the accounts app."""
-
+"""Views for accounts app."""
 
 from django.contrib import messages
-from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods
-from typing import Any
+
+from allauth.account.utils import has_verified_email
+
+from orders.models import AccessEntitlement
 
 
-from .decorators import verified_email_required
-from .forms import UserProfileForm
-from .models import UserProfile
+def _verified_or_redirect(request):
+    if not has_verified_email(request.user):
+        messages.warning(request, "Please verify your email before continuing.")
+        return redirect("account_email")
+    return None
 
 
+def _dashboard_url_with_tab(tab_name):
+    base_url = reverse("account_dashboard")
+    return f"{base_url}?tab={tab_name}"
 
-@verified_email_required
+
+@login_required
 def dashboard(request):
-    """Display user dashboard with purchased archives."""
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    
-    # Handle profile form submission
-    if request.method == "POST":
-        form = UserProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Profile updated successfully.")
-            return redirect("account_dashboard")
-    else:
-        form = UserProfileForm(instance=profile)
-    
-    entitlements_data = []
+    redirect_response = _verified_or_redirect(request)
+    if redirect_response:
+        return redirect_response
 
+    entitlements = (
+        AccessEntitlement.objects.filter(user=request.user)
+        .select_related("product")
+        .order_by("-granted_at")
+    )
 
-    for entitlement in request.user.entitlements.select_related("product", "order"):
-        product = entitlement.product
-        order = entitlement.order
-        if product:
-            entitlements_data.append(
-                {
-                    "product": product,
-                    "order": order,
-                    "purchased_at": entitlement.granted_at,
-                }
-            )
+    unlocked_products = [
+        {"product": e.product, "purchase_date": e.granted_at} for e in entitlements
+    ]
 
+    requested_tab = (request.GET.get("tab") or "").strip().lower()
+    tab_map = {
+        "profile": "profile",
+        "archive": "archive",
+        "my-archive": "archive",
+        "my_archive": "archive",
+        "delete": "delete",
+    }
+    active_tab = tab_map.get(requested_tab, "profile")
 
-    context: dict[str, Any] = {
-        "entitlements": entitlements_data,
-        "form": form,
-        "profile": profile,
+    context = {
+        "unlocked_products": unlocked_products,
+        "active_tab": active_tab,
     }
     return render(request, "accounts/dashboard.html", context)
 
 
-
-@verified_email_required
+@login_required
 def my_archive(request):
-    """Display user's purchased archives."""
-    unlocked_products = []
+    redirect_response = _verified_or_redirect(request)
+    if redirect_response:
+        return redirect_response
+
+    # If your project uses dashboard tabs as the single source of truth,
+    # keep this route as a redirect.
+    return redirect(_dashboard_url_with_tab("my-archive"))
 
 
-    for entitlement in request.user.entitlements.select_related("product", "order"):
-        product = entitlement.product
-        # Only show active products (or products user owns even if inactive)
-        if product and (product.is_active or True):
-            unlocked_products.append(
-                {
-                    "product": product,
-                    "purchase_date": entitlement.granted_at,
-                }
-            )
-
-
-    context: dict[str, Any] = {
-        "unlocked_products": unlocked_products,
-    }
-    return render(request, "accounts/my_archive.html", context)
-
-
-
-@verified_email_required
+@login_required
 def profile(request):
-    """Display and edit user profile."""
-    profile_obj, _ = UserProfile.objects.get_or_create(user=request.user)
+    redirect_response = _verified_or_redirect(request)
+    if redirect_response:
+        return redirect_response
 
-
-    if request.method == "POST":
-        form = UserProfileForm(request.POST, request.FILES, instance=profile_obj)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Profile updated successfully.")
-            return redirect("profile")
-    else:
-        form = UserProfileForm(instance=profile_obj)
-
-
-    context = {
-        "form": form,
-        "profile": profile_obj,
-    }
-    return render(request, "accounts/profile.html", context)
-
+    return redirect(_dashboard_url_with_tab("profile"))
 
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def delete_account(request):
-    """Handle account deletion with confirmation."""
+    redirect_response = _verified_or_redirect(request)
+    if redirect_response:
+        return redirect_response
+
     if request.method == "POST":
-        user = request.user
-        logout(request)
-        user.delete()
-        messages.success(
-            request, "Your account has been successfully deleted. We're sorry to see you go."
-        )
+        if request.user.is_superuser:
+            messages.error(request, "Superuser accounts cannot be deleted from the site.")
+            return redirect("account_dashboard")
+
+        request.user.delete()
+        messages.success(request, "Your account has been deleted.")
         return redirect("home")
 
-    return render(request, "accounts/account_confirm_delete.html")
+    return render(request, "accounts/delete_account.html")

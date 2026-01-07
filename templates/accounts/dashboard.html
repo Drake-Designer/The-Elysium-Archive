@@ -29,34 +29,34 @@
                             </div>
                         </div>
                         <nav class="dashboard-nav flex-column">
-                            <button class="dashboard-nav-item active"
+                            <button class="dashboard-nav-item {% if active_tab == 'profile' %}active{% endif %}"
                                     id="profile-nav-btn"
                                     data-dashboard-tab="profile"
                                     type="button"
                                     role="tab"
                                     aria-controls="profile"
-                                    aria-selected="true">
+                                    aria-selected="{% if active_tab == 'profile' %}true{% else %}false{% endif %}">
                                 <i class="fa-solid fa-id-card"></i>
                                 <span>Profile</span>
                             </button>
-                            <button class="dashboard-nav-item"
+                            <button class="dashboard-nav-item {% if active_tab == 'archive' %}active{% endif %}"
                                     id="archive-nav-btn"
                                     data-dashboard-tab="archive"
                                     type="button"
                                     role="tab"
                                     aria-controls="archive"
-                                    aria-selected="false">
+                                    aria-selected="{% if active_tab == 'archive' %}true{% else %}false{% endif %}">
                                 <i class="fa-solid fa-book-skull"></i>
                                 <span>My Archive</span>
                             </button>
                             {% if not user.is_superuser %}
-                                <button class="dashboard-nav-item"
+                                <button class="dashboard-nav-item {% if active_tab == 'delete' %}active{% endif %}"
                                         id="delete-nav-btn"
                                         data-dashboard-tab="delete"
                                         type="button"
                                         role="tab"
                                         aria-controls="delete"
-                                        aria-selected="false">
+                                        aria-selected="{% if active_tab == 'delete' %}true{% else %}false{% endif %}">
                                     <i class="fa-solid fa-trash"></i>
                                     <span>Delete Account</span>
                                 </button>
@@ -75,7 +75,9 @@
                 <div class="col-12 col-lg-9">
                     <!-- Dashboard tab content -->
                     <div class="tab-content" id="dashboardContent">
-                        <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                        <div class="tab-pane fade {% if active_tab == 'profile' %}show active{% endif %}"
+                             id="profile"
+                             role="tabpanel">
                             <!-- Profile tab -->
                             <div class="panel p-4 p-lg-5">
                                 <h1 class="h4 mb-4">
@@ -157,7 +159,9 @@
                                 </form>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="archive" role="tabpanel">
+                        <div class="tab-pane fade {% if active_tab == 'archive' %}show active{% endif %}"
+                             id="archive"
+                             role="tabpanel">
                             <!-- Archive tab -->
                             <div class="panel p-4 p-lg-5">
                                 <h1 class="h4 mb-4">
@@ -214,7 +218,9 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="delete" role="tabpanel">
+                        <div class="tab-pane fade {% if active_tab == 'delete' %}show active{% endif %}"
+                             id="delete"
+                             role="tabpanel">
                             <!-- Delete account tab -->
                             <div class="panel p-4 p-lg-5">
                                 <h1 class="h4 mb-4">
@@ -222,8 +228,8 @@
                                 </h1>
                                 {% if user.is_superuser %}
                                     <div class="alert alert-warning" role="alert">
-                                        <strong>Notice:</strong> Superuser accounts cannot be deleted through this interface.
-                                        Contact the system administrator for account management.
+                                        <strong>Notice:</strong> Superuser accounts cannot be deleted through this
+                                        interface. Contact the system administrator for account management.
                                     </div>
                                 {% else %}
                                     <div class="alert alert-danger" role="alert">
@@ -236,17 +242,15 @@
                                         <li>All associated data</li>
                                     </ul>
                                     <p class="muted mb-4">If you're sure you want to proceed, click the button below.</p>
-                                    <form method="post" action="{% url 'account_delete' %}">
-                                        {% csrf_token %}
-                                        <div class="d-grid gap-2">
-                                            <button type="submit" class="btn btn-danger btn-icon">
-                                                <i class="fa-solid fa-trash"></i>Delete My Account
-                                            </button>
-                                            <a href="{% url 'home' %}" class="btn btn-outline-light">
-                                                <i class="fa-solid fa-arrow-left me-1"></i>Cancel
-                                            </a>
-                                        </div>
-                                    </form>
+                                    <div class="d-grid gap-2">
+                                        {# NB: GET verso la view delete_account, che mostra la pagina col modale #}
+                                        <a href="{% url 'account_delete' %}" class="btn btn-danger btn-icon">
+                                            <i class="fa-solid fa-trash"></i>Delete My Account
+                                        </a>
+                                        <a href="{% url 'home' %}" class="btn btn-outline-light">
+                                            <i class="fa-solid fa-arrow-left me-1"></i>Cancel
+                                        </a>
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -277,7 +281,8 @@
                 </div>
                 <div class="modal-body modal-body-dashboard">
                     <p class="mb-0">
-                        You are about to end your session. You will be logged out and will need to sign in again to access your account.
+                        You are about to end your session. You will be logged out and will need to sign in again
+                        to access your account.
                     </p>
                 </div>
                 <div class="modal-footer modal-footer-dashboard">
