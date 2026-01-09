@@ -31,8 +31,8 @@ class Category(models.Model):
 
 class Product(models.Model):
     """Archive entry (product) model."""
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, blank=True)
     tagline = models.CharField(max_length=250, help_text="Short preview text")
     description = models.TextField(help_text="Public teaser description")
     content = CKEditor5Field(
@@ -49,7 +49,7 @@ class Product(models.Model):
     )
     price = models.DecimalField(max_digits=6, decimal_places=2)
     image = models.ImageField(upload_to="products/", blank=True, null=True)
-    image_alt = models.CharField(max_length=200, blank=True)
+    image_alt = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
 
@@ -207,9 +207,7 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
         from_product_banner = product.pk in banner_product_pks
 
         category_pk = product.category.pk if product.category is not None else None
-        from_category_banner = (
-            (category_pk in banner_category_pks) and (not product.deal_exclude)
-        )
+        from_category_banner = (category_pk in banner_category_pks) and (not product.deal_exclude)
 
         effective = bool(product.deal_manual or from_product_banner or from_category_banner)
 

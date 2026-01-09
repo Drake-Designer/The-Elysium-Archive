@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="product",
             name="image_alt",
-            field=models.CharField(blank=True, max_length=200),
+            field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AlterField(
             model_name="product",
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="product",
             name="slug",
-            field=models.SlugField(blank=True, max_length=200, unique=True),
+            field=models.SlugField(blank=True, max_length=255, unique=True),
         ),
         migrations.AlterField(
             model_name="product",
@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="product",
             name="title",
-            field=models.CharField(max_length=200),
+            field=models.CharField(max_length=255),
         ),
         migrations.CreateModel(
             name="DealBanner",
