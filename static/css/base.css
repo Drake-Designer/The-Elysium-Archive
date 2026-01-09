@@ -1440,6 +1440,7 @@ body.reduced-effects .entry-card:hover {
     transition: none;
   }
 }
+
 /* NO REFUNDS policy styling. */
 .no-refunds-policy-alert {
   background-color: rgba(139, 30, 45, 0.15);
@@ -1452,9 +1453,9 @@ body.reduced-effects .entry-card:hover {
   max-height: 400px;
   object-fit: cover;
 }
-
 .archive-reading-content > div {
   font-size: 1.1rem;
+  color: rgb(230, 230, 235);
 }
 
 /* Review management inline forms */

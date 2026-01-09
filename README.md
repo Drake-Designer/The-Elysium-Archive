@@ -983,8 +983,6 @@ The project includes a comprehensive Django admin interface with advanced featur
 - Jazzmin theme integration for polished interface
 - Toggle buttons with hover/focus states
 
-For detailed admin features, see [ADMIN_FEATURES.md](ADMIN_FEATURES.md).
-
 ## Future Improvements
 
 ## Credits and Acknowledgements

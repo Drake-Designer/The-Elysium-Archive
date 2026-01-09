@@ -55,6 +55,7 @@
                 </div>
             </div>
             <form method="get" class="d-flex gap-2">
+                {% if active_category %}<input type="hidden" name="cat" value="{{ active_category }}">{% endif %}
                 <input type="text"
                        name="q"
                        class="form-control"
@@ -64,17 +65,41 @@
                 <button type="submit" class="btn btn-primary btn-icon" aria-label="Search">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
-                {% if search_query %}
+                {% if search_query or active_category %}
                     <a href="{% url 'archive' %}"
                        class="btn btn-outline-light btn-icon"
-                       aria-label="Clear search">
+                       aria-label="Clear filters">
                         <i class="fa-solid fa-times"></i>
                     </a>
                 {% endif %}
             </form>
-            {% if search_query %}
+            {% if categories %}
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <!-- ALL button -->
+                    <a href="{% url 'archive' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
+                       class="btn btn-sm {% if not active_category %}btn-primary{% else %}btn-outline-light{% endif %} btn-icon"
+                       aria-label="Show all categories">
+                        <i class="fa-solid fa-layer-group"></i>All
+                    </a>
+                    <!-- Category buttons -->
+                    {% for c in categories %}
+                        <a href="{% url 'archive' %}?cat={{ c.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                           class="btn btn-sm {% if active_category == c.slug %}btn-primary{% else %}btn-outline-light{% endif %} btn-icon"
+                           aria-label="Filter by {{ c.name }}">
+                            <i class="fa-solid fa-tag"></i>{{ c.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if search_query or active_category %}
                 <p class="small muted mt-2 mb-0">
-                    Results for "<strong>{{ search_query }}</strong>"
+                    Filters:
+                    {% if active_category %}
+                        <strong>{{ active_category }}</strong>
+                    {% else %}
+                        <strong>all categories</strong>
+                    {% endif %}
+                    {% if search_query %}and search "<strong>{{ search_query }}</strong>"{% endif %}
                 </p>
             {% endif %}
         </div>
@@ -100,7 +125,11 @@
                                 <div>
                                     <h3 class="h5 mb-1">{{ product.title }}</h3>
                                     {% if product.category %}
-                                        <span class="badge text-bg-danger small">{{ product.category.name }}</span>
+                                        <a href="{% url 'archive' %}?cat={{ product.category.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                                           class="badge text-bg-danger small text-decoration-none"
+                                           aria-label="Filter by {{ product.category.name }}">
+                                            {{ product.category.name }}
+                                        </a>
                                     {% else %}
                                         <span class="badge text-bg-secondary small">Uncategorized</span>
                                     {% endif %}
@@ -152,7 +181,10 @@
                             </li>
                         {% else %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                <a class="page-link"
+                                   href="?page={{ num }}{% if active_category %}&cat={{ active_category }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">
+                                    {{ num }}
+                                </a>
                             </li>
                         {% endif %}
                     {% endfor %}

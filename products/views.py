@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView
 from typing import Any, cast
 
-from .models import Product
+from .models import Category, Product
 from elysium_archive.helpers import user_has_access
 from elysium_archive.type_guards import is_authenticated_user
 from reviews.forms import ReviewForm
@@ -23,10 +23,19 @@ class ProductListView(ListView):
     paginate_by = 12
 
     def get_queryset(self) -> QuerySet[Product]:
-        """Return active products, optionally filtered by search query."""
-        queryset = Product.objects.filter(is_active=True).order_by("-created_at")
+        """Return active products, optionally filtered by search query and category tag."""
+        queryset = (
+            Product.objects.filter(is_active=True)
+            .select_related("category")
+            .order_by("-created_at")
+        )
+
         search_query = self.request.GET.get("q", "").strip()
-        
+        category_slug = self.request.GET.get("cat", "").strip()
+
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+
         if search_query:
             queryset = queryset.filter(
                 Q(title__icontains=search_query)
@@ -34,13 +43,26 @@ class ProductListView(ListView):
                 | Q(tagline__icontains=search_query)
                 | Q(category__name__icontains=search_query)
             ).distinct()
-        
+
         return queryset
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add search query to context for template."""
+        """Add search query and category tags to context for template."""
         context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("q", "").strip()
+
+        search_query = self.request.GET.get("q", "").strip()
+        active_category = self.request.GET.get("cat", "").strip()
+
+        categories = (
+            Category.objects.filter(products__is_active=True)
+            .distinct()
+            .order_by("name")
+        )
+
+        context["search_query"] = search_query
+        context["categories"] = categories
+        context["active_category"] = active_category
+
         return context
 
 
@@ -55,7 +77,7 @@ class ProductDetailView(DetailView):
 
     def get_queryset(self) -> QuerySet[Product]:
         """Return all products (access control happens in get_object)."""
-        return Product.objects.all()
+        return Product.objects.all().select_related("category")
 
     def get_object(self, queryset: QuerySet[Product] | None = None) -> Product:
         """Return product if accessible, raise 404 otherwise."""
@@ -88,17 +110,14 @@ class ProductDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         product: Product = self.get_object()
 
-        # Check ownership and cart status
         purchased = user_has_access(self.request.user, product)
         cart_product_ids = set(self.request.session.get("cart", {}).keys())
 
-        # Get reviews from reverse relation
         reviews = product.reviews.all()
         user_review = None
         can_review = False
         form = None
 
-        # Authenticated buyers can leave reviews
         if is_authenticated_user(self.request.user) and purchased:
             user_review = product.reviews.filter(user=cast(Any, self.request.user)).first()
             can_review = not user_review
@@ -127,11 +146,9 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """Check email verification before processing request."""
-        # Superusers bypass email verification
         if is_authenticated_user(request.user) and request.user.is_superuser:  # type: ignore[attr-defined]
             return super().dispatch(request, *args, **kwargs)
 
-        # Regular users must have verified email
         if is_authenticated_user(request.user):
             from allauth.account.models import EmailAddress
             from django.contrib import messages
@@ -151,11 +168,9 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
         """Return product and verify user has access."""
         obj: Product = super().get_object(queryset)
 
-        # Superusers have unlimited access
         if is_authenticated_user(self.request.user) and self.request.user.is_superuser:  # type: ignore[attr-defined]
             return obj
 
-        # Regular users must own the product
         if not user_has_access(self.request.user, obj):
             raise PermissionDenied("You must purchase this archive to read it.")
 
