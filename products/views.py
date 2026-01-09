@@ -23,7 +23,7 @@ class ProductListView(ListView):
     paginate_by = 12
 
     def get_queryset(self) -> QuerySet[Product]:
-        """Return active products, optionally filtered by search query and category tag."""
+        """Return active products, optionally filtered by search query, category tag, or deals."""
         queryset = (
             Product.objects.filter(is_active=True)
             .select_related("category")
@@ -32,6 +32,10 @@ class ProductListView(ListView):
 
         search_query = self.request.GET.get("q", "").strip()
         category_slug = self.request.GET.get("cat", "").strip()
+        show_deals = self.request.GET.get("deals", "").strip().lower() == "true"
+
+        if show_deals:
+            queryset = queryset.filter(is_deal=True)
 
         if category_slug:
             queryset = queryset.filter(category__slug=category_slug)
@@ -47,11 +51,12 @@ class ProductListView(ListView):
         return queryset
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add search query and category tags to context for template."""
+        """Add search query, category tags, and deals filter to context for template."""
         context = super().get_context_data(**kwargs)
 
         search_query = self.request.GET.get("q", "").strip()
         active_category = self.request.GET.get("cat", "").strip()
+        show_deals = self.request.GET.get("deals", "").strip().lower() == "true"
 
         categories = (
             Category.objects.filter(products__is_active=True)
@@ -62,6 +67,7 @@ class ProductListView(ListView):
         context["search_query"] = search_query
         context["categories"] = categories
         context["active_category"] = active_category
+        context["show_deals"] = show_deals
 
         return context
 
@@ -83,17 +89,14 @@ class ProductDetailView(DetailView):
         """Return product if accessible, raise 404 otherwise."""
         obj: Product = super().get_object(queryset)
 
-        # Active products are visible to everyone
         if obj.is_active:
             return obj
 
-        # Inactive products: check staff/superuser access
         if is_authenticated_user(self.request.user) and (
             self.request.user.is_staff or self.request.user.is_superuser  # type: ignore[attr-defined]
         ):
             return obj
 
-        # Inactive products: check if user owns it via entitlement
         if is_authenticated_user(self.request.user):
             from orders.models import AccessEntitlement
 
@@ -102,7 +105,6 @@ class ProductDetailView(DetailView):
             ).exists():
                 return obj
 
-        # No access: raise 404
         raise Http404("Product not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:

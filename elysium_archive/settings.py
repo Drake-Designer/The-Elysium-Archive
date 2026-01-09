@@ -159,10 +159,12 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "elysium_archive.context_processors.cart_context",
+                "elysium_archive.context_processors.deals_context",
             ],
         },
     }
 ]
+
 
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
 

@@ -14,3 +14,17 @@ def cart_context(request):
         "cart_count": len(cart_items),
         "cart_product_ids": cart_product_ids,
     }
+
+
+def deals_context(request):
+    """Add deal products to context for banner display."""
+    from products.models import Product
+    
+    deal_products = Product.objects.filter(
+        is_active=True,
+        is_deal=True
+    ).select_related("category")[:10]
+    
+    return {
+        "deal_products": deal_products,
+    }

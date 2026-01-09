@@ -1,6 +1,8 @@
 """Admin configuration for the orders app."""
 
 from django.contrib import admin
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .models import AccessEntitlement, Order, OrderLineItem
 
@@ -17,62 +19,180 @@ class OrderLineItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     """Admin interface for orders."""
+    
+    class Media:
+        css = {
+            'all': ('css/admin/admin-orders.css',)
+        }
 
-    list_display = ("order_number", "user", "status", "total", "created_at")
-    list_filter = ("status", "created_at")
-    search_fields = ("order_number", "user__username", "user__email")
-    readonly_fields = ("order_number", "created_at", "updated_at")
+    list_display = [
+        'order_number_display',
+        'user_display',
+        'status_badge',
+        'total_display',
+        'created_at'
+    ]
+    
+    list_display_links = ['order_number_display']
+    
+    list_filter = ['status', 'created_at']
+    
+    search_fields = ['order_number', 'user__username', 'user__email']
+    
+    readonly_fields = ['order_number', 'created_at', 'updated_at']
+    
     inlines = [OrderLineItemInline]
+    
+    date_hierarchy = 'created_at'
 
     fieldsets = (
-        (
-            "Order Information",
-            {
-                "fields": (
-                    "order_number",
-                    "user",
-                    "status",
-                    "total",
-                    "stripe_session_id",
-                    "stripe_payment_intent_id",
-                ),
-            },
-        ),
-        (
-            "Timestamps",
-            {
-                "fields": ("created_at", "updated_at"),
-            },
-        ),
+        ('📦 Order Information', {
+            'fields': (
+                'order_number',
+                'user',
+                'status',
+                'total',
+            ),
+        }),
+        ('💳 Payment Details', {
+            'fields': (
+                'stripe_session_id',
+                'stripe_payment_intent_id',
+            ),
+        }),
+        ('📊 Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
     )
+    
+    actions = ['mark_as_paid', 'mark_as_failed']
+    
+    def order_number_display(self, obj):
+        """Display order number with styling."""
+        return format_html(
+            '<span class="order-number-display">#{}</span>',
+            obj.order_number
+        )
+    order_number_display.short_description = 'Order #'
+    
+    def user_display(self, obj):
+        """Display user info."""
+        if obj.user:
+            return format_html(
+                '<div class="order-user-info">'
+                '<span class="order-username">{}</span>'
+                '<span class="order-email">{}</span>'
+                '</div>',
+                obj.user.username,
+                obj.user.email
+            )
+        return mark_safe('<span class="order-no-user">Guest</span>')
+    user_display.short_description = 'User'
+    
+    def status_badge(self, obj):
+        """Display order status with colored badge."""
+        return format_html(
+            '<span class="order-status-badge {}">{}</span>',
+            obj.status,
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+    
+    def total_display(self, obj):
+        """Display order total with styling."""
+        return format_html(
+            '<span class="order-total-display">${}</span>',
+            obj.total
+        )
+    total_display.short_description = 'Total'
+    
+    # Admin actions
+    
+    def mark_as_paid(self, request, queryset):
+        """Mark orders as paid."""
+        updated = queryset.update(status='paid')
+        self.message_user(request, f'{updated} order(s) marked as paid.')
+    mark_as_paid.short_description = '✓ Mark as paid'
+    
+    def mark_as_failed(self, request, queryset):
+        """Mark orders as failed."""
+        updated = queryset.update(status='failed')
+        self.message_user(request, f'{updated} order(s) marked as failed.')
+    mark_as_failed.short_description = '✗ Mark as failed'
 
 
 @admin.register(OrderLineItem)
 class OrderLineItemAdmin(admin.ModelAdmin):
     """Admin interface for order line items."""
+    
+    class Media:
+        css = {
+            'all': ('css/admin/admin-orders.css',)
+        }
 
-    list_display = (
-        "order",
-        "product_title",
-        "product_price",
-        "quantity",
-        "line_total",
-    )
-    list_filter = ("order__status", "order__created_at")
-    search_fields = ("product_title", "order__order_number")
-    readonly_fields = ("line_total",)
+    list_display = [
+        'order',
+        'product_title',
+        'product_price',
+        'quantity',
+        'line_total',
+    ]
+    
+    list_filter = ['order__status', 'order__created_at']
+    
+    search_fields = ['product_title', 'order__order_number']
+    
+    readonly_fields = ['line_total']
 
 
 @admin.register(AccessEntitlement)
 class AccessEntitlementAdmin(admin.ModelAdmin):
     """Admin interface for access entitlements."""
+    
+    class Media:
+        css = {
+            'all': ('css/admin/admin-orders.css',)
+        }
 
-    list_display = ("user", "product", "order", "granted_at")
-    list_filter = ("granted_at", "order__status")
-    search_fields = (
-        "user__username",
-        "user__email",
-        "product__title",
-        "order__order_number",
-    )
-    readonly_fields = ("granted_at",)
+    list_display = [
+        'user_display',
+        'product',
+        'order',
+        'granted_badge',
+    ]
+    
+    list_display_links = ['user_display', 'product']
+    
+    list_filter = ['granted_at', 'order__status']
+    
+    search_fields = [
+        'user__username',
+        'user__email',
+        'product__title',
+        'order__order_number',
+    ]
+    
+    readonly_fields = ['granted_at']
+    
+    date_hierarchy = 'granted_at'
+    
+    def user_display(self, obj):
+        """Display user info."""
+        return format_html(
+            '<div class="order-user-info">'
+            '<span class="order-username">{}</span>'
+            '<span class="order-email">{}</span>'
+            '</div>',
+            obj.user.username,
+            obj.user.email
+        )
+    user_display.short_description = 'User'
+    
+    def granted_badge(self, obj):
+        """Display granted date with badge."""
+        return format_html(
+            '<span class="entitlement-granted-badge">✓ {}</span>',
+            obj.granted_at.strftime('%b %d, %Y')
+        )
+    granted_badge.short_description = 'Granted'

@@ -1,0 +1,90 @@
+/* =============================================
+   ACCOUNTS ADMIN CUSTOMIZATION
+   ============================================= */
+
+/* User profile display */
+.user-profile-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--admin-gold-border);
+}
+
+.user-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--admin-gold-soft);
+  border: 2px solid var(--admin-gold-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-gold);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-display-name {
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.user-username {
+  font-size: 12px;
+  color: var(--admin-muted);
+}
+
+/* Email verification badge - già presente ma miglioriamo */
+.badge-success {
+  background-color: rgba(76, 175, 80, 0.18);
+  border: 1px solid rgba(76, 175, 80, 0.45);
+  color: var(--admin-success);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-warning {
+  background-color: rgba(255, 152, 0, 0.15);
+  border: 1px solid rgba(255, 152, 0, 0.45);
+  color: var(--admin-warning);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Staff/Superuser badges */
+.user-role-badge {
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.user-role-badge.staff {
+  background-color: rgba(156, 39, 176, 0.15);
+  border: 1px solid rgba(156, 39, 176, 0.45);
+  color: #9c27b0;
+}
+
+.user-role-badge.superuser {
+  background-color: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.45);
+  color: #f44336;
+}

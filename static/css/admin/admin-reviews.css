@@ -1,0 +1,55 @@
+/* =============================================
+   REVIEWS ADMIN CUSTOMIZATION
+   ============================================= */
+
+/* Star rating display */
+.review-rating-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 16px;
+}
+
+.review-star {
+  color: #ffc107;
+}
+
+.review-star.empty {
+  color: rgba(160, 160, 168, 0.3);
+}
+
+.review-rating-text {
+  margin-left: 6px;
+  font-weight: 600;
+  color: var(--admin-text);
+  font-size: 14px;
+}
+
+/* Review title display */
+.review-title-display {
+  font-weight: 600;
+  color: var(--admin-text);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* Review body preview */
+.review-body-preview {
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Verified badge */
+.review-verified-badge {
+  background-color: rgba(33, 150, 243, 0.15);
+  border: 1px solid rgba(33, 150, 243, 0.45);
+  color: #2196f3;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

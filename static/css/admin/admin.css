@@ -2,3 +2,9 @@
 @import url('admin-variables.css');
 @import url('admin-components.css');
 @import url('admin-jazzmin-overrides.css');
+@import url('admin-deal-banners.css');
+@import url('admin-categories.css');
+@import url('admin-products.css');
+@import url('admin-orders.css');
+@import url('admin-reviews.css');
+@import url('admin-accounts.css');

@@ -1,305 +1,417 @@
-"""Admin interface for products app."""
-
+"""Admin configuration for products app."""
 from django.contrib import admin
-from django.contrib.messages import error, success
-from django.db.models import Count
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
-from django.urls import path, reverse
-from django.utils.html import format_html, format_html_join
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from django.views.decorators.http import require_http_methods
 
-from .models import Category, Product
 from .admin_utils import admin_display
-
-
-# Custom filters for Products.
-
-
-class HasPurchasesFilter(admin.SimpleListFilter):
-    """Filter products by entitlement count (purchases)."""
-
-    title = "purchases"
-    parameter_name = "has_purchases"
-
-    def lookups(self, request, model_admin):
-        """Return filter options."""
-        return (
-            ("yes", "Has purchases"),
-            ("no", "No purchases"),
-        )
-
-    def queryset(self, request, queryset):
-        """Filter queryset based on entitlements count."""
-        if self.value() == "yes":
-            return queryset.filter(entitlements__isnull=False).distinct()
-        elif self.value() == "no":
-            return queryset.filter(entitlements__isnull=True)
-        return queryset
-
-
-class HasImageFilter(admin.SimpleListFilter):
-    """Filter products by image presence."""
-
-    title = "image"
-    parameter_name = "has_image"
-
-    def lookups(self, request, model_admin):
-        """Return filter options."""
-        return (
-            ("yes", "Has image"),
-            ("no", "No image"),
-        )
-
-    def queryset(self, request, queryset):
-        """Filter queryset based on image field."""
-        if self.value() == "yes":
-            return queryset.exclude(image="")
-        elif self.value() == "no":
-            return queryset.filter(image="")
-        return queryset
+from .models import Category, DealBanner, Product
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    """Manage archive categories."""
+    """Admin interface for Category model."""
 
-    list_display = ("name", "slug")
-    search_fields = ("name", "slug")
+    class Media:
+        css = {
+            "all": ("css/admin/admin-categories.css",),
+        }
+
+    list_display = [
+        "name_display",
+        "slug_display",
+        "product_count",
+        "created_at",
+    ]
+
+    list_display_links = ["name_display"]
+
+    search_fields = ["name", "slug", "description"]
+
     prepopulated_fields = {"slug": ("name",)}
+
+    readonly_fields = ["created_at", "updated_at"]
+
+    fieldsets = (
+        ("📂 Category Information", {"fields": ("name", "slug", "description")}),
+        ("📊 Metadata", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+    )
+
+    @admin_display("Name")
+    def name_display(self, obj):
+        """Display category name with styling."""
+        return format_html(
+            '<span class="category-name-display">📂 {}</span>',
+            obj.name,
+        )
+
+    @admin_display("Slug")
+    def slug_display(self, obj):
+        """Display slug in monospace."""
+        return format_html(
+            '<code class="category-slug-display">{}</code>',
+            obj.slug,
+        )
+
+    @admin_display("Products")
+    def product_count(self, obj):
+        """Display number of products in this category."""
+        count = obj.products.count()
+        css_class = "category-product-count"
+        if count == 0:
+            css_class += " category-product-count-zero"
+
+        return format_html(
+            '<span class="{}">{} product{}</span>',
+            css_class,
+            count,
+            "s" if count != 1 else "",
+        )
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    """Manage products in admin panel with powerful tools."""
-
-    list_display = (
-        "title",
-        "entitlement_count",
-        "status_badge",
-        "featured_toggle",
-        "has_image_badge",
-        "category",
-        "price",
-        "created_at",
-    )
-    list_filter = (
-        "is_active",
-        "is_featured",
-        "category",
-        "created_at",
-        HasPurchasesFilter,
-        HasImageFilter,
-    )
-    search_fields = ("title", "slug", "tagline", "description")
-    prepopulated_fields = {"slug": ("title",)}
-    readonly_fields = ("created_at", "updated_at")
-    list_editable = ()
-    ordering = ("-created_at",)
-    date_hierarchy = "created_at"
-    autocomplete_fields = ("category",)
-    actions = [
-        "safe_delete_products",
-        "mark_as_featured",
-        "remove_featured",
-    ]
-
-    fieldsets = (
-        ("Archive Details", {"fields": ("title", "slug", "tagline", "category")}),
-        ("Content", {"fields": ("description", "content"), "classes": ("collapse",)}),
-        ("Media", {"fields": ("image", "image_alt")}),
-        ("Status", {"fields": ("price", "is_active", "is_featured")}),
-        (
-            "Timestamps",
-            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
-        ),
-    )
+    """Admin interface for Product model."""
 
     class Media:
-        css = {"all": ("css/admin/admin.css",)}
+        css = {
+            "all": ("css/admin/admin-products.css",),
+        }
 
-    def get_urls(self):
-        """Add custom URL for featured toggle."""
-        custom_urls = [
-            path(
-                "<int:product_id>/toggle-featured/",
-                self.admin_site.admin_view(self.toggle_featured_view),
-                name="products_product_toggle_featured",
-            ),
-        ]
-        return custom_urls + super().get_urls()
+    list_display = [
+        "image_thumbnail",
+        "title",
+        "category_display",
+        "price_display",
+        "status_badges",
+        "created_at",
+    ]
 
-    @require_http_methods(["POST"])
-    def toggle_featured_view(self, request, product_id):
-        """Toggle is_featured for a product and redirect back."""
-        product = get_object_or_404(Product, pk=product_id)
+    list_display_links = ["image_thumbnail", "title"]
 
-        # Verify permission to change
-        if not self.has_change_permission(request, product):
-            raise Http404("Permission denied")
+    list_filter = [
+        "is_active",
+        "is_featured",
+        "is_deal",
+        "deal_manual",
+        "deal_exclude",
+        "category",
+        "created_at",
+    ]
 
-        # Toggle featured status
-        product.is_featured = not product.is_featured
-        product.save(update_fields=["is_featured"])
+    search_fields = ["title", "tagline", "description"]
 
-        # Show success message
-        state = "featured" if product.is_featured else "not featured"
-        success(request, f'"{product.title}" is now {state}.')
+    prepopulated_fields = {"slug": ("title",)}
 
-        # Redirect back to list or referer
-        referer = request.META.get("HTTP_REFERER")
-        return HttpResponseRedirect(referer or self.get_changelist_url(request))
+    date_hierarchy = "created_at"
 
-    def get_changelist_url(self, request):
-        """Get admin change list URL."""
-        return reverse("admin:products_product_changelist")
+    autocomplete_fields = ["category"]
 
-    def get_queryset(self, request):
-        """Annotate queryset with entitlement count to avoid N+1 queries."""
-        queryset = super().get_queryset(request)
-        return queryset.annotate(entitlement_total=Count("entitlements"))
+    readonly_fields = ["created_at", "updated_at", "is_deal"]
 
-    @admin_display("Purchases")
-    def entitlement_count(self, obj):
-        """Display number of entitlements (purchases) as badge."""
-        count = getattr(obj, "entitlement_total", 0) or 0
-        if count > 0:
+    fieldsets = (
+        ("📝 Product Information", {"fields": ("title", "slug", "tagline", "category")}),
+        ("💰 Pricing & Status", {"fields": ("price", "is_active", "is_featured")}),
+        ("💰 Deal Rules", {"fields": ("is_deal", "deal_manual", "deal_exclude")}),
+        ("📄 Content", {"fields": ("description", "content")}),
+        ("🖼️ Media", {"fields": ("image", "image_alt")}),
+        ("📊 Metadata", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+    )
+
+    actions = [
+        "mark_as_active",
+        "mark_as_inactive",
+        "mark_as_deal_manual",
+        "remove_deal_manual",
+        "exclude_from_category_deals",
+        "include_in_category_deals",
+    ]
+
+    @admin_display("Image")
+    def image_thumbnail(self, obj):
+        """Display product image thumbnail."""
+        if obj.image:
             return format_html(
-                '<span class="badge badge-gold">{} purchase{}</span>',
-                count,
-                "s" if count != 1 else "",
+                '<img src="{}" class="product-thumbnail" alt="{}">',
+                obj.image.url,
+                obj.image_alt or obj.title,
             )
-        return "-"
+        return mark_safe('<div class="product-no-image">📦</div>')
+
+    @admin_display("Category")
+    def category_display(self, obj):
+        """Display category with badge."""
+        if obj.category:
+            return format_html(
+                '<span class="product-category-badge">{}</span>',
+                obj.category.name,
+            )
+        return mark_safe('<span class="product-no-category">No category</span>')
+
+    @admin_display("Price")
+    def price_display(self, obj):
+        """Display price with styling."""
+        return format_html(
+            '<span class="product-price-display">€{}</span>',
+            obj.price,
+        )
+
+    @admin_display("Status")
+    def status_badges(self, obj):
+        """Display all status badges."""
+        badges = []
+
+        if obj.is_active:
+            badges.append('<span class="product-status-badge active">✓ Active</span>')
+        else:
+            badges.append('<span class="product-status-badge inactive">✗ Inactive</span>')
+
+        if obj.is_featured:
+            badges.append('<span class="product-status-badge featured">⭐ Featured</span>')
+
+        if obj.is_deal:
+            badges.append('<span class="product-status-badge deal">💰 DEAL</span>')
+
+        if obj.deal_manual:
+            badges.append('<span class="product-status-badge manual">✋ Manual</span>')
+
+        if obj.deal_exclude:
+            badges.append('<span class="product-status-badge excluded">⛔ Excluded</span>')
+
+        return format_html(
+            '<div class="product-status-container">{}</div>',
+            mark_safe("".join(badges)),
+        )
+
+    def mark_as_active(self, request, queryset):
+        """Mark products as active."""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"{updated} product(s) marked as active.")
+    mark_as_active.short_description = "✓ Mark as active"
+
+    def mark_as_inactive(self, request, queryset):
+        """Mark products as inactive."""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} product(s) marked as inactive.")
+    mark_as_inactive.short_description = "✗ Mark as inactive"
+
+    def mark_as_deal_manual(self, request, queryset):
+        """Force products as deals using manual flag."""
+        updated = queryset.update(deal_manual=True)
+        self.message_user(request, f"{updated} product(s) forced as deals.")
+    mark_as_deal_manual.short_description = "💰 Force deal (manual)"
+
+    def remove_deal_manual(self, request, queryset):
+        """Remove manual deal flag from products."""
+        updated = queryset.update(deal_manual=False)
+        self.message_user(request, f"{updated} product(s) removed from manual deals.")
+    remove_deal_manual.short_description = "🚫 Remove manual deal"
+
+    def exclude_from_category_deals(self, request, queryset):
+        """Exclude products from category deal banners."""
+        updated = queryset.update(deal_exclude=True)
+        self.message_user(request, f"{updated} product(s) excluded from category deals.")
+    exclude_from_category_deals.short_description = "⛔ Exclude from category deals"
+
+    def include_in_category_deals(self, request, queryset):
+        """Include products in category deal banners."""
+        updated = queryset.update(deal_exclude=False)
+        self.message_user(request, f"{updated} product(s) included in category deals.")
+    include_in_category_deals.short_description = "✅ Include in category deals"
+
+
+@admin.register(DealBanner)
+class DealBannerAdmin(admin.ModelAdmin):
+    """Admin interface for DealBanner model with enhanced display."""
+
+    class Media:
+        css = {
+            "all": ("css/admin/admin-deal-banners.css",),
+        }
+
+    list_display = [
+        "order",
+        "icon_display",
+        "title",
+        "message_preview",
+        "destination_display",
+        "category_badge",
+        "status_badge",
+        "created_at",
+    ]
+
+    list_display_links = ["title", "message_preview"]
+
+    list_filter = [
+        "is_active",
+        "category",
+        "created_at",
+    ]
+
+    search_fields = ["title", "message", "url"]
+
+    list_editable = ["order"]
+
+    autocomplete_fields = ["product", "category"]
+
+    readonly_fields = ["created_at", "preview_banner"]
+
+    date_hierarchy = "created_at"
+
+    ordering = ["order", "-created_at"]
+
+    fieldsets = (
+        ("📝 Banner Content", {
+            "fields": ("title", "message", "icon"),
+            "description": "Main text and icon displayed in the banner",
+        }),
+        ("🔗 Link Settings", {
+    "fields": ("product", "category", "url"),
+    "description": mark_safe(
+        '<div class="deal-banner-fieldset-description">'
+        "<strong>Link Priority Order:</strong><br>"
+        "1. <strong>Product</strong> → Links directly to the selected product page<br>"
+        "2. <strong>URL</strong> → Uses the custom URL provided<br>"
+        "3. <strong>Category</strong> → Links to archive filtered by category + deals<br>"
+        "4. <strong>None</strong> → Links to archive with deals filter only"
+        "</div>"
+    ),
+}),
+        ("🎨 Display Options", {
+            "fields": ("is_active", "order"),
+            "description": "Category also adds a badge to the banner. Lower order number = displayed first.",
+        }),
+        ("📊 Metadata", {
+            "fields": ("created_at", "preview_banner"),
+            "classes": ("collapse",),
+        }),
+    )
+
+    actions = ["activate_banners", "deactivate_banners", "duplicate_banner"]
+
+    @admin_display("🎨")
+    def icon_display(self, obj):
+        """Display icon with larger size."""
+        return format_html(
+            '<span class="deal-banner-icon">{}</span>',
+            obj.icon,
+        )
+
+    @admin_display("Message")
+    def message_preview(self, obj):
+        """Display truncated message with full text on hover."""
+        if len(obj.message) > 50:
+            truncated = obj.message[:50] + "..."
+            return format_html(
+                '<span class="deal-banner-message-preview" title="{}">{}</span>',
+                obj.message,
+                truncated,
+            )
+        return obj.message
+
+    @admin_display("Destination")
+    def destination_display(self, obj):
+        """Display where the banner links to."""
+        url = obj.get_url()
+
+        if obj.product:
+            icon = "📦"
+            label = f"Product: {obj.product.title[:30]}"
+            css_class = "type-product"
+        elif obj.url:
+            icon = "🔗"
+            label = f"Custom: {obj.url[:30]}"
+            css_class = "type-custom"
+        elif obj.category:
+            icon = "📂"
+            label = f"Category: {obj.category.name}"
+            css_class = "type-category"
+        else:
+            icon = "💰"
+            label = "All Deals"
+            css_class = "type-default"
+
+        return format_html(
+            '<div class="deal-banner-destination">'
+            '<span class="deal-banner-destination-label {}">{} {}</span>'
+            '<span class="deal-banner-destination-url">{}</span>'
+            "</div>",
+            css_class,
+            icon,
+            label,
+            url,
+        )
+
+    @admin_display("Badge")
+    def category_badge(self, obj):
+        """Display category badge if present."""
+        if obj.category:
+            return format_html(
+                '<span class="deal-banner-category-badge">{}</span>',
+                obj.category.name,
+            )
+        return mark_safe('<span class="deal-banner-no-badge">No badge</span>')
 
     @admin_display("Status")
     def status_badge(self, obj):
-        """Display active/archived status as a badge."""
+        """Display active or inactive status."""
         if obj.is_active:
-            return mark_safe('<span class="badge badge-success">Active</span>')
-        else:
-            return mark_safe('<span class="badge badge-muted">Archived</span>')
+            return mark_safe('<span class="deal-banner-status-badge active">✓ ACTIVE</span>')
+        return mark_safe('<span class="deal-banner-status-badge inactive">✗ INACTIVE</span>')
 
-    @admin_display("Featured")
-    def featured_toggle(self, obj):
-        """Display featured status with toggle link."""
-        if obj.is_featured:
-            badge = '<span class="badge badge-featured">⭐ Featured</span>'
-        else:
-            badge = '<span class="badge badge-not-featured">Not featured</span>'
+    @admin_display("Banner Preview")
+    def preview_banner(self, obj):
+        """Display a preview of how the banner will look."""
+        if not obj.pk:
+            return "Save the banner to see preview"
 
-        # Generate POST form for toggle
-        toggle_url = reverse(
-            "admin:products_product_toggle_featured",
-            args=[obj.pk],
+        category_html = ""
+        if obj.category:
+            category_html = format_html(
+                '<span class="deal-banner-preview-category-badge">{}</span>',
+                obj.category.name,
+            )
+
+        return format_html(
+            '<div class="deal-banner-preview-wrapper">'
+            '<a href="{}" target="_blank" class="deal-banner-preview-link">'
+            '<span class="deal-banner-preview-icon">{}</span>'
+            '<span class="deal-banner-preview-text">'
+            '<strong class="deal-banner-preview-title">{}</strong> {}'
+            "{}"
+            "</span>"
+            "</a>"
+            "</div>"
+            '<p class="deal-banner-preview-url">'
+            "<strong>Clicks to:</strong> {}"
+            "</p>",
+            obj.get_url(),
+            obj.icon,
+            obj.title.upper(),
+            obj.message,
+            category_html,
+            obj.get_url(),
         )
-        form_html = (
-            f'<form method="post" action="{toggle_url}" class="admin-toggle-form">'
-            f'<button type="submit" class="admin-btn-toggle" title="Click to toggle featured status">'
-            f"{badge}</button></form>"
-        )
-        return mark_safe(form_html)
 
-    @admin_display("Image")
-    def has_image_badge(self, obj):
-        """Display image presence as badge."""
-        if obj.image:
-            return mark_safe('<span class="badge badge-image">🖼️ Has image</span>')
-        else:
-            return mark_safe('<span class="badge badge-no-image">No image</span>')
+    def activate_banners(self, request, queryset):
+        """Bulk activate selected banners."""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"{updated} banner(s) successfully activated.")
+    activate_banners.short_description = "✓ Activate selected banners"
 
-    @admin_display("Mark selected as featured")
-    def mark_as_featured(self, request, queryset):
-        """Bulk action to mark products as featured."""
-        updated = queryset.update(is_featured=True)
-        success(request, f"Marked {updated} product(s) as featured.")
+    def deactivate_banners(self, request, queryset):
+        """Bulk deactivate selected banners."""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} banner(s) successfully deactivated.")
+    deactivate_banners.short_description = "✗ Deactivate selected banners"
 
-    @admin_display("Remove featured status")
-    def remove_featured(self, request, queryset):
-        """Bulk action to remove featured status."""
-        updated = queryset.update(is_featured=False)
-        success(request, f"Removed featured status from {updated} product(s).")
-
-    def get_actions(self, request):
-        """Remove default delete_selected action; keep only safe_delete_products."""
-        actions = super().get_actions(request)
-        if "delete_selected" in actions:
-            del actions["delete_selected"]
-        return actions
-
-    def has_delete_permission(self, request, obj=None):
-        """Allow deletion attempts; actual deletion is gated in delete_model/delete_queryset."""
-        return True
-
-    def _get_protected_titles(self, queryset):
-        """Get titles of products with entitlements in single query."""
-        protected_titles = (
-            queryset.filter(entitlements__isnull=False)
-            .distinct()
-            .values_list("title", flat=True)
-        )
-        return list(protected_titles)
-
-    def delete_model(self, request, obj):
-        """Block deletion if product has entitlements; suggest soft delete instead."""
-        if obj.entitlements.exists():
-            count = obj.entitlements.count()
-            error(
-                request,
-                format_html(
-                    "Cannot delete <strong>{}</strong>: {} user{} {} purchased this. Use soft delete (set inactive) instead.",
-                    obj.title,
-                    count,
-                    "s" if count != 1 else "",
-                    "have" if count != 1 else "has",
-                ),
-            )
-            return
-        super().delete_model(request, obj)
-
-    def delete_queryset(self, request, queryset):
-        """Block bulk deletion if any product has entitlements (fallback protection)."""
-        protected_titles = self._get_protected_titles(queryset)
-
-        if protected_titles:
-            titles_html = format_html_join(
-                ", ",
-                "<strong>{}</strong>",
-                ((title,) for title in protected_titles),
-            )
-            error(
-                request,
-                format_html(
-                    "Cannot delete: {} {} purchased. Use soft delete (set inactive) instead.",
-                    titles_html,
-                    "have been" if len(protected_titles) > 1 else "has been",
-                ),
-            )
-            return
-
-        super().delete_queryset(request, queryset)
-
-    @admin_display("Delete selected products (safe)")
-    def safe_delete_products(self, request, queryset):
-        """Custom bulk delete action with entitlement protection (ALL-OR-NOTHING)."""
-        protected_titles = self._get_protected_titles(queryset)
-
-        if protected_titles:
-            titles_html = format_html_join(
-                ", ",
-                "<strong>{}</strong>",
-                ((title,) for title in protected_titles),
-            )
-            error(
-                request,
-                format_html(
-                    "Cannot delete: {} {} purchased. Use soft delete (set inactive) instead.",
-                    titles_html,
-                    "have been" if len(protected_titles) > 1 else "has been",
-                ),
-            )
-            return
-
-        deleted_count = queryset.count()
-        queryset.delete()
-        success(request, f"Successfully deleted {deleted_count} product(s).")
+    def duplicate_banner(self, request, queryset):
+        """Duplicate selected banners."""
+        count = 0
+        for banner in queryset:
+            banner.pk = None
+            banner.title = f"{banner.title} (Copy)"
+            banner.is_active = False
+            banner.save()
+            count += 1
+        self.message_user(request, f"{count} banner(s) duplicated successfully.")
+    duplicate_banner.short_description = "📋 Duplicate selected banners"
