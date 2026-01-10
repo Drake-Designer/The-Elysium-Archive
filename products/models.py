@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
+from django.core.validators import MaxLengthValidator
 
 
 class Category(models.Model):
@@ -49,7 +50,12 @@ class Product(models.Model):
     )
     price = models.DecimalField(max_digits=6, decimal_places=2)
     image = models.ImageField(upload_to="products/", blank=True, null=True)
-    image_alt = models.CharField(max_length=255, blank=True)
+    image_alt = models.CharField(
+        max_length=255,
+        blank=True,
+        validators=[MaxLengthValidator(150)],
+        help_text="Recommended 60-125 chars. Max 150.",
+    )
     is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
 
@@ -80,7 +86,12 @@ class Product(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
 
+        # Enforce model-level validation on save to ensure ORM/API saves
+        # cannot bypass the 150-char image_alt constraint.
+        self.full_clean()
+
         super().save(*args, **kwargs)
+        # Recalculate only this product's deal status after save.
         sync_products_deal_status(product_pks=[self.pk])
 
     def get_absolute_url(self):
@@ -137,33 +148,20 @@ class DealBanner(models.Model):
         return f"{self.title}: {self.message}"
 
     def save(self, *args, **kwargs):
-        """This method saves the banner and syncs related products."""
+        """Save banner. Deal syncing is handled by model signals and admin actions.
+
+        Avoid running sync here to prevent duplicate recalculations when bulk
+        operations or admin actions already perform updates.
+        """
         super().save(*args, **kwargs)
 
-        product_pks = []
-        category_pks = []
-
-        if self.product is not None:
-            product_pks.append(self.product.pk)
-
-        if self.category is not None:
-            category_pks.append(self.category.pk)
-
-        sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
-
     def delete(self, *args, **kwargs):
-        """This method deletes the banner and syncs related products."""
-        product_pks = []
-        category_pks = []
+        """Delete banner. Deal syncing is handled by post-delete signal.
 
-        if self.product is not None:
-            product_pks.append(self.product.pk)
-
-        if self.category is not None:
-            category_pks.append(self.category.pk)
-
+        We avoid calling sync here to keep deletion path minimal; the
+        `post_delete` signal will trigger recalculation for affected products.
+        """
         super().delete(*args, **kwargs)
-        sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
 
     def get_url(self):
         """This method returns the appropriate URL for this banner."""
@@ -182,14 +180,21 @@ class DealBanner(models.Model):
 
 
 def sync_products_deal_status(product_pks=None, category_pks=None):
-    """This function recalculates deal status for affected products."""
-    product_pks = product_pks or []
-    category_pks = category_pks or []
+    """Recalculate deal status for affected products.
 
-    qs = Product.objects.all()
+    To avoid expensive full-table recalculations, this function requires at
+    least one of `product_pks` or `category_pks` to be provided. If both are
+    empty, the function is a no-op. Use an explicit full-recalculation utility
+    if needed.
+    """
+    product_pks = list(product_pks or [])
+    category_pks = list(category_pks or [])
 
-    if product_pks or category_pks:
-        qs = qs.filter(Q(pk__in=product_pks) | Q(category__pk__in=category_pks))
+    # If nothing specified, skip to avoid scanning all products unintentionally.
+    if not product_pks and not category_pks:
+        return
+
+    qs = Product.objects.filter(Q(pk__in=product_pks) | Q(category__pk__in=category_pks)).select_related("category")
 
     active_banners = DealBanner.objects.filter(is_active=True)
 
@@ -203,13 +208,44 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
 
     now = timezone.now()
 
-    for product in qs.select_related("category"):
-        from_product_banner = product.pk in banner_product_pks
+    true_pks = []
+    false_pks = []
 
+    for product in qs:
+        from_product_banner = product.pk in banner_product_pks
         category_pk = product.category.pk if product.category is not None else None
         from_category_banner = (category_pk in banner_category_pks) and (not product.deal_exclude)
 
         effective = bool(product.deal_manual or from_product_banner or from_category_banner)
 
-        if product.is_deal != effective:
-            Product.objects.filter(pk=product.pk).update(is_deal=effective, updated_at=now)
+        if product.is_deal and not effective:
+            false_pks.append(product.pk)
+        elif not product.is_deal and effective:
+            true_pks.append(product.pk)
+
+    if true_pks:
+        Product.objects.filter(pk__in=true_pks).update(is_deal=True, updated_at=now)
+    if false_pks:
+        Product.objects.filter(pk__in=false_pks).update(is_deal=False, updated_at=now)
+
+
+# Signals to ensure sync runs for save/delete events (covers bulk delete via
+# QuerySet.delete which still emits post_delete per-instance).
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+
+@receiver(post_save, sender=DealBanner)
+def deal_banner_post_save(sender, instance, created, **kwargs):
+    product_pks = [instance.product.pk] if instance.product else []
+    category_pks = [instance.category.pk] if instance.category else []
+    if product_pks or category_pks:
+        sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
+
+
+@receiver(post_delete, sender=DealBanner)
+def deal_banner_post_delete(sender, instance, **kwargs):
+    product_pks = [instance.product.pk] if instance.product else []
+    category_pks = [instance.category.pk] if instance.category else []
+    if product_pks or category_pks:
+        sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)

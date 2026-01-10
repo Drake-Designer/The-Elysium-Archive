@@ -1,0 +1,10 @@
+.char-counter {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.char-counter.is-max {
+  font-weight: 600;
+  opacity: 1;
+}

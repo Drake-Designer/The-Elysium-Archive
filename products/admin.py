@@ -2,9 +2,26 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django import forms
 
 from .admin_utils import admin_display
-from .models import Category, DealBanner, Product
+from .models import Category, DealBanner, Product, sync_products_deal_status
+
+
+class ProductAdminForm(forms.ModelForm):
+    """Custom ModelForm for Product admin to enforce maxlength on image_alt."""
+
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "image_alt" in self.fields:
+            # Set maxlength attribute so browser blocks typing beyond 150 chars
+            self.fields["image_alt"].widget.attrs["maxlength"] = "150"
+            # Helpful placeholder
+            self.fields["image_alt"].widget.attrs["placeholder"] = "Short descriptive text (60–125 chars recommended)"
 
 
 @admin.register(Category)
@@ -71,11 +88,13 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Admin interface for Product model."""
+    form = ProductAdminForm
 
     class Media:
         css = {
-            "all": ("css/admin/admin-products.css",),
+            "all": ("css/admin/admin-products.css", "css/admin/admin-product-image-alt.css"),
         }
+        js = ("js/admin/image-alt-counter.js",)
 
     list_display = [
         "image_thumbnail",
@@ -196,25 +215,34 @@ class ProductAdmin(admin.ModelAdmin):
 
     def mark_as_deal_manual(self, request, queryset):
         """Force products as deals using manual flag."""
+        product_pks = list(queryset.values_list("pk", flat=True))
         updated = queryset.update(deal_manual=True)
+        # Recalculate only the affected products
+        sync_products_deal_status(product_pks=product_pks)
         self.message_user(request, f"{updated} product(s) forced as deals.")
     mark_as_deal_manual.short_description = "💰 Force deal (manual)"
 
     def remove_deal_manual(self, request, queryset):
         """Remove manual deal flag from products."""
+        product_pks = list(queryset.values_list("pk", flat=True))
         updated = queryset.update(deal_manual=False)
+        sync_products_deal_status(product_pks=product_pks)
         self.message_user(request, f"{updated} product(s) removed from manual deals.")
     remove_deal_manual.short_description = "🚫 Remove manual deal"
 
     def exclude_from_category_deals(self, request, queryset):
         """Exclude products from category deal banners."""
+        product_pks = list(queryset.values_list("pk", flat=True))
         updated = queryset.update(deal_exclude=True)
+        sync_products_deal_status(product_pks=product_pks)
         self.message_user(request, f"{updated} product(s) excluded from category deals.")
     exclude_from_category_deals.short_description = "⛔ Exclude from category deals"
 
     def include_in_category_deals(self, request, queryset):
         """Include products in category deal banners."""
+        product_pks = list(queryset.values_list("pk", flat=True))
         updated = queryset.update(deal_exclude=False)
+        sync_products_deal_status(product_pks=product_pks)
         self.message_user(request, f"{updated} product(s) included in category deals.")
     include_in_category_deals.short_description = "✅ Include in category deals"
 
@@ -394,13 +422,22 @@ class DealBannerAdmin(admin.ModelAdmin):
 
     def activate_banners(self, request, queryset):
         """Bulk activate selected banners."""
+        # Collect affected products/categories before the bulk update
+        product_pks = list(queryset.filter(product__isnull=False).values_list("product__pk", flat=True))
+        category_pks = list(queryset.filter(category__isnull=False).values_list("category__pk", flat=True))
         updated = queryset.update(is_active=True)
+        if product_pks or category_pks:
+            sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
         self.message_user(request, f"{updated} banner(s) successfully activated.")
     activate_banners.short_description = "✓ Activate selected banners"
 
     def deactivate_banners(self, request, queryset):
         """Bulk deactivate selected banners."""
+        product_pks = list(queryset.filter(product__isnull=False).values_list("product__pk", flat=True))
+        category_pks = list(queryset.filter(category__isnull=False).values_list("category__pk", flat=True))
         updated = queryset.update(is_active=False)
+        if product_pks or category_pks:
+            sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
         self.message_user(request, f"{updated} banner(s) successfully deactivated.")
     deactivate_banners.short_description = "✗ Deactivate selected banners"
 

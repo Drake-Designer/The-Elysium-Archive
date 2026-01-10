@@ -7,6 +7,7 @@
 **Live Site:** [The Elysium Archive](https://the-elysium-archive-a51393fa9431.herokuapp.com/)
 
 The Elysium Archive is a dark fantasy ecommerce site where each purchase unlocks a private archive page you can only access on the website.  
+
 No downloads. No loose files. Just secrets.
 
 ## Contents
@@ -28,6 +29,8 @@ No downloads. No loose files. Just secrets.
 - [Running the Project Locally](#running-the-project-locally)
 - [Heroku Deployment](#heroku-deployment)
 - [Admin Power Tools](#admin-power-tools)
+- [Deal Banner Bar](#deal-banner-bar)
+- [Alt Text Safety](#alt-text-safety)
 - [Future Improvements](#future-improvements)
 - [Credits and Acknowledgements](#credits-and-acknowledgements)
 
@@ -464,8 +467,6 @@ Each template:
 - Uses SendGrid's infrastructure for reliable delivery
 - Maintains consistency with website branding
 
-**Important:** All email templates use **inline CSS styles** instead of external stylesheets or `<style>` tags. This is intentional and required because most email clients (Gmail, Outlook, Apple Mail, etc.) do not support external stylesheets or document-level styles. Without inline styles, emails would appear unstyled to users, making them difficult to read. This is a standard practice in professional email marketing and confirmation workflows.
-
 ### Favicon Support
 
 A full favicon set is implemented to support all major platforms.
@@ -494,14 +495,14 @@ The implementation avoids unintended cropping by using intelligent scaling with 
 
 ### Core Framework and Language
 
-- **Django 6.0** – Backend framework
-- **Python 3.14** – Programming language
-- **PostgreSQL** – Production database
-- **SQLite3** – Development database
+- **Django 6.0**
+- **Python 3.14**
+- **PostgreSQL**
+- **SQLite3**
 
 ### Authentication and User Management
 
-- **django-allauth 65.13.1** – Professional authentication system
+- **django-allauth 65.13.1**
   - User registration, login, logout
   - Email verification via SendGrid
   - Password reset and change functionality
@@ -511,36 +512,36 @@ The implementation avoids unintended cropping by using intelligent scaling with 
 ### Frontend and Styling
 
 - **HTML5, CSS3, JavaScript (Vanilla)**
-- **Bootstrap 5.3** – Responsive layout and components
-- **Font Awesome 6.5** – Icon library
-- **Google Fonts** – Playfair Display, Inter, Cinzel
+- **Bootstrap 5.3**
+- **Font Awesome 6.5**
+- **Google Fonts**
 
 ### Backend Services and Integrations
 
-- **Stripe 14.1.0** – Payment processing (test mode)
-- **Cloudinary 1.44.1** – Media storage and image optimization
-- **SendGrid (via django-allauth)** – Email delivery
+- **Stripe 14.1.0**
+- **Cloudinary 1.44.1**
+- **SendGrid (via django-allauth)**
 
 ### Admin and Development
 
-- **django-jazzmin 3.0.1** – Enhanced Django admin UI
-- **whitenoise 6.11.0** – Static file serving
-- **gunicorn 23.0.0** – Production WSGI server
-- **dj-database-url 3.0.1** – Database URL parsing
+- **django-jazzmin 3.0.1**
+- **whitenoise 6.11.0**
+- **gunicorn 23.0.0**
+- **dj-database-url 3.0.1**
 
 ### Development and Testing Tools
 
-- **pytest 9.0.2** – Testing framework
-- **pytest-django 4.11.1** – Django testing plugin
-- **black 25.12.0** – Code formatter
-- **flake8 7.3.0** – Linter
-- **bandit 1.9.2** – Security linter
+- **pytest 9.0.2**
+- **pytest-django 4.11.1**
+- **black 25.12.0**
+- **flake8 7.3.0**
+- **bandit 1.9.2**
 
 ### Deployment
 
-- **Heroku** – Cloud hosting platform
-- **Heroku PostgreSQL** – Production database
-- **Git** – Version control
+- **Heroku**
+- **Heroku PostgreSQL**
+- **Git**
 
 ## Security and Error Handling
 
@@ -589,20 +590,14 @@ All error templates extend `base.html` (except 500, which uses inline critical C
 
 Error handlers are configured in `elysium_archive/urls.py` and work in both development and production.
 
-### Inline Styles Policy
+#### Exception: Email Templates
 
-The project follows a **strict no-inline-styles policy** with **one documented exception**:
+Email templates (`templates/account/email/*.html`) use **inline CSS only**. This is intentional and necessary because:
 
-#### Eccezione: Email Templates
-
-Email templates (`templates/account/email/*.html`) usano **solo CSS inline**. Questo è intenzionale e necessario perché:
-
-- La maggior parte dei client email (Gmail, Outlook, Apple Mail) non supporta fogli di stile esterni
-- I tag `<style>` a livello documento vengono rimossi da molti provider
-- Gli stili inline sono l'unico modo affidabile per garantire la resa corretta delle email
-- È prassi standard nelle email di marketing e transazionali
-
-Tutti gli altri template usano solo classi CSS definite in `static/css/base.css`.
+- Most email clients (Gmail, Outlook, Apple Mail) do not support external style sheets
+- Document-level `<style>` tags are stripped by many providers
+- Inline styles are the only reliable way to ensure correct email rendering
+- This is standard practice for marketing and transactional emails
 
 ## Stripe Payments
 
@@ -786,16 +781,20 @@ This minimal structure keeps the foundation clean and makes it easy to add purch
 
 The Entity Relationship Diagram (ERD) below illustrates the current database structure.
 
-The ERD includes Order, Review, and AccessEntitlement as implemented models.
+The ERD includes Order, OrderLineItem, Review, and AccessEntitlement as implemented models.
 
 The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagramming tool that allows database relationships to be defined using clear, readable syntax and exported as an image.
 
 ```mermaid
 erDiagram
     USER ||--|| USERPROFILE : has
-    USER ||--o{ PRODUCT : "accesses (via future transactions)"
-    PRODUCT ||--o{ REVIEW : "has (future)"
-    USER ||--o{ REVIEW : "writes (future)"
+    USER ||--o{ ORDER : places
+    USER ||--o{ ACCESSENTITLEMENT : grants
+    ACCESSENTITLEMENT }o--|| PRODUCT : "grants access to"
+    ORDER ||--o{ ORDERLINEITEM : contains
+    ORDERLINEITEM }o--|| PRODUCT : item
+    PRODUCT ||--o{ REVIEW : has
+    USER ||--o{ REVIEW : writes
 
     USERPROFILE {
         int id PK
@@ -815,6 +814,23 @@ erDiagram
         boolean is_staff
     }
 
+    ORDER {
+        int id PK
+        int user_id FK
+        string order_number
+        string status
+        datetime created_at
+        datetime updated_at
+    }
+
+    ORDERLINEITEM {
+        int id PK
+        int order_id FK
+        int product_id FK
+        int quantity
+        decimal price
+    }
+
     PRODUCT {
         int id PK
         string title
@@ -831,11 +847,11 @@ erDiagram
     }
 
     REVIEW {
-        int id PK "future"
-        int user_id FK "future"
-        int product_id FK "future"
-        text content "future"
-        int rating "future"
+        int id PK
+        int user_id FK
+        int product_id FK
+        text content
+        int rating
     }
 ```
 
@@ -863,13 +879,6 @@ Each model uses Django’s default primary key. Relationships are defined using 
 
 This structure keeps access control simple, auditable, and aligned with Django best practices.
 
-### ERD (Full Entity Relationship Diagram)
-
-The Entity Relationship Diagram (ERD) below illustrates the structure of the database used in this project.
-
-It shows the main entities, their primary and foreign keys, and how they relate to each other.  
-The diagram reflects the relational data model implemented using Django ORM and PostgreSQL.
-
 ## AI-Assisted Development (Testing and Complex Features)
 
 Testing is the area where I struggle the most and find the hardest to understand properly.  
@@ -890,6 +899,142 @@ All automated tests pass locally with 100% success and can be reproduced by foll
 ## Testing and Bug Fixes
 
 For detailed testing, see [TESTING.md](TESTING.md).
+
+These are selected real bugs found and fixed during development. Fixes were validated with manual tests and deployment verification.
+
+## Bug Fix Log
+
+### Checkout access delay after payment
+
+- Symptoms:
+  - Users reached checkout success but purchases did not appear in My Archive; carts were not cleared when webhook processing arrived later.
+- Root Cause:
+  - Checkout relied on webhook-only reconciliation and used only `order_number` in session metadata; delayed webhooks left the success view without a reliable payment state.
+- Fix:
+  - Add `order_id` to Stripe session metadata, verify the Stripe session in `checkout_success` as a fallback, create `AccessEntitlement` records when payment is confirmed, and limit model saves to changed fields.
+
+`checkout/views.py`
+
+```python
+session = stripe.checkout.Session.create(
+    line_items=line_items,
+    mode="payment",
+    success_url=request.build_absolute_uri(
+        reverse("checkout_success", kwargs={"order_number": order.order_number})
+    ),
+    cancel_url=request.build_absolute_uri(reverse("checkout_cancel")),
+    client_reference_id=order.order_number,
+    metadata={
+        "order_id": str(order.id),
+        "order_number": order.order_number,
+    },
+)
+```
+
+- How it was tested:
+  - Manual end-to-end checkout with Stripe test cards.
+  - Simulated delayed webhooks.
+  - Verified `AccessEntitlement` creation.
+  - Confirmed cart clearing after payment.
+  - Ran unit tests to ensure no regressions.
+
+### Static assets missing on Heroku
+
+- Symptoms:
+  - Deployed site served no CSS, JavaScript, or images.
+- Root Cause:
+  - The Heroku release phase executed database migrations but did not run `collectstatic`, so static files were missing from the deployed slug.
+- Fix:
+  - Run `collectstatic` automatically in the release phase after migrations.
+
+`Procfile`
+
+```text
+release: python manage.py migrate --noinput && python manage.py collectstatic --noinput
+web: gunicorn elysium_archive.wsgi:application
+```
+
+- How it was tested:
+  - Verified on Heroku staging.
+  - Ran `python manage.py collectstatic --noinput` locally.
+  - Confirmed that CSS, JS, and images load correctly after deployment.
+
+### Stripe webhook signature error not handled
+
+- Symptoms:
+  - Stripe webhooks failed with an import or attribute error and were not processed.
+- Root Cause:
+  - The code imported the signature verification exception from the wrong path for the installed Stripe client library.
+- Fix:
+  - Import `SignatureVerificationError` correctly from Stripe and handle invalid signatures gracefully in the webhook view.
+
+`checkout/webhooks.py`
+
+```python
+import stripe
+from stripe import SignatureVerificationError
+
+try:
+    event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+except ValueError:
+    logger.warning("Invalid payload for Stripe webhook")
+    return JsonResponse({"error": "Invalid payload"}, status=400)
+except SignatureVerificationError:
+    logger.warning("Invalid signature for Stripe webhook")
+    return JsonResponse({"error": "Invalid signature"}, status=400)
+```
+
+- How it was tested:
+  - Replayed webhook payloads locally.
+  - Tested invalid and valid signatures.
+  - Verified that order status updates correctly.
+  - Confirmed entitlements are created after valid webhook events.
+
+### Admin ALT text length overflow (became a feature)
+
+- Symptoms:
+  - Administrators could enter very long `image_alt` values in the Django Admin.
+  - These values risked causing deployment or migration failures on Postgres.
+  - The admin UX provided no feedback about safe or recommended lengths.
+- Root Cause:
+  - No server-side validation or admin input guardrails existed for `Product.image_alt`.
+- Fix:
+  - Add a server-side `MaxLengthValidator(150)` to `image_alt`.
+  - Enforce `maxlength="150"` on the admin input.
+  - Add a live character counter using small admin-only JS and CSS.
+
+`products/models.py`
+
+```python
+image_alt = models.CharField(
+    max_length=255,
+    blank=True,
+    validators=[MaxLengthValidator(150)],
+    help_text="Recommended 60–125 chars. Max 150.",
+)
+```
+
+`products/admin.py`
+
+```python
+def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    if "image_alt" in self.fields:
+        self.fields["image_alt"].widget.attrs["maxlength"] = "150"
+        self.fields["image_alt"].widget.attrs["placeholder"] = "Short descriptive text (60–125 chars recommended)"
+```
+
+- How it was tested:
+  - Manual admin tests confirming typing stops at 150 characters.
+  - Attempted saves greater than 150 characters failed server-side.
+  - Shell save attempts triggered Django validation errors.
+  - Verified that the live character counter updates correctly while typing.
+
+- Feature outcome:
+  - This bug became the inspiration for a proactive admin UX safeguard.
+  - A live ALT text counter and hard input limit were added to prevent future issues.
+  - Server-side validation remains the canonical enforcement.
+  - The counter exists purely as a UX improvement.
 
 ## Running the Project Locally
 
@@ -982,6 +1127,87 @@ The project includes a comprehensive Django admin interface with advanced featur
 - Badge system for status visualization (Featured, Active, Archived, Purchases)
 - Jazzmin theme integration for polished interface
 - Toggle buttons with hover/focus states
+
+## Deal Banner Bar
+
+The homepage includes a scrolling **Deal Banner Bar** (Admin Controlled Promotions) managed entirely from Django Admin. It is designed to highlight promotions, new entries, or category-based deals without editing templates.
+
+### Admin Features
+
+- Create banners with: title, message, emoji icon, display order, and active status
+- Drag-free ordering via an integer order field (lower values show first)
+- Quick scanning in admin with message preview, destination preview, and status badge
+
+### Destination Logic (Link Priority)
+
+A banner click follows this priority order:
+
+1. **Product**: links directly to the selected product page
+2. **Custom URL**: uses the provided URL
+3. **Category**: links to the archive filtered by category + deals
+4. **Fallback**: links to the archive with deals filter enabled
+
+### Deals Sync with Products
+
+The banner system is connected to the product flag `is_deal`, used by filters and UI badges:
+
+- Activating a banner linked to a **product** marks that product as a deal
+- Activating a banner linked to a **category** marks all products in that category as deals
+- Disabling or deleting a banner triggers a recalculation and updates affected products automatically
+
+### Per-Product Exceptions
+
+To support edge cases (for example: “one product in the category should NOT be a deal”):
+
+- `deal_exclude`: prevents a product from becoming a deal via category banners
+- `deal_manual`: forces a product to be a deal even without banners
+
+### Deal Banner Screenshots
+
+#### Frontend – Deal Banner Bar
+
+--------------------SCREENSHTOT HERE---------------------
+
+#### Admin – Deal Banner Management
+
+--------------------SCREENSHTOT HERE---------------------
+
+--------------------SCREENSHTOT HERE---------------------
+
+## Alt Text Safety
+
+### Context / Why
+
+- During testing I intentionally entered very long image ALT texts to stress-test the system.
+- I discovered that overly long values can fail during deployment when the database enforces max-length constraints (notably on Heroku/Postgres).
+- To prevent accidental admin content from causing deploy or migration failures, small guardrails were added to the admin workflow.
+
+### What was changed
+
+1. Server-side validation
+   - The `Product.image_alt` field is constrained at the Django validation level to a safe maximum of **150 characters**.
+   - This prevents saving overly long values via the admin, API, or ORM and keeps the database schema unchanged.
+
+2. Admin input hard limit
+   - The Django Admin form enforces `maxlength="150"` on the `image_alt` input so staff cannot type past the limit in the browser.
+
+3. Admin UX improvement (character counter)
+   - A small live character counter appears under the `image_alt` input (for example `0/150`) and updates while typing.
+   - When the limit is reached the counter highlights to indicate the maximum has been hit.
+   - The counter is implemented purely for UX; the security and canonical enforcement are provided by server-side validation.
+
+### Files implementing this
+
+- `products/models.py` — `image_alt` max length + Django validation
+- `products/admin.py` — admin ModelForm and Media inclusion
+- `static/js/admin/image-alt-counter.js` — live character counter (admin UX)
+- `static/css/admin/admin-product-image-alt.css` — counter styling (no inline styles)
+
+### Practical benefit
+
+- Prevents accidental invalid admin input that could break deployments or migrations.
+- Reduces the risk of runtime errors caused by data exceeding database constraints.
+- Encourages concise, meaningful ALT text which improves accessibility and content quality.
 
 ## Future Improvements
 
