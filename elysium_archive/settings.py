@@ -75,9 +75,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Installed applications
 INSTALLED_APPS = [
-    # Admin theme
     "jazzmin",
-    # Django core
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -85,13 +83,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-    # Third party
     "allauth",
     "allauth.account",
     "django_ckeditor_5",
     "cloudinary",
     "cloudinary_storage",
-    # Local apps
     "accounts.apps.AccountsConfig",
     "home",
     "products",
@@ -216,7 +212,6 @@ if os.environ.get("CLOUDINARY_URL"):
     }
     CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-    # Configure Cloudinary to serve secure URLs
     import cloudinary
 
     cloudinary.config(secure=True)
@@ -249,18 +244,15 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = os.environ.get(
-    "ACCOUNT_EMAIL_VERIFICATION",
-    "mandatory",
-)
-
-# Enable HTML emails for allauth
-ACCOUNT_EMAIL_HTML = _env_bool(os.environ.get("ACCOUNT_EMAIL_HTML"), default=True)
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
 
 ACCOUNT_FORMS = {
     "signup": "accounts.forms.ElysiumSignupForm",
     "login": "accounts.forms.ElysiumLoginForm",
 }
+
+# Make links in emails correct on Heroku
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if DEBUG else "https"
 
 # Email configuration
 if DEBUG:
@@ -268,25 +260,32 @@ if DEBUG:
 else:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-DEFAULT_FROM_EMAIL = os.environ.get(
-    "DEFAULT_FROM_EMAIL",
-    "The Elysium Archive <elysiumarchive@outlook.com>",
-)
-SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
-
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.sendgrid.net")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = _env_bool(os.environ.get("EMAIL_USE_TLS"), default=True)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "apikey")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
+# Important: the From domain must align with your authenticated sending domain
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL",
+    "The Elysium Archive <no-reply@the-elysium-archive.com>",
+)
+SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+
+# Optional but helps consistency
+ACCOUNT_EMAIL_SUBJECT_PREFIX = os.environ.get(
+    "ACCOUNT_EMAIL_SUBJECT_PREFIX",
+    "[The Elysium Archive] ",
+)
+
+# Fail fast in production if SMTP creds are missing
+if not DEBUG and not EMAIL_HOST_PASSWORD:
+    raise ImproperlyConfigured("EMAIL_HOST_PASSWORD must be set when DEBUG=False.")
+
 # Stripe configuration
-STRIPE_PUBLIC_KEY = os.environ.get(
-    "STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev"
-)
-STRIPE_SECRET_KEY = os.environ.get(
-    "STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev"
-)
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev")
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")
 
 # CKEditor 5 configuration
@@ -367,23 +366,9 @@ CKEDITOR_5_CONFIGS = {
         ],
         "heading": {
             "options": [
-                {
-                    "model": "paragraph",
-                    "title": "Paragraph",
-                    "class": "ck-heading_paragraph",
-                },
-                {
-                    "model": "heading2",
-                    "view": "h2",
-                    "title": "Heading 2",
-                    "class": "ck-heading_heading2",
-                },
-                {
-                    "model": "heading3",
-                    "view": "h3",
-                    "title": "Heading 3",
-                    "class": "ck-heading_heading3",
-                },
+                {"model": "paragraph", "title": "Paragraph", "class": "ck-heading_paragraph"},
+                {"model": "heading2", "view": "h2", "title": "Heading 2", "class": "ck-heading_heading2"},
+                {"model": "heading3", "view": "h3", "title": "Heading 3", "class": "ck-heading_heading3"},
             ]
         },
         "image": {
@@ -394,12 +379,9 @@ CKEDITOR_5_CONFIGS = {
                 "imageStyle:block",
             ],
         },
-        "table": {
-            "contentToolbar": ["tableColumn", "tableRow", "mergeTableCells"],
-        },
+        "table": {"contentToolbar": ["tableColumn", "tableRow", "mergeTableCells"]},
         "height": "600px",
     },
-    # Keep a default config to avoid warnings from packages expecting a 'default' key.
     "default": {
         "toolbar": [
             "heading",

@@ -1,0 +1,8 @@
+{% load account %}
+Please confirm your e-mail address.
+
+You received this message because user {{ user.get_username }} has given yours as an e-mail address on their account.
+
+If you are the user, please click on the link below to confirm your address is valid and active:
+
+{{ activate_url }}
