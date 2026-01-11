@@ -14,6 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if (BASE_DIR / "env.py").exists():
     import env  # noqa: F401
 
+
 # Environment helper functions
 def _env_bool(value, default=False):
     """Parse a boolean environment variable."""
@@ -21,12 +22,14 @@ def _env_bool(value, default=False):
         return default
     return str(value).strip().lower() in ("true", "1", "yes", "y", "on")
 
+
 def _env_list(name, default=None):
     """Parse a comma-separated environment variable into a list."""
     raw = os.environ.get(name)
     if raw is None:
         return default or []
     return [item.strip() for item in raw.split(",") if item.strip()]
+
 
 # Core security and environment flags
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
@@ -69,7 +72,6 @@ if not DEBUG:
 # Security headers
 X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
 
 # Installed applications
 INSTALLED_APPS = [
@@ -98,7 +100,6 @@ INSTALLED_APPS = [
     "orders",
     "reviews",
 ]
-
 
 SITE_ID = int(os.environ.get("SITE_ID", "1"))
 
@@ -165,7 +166,6 @@ TEMPLATES = [
     }
 ]
 
-
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
 
 # Database configuration
@@ -200,7 +200,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files and storage configuration
 MEDIA_URL = "/media/"
@@ -216,9 +215,10 @@ if os.environ.get("CLOUDINARY_URL"):
         },
     }
     CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-    
+
     # Force HTTPS for Cloudinary URLs to prevent mixed content errors
     import cloudinary
+
     cloudinary.config(secure=True)
 else:
     STORAGES = {
@@ -338,7 +338,6 @@ CKEDITOR_5_CONFIGS = {
         },
         "height": "500px",
     },
-
     "writer": {
         "toolbar": [
             "heading",
@@ -364,9 +363,23 @@ CKEDITOR_5_CONFIGS = {
         ],
         "heading": {
             "options": [
-                {"model": "paragraph", "title": "Paragraph", "class": "ck-heading_paragraph"},
-                {"model": "heading2", "view": "h2", "title": "Heading 2", "class": "ck-heading_heading2"},
-                {"model": "heading3", "view": "h3", "title": "Heading 3", "class": "ck-heading_heading3"},
+                {
+                    "model": "paragraph",
+                    "title": "Paragraph",
+                    "class": "ck-heading_paragraph",
+                },
+                {
+                    "model": "heading2",
+                    "view": "h2",
+                    "title": "Heading 2",
+                    "class": "ck-heading_heading2",
+                },
+                {
+                    "model": "heading3",
+                    "view": "h3",
+                    "title": "Heading 3",
+                    "class": "ck-heading_heading3",
+                },
             ]
         },
         "image": {
@@ -382,7 +395,6 @@ CKEDITOR_5_CONFIGS = {
         },
         "height": "600px",
     },
-
     # Keep a default config to avoid warnings from packages expecting a 'default' key.
     "default": {
         "toolbar": [

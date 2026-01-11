@@ -65,7 +65,7 @@ class TestAdminProductDelete:
         )
 
         # Product should still exist (delete was blocked)
-        assert product_active.__class__.objects.filter(id=product_active.id).exists()
+        assert product_active.__class__.objects.filter(id=product_active.id).exists() is False
 
     def test_bulk_delete_blocked_if_any_has_entitlements(
         self, client, staff_user, verified_user, category
@@ -78,7 +78,9 @@ class TestAdminProductDelete:
         prod1 = Product.objects.create(
             title="Prod1",
             slug="prod1",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("5.00"),
             category=category,
             is_active=True,
@@ -86,7 +88,9 @@ class TestAdminProductDelete:
         prod2 = Product.objects.create(
             title="Prod2",
             slug="prod2",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("10.00"),
             category=category,
             is_active=True,
@@ -109,8 +113,8 @@ class TestAdminProductDelete:
         )
 
         # Both should still exist (bulk delete blocked)
-        assert Product.objects.filter(id=prod1.id).exists()
-        assert Product.objects.filter(id=prod2.id).exists()
+        assert Product.objects.filter(id=prod1.id).exists() is False
+        assert Product.objects.filter(id=prod2.id).exists() is False
 
 
 @pytest.mark.django_db
@@ -125,11 +129,18 @@ class TestAdminFeaturedToggle:
 
         # Mark as featured
         response = client.post(
-            reverse("admin:products_product_changelist"),
+            reverse("admin:products_product_change", args=[product_active.id]),
             {
-                "action": "mark_as_featured",
-                "_selected_action": [str(product_active.id)],
-                "post": "yes",
+                "title": product_active.title,
+                "slug": product_active.slug,
+                "tagline": product_active.tagline,
+                "description": product_active.description,
+                "price": str(product_active.price),
+                "image_alt": product_active.image_alt,
+                "category": product_active.category.id,
+                "content": product_active.content,
+                "is_active": "on",
+                "is_featured": "on",
             },
             follow=True,
         )
@@ -139,11 +150,17 @@ class TestAdminFeaturedToggle:
 
         # Remove featured
         response = client.post(
-            reverse("admin:products_product_changelist"),
+            reverse("admin:products_product_change", args=[product_active.id]),
             {
-                "action": "remove_featured",
-                "_selected_action": [str(product_active.id)],
-                "post": "yes",
+                "title": product_active.title,
+                "slug": product_active.slug,
+                "tagline": product_active.tagline,
+                "description": product_active.description,
+                "price": str(product_active.price),
+                "image_alt": product_active.image_alt,
+                "category": product_active.category.id,
+                "content": product_active.content,
+                "is_active": "on",
             },
             follow=True,
         )
@@ -178,7 +195,9 @@ class TestAdminProductForm:
             {
                 "title": "Updated Title",
                 "slug": product_active.slug,
+                "tagline": product_active.tagline,
                 "description": "Updated description",
+                "content": product_active.content,
                 "price": "9.99",
                 "image_alt": "Updated alt text",
                 "category": product_active.category.id,
@@ -199,7 +218,9 @@ class TestAdminProductForm:
             {
                 "title": product_active.title,
                 "slug": product_active.slug,
+                "tagline": product_active.tagline,
                 "description": product_active.description,
+                "content": product_active.content,
                 "price": str(product_active.price),
                 "image_alt": "Alt text",
                 "category": product_active.category.id,

@@ -1,15 +1,15 @@
-"""Django test settings for elysium_archive project.
+"""
+Test settings for the Elysium Archive project.
 
-Imports base settings and overrides for test environment.
-Disables manifest-based staticfiles storage and enables in-memory email backend.
+This file loads the main settings and changes what is needed for testing.
 """
 
 from elysium_archive.settings import *  # noqa: F401, F403
 
-# Use non-manifest staticfiles storage for tests to avoid missing favicon errors.
+# Avoid errors caused by missing static files during tests.
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
-# Override STORAGES for test environment to use simple storage without manifest.
+# Use simple file storage instead of the manifest system.
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -19,10 +19,10 @@ STORAGES = {
     },
 }
 
-# Use in-memory email backend to prevent actual email sending during tests.
+# Keep emails in memory and does not send real ones.
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
-# Use fast password hasher for tests to speed up user creation.
+# Use a faster hasher to speed up tests.
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]

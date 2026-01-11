@@ -139,7 +139,7 @@ class TestMyArchiveNavigation:
         AccessEntitlement.objects.create(user=verified_user, product=product_active)
 
         client.force_login(verified_user)
-        response = client.get(reverse("my_archive"))
+        response = client.get(reverse("my_archive"), follow=True)
 
         assert response.status_code == 200
         content = response.content.decode()

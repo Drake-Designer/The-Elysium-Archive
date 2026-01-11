@@ -40,9 +40,12 @@ class ReviewCreationTest(TestCase):
         self.product = Product.objects.create(
             title="Test Archive",
             slug="test-archive",
+            tagline="Test tagline",
             description="Test description",
+            content="<p>Test premium content.</p>",
             price=Decimal("9.99"),
             image_alt="Test image",
+            category=self.category,
         )
         
         # Grant entitlement to buyer
@@ -126,12 +129,19 @@ class ReviewDuplicatePreventionTest(TestCase):
             user=self.user, email=self.user.email, verified=True, primary=True
         )
         
+        self.category = Category.objects.create(
+            name="Test Category", slug="test-category"
+        )
+        
         self.product = Product.objects.create(
             title="Test Product",
             slug="test-product",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("9.99"),
             image_alt="Test",
+            category=self.category,
         )
         
         AccessEntitlement.objects.create(user=self.user, product=self.product)
@@ -170,12 +180,19 @@ class ReviewDisplayTest(TestCase):
             username="reviewer", email="reviewer@test.com", password="pass123"
         )
         
+        self.category = Category.objects.create(
+            name="Test Category", slug="test-category"
+        )
+        
         self.product = Product.objects.create(
             title="Product with Reviews",
             slug="product-reviews",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("14.99"),
             image_alt="Test",
+            category=self.category,
         )
         
         self.review = Review.objects.create(
@@ -229,12 +246,19 @@ class ReviewRatingTest(TestCase):
             user=self.user, email=self.user.email, verified=True, primary=True
         )
         
+        self.category = Category.objects.create(
+            name="Test Category", slug="test-category"
+        )
+        
         self.product = Product.objects.create(
             title="Rated Product",
             slug="rated-product",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("9.99"),
             image_alt="Test",
+            category=self.category,
         )
         AccessEntitlement.objects.create(user=self.user, product=self.product)
 
@@ -269,12 +293,18 @@ class ReviewModelTest(TestCase):
         self.user = User.objects.create_user(
             username="modeltest", email="modeltest@test.com", password="pass123"
         )
+        self.category = Category.objects.create(
+            name="Test Category", slug="test-category"
+        )
         self.product = Product.objects.create(
             title="Model Test Product",
             slug="model-test",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("9.99"),
             image_alt="Test",
+            category=self.category,
         )
 
     def test_review_str(self):
@@ -333,12 +363,19 @@ class ReviewEditTest(TestCase):
             user=self.other_user, email=self.other_user.email, verified=True, primary=True
         )
         
+        self.category = Category.objects.create(
+            name="Test Category", slug="test-category"
+        )
+        
         self.product = Product.objects.create(
             title="Edit Test",
             slug="edit-test",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("9.99"),
             image_alt="Test",
+            category=self.category,
         )
         self.review = Review.objects.create(
             user=self.owner,
@@ -410,12 +447,19 @@ class ReviewDeleteTest(TestCase):
             user=self.other_user, email=self.other_user.email, verified=True, primary=True
         )
         
+        self.category = Category.objects.create(
+            name="Test Category", slug="test-category"
+        )
+        
         self.product = Product.objects.create(
             title="Delete Test",
             slug="delete-test",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("9.99"),
             image_alt="Test",
+            category=self.category,
         )
         self.review = Review.objects.create(
             user=self.owner,

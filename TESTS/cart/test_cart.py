@@ -170,7 +170,9 @@ class TestCartTotals:
         prod1 = Product.objects.create(
             title="Prod1",
             slug="prod1",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("10.00"),
             category=category,
             is_active=True,
@@ -178,7 +180,9 @@ class TestCartTotals:
         prod2 = Product.objects.create(
             title="Prod2",
             slug="prod2",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("5.00"),
             category=category,
             is_active=True,

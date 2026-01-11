@@ -1,6 +1,7 @@
 """Tests for Product model CRUD operations and permissions."""
 
 import pytest
+from decimal import Decimal
 from products.models import Category, Product
 
 
@@ -15,8 +16,10 @@ class TestProductCRUD:
         self.product = Product.objects.create(
             title="Test Forbidden Knowledge",
             slug="test-forbidden",
+            tagline="Test tagline",
             description="A test product",
-            price=29.99,
+            content="<p>Test premium content.</p>",
+            price=Decimal("29.99"),
             image_alt="A forbidden artifact",
             category=self.category,
             is_active=True,
@@ -27,8 +30,10 @@ class TestProductCRUD:
         product = Product.objects.create(
             title="New Relic",
             slug="new-relic",
+            tagline="Test tagline",
             description="A forbidden artifact",
-            price=49.99,
+            content="<p>Test premium content.</p>",
+            price=Decimal("49.99"),
             image_alt="New relic image",
             category=self.category,
             is_active=True,
@@ -44,8 +49,6 @@ class TestProductCRUD:
 
     def test_update_product(self):
         """Test updating a product."""
-        from decimal import Decimal
-
         self.product.price = Decimal("39.99")
         self.product.save()
         product = Product.objects.get(pk=self.product.pk)

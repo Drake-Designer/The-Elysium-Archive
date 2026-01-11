@@ -116,7 +116,9 @@ class TestProductListFiltering:
         featured = Product.objects.create(
             title="Featured",
             slug="featured",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("5.00"),
             category=category,
             is_active=True,
@@ -136,7 +138,9 @@ class TestProductListFiltering:
         inactive_featured = Product.objects.create(
             title="Inactive Featured",
             slug="inactive-featured",
+            tagline="Test tagline",
             description="Test",
+            content="<p>Test premium content.</p>",
             price=Decimal("5.00"),
             category=category,
             is_active=False,

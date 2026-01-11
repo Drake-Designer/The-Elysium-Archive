@@ -24,6 +24,7 @@ def product_active(category):
     return Product.objects.create(
         title="Active Product",
         slug="active-product",
+        tagline="A short tagline for testing",
         description="A test product",
         content="<p>This is the full premium content available after purchase.</p>",
         price=Decimal("9.99"),
@@ -39,7 +40,9 @@ def product_inactive(category):
     return Product.objects.create(
         title="Inactive Product",
         slug="inactive-product",
+        tagline="A short tagline for testing",
         description="An inactive test product",
+        content="<p>This product is inactive for testing purposes.</p>",
         price=Decimal("14.99"),
         image_alt="Test image",
         is_active=False,
