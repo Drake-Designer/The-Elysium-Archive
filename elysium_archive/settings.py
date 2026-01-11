@@ -216,7 +216,7 @@ if os.environ.get("CLOUDINARY_URL"):
     }
     CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-    # Force HTTPS for Cloudinary URLs to prevent mixed content errors
+    # Configure Cloudinary to serve secure URLs
     import cloudinary
 
     cloudinary.config(secure=True)
@@ -254,6 +254,9 @@ ACCOUNT_EMAIL_VERIFICATION = os.environ.get(
     "mandatory",
 )
 
+# Enable HTML emails for allauth
+ACCOUNT_EMAIL_HTML = _env_bool(os.environ.get("ACCOUNT_EMAIL_HTML"), default=True)
+
 ACCOUNT_FORMS = {
     "signup": "accounts.forms.ElysiumSignupForm",
     "login": "accounts.forms.ElysiumLoginForm",
@@ -269,6 +272,7 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",
     "The Elysium Archive <elysiumarchive@outlook.com>",
 )
+SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.sendgrid.net")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))

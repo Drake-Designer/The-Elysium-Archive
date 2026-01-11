@@ -22,6 +22,9 @@ STORAGES = {
 # Keep emails in memory and does not send real ones.
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
+# Force HTML emails in tests as well.
+ACCOUNT_EMAIL_HTML = True
+
 # Use a faster hasher to speed up tests.
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
