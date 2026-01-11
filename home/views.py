@@ -4,6 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.http import Http404
 from products.models import Product, DealBanner
+from allauth.account.utils import has_verified_email
 
 
 def home_view(request):
@@ -35,6 +36,7 @@ def home_view(request):
         'featured_products': featured_products,
         'latest_products': latest_products,
         'deal_banners': deal_banners,
+        'user_is_verified': has_verified_email(request.user) if request.user.is_authenticated else False,
     }
     
     return render(request, 'home/index.html', context)

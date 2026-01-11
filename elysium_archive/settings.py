@@ -337,5 +337,100 @@ CKEDITOR_5_CONFIGS = {
             ],
         },
         "height": "500px",
-    }
+    },
+
+    "writer": {
+        "toolbar": [
+            "heading",
+            "|",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "link",
+            "|",
+            "bulletedList",
+            "numberedList",
+            "todoList",
+            "|",
+            "blockQuote",
+            "codeBlock",
+            "insertTable",
+            "imageUpload",
+            "horizontalLine",
+            "|",
+            "undo",
+            "redo",
+        ],
+        "heading": {
+            "options": [
+                {"model": "paragraph", "title": "Paragraph", "class": "ck-heading_paragraph"},
+                {"model": "heading2", "view": "h2", "title": "Heading 2", "class": "ck-heading_heading2"},
+                {"model": "heading3", "view": "h3", "title": "Heading 3", "class": "ck-heading_heading3"},
+            ]
+        },
+        "image": {
+            "toolbar": [
+                "imageTextAlternative",
+                "toggleImageCaption",
+                "imageStyle:inline",
+                "imageStyle:block",
+            ],
+        },
+        "table": {
+            "contentToolbar": ["tableColumn", "tableRow", "mergeTableCells"],
+        },
+        "height": "600px",
+    },
+
+    # Keep a default config to avoid warnings from packages expecting a 'default' key.
+    "default": {
+        "toolbar": [
+            "heading",
+            "|",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "link",
+            "|",
+            "bulletedList",
+            "numberedList",
+            "todoList",
+            "|",
+            "outdent",
+            "indent",
+            "alignment",
+            "|",
+            "blockQuote",
+            "codeBlock",
+            "horizontalLine",
+            "pageBreak",
+            "insertTable",
+            "imageUpload",
+            "mediaEmbed",
+            "|",
+            "undo",
+            "redo",
+        ],
+        "image": {
+            "toolbar": [
+                "imageTextAlternative",
+                "toggleImageCaption",
+                "imageStyle:inline",
+                "imageStyle:block",
+                "imageStyle:side",
+            ],
+        },
+        "table": {
+            "contentToolbar": [
+                "tableColumn",
+                "tableRow",
+                "mergeTableCells",
+                "tableProperties",
+                "tableCellProperties",
+            ],
+        },
+        "height": "500px",
+    },
 }

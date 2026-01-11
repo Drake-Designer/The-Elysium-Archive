@@ -4,6 +4,9 @@
 {% block title %}
   Home | The Elysium Archive
 {% endblock title %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/home-coming.css' %}">
+{% endblock extra_css %}
 {% block content %}
   <!-- Deal banner -->
   {% if deal_banners %}
@@ -167,7 +170,7 @@
                               <!-- Image placeholder -->
                               <div class="entry-card-img-placeholder"
                                    role="img"
-                                   aria-label="Image coming soon"></div>
+                                   aria-label="Image unavailable"></div>
                             {% endif %}
                           </div>
                           <!-- Entry text area -->
@@ -329,48 +332,84 @@
           <p class="text-center muted mb-4">The Archive continues to expand. New secrets await those who remain patient.</p>
           <!-- Upcoming features grid -->
           <div class="row g-3">
-            <!-- Coming feature card -->
+            <!-- My Archive card -->
             <div class="col-12 col-sm-6 col-lg-3">
               <div class="panel p-4 h-100 coming-card">
                 <div class="coming-card-icon">
                   <i class="fa-solid fa-vault"></i>
                 </div>
                 <h3 class="h5 mt-3 mb-2">My Archive</h3>
-                <p class="small muted mb-3">A private vault where your unlocked entries live forever.</p>
-                <span class="badge badge-coming">Coming soon</span>
+                <p class="small muted mb-3">Your private vault where unlocked entries live forever.</p>
+                <div class="card-actions">
+                  {% if request.user.is_authenticated and user_is_verified %}
+                    <a href="{% url 'my_archive' %}" class="btn btn-outline-light btn-icon">
+                      <i class="fa-solid fa-folder-open"></i>
+                      Open My Archive
+                    </a>
+                  {% else %}
+                    <a href="{% url 'account_login' %}"
+                       class="btn btn-outline-light btn-icon">
+                      <i class="fa-solid fa-right-to-bracket"></i>
+                      Sign in to access
+                    </a>
+                  {% endif %}
+                </div>
               </div>
             </div>
-            <!-- Coming feature card -->
+            <!-- Verified Reviews card -->
             <div class="col-12 col-sm-6 col-lg-3">
               <div class="panel p-4 h-100 coming-card">
                 <div class="coming-card-icon">
                   <i class="fa-solid fa-star"></i>
                 </div>
                 <h3 class="h5 mt-3 mb-2">Verified Reviews</h3>
-                <p class="small muted mb-3">Only those who have unlocked an entry may speak of its contents.</p>
-                <span class="badge badge-coming">Coming soon</span>
+                <p class="small muted mb-3">Read reviews on each entry. Verified buyers can leave one review per entry.</p>
+                <div class="card-actions">
+                  <a href="{% url 'archive' %}" class="btn btn-outline-light btn-icon">
+                    <i class="fa-solid fa-list"></i>
+                    Browse entries
+                  </a>
+                </div>
               </div>
             </div>
-            <!-- Coming feature card -->
+            <!-- Profile Management card -->
             <div class="col-12 col-sm-6 col-lg-3">
               <div class="panel p-4 h-100 coming-card">
                 <div class="coming-card-icon">
                   <i class="fa-solid fa-user-gear"></i>
                 </div>
                 <h3 class="h5 mt-3 mb-2">Profile Management</h3>
-                <p class="small muted mb-3">Control your identity, view history, or vanish without a trace.</p>
-                <span class="badge badge-coming">Coming soon</span>
+                <p class="small muted mb-3">Control your identity, manage email, password, and account settings.</p>
+                <div class="card-actions">
+                  {% if request.user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="btn btn-outline-light btn-icon">
+                      <i class="fa-solid fa-user"></i>
+                      Open Profile
+                    </a>
+                  {% else %}
+                    <a href="{% url 'account_signup' %}"
+                       class="btn btn-outline-light btn-icon">
+                      <i class="fa-solid fa-user-plus"></i>
+                      Create an account
+                    </a>
+                  {% endif %}
+                </div>
               </div>
             </div>
-            <!-- Coming feature card -->
+            <!-- Lore card -->
             <div class="col-12 col-sm-6 col-lg-3">
               <div class="panel p-4 h-100 coming-card">
                 <div class="coming-card-icon">
-                  <i class="fa-solid fa-scroll"></i>
+                  <i class="fa-solid fa-book-skull"></i>
                 </div>
-                <h3 class="h5 mt-3 mb-2">New Entries</h3>
-                <p class="small muted mb-3">Fresh secrets are inscribed into the Archive as the darkness grows.</p>
-                <span class="badge badge-coming">Coming soon</span>
+                <h3 class="h5 mt-3 mb-2">Lore</h3>
+                <p class="small muted mb-3">Explore the Archive's world-building, histories, and dark tales.</p>
+                <div class="card-actions">
+                  <a href="{% url 'lore' %}" class="btn btn-outline-light btn-icon">
+                    <i class="fa-solid fa-scroll-old"></i>
+                    Explore lore
+                  </a>
+                </div>
               </div>
             </div>
           </div>

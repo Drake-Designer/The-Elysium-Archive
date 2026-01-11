@@ -38,7 +38,7 @@ class Product(models.Model):
     description = models.TextField(help_text="Public teaser description")
     content = CKEditor5Field(
         "Content",
-        config_name="default",
+        config_name="writer",
         help_text="Full content (visible after purchase)",
     )
     category = models.ForeignKey(
