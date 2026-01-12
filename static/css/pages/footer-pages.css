@@ -1,0 +1,203 @@
+/* ===================
+   FOOTER PAGES STYLES
+   =================== */
+
+/* Page Headers */
+.footer-page-header {
+  color: var(--ash-white);
+}
+
+.footer-page-date {
+  color: rgba(230, 230, 235, 0.6);
+}
+
+.footer-page-subtitle {
+  color: rgba(230, 230, 235, 0.85);
+}
+
+.footer-page-title {
+  color: var(--ash-white);
+  font-family: var(--font-heading);
+}
+
+/* Section Titles */
+.footer-section-title {
+  color: var(--ash-white);
+  font-family: var(--font-heading);
+}
+
+/* Info Cards */
+.footer-card-title {
+  align-items: center;
+  color: var(--relic-gold);
+  display: flex;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.footer-card-title i {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+.footer-info-card {
+  background-color: var(--obsidian-grey);
+  border: 1px solid rgba(194, 161, 77, 0.25);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.footer-info-card .card-body {
+  padding: 1.5rem;
+}
+
+.footer-info-card li {
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.footer-info-card li:last-child {
+  margin-bottom: 0;
+}
+
+.footer-info-card ul {
+  margin-bottom: 0;
+  padding-left: 1.5rem;
+}
+
+/* Highlight Items */
+.footer-highlight-item {
+  background-color: var(--obsidian-grey);
+  border-left: 4px solid var(--relic-gold);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.footer-highlight-item.danger {
+  border-left-color: var(--blood-crimson);
+}
+
+.footer-highlight-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Rights Grid */
+.footer-rights-grid {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-rights-col {
+  max-width: 360px;
+}
+
+.footer-rights-item {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 140px;
+  text-align: center;
+}
+
+/* Rights Titles */
+.footer-rights-title {
+  align-items: center;
+  color: var(--relic-gold);
+  display: inline-flex;
+  flex-wrap: wrap;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  gap: 0.5rem;
+  justify-content: center;
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.footer-rights-title i {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+.footer-rights-text {
+  max-width: 26ch;
+}
+
+/* Links */
+.footer-page-link {
+  border-radius: 4px;
+  color: var(--relic-gold) !important;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.footer-page-link:hover {
+  color: #ffd700 !important;
+  text-decoration: underline;
+  text-shadow: 0 0 4px rgba(194, 161, 77, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Alerts */
+.footer-alert {
+  align-items: center;
+  background-color: var(--obsidian-grey);
+  border: var(--border);
+  border-radius: var(--radius);
+  color: var(--ash-white);
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.footer-alert-icon {
+  color: var(--relic-gold);
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+/* Form Card */
+.footer-form-card {
+  background-color: var(--obsidian-grey);
+  border: 1px solid rgba(194, 161, 77, 0.35);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.footer-form-label {
+  color: var(--relic-gold);
+  font-weight: 600;
+}
+
+.footer-form-title {
+  color: var(--relic-gold);
+  font-family: var(--font-heading);
+}
+
+/* Info Boxes */
+.footer-info-box {
+  background-color: var(--obsidian-grey);
+  border: 1px solid rgba(194, 161, 77, 0.35);
+  border-radius: var(--radius);
+  padding: 2rem;
+}
+
+.footer-info-box-text {
+  color: rgba(230, 230, 235, 0.85);
+}
+
+.footer-info-box-title {
+  color: var(--ash-white);
+  font-family: var(--font-heading);
+}
+
+/* Lists */
+.footer-page-list {
+  color: rgba(230, 230, 235, 0.9);
+}

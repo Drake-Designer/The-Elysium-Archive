@@ -1,50 +1,21 @@
 /* ==========
-    HOME PAGE
-   ========== */
+   HOME PAGE
+   ========= */
 
-/* Hero Panel */
-.hero-panel .display-5 {
-  font-family: var(--font-brand);
-  letter-spacing: 1px;
+/* Badge Coming */
+.badge-coming {
+  background-color: rgba(194, 161, 77, 0.15);
+  border: 1px solid rgba(194, 161, 77, 0.35);
+  color: var(--relic-gold);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-top: auto;
+  padding: 0.35rem 0.65rem;
   text-transform: uppercase;
 }
 
-/* Section Headers */
-.section-header {
-  align-items: flex-end;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: space-between;
-}
-
-.section-header-text {
-  min-width: 220px;
-}
-
-.section-header-actions {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.4rem;
-}
-
-.section-nav-btn {
-  line-height: 1;
-  padding: 0.25rem 0.6rem;
-}
-
-/* How It Works Section */
-.how-card-img {
-  aspect-ratio: 16 / 9;
-  border: 1px solid rgba(194, 161, 77, 0.25);
-  border-radius: calc(var(--radius) - 4px);
-  display: block;
-  object-fit: cover;
-  object-position: center;
-  width: 100%;
-}
-
-/* Coming Soon Section */
+/* Coming Card */
 .coming-card {
   align-items: center;
   display: flex;
@@ -65,19 +36,33 @@
   width: 60px;
 }
 
-.badge-coming {
-  background-color: rgba(194, 161, 77, 0.15);
-  border: 1px solid rgba(194, 161, 77, 0.35);
-  color: var(--relic-gold);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  margin-top: auto;
-  padding: 0.35rem 0.65rem;
+/* Hero Panel */
+.hero-panel .display-5 {
+  font-family: var(--font-brand);
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 
+/* How It Works Section */
+.how-card-img {
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(194, 161, 77, 0.25);
+  border-radius: calc(var(--radius) - 4px);
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  width: 100%;
+}
+
 /* Membership Section */
+.membership-img {
+  aspect-ratio: 4 / 3;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  width: 100%;
+}
+
 .membership-media {
   background: rgba(20, 20, 27, 0.7);
   border: 1px solid rgba(194, 161, 77, 0.25);
@@ -86,10 +71,21 @@
   overflow: hidden;
 }
 
-.membership-img {
-  aspect-ratio: 4 / 3;
-  display: block;
-  object-fit: cover;
-  object-position: center;
-  width: 100%;
+/* Section Headers */
+.section-header {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.section-header-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+}
+
+.section-header-text {
+  min-width: 220px;
 }

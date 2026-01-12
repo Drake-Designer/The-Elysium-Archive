@@ -38,7 +38,7 @@
                                                     <form method="post" action="{% url 'account_email' %}" class="m-0">
                                                         {% csrf_token %}
                                                         <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                                                        <button type="submit" name="action_primary" class="btn btn-sm btn-primary">
+                                                        <button type="submit" name="action_primary" class="btn btn-primary btn-icon">
                                                             <i class="fa-solid fa-star me-1"></i>Make Primary
                                                         </button>
                                                     </form>
@@ -47,7 +47,7 @@
                                                     <form method="post" action="{% url 'account_email' %}" class="m-0">
                                                         {% csrf_token %}
                                                         <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                                                        <button type="submit" name="action_send" class="btn btn-sm btn-outline-light">
+                                                        <button type="submit" name="action_send" class="btn btn-outline-light btn-icon">
                                                             <i class="fa-solid fa-paper-plane me-1"></i>Re-send
                                                         </button>
                                                     </form>
@@ -57,7 +57,7 @@
                                                     <input type="hidden" name="email" value="{{ emailaddress.email }}">
                                                     <button type="submit"
                                                             name="action_remove"
-                                                            class="btn btn-sm btn-outline-danger">
+                                                            class="btn btn-outline-danger btn-icon">
                                                         <i class="fa-solid fa-trash me-1"></i>Remove
                                                     </button>
                                                 </form>
@@ -102,7 +102,7 @@
                                 <div class="col-12 col-md-4">
                                     <button type="submit"
                                             name="action_add"
-                                            class="btn btn-primary btn-icon w-100">
+                                            class="btn btn-primary btn-icon">
                                         <i class="fa-solid fa-plus"></i>Add Email
                                     </button>
                                 </div>

@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact the Lore - The Elysium Archive{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/footer-pages.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Contact Lore Page -->
+<div class="container py-5 min-vh-100">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-8">
+
+      <!-- Page Header -->
+      <header class="text-center mb-5 footer-page-header">
+        <h1 class="display-3 fw-bold mb-4 lh-1 footer-page-title">Contact the Lore</h1>
+        <p class="lead opacity-75 mb-0 fs-4 footer-page-subtitle">Whispers reach the Keeper through ancient channels</p>
+        <div class="mt-4">
+          <small class="opacity-50 footer-page-date">The Keeper responds to worthy seekers</small>
+        </div>
+      </header>
+
+      <div class="lore-contact-content">
+        <!-- Keeper Awaits Section -->
+        <section class="mb-5 text-center">
+          <div class="mb-5">
+            <i class="fa-solid fa-mask fa-5x text-warning mb-4 opacity-75"></i>
+            <h2 class="h2 fw-bold mb-4 footer-section-title">The Keeper Awaits</h2>
+            <p class="lead opacity-90 mb-5">Speak your purpose and the Keeper shall listen.</p>
+          </div>
+        </section>
+
+        <!-- Contact Form Section -->
+        <section class="mb-5">
+          <div class="footer-form-card">
+            <div class="card-body p-4 p-md-5">
+              <h3 class="h4 fw-bold mb-4 text-center footer-form-title">
+                <i class="fa-solid fa-scroll me-2"></i>Send Your Message
+              </h3>
+
+              <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                  <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                  </div>
+                {% endif %}
+
+                <div class="mb-4">
+                  <label for="{{ form.name.id_for_label }}" class="form-label footer-form-label">
+                    {{ form.name.label }}
+                  </label>
+                  {{ form.name }}
+                  {% if form.name.errors %}
+                    <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="mb-4">
+                  <label for="{{ form.email.id_for_label }}" class="form-label footer-form-label">
+                    {{ form.email.label }}
+                  </label>
+                  {{ form.email }}
+                  {% if form.email.errors %}
+                    <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="mb-4">
+                  <label for="{{ form.subject.id_for_label }}" class="form-label footer-form-label">
+                    {{ form.subject.label }}
+                  </label>
+                  {{ form.subject }}
+                  {% if form.subject.errors %}
+                    <div class="text-danger small mt-1">{{ form.subject.errors }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="mb-4">
+                  <label for="{{ form.message.id_for_label }}" class="form-label footer-form-label">
+                    {{ form.message.label }}
+                  </label>
+                  {{ form.message }}
+                  {% if form.message.errors %}
+                    <div class="text-danger small mt-1">{{ form.message.errors }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="text-center">
+                  <button type="submit" class="btn btn-primary btn-icon">
+                    <i class="fa-solid fa-paper-plane me-2"></i>Send to the Keeper
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Info Section -->
+        <section class="mb-5 text-center footer-rights-section">
+          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">The Keeper's Hours</h2>
+
+          <div class="row g-4 justify-content-center footer-rights-grid">
+            <div class="col-12 col-md-6 col-lg-4 footer-rights-col">
+              <div class="p-4 footer-rights-item">
+                <h5 class="fw-bold footer-rights-title mb-2">
+                  <i class="fa-solid fa-clock"></i>
+                  <span>Response Time</span>
+                </h5>
+                <p class="opacity-90 mb-0 footer-rights-text">24-48 hours for worthy missives</p>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 footer-rights-col">
+              <div class="p-4 footer-rights-item">
+                <h5 class="fw-bold footer-rights-title mb-2">
+                  <i class="fa-solid fa-exclamation-triangle"></i>
+                  <span>Expectations</span>
+                </h5>
+                <p class="opacity-90 mb-0 footer-rights-text">Clear purpose. No spam. Respect the Lore.</p>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 footer-rights-col">
+              <div class="p-4 footer-rights-item">
+                <h5 class="fw-bold footer-rights-title mb-2">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span>Verification</span>
+                </h5>
+                <p class="opacity-90 mb-0 footer-rights-text">Include Archive username for priority</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Before You Write Section -->
+        <section class="text-center">
+          <div class="footer-info-box">
+            <i class="fa-solid fa-scroll-old text-warning fa-2x mb-3 d-block"></i>
+            <h4 class="fw-bold mb-3 footer-info-box-title">Before You Write</h4>
+            <p class="lead opacity-90 mb-4 footer-info-box-text">Most questions answered in:</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+              <a href="{% url 'privacy_covenant' %}" class="btn btn-outline-light btn-icon">
+                Privacy Covenant
+              </a>
+              <a href="{% url 'terms_archiver' %}" class="btn btn-outline-light btn-icon">
+                Archiver Terms
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

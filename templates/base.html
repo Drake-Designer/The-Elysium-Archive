@@ -16,6 +16,7 @@
           content="{% block meta_keywords %}dark fantasy, vampires, archive, premium content, ecommerce{% endblock meta_keywords %}">
     {% block meta %}
     {% endblock meta %}
+
     <!-- Site icons and manifest -->
     <link rel="icon"
           type="image/x-icon"
@@ -40,6 +41,7 @@
           sizes="512x512"
           href="{% static 'img/favicon/android-chrome-512x512.png' %}">
     <link rel="manifest" href="{% static 'img/favicon/site.webmanifest' %}">
+
     <!-- External fonts and vendors -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,29 +56,38 @@
           integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
           crossorigin="anonymous"
           referrerpolicy="no-referrer">
+
     <!-- Site styles (global) -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
     <!-- Site styles (components) - Always loaded -->
     <link rel="stylesheet" href="{% static 'css/components/deal-banner.css' %}">
     <link rel="stylesheet" href="{% static 'css/components/products.css' %}">
+
     <!-- Conditional component styles -->
     {% if user.is_authenticated %}
       <link rel="stylesheet" href="{% static 'css/components/dashboard.css' %}">
     {% endif %}
+
     <!-- Page-specific styles -->
     {% block extra_css %}
     {% endblock extra_css %}
   </head>
+
   <body class="d-flex flex-column min-vh-100 site-body">
     <!-- Accessibility skip link -->
     <a class="site-skip-link" href="#main-content">Skip to main content</a>
+
     <!-- Main navigation -->
     <header>
       <nav class="navbar navbar-expand-lg site-navbar"
            data-bs-theme="dark"
            aria-label="Primary navigation">
         <div class="container">
+          <!-- Brand logo -->
           <a class="navbar-brand site-brand" href="{% url 'home' %}">The Elysium Archive</a>
+
+          <!-- Main navigation collapse -->
           <div class="collapse navbar-collapse" id="primaryNav">
             <ul class="navbar-nav mx-auto site-nav-links">
               <li class="nav-item">
@@ -101,26 +112,31 @@
                 </a>
               </li>
             </ul>
+
+            <!-- Mobile divider -->
             <hr class="d-lg-none border-secondary my-2">
+
+            <!-- Authentication & cart links -->
             <ul class="navbar-nav align-items-lg-center site-nav-auth">
               {% if cart_count|default:0 > 0 %}
                 <li class="nav-item d-none d-lg-block">
                   <a href="{% url 'cart' %}"
                      class="nav-link site-nav-link position-relative"
-                     aria-label="Shopping cart">
-                    <i class="fa-solid fa-shopping-cart"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
-                      {{ cart_count }}
-                    </span>
+                     aria-label="Shopping cart ({{ cart_count }})">
+                     <i class="fa-solid fa-shopping-cart"></i>
+                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
+                       {{ cart_count }}
+                     </span>
                   </a>
                 </li>
               {% endif %}
+
               {% if user.is_authenticated %}
                 <li class="nav-item d-none d-lg-block">
                   <a href="{% url 'account_dashboard' %}"
                      class="nav-link site-nav-link site-user-icon"
-                     aria-label="Account dashboard">
-                    <i class="fa-solid fa-user"></i>
+                     aria-label="User dashboard">
+                     <i class="fa-solid fa-user"></i>
                   </a>
                 </li>
               {% else %}
@@ -138,14 +154,17 @@
                       <i class="fa-solid fa-user-plus me-1"></i>Register
                     </span>
                   </a>
-                  <a class="btn btn-outline-light site-cta d-none d-lg-inline-flex"
-                     href="{% url 'account_signup' %}">
-                    <i class="fa-solid fa-user-plus me-1"></i>Register
-                  </a>
+                  <a class="btn btn-outline-light btn-icon d-none d-lg-inline-flex"
+   href="{% url 'account_signup' %}">
+  <i class="fa-solid fa-user-plus me-1"></i>Register
+</a>
+
                 </li>
               {% endif %}
             </ul>
           </div>
+
+          <!-- Right-side utilities: mobile menu + effects toggle -->
           <div class="site-nav-right">
             <div class="site-nav-mobile-actions d-lg-none">
               <ul class="navbar-nav site-nav-auth site-nav-auth-mobile">
@@ -153,7 +172,7 @@
                   <li class="nav-item">
                     <a href="{% url 'cart' %}"
                        class="nav-link site-nav-link position-relative"
-                       aria-label="Shopping cart">
+                       aria-label="Shopping cart ({{ cart_count }})">
                       <i class="fa-solid fa-shopping-cart"></i>
                       <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
                         {{ cart_count }}
@@ -161,11 +180,12 @@
                     </a>
                   </li>
                 {% endif %}
+
                 {% if user.is_authenticated %}
                   <li class="nav-item">
                     <a href="{% url 'account_dashboard' %}"
                        class="nav-link site-nav-link site-user-icon"
-                       aria-label="Account dashboard">
+                       aria-label="User dashboard">
                       <i class="fa-solid fa-user"></i>
                     </a>
                   </li>
@@ -179,6 +199,8 @@
                   </li>
                 {% endif %}
               </ul>
+
+              <!-- Mobile menu toggle -->
               <button class="navbar-toggler site-toggler"
                       type="button"
                       data-bs-toggle="collapse"
@@ -189,6 +211,8 @@
                 <span class="navbar-toggler-icon"></span>
               </button>
             </div>
+
+            <!-- Global effects toggle (desktop) -->
             <button class="btn effects-toggle-btn site-effects-toggle-desktop"
                     type="button"
                     id="effectsToggleGlobal"
@@ -202,47 +226,64 @@
           </div>
         </div>
       </nav>
+
+      <!-- Flash messages (if any) -->
       {% if messages %}
-        <!-- Flash message area -->
         <div class="container py-3">{% include "includes/messages.html" %}</div>
       {% endif %}
     </header>
-    <!-- Page content outlet -->
+
+    <!-- Main content area -->
     <main id="main-content" class="flex-grow-1">
       {% block content %}
       {% endblock content %}
     </main>
-    <!-- Site footer -->
+
+    <!-- Footer -->
     <footer class="mt-auto site-footer" data-bs-theme="dark">
       <div class="container py-4">
-        <div class="row align-items-center g-3">
-          <div class="col">
-            <p class="mb-0 site-footer-title">The Elysium Archive</p>
-            <p class="mb-0 small site-footer-text">No downloads. No refunds. Access is the product.</p>
+        <div class="row align-items-start align-items-lg-center g-3">
+          <div class="col-12 col-lg">
+            <p class="mb-0 site-footer-title fw-bold text-center text-lg-start">The Elysium Archive</p>
+            <p class="mb-0 small opacity-75 site-footer-text text-center text-lg-start">
+              <em>No downloads. No refunds. Access is the product.</em>
+            </p>
           </div>
-          <div class="col-auto">
-            <ul class="list-inline mb-0">
-              <li class="list-inline-item">
-                <a class="link-light" href="#">Privacy</a>
+
+          <div class="col-12 col-lg-auto">
+            <ul class="site-footer-links mb-0">
+              <li>
+                <a class="link-light text-decoration-none opacity-85 footer-link" href="{% url 'privacy_covenant' %}">
+                  <i class="fa-solid fa-shield-halved"></i><span>Privacy of the Covenant</span>
+                </a>
               </li>
-              <li class="list-inline-item">
-                <a class="link-light" href="#">Terms</a>
+              <li>
+                <a class="link-light text-decoration-none opacity-85 footer-link" href="{% url 'terms_archiver' %}">
+                  <i class="fa-solid fa-scroll"></i><span>Terms of the Archiver</span>
+                </a>
               </li>
-              <li class="list-inline-item">
-                <a class="link-light" href="#">Contact</a>
+              <li>
+                <a class="link-light text-decoration-none opacity-85 footer-link" href="{% url 'contact_lore' %}">
+                  <i class="fa-solid fa-book-open"></i><span>Contact the Lore</span>
+                </a>
               </li>
             </ul>
           </div>
         </div>
       </div>
     </footer>
-    <!-- Core scripts and page hooks -->
+
+    <!-- Core JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
             crossorigin="anonymous"></script>
+
+    <!-- Site scripts (deferred) -->
     <script src="{% static 'js/messages.js' %}" defer></script>
     <script src="{% static 'js/effects-toggle.js' %}" defer></script>
     <script src="{% static 'js/deal-banner-carousel.js' %}" defer></script>
+
+    <!-- Page-specific scripts -->
     {% block extra_js %}
     {% endblock extra_js %}
   </body>

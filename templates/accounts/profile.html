@@ -28,14 +28,16 @@
                                 <strong class="text-break">{{ user.email }}</strong>
                             </div>
                         </div>
-                        <a href="{% url 'account_email' %}"
-                           class="btn btn-sm btn-outline-light btn-icon">
-                            <i class="fa-solid fa-envelope"></i>Manage Email Addresses
-                        </a>
-                        <a href="{% url 'account_change_password' %}"
-                           class="btn btn-sm btn-outline-light btn-icon">
-                            <i class="fa-solid fa-key"></i>Change Password
-                        </a>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{% url 'account_email' %}"
+                               class="btn btn-outline-light btn-icon">
+                                <i class="fa-solid fa-envelope"></i>Manage Email Addresses
+                            </a>
+                            <a href="{% url 'account_change_password' %}"
+                               class="btn btn-outline-light btn-icon">
+                                <i class="fa-solid fa-key"></i>Change Password
+                            </a>
+                        </div>
                     </div>
                     <hr class="my-4 border-secondary">
                     <h2 class="h5 mb-3">Profile Picture</h2>
@@ -91,7 +93,7 @@
                     {% if not user.is_superuser %}
                         <div class="text-center">
                             <a href="{% url 'account_delete' %}"
-                               class="btn btn-sm btn-outline-danger btn-icon">
+                               class="btn btn-outline-danger btn-icon">
                                 <i class="fa-solid fa-trash"></i>Delete Account
                             </a>
                         </div>

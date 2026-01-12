@@ -3,8 +3,14 @@ from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.http import Http404
+from django.views.generic import TemplateView, FormView
+from django.urls import reverse_lazy
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib import messages
 from products.models import Product, DealBanner
 from allauth.account.utils import has_verified_email
+from .forms import ContactForm
 
 
 def home_view(request):
@@ -51,6 +57,7 @@ def lore_view(request):
 # ERROR PAGE TESTING (Staff Only)
 # ==========================================
 
+
 @staff_member_required
 def test_errors_dashboard(request):
     """Render the error testing dashboard. Staff only."""
@@ -79,3 +86,81 @@ def test_error_404(request):
 def test_error_500(request):
     """Test 500 Server Error page. Staff only."""
     raise Exception('Test 500 - Server Error')
+
+
+# ==========================================
+# FOOTER PAGES - Covenant, Archiver, Lore
+# ==========================================
+
+
+class PrivacyCovenantView(TemplateView):
+    """Privacy of the Covenant - Footer page."""
+    template_name = 'footer/privacy_covenant.html'
+    extra_context = {'page_title': 'Privacy of the Covenant'}
+
+
+class TermsArchiverView(TemplateView):
+    """Terms of the Archiver - Footer page."""
+    template_name = 'footer/terms_archiver.html'
+    extra_context = {'page_title': 'Terms of the Archiver'}
+
+
+class ContactLoreView(FormView):
+    """Contact the Lore - Footer page with contact form."""
+    template_name = 'footer/contact_lore.html'
+    form_class = ContactForm
+    success_url = reverse_lazy('contact_lore')
+    
+    def get_context_data(self, **kwargs):
+        """Add page title to context."""
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = 'Contact the Lore'
+        return context
+    
+    def form_valid(self, form):
+        """Process valid form and send email to the Keeper."""
+        name = form.cleaned_data['name']
+        email = form.cleaned_data['email']
+        subject = form.cleaned_data['subject']
+        message = form.cleaned_data['message']
+        
+        # Compose the email message
+        full_message = f"""
+New contact message from The Elysium Archive
+
+From: {name}
+Email: {email}
+Subject: {subject}
+
+Message:
+{message}
+
+---
+This message was sent through the Elysium Archive contact form.
+Reply directly to: {email}
+        """
+        
+        try:
+            send_mail(
+                subject=f'[Elysium Archive Contact] {subject}',
+                message=full_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=['elysiumarchive@outlook.com'],
+                fail_silently=False,
+            )
+            messages.success(
+                self.request, 
+                'Your message has been sent to the Keeper. Expect a response within 24-48 hours.'
+            )
+        except Exception as e:
+            messages.error(
+                self.request, 
+                'The ritual failed. Please try again or contact us directly at elysiumarchive@outlook.com'
+            )
+            # Log the error in production
+            if not settings.DEBUG:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f'Contact form email failed: {str(e)}')
+        
+        return super().form_valid(form)

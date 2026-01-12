@@ -1,14 +1,16 @@
 """Views for accounts app."""
 
+from allauth.account.utils import has_verified_email
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
-from allauth.account.utils import has_verified_email
-
 from orders.models import AccessEntitlement
+
+from .forms import UserProfileForm
+from .models import UserProfile
 
 
 def _verified_or_redirect(request):
@@ -24,10 +26,42 @@ def _dashboard_url_with_tab(tab_name):
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def dashboard(request):
     redirect_response = _verified_or_redirect(request)
     if redirect_response:
         return redirect_response
+
+    profile, _created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+
+        if form.is_valid():
+            profile = form.save(commit=False)
+
+            remove_picture = form.cleaned_data.get("remove_picture")
+            if remove_picture:
+                profile.profile_picture = None
+
+            profile.save()
+            messages.success(request, "Your profile has been updated.")
+            return redirect(_dashboard_url_with_tab("profile"))
+
+        messages.error(request, "Please correct the errors below.")
+        active_tab = "profile"
+    else:
+        form = UserProfileForm(instance=profile)
+
+        requested_tab = (request.GET.get("tab") or "").strip().lower()
+        tab_map = {
+            "profile": "profile",
+            "archive": "archive",
+            "my-archive": "archive",
+            "my_archive": "archive",
+            "delete": "delete",
+        }
+        active_tab = tab_map.get(requested_tab, "profile")
 
     entitlements = (
         AccessEntitlement.objects.filter(user=request.user)
@@ -39,19 +73,10 @@ def dashboard(request):
         {"product": e.product, "purchase_date": e.granted_at} for e in entitlements
     ]
 
-    requested_tab = (request.GET.get("tab") or "").strip().lower()
-    tab_map = {
-        "profile": "profile",
-        "archive": "archive",
-        "my-archive": "archive",
-        "my_archive": "archive",
-        "delete": "delete",
-    }
-    active_tab = tab_map.get(requested_tab, "profile")
-
     context = {
-        "unlocked_products": unlocked_products,
         "active_tab": active_tab,
+        "form": form,
+        "unlocked_products": unlocked_products,
     }
     return render(request, "accounts/dashboard.html", context)
 
@@ -62,8 +87,6 @@ def my_archive(request):
     if redirect_response:
         return redirect_response
 
-    # If your project uses dashboard tabs as the single source of truth,
-    # keep this route as a redirect.
     return redirect(_dashboard_url_with_tab("my-archive"))
 
 
@@ -85,7 +108,10 @@ def delete_account(request):
 
     if request.method == "POST":
         if request.user.is_superuser:
-            messages.error(request, "Superuser accounts cannot be deleted from the site.")
+            messages.error(
+                request,
+                "Superuser accounts cannot be deleted from the site.",
+            )
             return redirect("account_dashboard")
 
         request.user.delete()

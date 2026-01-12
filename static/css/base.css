@@ -4,34 +4,35 @@
    ROOT & CUSTOM PROPERTIES
    ======================== */
 :root {
-  --void-black: #0b0b0f;
-  --obsidian-grey: #14141b;
   --ash-white: #e6e6eb;
   --blood-crimson: #8b1e2d;
-  --relic-gold: #c2a14d;
-
-  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-brand: 'Cinzel', Georgia, 'Times New Roman', serif;
-
-  --fs-nav-brand: clamp(0.75rem, 0.45rem + 2vw, 1.7rem);
-  --fs-nav-link: clamp(0.7rem, 0.55rem + 0.7vw, 1rem);
-  --fs-cta: clamp(0.7rem, 0.6rem + 0.4vw, 0.95rem);
-
-  --sp-nav-link-x: clamp(0.35rem, 0.2rem + 0.5vw, 1rem);
-  --sp-nav-link-y: clamp(0.3rem, 0.2rem + 0.3vw, 0.6rem);
-  --sp-nav-gap: clamp(0.08rem, 0.04rem + 0.35vw, 0.5rem);
-  --sp-auth-gap: clamp(0.12rem, 0.08rem + 0.35vw, 0.55rem);
-
-  --content-max: 1200px;
-  --radius: 8px;
   --border: 1px solid rgba(230, 230, 235, 0.12);
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-
+  --color-accent-gold: var(--relic-gold);
+  --color-accent-gold-glow: rgba(194, 161, 77, 0.35);
+  --color-bg-primary: var(--void-black);
+  --color-bg-secondary: var(--obsidian-grey);
+  --color-fg-muted: rgba(230, 230, 235, 0.75);
+  --color-fg-primary: var(--ash-white);
+  --content-max: 1200px;
   --field-bg: rgba(11, 11, 15, 0.55);
   --field-border: rgba(230, 230, 235, 0.18);
   --field-border-focus: rgba(194, 161, 77, 0.65);
   --field-placeholder: rgba(230, 230, 235, 0.45);
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-brand: 'Cinzel', Georgia, 'Times New Roman', serif;
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --fs-cta: clamp(0.7rem, 0.6rem + 0.4vw, 0.95rem);
+  --fs-nav-brand: clamp(0.75rem, 0.45rem + 2vw, 1.7rem);
+  --fs-nav-link: clamp(0.7rem, 0.55rem + 0.7vw, 1rem);
+  --obsidian-grey: #14141b;
+  --radius: 8px;
+  --relic-gold: #c2a14d;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --sp-auth-gap: clamp(0.12rem, 0.08rem + 0.35vw, 0.55rem);
+  --sp-nav-gap: clamp(0.08rem, 0.04rem + 0.35vw, 0.5rem);
+  --sp-nav-link-x: clamp(0.35rem, 0.2rem + 0.5vw, 1rem);
+  --sp-nav-link-y: clamp(0.3rem, 0.2rem + 0.3vw, 0.6rem);
+  --void-black: #0b0b0f;
 }
 
 /* ===================
@@ -49,8 +50,8 @@ body.site-body {
 }
 
 main#main-content > section {
-  padding-top: clamp(1.25rem, 1rem + 0.6vw, 2.25rem);
   padding-bottom: clamp(1.25rem, 1rem + 0.6vw, 2.25rem);
+  padding-top: clamp(1.25rem, 1rem + 0.6vw, 2.25rem);
 }
 
 h1,
@@ -97,26 +98,26 @@ main .container,
    SKIP TO MAIN
    ============= */
 .site-skip-link {
-  position: absolute;
-  left: 0.75rem;
-  top: 0.75rem;
-  z-index: 1100;
-  padding: 0.5rem 0.75rem;
   background-color: rgba(11, 11, 15, 0.95);
   border: 1px solid rgba(194, 161, 77, 0.45);
   border-radius: 8px;
   color: var(--ash-white);
   font-weight: 600;
+  left: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  position: absolute;
   text-decoration: none;
+  top: 0.75rem;
   transform: translateY(-150%);
   transition: transform 0.2s ease;
+  z-index: 1100;
 }
 
 .site-skip-link:focus {
-  transform: translateY(0);
+  color: var(--relic-gold);
   outline: 2px solid var(--relic-gold);
   outline-offset: 3px;
-  color: var(--relic-gold);
+  transform: translateY(0);
 }
 
 /* ===================
@@ -280,31 +281,175 @@ main .container,
 }
 
 /* =============
-   BUTTONS & CTA
+   BUTTON SYSTEM
    ============= */
-.site-cta {
+.site-body .btn {
   align-items: center;
-  background: transparent;
-  border: 1.5px solid var(--relic-gold);
-  border-radius: 8px;
-  color: var(--relic-gold) !important;
+  border-radius: var(--radius);
+  border-width: 1.5px;
+  box-shadow: none;
   display: inline-flex;
-  font-size: var(--fs-cta);
-  font-weight: 600;
-  gap: clamp(0.25rem, 0.15rem + 0.25vw, 0.35rem);
-  letter-spacing: clamp(0.15px, 0.1vw, 0.55px);
-  padding: clamp(0.38rem, 0.32rem + 0.2vw, 0.55rem) clamp(0.8rem, 0.7rem + 0.6vw, 1.3rem);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
+  gap: 0.5rem;
+  justify-content: center;
+  letter-spacing: clamp(0.1px, 0.08vw, 0.45px);
+  line-height: 1.1;
+  padding: 0.55rem 1.05rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.site-body .btn i {
+  line-height: 1;
+}
+
+.site-body .btn:active {
+  transform: translateY(1px);
+}
+
+.site-body .btn-sm {
+  padding: 0.35rem 0.75rem;
+}
+
+.site-body .btn-lg {
+  padding: 0.75rem 1.35rem;
+}
+
+.btn.disabled,
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.btn-icon {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.5rem;
+  justify-content: center;
   width: fit-content;
 }
 
-.site-cta:focus,
-.site-cta:hover {
+/* Primary */
+.btn-primary {
   background-color: var(--relic-gold);
-  box-shadow: 0 8px 20px rgba(194, 161, 77, 0.3);
-  color: var(--void-black) !important;
-  transform: translateY(-2px);
+  border-color: var(--relic-gold);
+  color: var(--void-black);
+}
+
+.btn-primary:focus,
+.btn-primary:hover {
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+  color: var(--ash-white);
+}
+
+.btn-primary:active {
+  background-color: #6e1724;
+  border-color: #6e1724;
+}
+
+/* Outline Light */
+.btn-outline-light {
+  background-color: transparent;
+  border-color: rgba(230, 230, 235, 0.5);
+  color: var(--ash-white);
+}
+
+.btn-outline-light:focus,
+.btn-outline-light:hover {
+  background-color: rgba(139, 30, 45, 0.9);
+  border-color: rgba(139, 30, 45, 0.9);
+  color: var(--ash-white);
+}
+
+.btn-outline-light:active {
+  background-color: #6e1724;
+  border-color: #6e1724;
+}
+
+/* Danger */
+.btn-danger {
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+  color: var(--ash-white);
+}
+
+.btn-danger:focus,
+.btn-danger:hover {
+  background-color: #6e1724;
+  border-color: #6e1724;
+  color: var(--ash-white);
+}
+
+.btn-danger:active {
+  background-color: #54111b;
+  border-color: #54111b;
+}
+
+/* Outline Danger */
+.btn-outline-danger {
+  background-color: transparent;
+  border-color: rgba(139, 30, 45, 0.85);
+  color: rgba(230, 230, 235, 0.95);
+}
+
+.btn-outline-danger:focus,
+.btn-outline-danger:hover {
+  background-color: rgba(139, 30, 45, 0.9);
+  border-color: rgba(139, 30, 45, 0.9);
+  color: var(--ash-white);
+}
+
+.btn-outline-danger:active {
+  background-color: #6e1724;
+  border-color: #6e1724;
+}
+
+/* Success */
+.btn-success {
+  background-color: rgba(25, 135, 84, 0.95);
+  border-color: rgba(25, 135, 84, 0.95);
+  color: var(--ash-white);
+}
+
+.btn-success:focus,
+.btn-success:hover {
+  background-color: rgba(20, 110, 70, 1);
+  border-color: rgba(20, 110, 70, 1);
+  color: var(--ash-white);
+}
+
+.btn-success:active {
+  background-color: rgba(16, 88, 56, 1);
+  border-color: rgba(16, 88, 56, 1);
+}
+
+/* Outline Primary */
+.btn-outline-primary {
+  background-color: transparent;
+  border-color: rgba(194, 161, 77, 0.75);
+  color: rgba(230, 230, 235, 0.95);
+}
+
+.btn-outline-primary:focus,
+.btn-outline-primary:hover {
+  background-color: rgba(194, 161, 77, 0.15);
+  border-color: rgba(194, 161, 77, 0.95);
+  color: var(--ash-white);
+}
+
+.btn-outline-primary:active {
+  background-color: rgba(194, 161, 77, 0.25);
+  border-color: rgba(194, 161, 77, 1);
+}
+
+/* =============
+   BUTTONS & CTA
+   ============= */
+/* Keep .site-cta as layout helper only, so it never overrides the global button system. */
+.site-cta {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.5rem;
 }
 
 /* Effects toggle button */
@@ -346,58 +491,6 @@ main .container,
 .effects-toggle-btn.is-active:hover {
   background-color: var(--blood-crimson);
   color: var(--ash-white);
-}
-
-/* Bootstrap button variants */
-.btn-primary {
-  background-color: var(--relic-gold);
-  border-color: var(--relic-gold);
-  color: var(--void-black);
-  font-weight: 600;
-}
-
-.btn-primary:focus,
-.btn-primary:hover {
-  background-color: var(--blood-crimson);
-  border-color: var(--blood-crimson);
-  color: var(--ash-white);
-}
-
-.btn-primary:active {
-  background-color: #6e1724;
-  border-color: #6e1724;
-}
-
-.btn-outline-light {
-  border-color: rgba(230, 230, 235, 0.5);
-  color: var(--ash-white);
-}
-
-.btn-outline-light:focus,
-.btn-outline-light:hover {
-  background-color: var(--blood-crimson);
-  border-color: var(--blood-crimson);
-  color: var(--ash-white);
-}
-
-.btn-outline-light:active {
-  background-color: #6e1724;
-  border-color: #6e1724;
-}
-
-.btn.disabled,
-.btn:disabled,
-.btn[aria-disabled='true'] {
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.btn-icon {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.5rem;
-  justify-content: center;
-  width: fit-content;
 }
 
 /* ==============
@@ -698,17 +791,56 @@ main .container,
    FOOTER
    ====== */
 .site-footer {
-  background-color: rgba(11, 11, 15, 0.92);
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
   border-top: var(--border);
 }
 
 .site-footer-title {
+  color: var(--color-fg-primary);
   font-family: var(--font-heading);
   letter-spacing: 0.3px;
 }
 
 .site-footer-text {
-  color: rgba(230, 230, 235, 0.7);
+  color: var(--color-fg-muted);
+}
+
+.site-footer-links {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.35rem, 0.25rem + 0.6vw, 0.75rem);
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-link {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  gap: 0.45rem;
+  line-height: 1.2;
+  padding: 0.35rem 0.55rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: normal;
+}
+
+.footer-link i {
+  flex: 0 0 auto;
+}
+
+.footer-link span {
+  display: inline-block;
+}
+
+.footer-link:hover {
+  color: var(--color-accent-gold) !important;
+  opacity: 1 !important;
+  text-shadow: 0 0 12px var(--color-accent-gold-glow);
+  transform: translateY(-1px);
 }
 
 /* =========
@@ -743,10 +875,16 @@ main .container,
 }
 
 /* ===================
-   ERROR PAGE UTILITY
+   ERROR PAGE UTILITIES
    =================== */
 .error-icon-lg {
   font-size: 5rem;
+}
+
+@media (max-width: 575.98px) {
+  .error-icon-lg {
+    font-size: 4.25rem;
+  }
 }
 
 /* ==============================
@@ -763,7 +901,6 @@ body.reduced-effects .site-brand::before {
 
 body.reduced-effects .entry-card,
 body.reduced-effects .site-brand,
-body.reduced-effects .site-cta,
 body.reduced-effects .site-nav-link {
   transition: none !important;
 }
@@ -865,6 +1002,12 @@ body.reduced-effects .entry-card:hover {
 
   .site-nav-auth-mobile .nav-link {
     padding: clamp(0.2rem, 0.15rem + 0.2vw, 0.4rem);
+  }
+}
+
+@media (min-width: 992px) {
+  .site-footer-links {
+    justify-content: flex-end;
   }
 }
 

@@ -131,6 +131,11 @@
   width: 40px;
 }
 
+/* Dashboard button helpers (scoped) */
+.btn-close-danger {
+  border: 1px solid rgba(194, 161, 77, 0.3);
+}
+
 .btn-close-icon-hover {
   opacity: 0.6;
   transition: opacity 0.2s;
@@ -150,17 +155,13 @@
   border-color: #6e1724;
 }
 
-.btn-close-danger {
-  border: 1px solid rgba(194, 161, 77, 0.3);
-}
-
 /* Profile Elements */
 .profile-pic-sidebar {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
   border: 2px solid var(--relic-gold);
   border-radius: 50%;
+  height: 80px;
+  object-fit: cover;
+  width: 80px;
 }
 
 .user-greeting-banner {

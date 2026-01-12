@@ -152,14 +152,6 @@
     line-clamp: 3;
   }
 
-  .entry-card-footer--featured {
-    padding: 1rem 1.5rem 1.25rem;
-  }
-
-  .entry-card-footer--featured .btn {
-    padding: 0.5rem 1.25rem;
-  }
-
   .price--featured {
     font-size: 1.4rem;
   }
