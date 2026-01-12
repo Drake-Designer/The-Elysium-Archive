@@ -1,45 +1,55 @@
 {% extends "base.html" %}
-{% block title %}
-    Confirm Email | The Elysium Archive
-{% endblock title %}
+{% load i18n %}
+
+{% block extra_title %}{% trans "Confirm Email" %} | The Elysium Archive{% endblock %}
+
 {% block content %}
-    <!-- Email confirmation page -->
-    <section class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-5">
-                <div class="panel p-4 p-lg-5">
-                    <h1 class="h3 text-center mb-4">
-                        <i class="fa-solid fa-check-circle me-2"></i>Confirm Email Address
-                    </h1>
-                    {% if confirmation %}
-                        <!-- Email confirmation form -->
-                        <p class="text-center muted mb-4">
-                            Please confirm that <strong>{{ confirmation.email_address.email }}</strong> is your email address by clicking the button below.
-                        </p>
-                        <form method="post"
-                              action="{% url 'account_confirm_email' confirmation.key %}">
-                            {% csrf_token %}
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-icon">
-                                    <i class="fa-solid fa-envelope-circle-check"></i>Confirm Email
-                                </button>
-                            </div>
-                        </form>
-                    {% else %}
-                        <!-- Email confirmation fallback -->
-                        <p class="text-center muted mb-4">This confirmation link is invalid or has already been used.</p>
-                        <div class="d-grid">
-                            <a class="btn btn-primary btn-icon" href="{% url 'account_email' %}">
-                                <i class="fa-solid fa-paper-plane"></i>Request a new confirmation email
-                            </a>
-                        </div>
-                    {% endif %}
-                    <hr class="my-4 border-secondary">
-                    <p class="text-center muted mb-0">
-                        <a href="{% url 'home' %}">Return to home</a>
-                    </p>
-                </div>
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+      <div class="card border-0 shadow-lg">
+        <div class="card-body p-4 p-lg-5 text-center">
+
+          <h1 class="h3 mb-4">
+            <i class="fa-solid fa-check-circle me-2"></i>{% trans "Confirm Email Address" %}
+          </h1>
+
+          {% if confirmation %}
+            <p class="text-muted mb-4">
+              {% blocktrans with email=confirmation.email_address.email %}
+                Please confirm that <strong>{{ email }}</strong> is your email address by clicking the button below.
+              {% endblocktrans %}
+            </p>
+
+            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+              {% csrf_token %}
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fa-solid fa-envelope-circle-check me-2"></i>{% trans "Confirm Email" %}
+                </button>
+              </div>
+            </form>
+          {% else %}
+            <p class="text-muted mb-4">
+              {% trans "This confirmation link is invalid or has already been used." %}
+            </p>
+
+            <div class="d-grid">
+              <a class="btn btn-primary" href="{% url 'account_email' %}">
+                <i class="fa-solid fa-paper-plane me-2"></i>{% trans "Request a new confirmation email" %}
+              </a>
             </div>
+          {% endif %}
+
+          <hr class="my-4">
+
+          <a href="{% url 'home' %}" class="text-decoration-underline">
+            {% trans "Return to home" %}
+          </a>
+
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock content %}

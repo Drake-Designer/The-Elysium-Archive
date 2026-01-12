@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    403 - Forbidden | The Elysium Archive
+    404 - Page Not Found | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Access forbidden error page for The Elysium Archive.
+    Page not found error page for The Elysium Archive.
 {% endblock meta_description %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/pages/errors.css' %}">
+{% endblock extra_css %}
 {% block content %}
     <section class="container py-5">
         <div class="row justify-content-center">
@@ -13,15 +16,15 @@
                 <div class="panel p-5 text-center">
                     <!-- Error icon -->
                     <div class="mb-5">
-                        <i class="fa-solid fa-lock text-danger error-icon-lg"></i>
+                        <i class="fa-solid fa-ghost text-muted error-icon-lg"></i>
                     </div>
                     <!-- Error heading -->
-                    <h1 class="display-4 mb-3 text-danger">403 - Forbidden</h1>
-                    <p class="lead mb-4 text-muted">You do not have permission to access this resource.</p>
+                    <h1 class="display-4 mb-3 text-danger">404 - Page Not Found</h1>
+                    <p class="lead mb-4 text-muted">The page you are looking for has vanished into the void.</p>
                     <!-- Error description -->
                     <p class="mb-5">
-                        This archive entry requires authentication and verified purchase to access.
-                        If you believe you should have access, please ensure you are logged in with the correct account.
+                        This archive entry may have been removed, archived, or never existed.
+                        Perhaps the URL was mistyped, or the content has been relocated.
                     </p>
                     <!-- Navigation links -->
                     <div class="d-flex flex-wrap gap-3 justify-content-center">
@@ -32,12 +35,7 @@
                            class="btn btn-outline-light btn-lg btn-icon">
                             <i class="fa-solid fa-book me-2"></i>Browse Archive
                         </a>
-                        {% if not user.is_authenticated %}
-                            <a href="{% url 'account_login' %}"
-                               class="btn btn-outline-light btn-lg btn-icon">
-                                <i class="fa-solid fa-sign-in-alt me-2"></i>Login
-                            </a>
-                        {% else %}
+                        {% if user.is_authenticated %}
                             <a href="{% url 'my_archive' %}"
                                class="btn btn-outline-light btn-lg btn-icon">
                                 <i class="fa-solid fa-lock-open me-2"></i>My Archive

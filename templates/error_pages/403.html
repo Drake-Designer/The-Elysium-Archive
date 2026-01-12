@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    500 - Server Error | The Elysium Archive
+    403 - Forbidden | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Server error page for The Elysium Archive.
+    Access forbidden error page for The Elysium Archive.
 {% endblock meta_description %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/pages/errors.css' %}">
+{% endblock extra_css %}
 {% block content %}
     <section class="container py-5">
         <div class="row justify-content-center">
@@ -13,16 +16,15 @@
                 <div class="panel p-5 text-center">
                     <!-- Error icon -->
                     <div class="mb-5">
-                        <i class="fa-solid fa-server text-danger error-icon-lg"></i>
+                        <i class="fa-solid fa-lock text-danger error-icon-lg"></i>
                     </div>
                     <!-- Error heading -->
-                    <h1 class="display-4 mb-3 text-danger">500 - Server Error</h1>
-                    <p class="lead mb-4 text-muted">Something went wrong on our end.</p>
+                    <h1 class="display-4 mb-3 text-danger">403 - Forbidden</h1>
+                    <p class="lead mb-4 text-muted">You do not have permission to access this resource.</p>
                     <!-- Error description -->
                     <p class="mb-5">
-                        The server encountered an internal error and was unable to complete your request.
-                        Our team has been notified and is working to resolve the issue.
-                        Please try again later.
+                        This archive entry requires authentication and verified purchase to access.
+                        If you believe you should have access, please ensure you are logged in with the correct account.
                     </p>
                     <!-- Navigation links -->
                     <div class="d-flex flex-wrap gap-3 justify-content-center">
@@ -33,7 +35,12 @@
                            class="btn btn-outline-light btn-lg btn-icon">
                             <i class="fa-solid fa-book me-2"></i>Browse Archive
                         </a>
-                        {% if user.is_authenticated %}
+                        {% if not user.is_authenticated %}
+                            <a href="{% url 'account_login' %}"
+                               class="btn btn-outline-light btn-lg btn-icon">
+                                <i class="fa-solid fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        {% else %}
                             <a href="{% url 'my_archive' %}"
                                class="btn btn-outline-light btn-lg btn-icon">
                                 <i class="fa-solid fa-lock-open me-2"></i>My Archive

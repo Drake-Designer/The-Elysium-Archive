@@ -1,4 +1,7 @@
-/* Admin theme variables matching site design system. */
+/* ===============
+   ADMIN VARIABLES
+   =============== */
+
 :root {
   --admin-bg: #0b0b0f;
   --admin-panel: #14141b;

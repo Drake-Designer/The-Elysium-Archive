@@ -433,22 +433,98 @@ A custom design system was implemented using CSS variables.
 - Spacing, font sizes, and layout scales adapt responsively
 - No inline styles are used anywhere in the project
 
-This ensures:
+### CSS Architecture and Organization
 
-- Consistent visual identity
-- Easier future changes
-- Clean separation of concerns
+The project uses a **modular CSS architecture** to maintain scalability and separation of concerns.
+
+#### Frontend CSS Structure
+
+All frontend stylesheets are organized in `static/css/` and follow a logical hierarchy:
+
+**Base Styles:**
+
+- `base.css` – Global styles, CSS variables, typography, resets, navigation, footer, forms, alerts
+- `components.css` – Reusable UI components shared across multiple pages
+
+**Page-Specific Styles:**
+
+- `pages/home.css` – Homepage layout (hero, carousel, membership cards)
+- `pages/lore.css` – Lore page styling
+- `pages/archive.css` – Archive catalog and product cards
+- `pages/profile.css` – User profile page
+- `pages/dashboard.css` – User dashboard and navigation
+
+**Loading Strategy:**
+
+- `base.css` is loaded globally in `base.html` (applies to all pages)
+- Page-specific CSS is loaded conditionally using `{% block extracss %}` in individual templates
+- This approach minimizes CSS payload and avoids style conflicts
+
+**Example (homepage template):**
+
+```django
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">
+{% endblock extracss %}
+```
+
+#### Exception inline style: Email Templates
+
+Email templates (`templates/account/email/*.html`) use **inline CSS only**. This is intentional and necessary because:
+
+- Most email clients (Gmail, Outlook, Apple Mail) do not support external style sheets
+- Document-level `<style>` tags are stripped by many providers
+- Inline styles are the only reliable way to ensure correct email rendering
+- This is standard practice for marketing and transactional emails
 
 ### Static Assets Structure
 
 Static assets are organised to support both development and production environments.
 
-- CSS files are stored in `static/css`
-- Images are stored in `static/img`
-- Video assets are stored in `static/video`
-- Favicon assets are stored in `static/img/favicon`
+```text
+static/
+├── css/
+│   ├── base.css                          → Global styles (navigation, forms, typography)
+│   ├── components/
+│   │   ├── dashboard.css                 → Dashboard UI components
+│   │   ├── deal-banner.css               → Deal banner marquee
+│   │   └── products.css                  → Product cards and layouts
+│   ├── pages/
+│   │   ├── home.css                      → Homepage-specific styles
+│   │   └── lore.css                      → Lore page styles
+│   └── admin/
+│       ├── admin.css                     → Admin entry point (imports all modules)
+│       ├── admin-variables.css           → Admin CSS variables
+│       ├── admin-components.css          → Admin UI components
+│       ├── admin-jazzmin-overrides.css   → Jazzmin theme customizations
+│       ├── admin-categories.css          → Category admin styling
+│       ├── admin-products.css            → Product admin styling
+│       ├── admin-orders.css              → Order admin styling
+│       ├── admin-reviews.css             → Review admin styling
+│       ├── admin-accounts.css            → Account admin styling
+│       ├── admin-deal-banners.css        → Deal banner admin styling
+│       └── admin-product-image-alt.css   → ALT text counter
+│
+├── js/
+│   ├── dashboard.js                      → Dashboard tab switching
+│   ├── deal-banner-carousel.js           → Deal banner auto-scroll
+│   ├── effects-toggle.js                 → Reduced effects toggle
+│   ├── messages.js                       → Django messages auto-dismiss
+│   └── admin/
+│       └── image-alt-counter.js          → Admin ALT text character counter
+│
+├── img/
+│   ├── favicon/                          → Favicon files (all formats)
+│   ├── home/
+│   │   ├── how/                          → "How it works" section images
+│   │   └── membership/                   → Membership section images
+│   └── lore/                             → Lore page images
+│
+└── video/
+    └── elysium-intro-video.mp4           → Homepage hero video
+```
 
-All static files are collected using Django's `collectstatic` command and are fully compatible with Heroku deployment.
+All static files are collected using Django's collectstatic command and are fully compatible with Heroku deployment.
 
 ### Email Templates and Notifications
 
@@ -481,15 +557,17 @@ Included formats:
 
 This ensures consistent branding across desktop, mobile, and installed web experiences.
 
-### Media Handling and Image Optimisation
+### Media Handling, Image Optimisation, and Visual Assets
 
-Media assets are stored and delivered using Cloudinary, a cloud-based media management platform. This approach provides several benefits for performance and maintainability.
+Media assets are stored and delivered using **Cloudinary**, a cloud-based media management platform. This approach improves performance and makes media handling easier to maintain.
 
-Images are served responsively based on device size and resolution. Cloudinary automatically generates optimised formats such as WebP and AVIF where supported, reducing file sizes without visible quality loss.
+Images are served responsively based on device size and resolution. Cloudinary automatically generates optimised formats such as **WebP** and **AVIF** where supported, reducing file sizes without visible quality loss.
 
-Image scaling is handled server-side to ensure appropriate dimensions for each breakpoint. This prevents unnecessary bandwidth usage on mobile devices while maintaining sharp visuals on larger screens.
+Image scaling is handled server-side to ensure the correct dimensions for each breakpoint. This prevents unnecessary bandwidth usage on mobile devices while keeping images sharp on larger screens.
 
-The implementation avoids unintended cropping by using intelligent scaling with automatic gravity detection. Featured images retain their intended composition across all device sizes.
+To avoid unintended cropping, intelligent scaling with automatic gravity detection is used. Featured images keep their intended composition across all device sizes.
+
+All atmospheric images used throughout the project are sourced from [Stockcake](https://stockcake.com/), a platform providing free AI-generated stock images. All images are used for educational purposes only as part of a Code Institute student project.
 
 ## Technologies Used
 
@@ -589,15 +667,6 @@ Professional error pages maintain the dark fantasy theme and provide clear navig
 All error templates extend `base.html` (except 500, which uses inline critical CSS for reliability).
 
 Error handlers are configured in `elysium_archive/urls.py` and work in both development and production.
-
-#### Exception: Email Templates
-
-Email templates (`templates/account/email/*.html`) use **inline CSS only**. This is intentional and necessary because:
-
-- Most email clients (Gmail, Outlook, Apple Mail) do not support external style sheets
-- Document-level `<style>` tags are stripped by many providers
-- Inline styles are the only reliable way to ensure correct email rendering
-- This is standard practice for marketing and transactional emails
 
 ## Stripe Payments
 
@@ -1212,9 +1281,3 @@ To support edge cases (for example: “one product in the category should NOT be
 ## Future Improvements
 
 ## Credits and Acknowledgements
-
-### Media and Visual Assets
-
-All atmospheric images used throughout the project are sourced from [Stockcake](https://stockcake.com/), a platform providing free AI-generated stock images. All images are used for educational purposes only as part of a Code Institute student project.
-
-Media assets are optimised and delivered using Cloudinary.

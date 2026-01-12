@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    404 - Page Not Found | The Elysium Archive
+    400 - Bad Request | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Page not found error page for The Elysium Archive.
+    Bad request error page for The Elysium Archive.
 {% endblock meta_description %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/pages/errors.css' %}">
+{% endblock extra_css %}
 {% block content %}
     <section class="container py-5">
         <div class="row justify-content-center">
@@ -13,15 +16,15 @@
                 <div class="panel p-5 text-center">
                     <!-- Error icon -->
                     <div class="mb-5">
-                        <i class="fa-solid fa-ghost text-muted error-icon-lg"></i>
+                        <i class="fa-solid fa-exclamation-triangle text-warning error-icon-lg"></i>
                     </div>
                     <!-- Error heading -->
-                    <h1 class="display-4 mb-3 text-danger">404 - Page Not Found</h1>
-                    <p class="lead mb-4 text-muted">The page you are looking for has vanished into the void.</p>
+                    <h1 class="display-4 mb-3 text-danger">400 - Bad Request</h1>
+                    <p class="lead mb-4 text-muted">The request could not be understood by the server.</p>
                     <!-- Error description -->
                     <p class="mb-5">
-                        This archive entry may have been removed, archived, or never existed.
-                        Perhaps the URL was mistyped, or the content has been relocated.
+                        Your browser sent a request that this server could not understand.
+                        This usually happens when the request format is invalid or malformed.
                     </p>
                     <!-- Navigation links -->
                     <div class="d-flex flex-wrap gap-3 justify-content-center">
