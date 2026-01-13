@@ -3,6 +3,7 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 
+from orders.models import AccessEntitlement
 from products.models import Product
 
 from .cart import (
@@ -15,10 +16,45 @@ from accounts.decorators import verified_email_required
 
 
 def _parse_int(value, default):
+    """Parse an integer from input safely."""
     try:
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def _remove_purchased_items_from_cart(request):
+    """Remove already purchased products from the cart session."""
+    cart = request.session.get("cart", {})
+    if not cart:
+        return 0
+
+    try:
+        product_ids = [int(pid) for pid in cart.keys()]
+    except (TypeError, ValueError):
+        return 0
+
+    purchased_ids = set(
+        AccessEntitlement.objects.filter(
+            user=request.user,
+            product_id__in=product_ids,
+        ).values_list("product_id", flat=True)
+    )
+
+    removed = 0
+    for pid in list(cart.keys()):
+        try:
+            if int(pid) in purchased_ids:
+                cart.pop(pid, None)
+                removed += 1
+        except (TypeError, ValueError):
+            continue
+
+    if removed:
+        request.session["cart"] = cart
+        request.session.modified = True
+
+    return removed
 
 
 @verified_email_required
@@ -33,6 +69,11 @@ def add_to_cart(request):
         return redirect("archive")
 
     product = get_object_or_404(Product, id=product_id, is_active=True)
+
+    if AccessEntitlement.objects.filter(user=request.user, product=product).exists():
+        messages.info(request, "You already own this archive.")
+        return redirect("product_detail", slug=product.slug)
+
     result = add_product_to_cart(request.session, product_id)
 
     if result is True:
@@ -48,6 +89,13 @@ def add_to_cart(request):
 @verified_email_required
 def cart_view(request):
     """Render the shopping cart view."""
+    removed = _remove_purchased_items_from_cart(request)
+    if removed:
+        messages.info(
+            request,
+            "Your cart was updated because some items were already purchased.",
+        )
+
     cart_items = get_cart_items(request.session)
     context = {
         "cart_items": cart_items,
