@@ -46,6 +46,10 @@ def _get_order_from_metadata(data):
 
 def _grant_entitlements(order):
     """Create entitlements for purchased products."""
+    if not order.user:
+        logger.warning("Order has no user, cannot grant entitlements (order=%s).", order.order_number)
+        return
+
     for line in order.line_items.select_related("product").all():
         if not line.product:
             continue
@@ -79,11 +83,37 @@ def _mark_order_paid(order, data):
     _grant_entitlements(order)
 
 
+def _ensure_paid_order_consistency(order, data):
+    """Ensure a paid order has Stripe IDs and entitlements."""
+    updated_fields = []
+    payment_intent = data.get("payment_intent")
+    session_id = data.get("id")
+
+    if payment_intent and not order.stripe_payment_intent_id:
+        order.stripe_payment_intent_id = payment_intent
+        updated_fields.append("stripe_payment_intent_id")
+
+    if session_id and not order.stripe_session_id:
+        order.stripe_session_id = session_id
+        updated_fields.append("stripe_session_id")
+
+    if updated_fields:
+        updated_fields.append("updated_at")
+        order.save(update_fields=updated_fields)
+
+    _grant_entitlements(order)
+
+
 def _handle_checkout_completed(data):
     """Handle checkout.session.completed event."""
     order = _get_order_from_metadata(data)
     if not order:
         logger.warning("Webhook missing order reference on checkout.session.completed")
+        return
+
+    # If already paid, only ensure consistency.
+    if order.status == "paid":
+        _ensure_paid_order_consistency(order, data)
         return
 
     # Do not grant access unless Stripe confirms the payment is paid.
@@ -110,8 +140,30 @@ def _handle_async_payment_succeeded(data):
         )
         return
 
+    if order.status == "paid":
+        _ensure_paid_order_consistency(order, data)
+        return
+
     if data.get("payment_status") == "paid":
         _mark_order_paid(order, data)
+
+
+def _handle_checkout_expired(data):
+    """Handle checkout.session.expired event."""
+    order = _get_order_from_metadata(data)
+    if not order:
+        logger.warning("Webhook missing order reference on checkout.session.expired")
+        return
+
+    if order.status == "paid":
+        return
+
+    order.status = "failed"
+    session_id = data.get("id")
+    if session_id and not order.stripe_session_id:
+        order.stripe_session_id = session_id
+
+    order.save(update_fields=["status", "stripe_session_id", "updated_at"])
 
 
 def _handle_payment_failed(data):
@@ -119,6 +171,9 @@ def _handle_payment_failed(data):
     order = _get_order_from_metadata(data)
     if not order:
         logger.warning("Webhook missing order reference on payment failure")
+        return
+
+    if order.status == "paid":
         return
 
     order.status = "failed"
@@ -140,8 +195,12 @@ def stripe_webhook(request):
         logger.error("Stripe webhook secret missing")
         return JsonResponse({"error": "Webhook not configured"}, status=500)
 
-    payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+    if not sig_header:
+        logger.warning("Missing Stripe signature header")
+        return JsonResponse({"error": "Missing signature"}, status=400)
+
+    payload = request.body
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
@@ -160,6 +219,8 @@ def stripe_webhook(request):
             _handle_checkout_completed(data)
         elif event_type == "checkout.session.async_payment_succeeded":
             _handle_async_payment_succeeded(data)
+        elif event_type == "checkout.session.expired":
+            _handle_checkout_expired(data)
         elif event_type in (
             "payment_intent.payment_failed",
             "checkout.session.async_payment_failed",

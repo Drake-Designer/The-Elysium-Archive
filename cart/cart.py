@@ -48,22 +48,39 @@ def remove_from_cart(session, product_id):
 def get_cart_items(session):
     """Return cart items with product data."""
     cart = get_cart(session)
-    items = []
+    if not cart:
+        return []
 
-    for product_id_str in cart.keys():
+    valid_ids = []
+    for product_id_str in list(cart.keys()):
         try:
-            product_id = int(product_id_str)
+            valid_ids.append(int(product_id_str))
+        except (TypeError, ValueError):
+            cart.pop(product_id_str, None)
+
+    if not valid_ids:
+        session["cart"] = {}
+        session.modified = True
+        return []
+
+    qs = Product.objects.filter(id__in=valid_ids, is_active=True)
+    products = list(qs)
+    active_ids = set(qs.values_list("id", flat=True))
+
+    removed = 0
+    for product_id_str in list(cart.keys()):
+        try:
+            if int(product_id_str) not in active_ids:
+                cart.pop(product_id_str, None)
+                removed += 1
         except (TypeError, ValueError):
             continue
 
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            continue
+    if removed:
+        session["cart"] = cart
+        session.modified = True
 
-        items.append({"product": product})
-
-    return items
+    return [{"product": product} for product in products]
 
 
 def get_cart_total(session, cart_items=None):

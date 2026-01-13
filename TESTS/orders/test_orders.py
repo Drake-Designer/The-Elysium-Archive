@@ -3,8 +3,10 @@
 import pytest
 from decimal import Decimal
 from unittest.mock import patch
+
 from django.urls import reverse
-from orders.models import Order, AccessEntitlement
+
+from orders.models import AccessEntitlement, Order
 
 
 @pytest.mark.django_db
@@ -203,6 +205,16 @@ class TestWebhookHandling:
 
         assert response.status_code == 400
 
+    def test_webhook_missing_signature_header_rejected(self, client):
+        """Webhook without Stripe signature header is rejected."""
+        response = client.post(
+            reverse("stripe_webhook"),
+            data="{}",
+            content_type="application/json",
+        )
+
+        assert response.status_code == 400
+
     def test_webhook_post_required(self, client):
         """Webhook only accepts POST, rejects GET."""
         response = client.get(reverse("stripe_webhook"))
@@ -232,6 +244,126 @@ class TestWebhookHandling:
         )
 
         assert response.status_code == 200
+
+    @patch("checkout.webhooks.stripe.Webhook.construct_event")
+    def test_webhook_paid_order_does_not_duplicate_entitlements(
+        self, mock_construct, client, verified_user, order_paid
+    ):
+        """Webhook on already paid order does not create duplicate entitlements."""
+        mock_construct.return_value = {
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_test999",
+                    "payment_intent": "pi_test999",
+                    "payment_status": "paid",
+                    "metadata": {"order_id": str(order_paid.id)},
+                }
+            },
+        }
+
+        assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
+
+        response = client.post(
+            reverse("stripe_webhook"),
+            data="{}",
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="test_sig",
+        )
+
+        assert response.status_code == 200
+        assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
+
+        order_paid.refresh_from_db()
+        assert order_paid.status == "paid"
+
+    @patch("checkout.webhooks.stripe.Webhook.construct_event")
+    def test_webhook_paid_order_fills_missing_stripe_ids(
+        self, mock_construct, client, order_paid
+    ):
+        """Paid order stores Stripe IDs if they are missing."""
+        order_paid.stripe_session_id = ""
+        order_paid.stripe_payment_intent_id = ""
+        order_paid.save(update_fields=["stripe_session_id", "stripe_payment_intent_id", "updated_at"])
+
+        mock_construct.return_value = {
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_test999",
+                    "payment_intent": "pi_test999",
+                    "payment_status": "paid",
+                    "metadata": {"order_id": str(order_paid.id)},
+                }
+            },
+        }
+
+        client.post(
+            reverse("stripe_webhook"),
+            data="{}",
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="test_sig",
+        )
+
+        order_paid.refresh_from_db()
+        assert order_paid.stripe_session_id == "cs_test999"
+        assert order_paid.stripe_payment_intent_id == "pi_test999"
+
+    @patch("checkout.webhooks.stripe.Webhook.construct_event")
+    def test_webhook_order_without_user_does_not_crash(
+        self, mock_construct, client, order_pending
+    ):
+        """Webhook does not crash if order has no user."""
+        Order.objects.filter(pk=order_pending.pk).update(user=None)
+
+        mock_construct.return_value = {
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_test123",
+                    "payment_intent": "pi_test123",
+                    "payment_status": "paid",
+                    "metadata": {"order_id": str(order_pending.id)},
+                }
+            },
+        }
+
+        response = client.post(
+            reverse("stripe_webhook"),
+            data="{}",
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="test_sig",
+        )
+
+        assert response.status_code == 200
+        assert AccessEntitlement.objects.count() == 0
+
+        order_pending.refresh_from_db()
+        assert order_pending.status == "paid"
+
+    @patch("checkout.webhooks.stripe.Webhook.construct_event")
+    def test_webhook_checkout_expired_marks_failed(self, mock_construct, client, order_pending):
+        """Webhook on checkout.session.expired marks order as failed."""
+        mock_construct.return_value = {
+            "type": "checkout.session.expired",
+            "data": {
+                "object": {
+                    "id": "cs_test_expired",
+                    "metadata": {"order_id": str(order_pending.id)},
+                }
+            },
+        }
+
+        response = client.post(
+            reverse("stripe_webhook"),
+            data="{}",
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="test_sig",
+        )
+
+        assert response.status_code == 200
+        order_pending.refresh_from_db()
+        assert order_pending.status == "failed"
 
 
 @pytest.mark.django_db
