@@ -126,11 +126,17 @@ class TestDashboardFormPost:
 
     def test_dashboard_form_post_updates_display_name(self, client, verified_user):
         """POST to dashboard with form data updates display_name."""
+        from accounts.models import UserProfile
+
         client.force_login(verified_user)
 
         response = client.post(
             reverse("account_dashboard"),
             {"display_name": "TestName"},
+            follow=True,
         )
 
         assert response.status_code == 200
+
+        profile = UserProfile.objects.get(user=verified_user)
+        assert profile.display_name == "TestName"

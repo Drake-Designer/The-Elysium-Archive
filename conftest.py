@@ -88,7 +88,7 @@ def staff_user(db):
 def client_with_cart(client, product_active):
     """Create a client with items in cart session."""
     session = client.session
-    session["cart"] = {str(product_active.id): {"quantity": 1}}
+    session["cart"] = {str(product_active.id): 1}
     session.save()
     return client
 
