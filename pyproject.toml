@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 88
-target-version = ['py314']
+target-version = ["py314"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -24,7 +24,11 @@ extend_skip_glob = ["*/migrations/*"]
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "elysium_archive.settings_test"
 python_files = ["test_*.py", "*_test.py", "tests.py"]
-testpaths = ["accounts/tests", "products/tests", "cart", "checkout", "orders", "reviews", "home"]
+testpaths = ["TESTS"]
+addopts = "-ra"
+filterwarnings = [
+  "default",
+]
 
 [tool.mypy]
 python_version = "3.14"
@@ -38,12 +42,12 @@ plugins = ["mypy_django_plugin.main"]
 
 [[tool.mypy.overrides]]
 module = [
-    "cloudinary.*",
-    "django_ckeditor_5.*",
-    "allauth.*",
-    "stripe.*",
-    "cloudinary_storage.*",
-    "django_jazzmin.*"
+  "cloudinary.*",
+  "django_ckeditor_5.*",
+  "allauth.*",
+  "stripe.*",
+  "cloudinary_storage.*",
+  "django_jazzmin.*",
 ]
 ignore_missing_imports = true
 
@@ -61,10 +65,10 @@ django_settings_module = "elysium_archive.settings"
 [tool.coverage.run]
 source = ["."]
 omit = [
-    "*/migrations/*",
-    "*/tests/*",
-    "*/test_*.py",
-    "*/__pycache__/*",
-    "manage.py",
-    "*/settings*.py",
+  "*/migrations/*",
+  "*/tests/*",
+  "*/test_*.py",
+  "*/__pycache__/*",
+  "manage.py",
+  "*/settings*.py",
 ]
