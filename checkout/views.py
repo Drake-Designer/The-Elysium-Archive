@@ -1,6 +1,6 @@
 """Views for checkout and Stripe integration."""
 
-import os
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -12,13 +12,23 @@ from accounts.decorators import verified_email_required
 from cart.cart import clear_cart, get_cart_items, get_cart_total
 from orders.models import AccessEntitlement, Order, OrderLineItem
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+
+def _set_stripe_key() -> bool:
+    """Set Stripe API key from settings and return True if available."""
+    if not getattr(settings, "STRIPE_SECRET_KEY", ""):
+        return False
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    return True
 
 
 @verified_email_required
 @require_http_methods(["POST"])
 def checkout(request):
     """Create Stripe checkout session and redirect user to payment."""
+    if not _set_stripe_key():
+        messages.error(request, "Payment is not configured yet. Please try again later.")
+        return redirect("cart")
+
     cart_items = get_cart_items(request.session)
 
     if not cart_items:
@@ -80,12 +90,10 @@ def checkout(request):
         if session.url:
             return redirect(session.url, code=303)
 
-        raise Exception("Stripe session URL is missing")
+        raise ValueError("Stripe session URL is missing.")
 
-    except Exception as e:
-        messages.error(
-            request, f"Payment initialization failed: {str(e)}. Please try again."
-        )
+    except Exception as exc:
+        messages.error(request, f"Payment initialization failed: {exc}. Please try again.")
         order.delete()
         return redirect("cart")
 
@@ -93,6 +101,12 @@ def checkout(request):
 @verified_email_required
 def checkout_success(request, order_number):
     """Display order confirmation after successful payment."""
+    if not _set_stripe_key():
+        messages.warning(
+            request,
+            "Payment verification is not available right now. Please refresh in a moment.",
+        )
+
     try:
         order = Order.objects.get(order_number=order_number, user=request.user)
     except Order.DoesNotExist:
@@ -113,8 +127,8 @@ def checkout_success(request, order_number):
         context = {"order": order}
         return render(request, "checkout/success.html", context)
 
-    # Fallback: if webhook did not arrive yet, verify via Stripe session
-    if order.status == "pending" and order.stripe_session_id:
+    # Fallback: if webhook did not arrive yet, verify via Stripe session.
+    if order.status == "pending" and order.stripe_session_id and stripe.api_key:
         try:
             session = stripe.checkout.Session.retrieve(order.stripe_session_id)
             if session.payment_status == "paid":
@@ -135,7 +149,10 @@ def checkout_success(request, order_number):
                 clear_cart(request.session)
 
         except stripe.error.StripeError:
-            pass
+            messages.info(
+                request,
+                "Your payment is being confirmed. If this page still shows pending, refresh in a moment.",
+            )
 
     context = {"order": order}
     return render(request, "checkout/success.html", context)

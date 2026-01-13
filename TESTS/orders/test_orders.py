@@ -22,6 +22,7 @@ class TestWebhookHandling:
                 "object": {
                     "id": "cs_test123",
                     "payment_intent": "pi_test123",
+                    "payment_status": "paid",
                     "metadata": {"order_id": str(order_pending.id)},
                 }
             },
@@ -50,6 +51,7 @@ class TestWebhookHandling:
                 "object": {
                     "id": "cs_test123",
                     "payment_intent": "pi_test123",
+                    "payment_status": "paid",
                     "metadata": {"order_id": str(order_pending.id)},
                 }
             },
@@ -79,6 +81,7 @@ class TestWebhookHandling:
                 "object": {
                     "id": session_id,
                     "payment_intent": payment_id,
+                    "payment_status": "paid",
                     "metadata": {"order_id": str(order_pending.id)},
                 }
             },
@@ -106,6 +109,7 @@ class TestWebhookHandling:
                 "object": {
                     "id": "cs_test123",
                     "payment_intent": "pi_test123",
+                    "payment_status": "paid",
                     "metadata": {"order_id": str(order_pending.id)},
                 }
             },
@@ -128,6 +132,34 @@ class TestWebhookHandling:
         )
 
         assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
+
+    @patch("checkout.webhooks.stripe.Webhook.construct_event")
+    def test_webhook_checkout_completed_unpaid_does_not_grant_access(
+        self, mock_construct, client, verified_user, order_pending
+    ):
+        """Checkout completed but unpaid does not grant access or mark as paid."""
+        mock_construct.return_value = {
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_test123",
+                    "payment_intent": "pi_test123",
+                    "payment_status": "unpaid",
+                    "metadata": {"order_id": str(order_pending.id)},
+                }
+            },
+        }
+
+        client.post(
+            reverse("stripe_webhook"),
+            data="{}",
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="test_sig",
+        )
+
+        order_pending.refresh_from_db()
+        assert order_pending.status == "pending"
+        assert AccessEntitlement.objects.filter(user=verified_user).count() == 0
 
     @patch("checkout.webhooks.stripe.Webhook.construct_event")
     def test_webhook_payment_failed_sets_status(
@@ -186,6 +218,7 @@ class TestWebhookHandling:
                 "object": {
                     "id": "cs_test123",
                     "payment_intent": "pi_test123",
+                    "payment_status": "paid",
                     "metadata": {"order_id": "99999"},
                 }
             },

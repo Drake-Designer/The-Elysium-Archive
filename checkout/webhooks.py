@@ -13,7 +13,13 @@ from orders.models import AccessEntitlement, Order
 
 logger = logging.getLogger(__name__)
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def _set_stripe_key() -> bool:
+    """Set Stripe API key from settings and return True if available."""
+    if not getattr(settings, "STRIPE_SECRET_KEY", ""):
+        return False
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    return True
 
 
 def _get_order_from_metadata(data):
@@ -50,13 +56,8 @@ def _grant_entitlements(order):
         )
 
 
-def _handle_checkout_completed(data):
-    """Handle checkout.session.completed event."""
-    order = _get_order_from_metadata(data)
-    if not order:
-        logger.warning("Webhook missing order reference on checkout.session.completed")
-        return
-
+def _mark_order_paid(order, data):
+    """Mark order as paid and store Stripe IDs."""
     payment_intent = data.get("payment_intent")
     session_id = data.get("id")
 
@@ -65,11 +66,52 @@ def _handle_checkout_completed(data):
         order.stripe_payment_intent_id = payment_intent
     if session_id:
         order.stripe_session_id = session_id
+
     order.save(
-        update_fields=["status", "stripe_payment_intent_id", "stripe_session_id", "updated_at"]
+        update_fields=[
+            "status",
+            "stripe_payment_intent_id",
+            "stripe_session_id",
+            "updated_at",
+        ]
     )
 
     _grant_entitlements(order)
+
+
+def _handle_checkout_completed(data):
+    """Handle checkout.session.completed event."""
+    order = _get_order_from_metadata(data)
+    if not order:
+        logger.warning("Webhook missing order reference on checkout.session.completed")
+        return
+
+    # Do not grant access unless Stripe confirms the payment is paid.
+    if data.get("payment_status") != "paid":
+        logger.info(
+            "Checkout completed but payment not paid yet (order=%s).",
+            order.order_number,
+        )
+        session_id = data.get("id")
+        if session_id and not order.stripe_session_id:
+            order.stripe_session_id = session_id
+            order.save(update_fields=["stripe_session_id", "updated_at"])
+        return
+
+    _mark_order_paid(order, data)
+
+
+def _handle_async_payment_succeeded(data):
+    """Handle checkout.session.async_payment_succeeded event."""
+    order = _get_order_from_metadata(data)
+    if not order:
+        logger.warning(
+            "Webhook missing order reference on checkout.session.async_payment_succeeded"
+        )
+        return
+
+    if data.get("payment_status") == "paid":
+        _mark_order_paid(order, data)
 
 
 def _handle_payment_failed(data):
@@ -78,6 +120,7 @@ def _handle_payment_failed(data):
     if not order:
         logger.warning("Webhook missing order reference on payment failure")
         return
+
     order.status = "failed"
     order.save(update_fields=["status", "updated_at"])
 
@@ -87,6 +130,10 @@ def stripe_webhook(request):
     """Process Stripe webhooks with signature verification."""
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    if not _set_stripe_key():
+        logger.error("Stripe secret key missing")
+        return JsonResponse({"error": "Stripe not configured"}, status=500)
 
     endpoint_secret = settings.STRIPE_WH_SECRET
     if not endpoint_secret:
@@ -111,6 +158,8 @@ def stripe_webhook(request):
     try:
         if event_type == "checkout.session.completed":
             _handle_checkout_completed(data)
+        elif event_type == "checkout.session.async_payment_succeeded":
+            _handle_async_payment_succeeded(data)
         elif event_type in (
             "payment_intent.payment_failed",
             "checkout.session.async_payment_failed",
