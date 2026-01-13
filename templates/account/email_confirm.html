@@ -1,55 +1,60 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block extra_title %}{% trans "Confirm Email" %} | The Elysium Archive{% endblock %}
+{% block title %}
+    {% trans "Confirm Email Address" %} | The Elysium Archive
+{% endblock title %}
 
 {% block content %}
-<section class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-5">
-      <div class="card border-0 shadow-lg">
-        <div class="card-body p-4 p-lg-5 text-center">
+    <section class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="panel p-4 p-lg-5 text-center">
+                    <h1 class="h3 mb-3">
+                        <i class="fa-solid fa-circle-check me-2"></i>{% trans "Confirm Email Address" %}
+                    </h1>
 
-          <h1 class="h3 mb-4">
-            <i class="fa-solid fa-check-circle me-2"></i>{% trans "Confirm Email Address" %}
-          </h1>
+                    {% if confirmation %}
+                        <p class="muted mb-4">
+                            {% blocktrans with email=confirmation.email_address.email %}
+                                Please confirm that <strong class="text-break">{{ email }}</strong> is your email address by clicking the button below.
+                            {% endblocktrans %}
+                        </p>
 
-          {% if confirmation %}
-            <p class="text-muted mb-4">
-              {% blocktrans with email=confirmation.email_address.email %}
-                Please confirm that <strong>{{ email }}</strong> is your email address by clicking the button below.
-              {% endblocktrans %}
-            </p>
+                        <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                            {% csrf_token %}
+                            <div class="d-grid d-sm-flex justify-content-center gap-2">
+                                <button type="submit" class="btn btn-primary btn-icon">
+                                    <i class="fa-solid fa-envelope-circle-check"></i>{% trans "Confirm Email" %}
+                                </button>
+                                <a href="{% url 'home' %}" class="btn btn-outline-light btn-icon">
+                                    <i class="fa-solid fa-house"></i>{% trans "Return to home" %}
+                                </a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning text-start" role="alert">
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                            {% trans "This confirmation link is invalid or has already been used." %}
+                        </div>
 
-            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
-              {% csrf_token %}
-              <div class="d-grid">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fa-solid fa-envelope-circle-check me-2"></i>{% trans "Confirm Email" %}
-                </button>
-              </div>
-            </form>
-          {% else %}
-            <p class="text-muted mb-4">
-              {% trans "This confirmation link is invalid or has already been used." %}
-            </p>
+                        <div class="d-grid d-sm-flex justify-content-center gap-2">
+                            <a href="{% url 'account_email' %}" class="btn btn-primary btn-icon">
+                                <i class="fa-solid fa-envelope"></i>{% trans "Manage Email Addresses" %}
+                            </a>
+                            <a href="{% url 'home' %}" class="btn btn-outline-light btn-icon">
+                                <i class="fa-solid fa-house"></i>{% trans "Return to home" %}
+                            </a>
+                        </div>
+                    {% endif %}
 
-            <div class="d-grid">
-              <a class="btn btn-primary" href="{% url 'account_email' %}">
-                <i class="fa-solid fa-paper-plane me-2"></i>{% trans "Request a new confirmation email" %}
-              </a>
+                    <hr class="my-4 border-secondary">
+
+                    <p class="small muted mb-0">
+                        {% trans "If you did not request this, you can safely ignore it." %}
+                    </p>
+                </div>
             </div>
-          {% endif %}
-
-          <hr class="my-4">
-
-          <a href="{% url 'home' %}" class="text-decoration-underline">
-            {% trans "Return to home" %}
-          </a>
-
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 {% endblock content %}

@@ -201,3 +201,45 @@
 .footer-page-list {
   color: rgba(230, 230, 235, 0.9);
 }
+
+/* Terms: Oath block (Versione A solenne) */
+.footer-oath {
+  backdrop-filter: blur(6px);
+  background: rgba(10, 14, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 1.25rem 1.25rem;
+  text-align: center;
+}
+
+.footer-oath-line {
+  font-family: var(--font-heading);
+  letter-spacing: 0.02em;
+}
+
+.footer-oath-line-1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.footer-oath-line-2 {
+  font-size: 0.98rem;
+  margin-top: 0.35rem;
+  opacity: 0.88;
+}
+
+.footer-oath-em {
+  text-transform: uppercase;
+}
+
+.footer-oath-eq {
+  display: inline-block;
+  opacity: 0.9;
+  padding: 0 0.35rem;
+}
+
+/* Footer page actions */
+.footer-page-actions {
+  margin-top: 1.5rem;
+}

@@ -11,19 +11,25 @@
                     <h1 class="h3 text-center mb-4">
                         <i class="fa-solid fa-user-plus me-2"></i>Create Account
                     </h1>
+
                     <!-- Signup form -->
                     <form method="post" action="{% url 'account_signup' %}" novalidate>
                         {% csrf_token %}
+
                         {% if redirect_field_value %}
                             <input type="hidden"
                                    name="{{ redirect_field_name }}"
                                    value="{{ redirect_field_value }}">
                         {% endif %}
+
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger">
-                                {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+                                {% for err in form.non_field_errors %}
+                                    {{ err }}
+                                {% endfor %}
                             </div>
                         {% endif %}
+
                         <div class="mb-3">
                             <label for="id_username" class="form-label">Username</label>
                             <input type="text"
@@ -36,10 +42,13 @@
                                    required>
                             {% if form.username.errors %}
                                 <div class="invalid-feedback">
-                                    {% for error in form.username.errors %}{{ error }}{% endfor %}
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
+
                         <div class="mb-3">
                             <label for="id_email" class="form-label">Email</label>
                             <input type="email"
@@ -52,11 +61,14 @@
                                    required>
                             {% if form.email.errors %}
                                 <div class="invalid-feedback">
-                                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                             <div class="form-text muted">Helps with account recovery</div>
                         </div>
+
                         <div class="mb-3">
                             <label for="id_password1" class="form-label">Password</label>
                             <input type="password"
@@ -68,10 +80,13 @@
                                    required>
                             {% if form.password1.errors %}
                                 <div class="invalid-feedback">
-                                    {% for error in form.password1.errors %}{{ error }}{% endfor %}
+                                    {% for error in form.password1.errors %}
+                                        {{ error }}
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
+
                         <div class="mb-4">
                             <label for="id_password2" class="form-label">Confirm Password</label>
                             <input type="password"
@@ -83,17 +98,23 @@
                                    required>
                             {% if form.password2.errors %}
                                 <div class="invalid-feedback">
-                                    {% for error in form.password2.errors %}{{ error }}{% endfor %}
+                                    {% for error in form.password2.errors %}
+                                        {{ error }}
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
-                        <div class="d-grid">
+
+                        <!-- Centered Sign Up button -->
+                        <div class="text-center mt-4">
                             <button type="submit" class="btn btn-primary btn-icon">
                                 <i class="fa-solid fa-user-plus"></i>Sign Up
                             </button>
                         </div>
                     </form>
+
                     <hr class="my-4 border-secondary">
+
                     <div class="text-center">
                         <p class="muted mb-2">Already have an account?</p>
                         <a class="btn btn-outline-light btn-icon"

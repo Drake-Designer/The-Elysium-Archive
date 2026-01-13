@@ -2,6 +2,9 @@
 
 from allauth.account.forms import LoginForm, SignupForm
 from django import forms
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from .models import UserProfile
 
@@ -61,6 +64,76 @@ class ElysiumLoginForm(LoginForm):
             }
         )
 
+    def clean(self):
+        """Validate login with case sensitive checks and show one warning."""
+        cleaned_data = forms.Form.clean(self)
+
+        login_input = (cleaned_data.get("login") or "").strip()
+        password = cleaned_data.get("password") or ""
+
+        if not login_input or not password:
+            return cleaned_data
+
+        exact_user = self._get_user_exact(login_input)
+
+        if exact_user:
+            if not exact_user.check_password(password):
+                self.add_error("password", _("Incorrect password."))
+                raise ValidationError(_("Incorrect password."))
+
+            return super().clean()
+
+        ci_user = self._get_user_case_insensitive(login_input)
+
+        if ci_user:
+            if ci_user.check_password(password):
+                self.add_error("login", _("Incorrect username or email."))
+                raise ValidationError(
+                    _("Incorrect username or email. Login is case sensitive.")
+                )
+
+            self.add_error("login", _("Incorrect username or email."))
+            self.add_error("password", _("Incorrect password."))
+            raise ValidationError(
+                _("Incorrect username or email and incorrect password. Login is case sensitive.")
+            )
+
+        self.add_error("login", _("Incorrect username or email."))
+        raise ValidationError(
+            _("Incorrect username or email. Login is case sensitive.")
+        )
+
+    def _get_user_exact(self, login_input):
+        """Return a user using an exact match on username or email."""
+        UserModel = get_user_model()
+
+        try:
+            return UserModel.objects.get(**{UserModel.USERNAME_FIELD: login_input})
+        except UserModel.DoesNotExist:
+            pass
+        except UserModel.MultipleObjectsReturned:
+            return UserModel.objects.filter(**{UserModel.USERNAME_FIELD: login_input}).first()
+
+        try:
+            return UserModel.objects.get(email=login_input)
+        except UserModel.DoesNotExist:
+            return None
+        except UserModel.MultipleObjectsReturned:
+            return UserModel.objects.filter(email=login_input).first()
+
+    def _get_user_case_insensitive(self, login_input):
+        """Return a user using a case insensitive match on username or email."""
+        UserModel = get_user_model()
+
+        username_field = UserModel.USERNAME_FIELD
+        username_lookup = f"{username_field}__iexact"
+
+        user = UserModel.objects.filter(**{username_lookup: login_input}).first()
+        if user:
+            return user
+
+        return UserModel.objects.filter(email__iexact=login_input).first()
+
 
 class UserProfileForm(forms.ModelForm):
     """Form for editing user profile information."""
@@ -99,5 +172,4 @@ class UserProfileForm(forms.ModelForm):
         }
 
 
-# Alias for backward compatibility if needed
 ProfileForm = UserProfileForm

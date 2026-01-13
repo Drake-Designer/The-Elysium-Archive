@@ -8,7 +8,7 @@
     <section class="container py-5">
         <div class="panel p-4 p-lg-5">
             <h1 class="h3 mb-4">
-                <i class="fa-solid fa-book-skull me-2"></i>My Archive
+                <i class="fa-solid fa-book-skull"></i>My Archive
             </h1>
             <p class="muted mb-4">Your unlocked entries from The Elysium Archive.</p>
             {% if unlocked_products %}
@@ -40,7 +40,7 @@
                                 </div>
                                 <div class="entry-card-footer">
                                     <span class="badge badge-sealed">
-                                        <i class="fa-solid fa-lock-open"></i>Unlocked
+                                        <i class="fa-solid fa-lock-open me-2"></i>Unlocked
                                     </span>
                                     <a href="{% url 'archive_read' item.product.slug %}"
                                        class="btn btn-outline-light btn-icon">

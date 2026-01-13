@@ -12,15 +12,12 @@
         <div class="row g-4 align-items-center mb-4">
             <div class="col-12 col-lg-7">
                 <div class="panel p-4">
-                    <h1 class="display-6 mb-2">The Archive Catalog</h1>
-                    <p class="muted mb-3">
-                        Browse sealed entries before you join. Each purchase unlocks a private page tied to your account.
+                    <h1 class="h3 mb-2">
+                        <i class="fa-solid fa-archive me-2"></i>The Archive Catalog
+                    </h1>
+                    <p class="muted mb-0">
+                        Browse entries. Buy once, read forever on-site.
                     </p>
-                    <ul class="mb-0">
-                        <li>No downloads and no external files.</li>
-                        <li>Read on site anytime after unlock.</li>
-                        <li>Access stays linked to your account.</li>
-                    </ul>
                 </div>
             </div>
             <div class="col-12 col-lg-5">
@@ -43,52 +40,51 @@
                 </div>
             </div>
         </div>
-        <!-- Search and filter bar -->
+
+        <!-- Search + filters -->
         <div class="panel p-4 mb-4">
-            <div class="row g-3 align-items-end mb-3">
-                <div class="col-12 col-lg-8">
-                    <h2 class="h4 mb-1">Browse entries</h2>
-                    <p class="muted mb-0">This is a public catalog. Full content unlocks only after login and purchase.</p>
+            <form method="get" action="{% url 'archive' %}" class="row g-3 align-items-end">
+                <div class="col-12 col-lg-7">
+                    <label for="archiveSearch" class="form-label">Search the Archive</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input id="archiveSearch"
+                               type="text"
+                               class="form-control"
+                               name="q"
+                               placeholder="Title, category, tagline..."
+                               value="{{ search_query }}">
+                    </div>
                 </div>
-                <div class="col-12 col-lg-4 text-lg-end">
-                    <span class="badge text-bg-secondary">12 per page</span>
+
+                <div class="col-12 col-lg-5">
+                    <div class="d-grid d-lg-flex gap-2 justify-content-lg-end">
+                        <button type="submit" class="btn btn-primary btn-icon">
+                            <i class="fa-solid fa-filter"></i>Search
+                        </button>
+                        <a href="{% url 'archive' %}" class="btn btn-outline-light btn-icon">
+                            <i class="fa-solid fa-rotate-left"></i>Reset
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <form method="get" class="d-flex gap-2">
-                {% if active_category %}<input type="hidden" name="cat" value="{{ active_category }}">{% endif %}
-                {% if show_deals %}<input type="hidden" name="deals" value="true">{% endif %}
-                <input type="text"
-                       name="q"
-                       class="form-control"
-                       placeholder="Search by title, category, or description..."
-                       value="{{ search_query }}"
-                       aria-label="Search products">
-                <button type="submit" class="btn btn-primary btn-icon" aria-label="Search">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-                {% if search_query or active_category or show_deals %}
-                    <a href="{% url 'archive' %}"
-                       class="btn btn-outline-light btn-icon"
-                       aria-label="Clear filters">
-                        <i class="fa-solid fa-times"></i>
-                    </a>
-                {% endif %}
             </form>
-            <div class="d-flex flex-wrap gap-2 mt-3">
-                <!-- ALL button -->
-                <a href="{% url 'archive' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
+
+            <hr class="border-secondary my-4">
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'archive' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}{% if active_category and not search_query %}?cat={{ active_category }}{% endif %}{% if show_deals and not search_query and not active_category %}?deals=true{% endif %}"
                    class="btn btn-sm {% if not active_category and not show_deals %}btn-primary{% else %}btn-outline-light{% endif %} btn-icon"
-                   aria-label="Show all categories">
+                   aria-label="Show all entries">
                     <i class="fa-solid fa-layer-group"></i>All
                 </a>
-                <!-- DEALS filter button -->
+
                 <a href="{% url 'archive' %}?deals=true{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="btn btn-sm {% if show_deals %}btn-primary{% else %}btn-outline-light{% endif %} btn-icon deal-filter-btn"
                    aria-label="Show deals only">
                     <i class="fa-solid fa-tags"></i>💰 DEALS
                 </a>
+
                 {% if categories %}
-                    <!-- Category buttons -->
                     {% for c in categories %}
                         <a href="{% url 'archive' %}?cat={{ c.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                            class="btn btn-sm {% if active_category == c.slug %}btn-primary{% else %}btn-outline-light{% endif %} btn-icon"
@@ -98,6 +94,7 @@
                     {% endfor %}
                 {% endif %}
             </div>
+
             {% if search_query or active_category or show_deals %}
                 <p class="small muted mt-2 mb-0">
                     Filters:
@@ -112,6 +109,8 @@
                 </p>
             {% endif %}
         </div>
+
+        <!-- Products grid -->
         <div class="row g-3" id="products-grid">
             {% for product in products %}
                 <div class="col-12 col-md-6 col-xl-4">
@@ -129,7 +128,9 @@
                                 <i class="fa-solid fa-book fa-2x placeholder-icon"></i>
                             </div>
                         {% endif %}
-                        <div class="p-3">
+
+                        <!-- CHANGED: make this a flex column that grows -->
+                        <div class="p-3 d-flex flex-column flex-grow-1">
                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                                 <div>
                                     <h3 class="h5 mb-1">{{ product.title }}</h3>
@@ -143,6 +144,7 @@
                                         <span class="badge text-bg-secondary small">Uncategorized</span>
                                     {% endif %}
                                 </div>
+
                                 <!-- Deal and status badges -->
                                 <div class="d-flex flex-column gap-1 align-items-end">
                                     {% if product.is_deal %}<span class="badge badge-deal-gold">💰 DEAL</span>{% endif %}
@@ -153,9 +155,13 @@
                                     {% endif %}
                                 </div>
                             </div>
+
                             <p class="small muted mb-3">{{ product.tagline }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
+
+                            <!-- CHANGED: push CTA row to bottom of card -->
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
                                 <span class="price">{{ product.price }} €</span>
+
                                 {% if product.id|stringformat:"s" in cart_product_ids %}
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="small muted">In cart</span>
@@ -182,12 +188,21 @@
                 </div>
             {% endfor %}
         </div>
+
+        <!-- Pagination -->
         {% if is_paginated %}
-            <!-- Pagination controls -->
-            <nav aria-label="Page navigation"
-                 class="mt-5 d-flex justify-content-center">
-                <ul class="pagination">
-                    {% for num in page_obj.paginator.page_range %}
+            <nav class="mt-4" aria-label="Archive pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if active_category %}&cat={{ active_category }}{% endif %}{% if show_deals %}&deals=true{% endif %}">
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
                         {% if page_obj.number == num %}
                             <li class="page-item active">
                                 <span class="page-link">{{ num }}</span>
@@ -195,24 +210,23 @@
                         {% else %}
                             <li class="page-item">
                                 <a class="page-link"
-                                   href="?page={{ num }}{% if active_category %}&cat={{ active_category }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if show_deals %}&deals=true{% endif %}">
+                                   href="?page={{ num }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if active_category %}&cat={{ active_category }}{% endif %}{% if show_deals %}&deals=true{% endif %}">
                                     {{ num }}
                                 </a>
                             </li>
                         {% endif %}
                     {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if active_category %}&cat={{ active_category }}{% endif %}{% if show_deals %}&deals=true{% endif %}">
+                                Next
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </nav>
-        {% endif %}
-        {% if not user.is_authenticated %}
-            <!-- Guest conversion card -->
-            <div class="panel p-4 mt-4 text-center">
-                <h2 class="h4 mb-2">Ready to unlock your first entry?</h2>
-                <p class="muted mb-3">Register, then purchase an Archive to reveal the private page inside The Elysium.</p>
-                <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
-                    <i class="fa-solid fa-key"></i>Become a Member
-                </a>
-            </div>
         {% endif %}
     </section>
 {% endblock content %}

@@ -12,7 +12,7 @@
 <div class="container py-5 min-vh-100">
   <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-8">
-      
+
       <!-- Page Header -->
       <header class="text-center mb-5 footer-page-header">
         <h1 class="display-3 fw-bold mb-4 lh-1 footer-page-title">Terms of the Archiver</h1>
@@ -76,13 +76,13 @@
           <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">III. Prohibited Rites</h2>
           <ul class="list-unstyled">
             <li class="footer-highlight-item danger">
-              <strong>URL Manipulation:</strong> Direct access to protected content forbidden.
+              <strong>URL Manipulation:</strong> Direct access to protected content forbidden
             </li>
             <li class="footer-highlight-item danger">
-              <strong>Multiple Accounts:</strong> One soul, one account. Multiple accounts = banishment.
+              <strong>Multiple Accounts:</strong> One soul, one account. Multiple accounts = banishment
             </li>
             <li class="footer-highlight-item danger">
-              <strong>Content Scraping:</strong> No downloads, screenshots, or copying permitted.
+              <strong>Content Scraping:</strong> No downloads, screenshots, or copying permitted
             </li>
           </ul>
         </section>
@@ -91,16 +91,25 @@
         <section class="mb-5">
           <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">IV. The Final Reckoning</h2>
           <p class="lead mb-4">By accessing this site, you swear the Archiver's Oath. Violation leads to eternal banishment from the Archive.</p>
-          <div class="footer-alert">
-            <i class="fa-solid fa-scroll-old footer-alert-icon"></i>
-            <strong>Your access = Your oath.</strong> No warnings. No appeals.
+
+          <div class="footer-oath" role="note" aria-label="Archiver oath notice">
+            <div class="footer-oath-line footer-oath-line-1">
+              <span class="footer-oath-em">Your access</span>
+              <span class="footer-oath-eq">=</span>
+              <span class="footer-oath-em">Your oath</span>
+            </div>
+            <div class="footer-oath-line footer-oath-line-2">
+              No warnings. No appeals.
+            </div>
           </div>
         </section>
 
         <!-- Footer navigation links -->
-        <section class="text-center">
-          <a href="{% url 'privacy_covenant' %}" class="btn btn-outline-light">Privacy of the Covenant</a>
-          <a href="{% url 'contact_lore' %}" class="btn btn-outline-light">Contact the Lore</a>
+        <section class="footer-page-actions">
+          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="{% url 'privacy_covenant' %}" class="btn btn-outline-light">Privacy of the Covenant</a>
+            <a href="{% url 'contact_lore' %}" class="btn btn-outline-light">Contact the Lore</a>
+          </div>
         </section>
       </div>
     </div>

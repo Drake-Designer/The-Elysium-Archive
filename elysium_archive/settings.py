@@ -58,6 +58,9 @@ CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", default=[])
 if not CSRF_TRUSTED_ORIGINS and IS_HEROKU:
     CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com"]
 
+if DEBUG and not CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1", "http://localhost"]
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
@@ -237,7 +240,7 @@ LOGOUT_REDIRECT_URL = "home"
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
+    "accounts.backends.CaseSensitiveAuthenticationBackend",
 ]
 
 # Allauth configuration
@@ -272,6 +275,9 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "The Elysium Archive <no-reply@the-elysium-archive.com>",
 )
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+
+#Contact recipient is configurable via env
+CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL)
 
 # Optional but helps consistency
 ACCOUNT_EMAIL_SUBJECT_PREFIX = os.environ.get(
