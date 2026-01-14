@@ -1,407 +1,365 @@
 # Testing Guide - The Elysium Archive
 
-This document describes the testing strategy, automated test suite, and manual testing procedures for The Elysium Archive project. The test suite covers all core functionality and grows as new features are added.
-
----
+This document describes the current automated test suite and the manual testing that matches the repository as it stands.
 
 ## Automated Tests
 
+### Tooling
+
+- pytest 9.0.2
+- pytest-django 4.11.1
+- Tests are a mix of pytest-style functions and Django TestCase classes (notably in reviews).
+
+### Test Configuration
+
+Pytest configuration lives in `pyproject.toml` under `[tool.pytest.ini_options]`:
+
+- `DJANGO_SETTINGS_MODULE = "elysium_archive.settings_test"`
+- `python_files = ["test_*.py", "*_test.py", "tests.py"]`
+- `testpaths = ["TESTS"]`
+- `addopts = "-ra"`
+
+`elysium_archive/settings_test.py` overrides:
+
+- `STATICFILES_STORAGE` uses `StaticFilesStorage`
+- `STORAGES` uses `FileSystemStorage` for media and `StaticFilesStorage` for static
+- `EMAIL_BACKEND` uses `django.core.mail.backends.locmem.EmailBackend`
+- `ACCOUNT_EMAIL_HTML = True`
+- `PASSWORD_HASHERS` uses `MD5PasswordHasher`
+
 ### Running Tests
 
-The project uses **pytest 9.0.2** with **pytest-django 4.11.1** for automated testing.
-
-**Run all tests:**
+Run all tests:
 
 ```bash
 pytest
 ```
 
-**Run with verbose output:**
+Verbose output:
 
 ```bash
 pytest -v
 ```
 
-**Run specific test file:**
+Run a specific test file:
 
 ```bash
-pytest accounts/tests/test_profile.py -v
+pytest TESTS/accounts/test_profile.py -v
 ```
 
-**Run specific test class:**
+Run a specific test class:
 
 ```bash
-pytest products/tests/test_access_control.py::TestProductAccessControl -v
+pytest TESTS/products/test_access_control.py::TestProductAccessControl -v
 ```
 
-**Run specific test:**
+Run a specific test:
 
 ```bash
-pytest orders/tests.py::TestWebhookHandling::test_webhook_idempotent_same_event_twice -v
+pytest TESTS/orders/test_orders.py::TestWebhookHandling::test_webhook_idempotent_same_event_twice -v
 ```
 
-**Show print statements:**
+Show print output:
 
 ```bash
 pytest -v -s
 ```
 
-### Test Configuration
+### Test Inventory Summary
 
-Tests use a dedicated test settings module (`elysium_archive/settings_test.py`) that:
+Test discovery (under `TESTS/`) currently finds 136 tests across 11 files.
 
-- Uses simple `StaticFilesStorage` instead of manifest-based storage.
-- Uses StaticFilesStorage in settings_test; WhiteNoise middleware is removed in the conftest autouse fixture.
-- Uses in-memory email backend (no real emails sent).
-- Uses fast MD5 password hasher for speed.
+## Automated Test Coverage by App
 
-Configuration is in `pytest.ini`:
+### Accounts
 
-```ini
-[pytest]
-DJANGO_SETTINGS_MODULE = elysium_archive.settings_test
-python_files = tests.py test_*.py *_tests.py
-```
+Files:
+- `TESTS/accounts/test_auth_pages.py`
+- `TESTS/accounts/test_email_gate.py`
+- `TESTS/accounts/test_profile.py`
 
-### Automated Test Coverage by Feature
+Coverage:
+- Login, signup, and logout page behaviour (200/302)
+- Email verification gate for dashboard, profile, and my-archive redirects
+- Anonymous users redirected to login for account pages
+- My Archive display for verified users, including deleted-product handling
+- Dashboard form POST updates display_name
+- Profile view shows username/email and display_name form (profile POST does not update display_name)
+- Account deletion flow (confirmation, delete, logout, redirect, message, profile removal)
 
-#### Authentication and Account Management
+Key assertions:
+- Status codes and redirect targets (`/accounts/login/`, `/accounts/email/`)
+- Template rendering and message presence
+- User/Profile database updates after delete
 
-**Files:** `accounts/tests/test_auth_pages.py` (5 tests), `accounts/tests/test_email_gate.py` (11 tests), `accounts/tests/test_profile.py` (14 tests)
+### Products
 
-**User Authentication:**
+Files:
+- `TESTS/products/test_access_control.py`
+- `TESTS/products/test_archive_read.py`
+- `TESTS/products/test_products.py`
 
-- Login page access (GET)
-- Signup page access (GET)
-- Logout flow (POST with redirect)
-- Login/signup accessibility when already authenticated
+Coverage:
+- Active vs inactive product visibility for anonymous, verified, staff, and entitled users
+- Product list includes only active items; featured items appear; inactive featured items do not
+- Product detail shows title/description/price for active items
+- Archive reading page access (login required, entitlement required, email verified)
+- Preview page content separation and CTA differences
+- My Archive links to reading page
+- Reading page navigation links
+- Product model CRUD
+- Archive card layout class checks
 
-**Email Verification Gate:**
+Key assertions:
+- Status codes (200/302/403/404)
+- Content presence or absence on preview vs reading pages
+- Correct links for reading and detail pages
+- Model persistence and deletion
 
-- Unverified users cannot access dashboard/archive/profile (302 redirect)
-- Anonymous users redirected to login
-- Verified users can access protected pages
-- My Archive displays purchased products for verified users
-- Dashboard form POST updates display_name successfully
+### Cart
 
-**User Profile Management:**
+File:
+- `TESTS/cart/test_cart.py`
 
-- Profile view requires authentication (302 redirect to login)
-- Profile displays username and email read-only
-- display_name form shows on profile page
-- display_name POST updates stored in database
-- display_name can be empty (optional field)
-- display_name respects max_length (20 chars)
-- Account deletion requires confirmation page
-- Account deletion removes user and associated profile
-- Account deletion logs out user and redirects home
-- Success message shown on deletion
+Coverage:
+- Add to cart redirects and session storage
+- Cart view renders with items or empty state
+- Remove from cart updates session
+- Cart persistence across pages
+- Validation for missing/nonexistent products and inactive products
+- Verified email required for add-to-cart
+- Totals for single and multiple items
 
-**Key assertions:** Status codes (200/302), email gate enforcement, template rendering, form handling, database state changes, messages
+Key assertions:
+- Session cart contents
+- Redirects and status codes
+- Expected product titles in rendered cart
 
----
+### Checkout
 
-#### Product Catalog and Access Control
+File:
+- `TESTS/checkout/test_checkout.py`
 
-**Files:** `products/tests/test_access_control.py` (12 tests), `products/tests.py` (4 tests)
+Coverage:
+- Verified email gate for checkout and anonymous login redirect
+- Stripe session creation mocked and redirects to Stripe
+- Order and OrderLineItem creation from cart
+- Order total calculation
+- Stripe error cleanup (Order and OrderLineItem removal)
+- Empty cart redirects to cart
+- Success page template rendering and wrong-user access
+- Cancel page template rendering and message presence
 
-**Coverage:**
+Key assertions:
+- Status codes and redirect targets
+- Order database state
+- Stripe session URL handling
 
-- Active products visible to anonymous and authenticated users
-- Inactive products return 404 for non-owners
-- Inactive products visible to staff/superusers
-- Inactive products visible to users with AccessEntitlement (purchased products)
-- Product list shows only active products
-- Product detail displays title, price, content correctly
-- Featured products appear in list
-- CRUD operations (create, read, update, delete)
+### Orders and Webhooks
 
-**Key assertions:** Access control logic, status codes (200/404), content display, database state
+File:
+- `TESTS/orders/test_orders.py`
 
----
+Coverage:
+- Webhook handling for `checkout.session.completed` (paid and unpaid)
+- Webhook handling for `payment_intent.payment_failed`
+- Webhook handling for `checkout.session.expired`
+- Idempotent entitlement creation
+- Missing/invalid signature handling and POST-only enforcement
+- Missing order ID and order without user
+- Stripe session/payment intent ID storage
+- Order model order_number generation, uniqueness, and timestamps
+- AccessEntitlement uniqueness and cascade delete
+- Order default status test exists (no explicit assertion)
 
-#### Archive Reading Pages and Content Separation
+Key assertions:
+- Response codes for webhook endpoints
+- Order status transitions and stripe ID fields
+- Entitlement counts and uniqueness
 
-**File:** `products/tests/test_archive_read.py` (12 tests)
+### Reviews
 
-**Coverage:**
+File:
+- `TESTS/reviews/test_reviews.py`
 
-- Anonymous users redirected to login when accessing reading page
-- Authenticated users without entitlement receive 403 error
-- Users with unverified email redirected to email verification
-- Owners with entitlement can access reading page (200 status)
-- Reading page displays full archive content
-- Preview page never displays full content, even for owners
-- Preview page shows "Read Full Archive" button for owners
-- Preview page shows purchase CTA for non-owners
-- My Archive links directly to reading page, not preview
-- Reading page includes navigation back to My Archive
-- Reading page includes link to product preview page
+Coverage:
+- Review form visibility for buyers vs non-buyers
+- Review creation for buyers
+- Anonymous redirect to login on review POST
+- Duplicate review prevention
+- Review display (single and multiple)
+- Rating range validation
+- Optional review title
+- Review model __str__
+- Cascade deletes for user and product
+- Review edit and delete permissions
+- Delete requires POST
 
-**Key assertions:** Access control enforcement, content separation, navigation links, permission denied handling
+Key assertions:
+- Status codes and redirects
+- Review database state and uniqueness
+- Content displayed on product detail page
 
----
+### Admin (Home)
 
-#### Shopping Cart and Session Behavior
+File:
+- `TESTS/home/test_home.py`
 
-**File:** `cart/tests.py` (11 tests)
+Coverage:
+- Admin access for anonymous, regular, and staff users
+- Admin delete actions for products (single delete and bulk delete exercised)
+- Featured flag toggled via admin change form
+- Admin product edits and deactivation
+- Admin order list/detail access for staff only
+- A placeholder test exists for delete without entitlements (no assertions)
 
-**Coverage:**
-
-- Adding product to cart redirects to product detail
-- Products stored in session as `{product_id: quantity}` dictionary
-- Cart view displays items and shows empty state
-- Removing products from cart updates session
-- Cart persists across page visits
-- Adding nonexistent/inactive products handled gracefully
-- Cart operations require verified email (add_to_cart has email gate)
-- Cart totals calculated correctly (single/multiple items)
-
-**Key assertions:** Session state management, redirects, total calculations
-
----
-
-#### Checkout and Payment Integration (Stripe)
-
-**File:** `checkout/tests.py` (13 tests)
-
-**Coverage:**
-
-- Unverified users cannot access checkout (302 to email gate)
-- Verified users can access checkout and get Stripe redirect
-- Anonymous users redirected to login
-- Checkout creates Order record in database
-- Checkout creates OrderLineItem for each cart item
-- Order total calculated from cart
-- Empty cart shows warning message
-- Success page displays order details
-- Success page displays order status; paid status is set by the webhook.
-- Cancel page shows cancellation message
-
-**Test setup:** Uses `@patch('stripe.checkout.Session.create')` to mock Stripe without real API calls
-
-**Key assertions:** Access control, order creation, Stripe session creation, redirects, order status transitions
-
----
-
-#### Webhook Handling and Access Entitlements
-
-**File:** `orders/tests.py` (16 tests)
-
-**Coverage:**
-
-- Webhook `checkout.session.completed` creates AccessEntitlements
-- Webhook updates order status to paid
-- Webhook stores Stripe session ID and payment intent ID.
-- **Idempotency:** Same webhook event twice creates only one AccessEntitlement (verified using `get_or_create`)
-- Payment failure webhook sets order status to failed
-- Invalid webhook signature rejected (signature verification)
-- POST only (GET not allowed)
-- Missing order handled gracefully
-- Order number generated as UUID on save
-- Order number is unique
-- Default order status is pending
-- Order timestamps (created_at/updated_at) work correctly
-- AccessEntitlement is unique per (user, product) pair
-- AccessEntitlement deleted when product deleted (cascade delete)
-
-**Test setup:** Uses `@patch('stripe.Webhook.construct_event')` to mock webhook verification without real Stripe calls
-
-**Key assertions:** Database state integrity, webhook idempotency, signature validation, cascade deletes
-
----
-
-#### Reviews and User-Generated Content
-
-**File:** `reviews/tests.py` (19 tests)
-
-**Coverage:**
-
-- Non-buyers cannot see or post reviews
-- Buyers (users with AccessEntitlement) can see review form and post reviews
-- Anonymous users cannot post reviews
-- User cannot post duplicate review for same product (unique constraint enforced)
-- Reviews appear on product detail page
-- Multiple reviews display correctly on product
-- Review rating is valid range (1-5)
-- Review title is optional (blank=True)
-- Review deleted when user deleted (cascade delete)
-- Review deleted when product deleted (cascade delete)
-- **Edit Reviews:** Users can edit their own reviews via dedicated edit page
-- **Edit Permission:** Users cannot edit other users' reviews (ownership verification)
-- **Edit Form:** GET request to edit page shows pre-filled form with current values
-- **Delete Reviews:** Users can delete their own reviews
-- **Delete Permission:** Users cannot delete other users' reviews (ownership verification)
-- **Delete Method:** Delete requires POST method (405 on GET)
-
-**Key assertions:** Access control based on purchase history, unique constraints, content display, cascade deletes, ownership verification for edit/delete
-
----
-
-#### Admin Interface and Safety Protections
-
-**File:** `home/tests.py` (13 tests)
-
-**Coverage:**
-
-- Anonymous users cannot access Django admin (403/302)
-- Regular users cannot access Django admin (403/302)
-- Staff/superusers can access Django admin (200)
-- Admins can delete products without entitlements
-- Admins **cannot** delete products with AccessEntitlements (safety protection)
-- Bulk delete blocked if ANY product has entitlements (all-or-nothing protection)
-- Admins can mark products as featured via bulk action
-- Admins can remove featured status via bulk action
-- Regular users cannot toggle featured status (action not visible)
-- Admins can edit product details (title, description, price) via form
-- Admins can deactivate products (set `is_active=False`)
-- Admins can view order list and order details
-- Regular users cannot view orders (staff-only)
-
-**Test setup:** Uses actual Django admin form submission (no mocking needed)
-
-**Key assertions:** Staff-only access control, delete protection logic, admin bulk actions, form validation
-
----
+Key assertions:
+- Status codes for admin access
+- Product database changes after admin POSTs
+- Staff-only access to orders in admin
 
 ## Manual Testing Procedures
 
-Manual tests verify user-facing functionality that automated tests may not fully cover (UI/UX, visual rendering, real Stripe integration).
+Manual tests validate user-facing behaviour, page rendering, and third-party flows that are not fully covered by automated tests.
 
 ### Test Environment Setup
 
-1. **Create test user:**
+1. Create a superuser:
 
-   ```bash
-   python manage.py createsuperuser
-   # Username: testadmin
-   # Email: admin@example.com
-   # Password: (your choice)
-   ```
+```bash
+python manage.py createsuperuser
+```
 
-2. **Create test products:**
+2. Create a test category and product:
 
-   ```bash
-   python manage.py shell
-   >>> from products.models import Category, Product
-   >>> from decimal import Decimal
-   >>> cat = Category.objects.create(name="Test", slug="test")
-   >>> Product.objects.create(
-   ...     title="Test Product",
-   ...     slug="test-product",
-   ...     description="Test description",
-   ...     tagline="Test tagline",
-   ...     image_alt="Test image",
-   ...     price=Decimal("9.99"),
-   ...     category=cat
-   ... )
-   ```
+```bash
+python manage.py shell
+>>> from products.models import Category, Product
+>>> from decimal import Decimal
+>>> cat = Category.objects.create(name="Test", slug="test")
+>>> Product.objects.create(
+...     title="Test Product",
+...     slug="test-product",
+...     tagline="Test tagline",
+...     description="Test description",
+...     content="<p>Test premium content.</p>",
+...     image_alt="Test image",
+...     price=Decimal("9.99"),
+...     category=cat,
+...     is_active=True,
+... )
+```
 
-3. **Run development server:**
+3. Start the dev server:
 
-   ```bash
-   python manage.py runserver
-   ```
+```bash
+python manage.py runserver
+```
+
+Note: In DEBUG, email is sent to the console backend. Use the verification link printed in the terminal.
 
 ### Manual Test Checklist
 
 #### Authentication and Email Verification
 
-- [ ] Anonymous user visits /accounts/login/ → page loads
-- [ ] Anonymous user visits /accounts/signup/ → page loads
-- [ ] New user signs up with email → receives verification email (check console in dev)
-- [ ] User clicks email verification link → redirected to confirm
-- [ ] Unverified user tries to access /accounts/dashboard/ → redirected to /accounts/email/
-- [ ] Verified user accesses /accounts/dashboard/ → dashboard loads
+- [ ] Anonymous user visits `/accounts/login/` -> page loads
+- [ ] Anonymous user visits `/accounts/signup/` -> page loads
+- [ ] New user signs up -> verification email appears in console
+- [ ] User confirms email -> verification succeeds
+- [ ] Unverified user visits `/accounts/dashboard/` -> redirected to `/accounts/email/`
+- [ ] Verified user visits `/accounts/dashboard/` -> dashboard loads
 
-#### User Profile Management
+#### Dashboard, Profile, and Account Deletion
 
-- [ ] Verified user accesses /accounts/profile/ → profile page loads
-- [ ] User updates display_name form → displays success message
-- [ ] User accesses /accounts/delete_account/ → confirmation page with delete button
-- [ ] User confirms deletion → account deleted, redirected to home, success message
+- [ ] Verified user visits `/accounts/profile/` -> redirected to dashboard profile tab
+- [ ] Verified user updates display name in dashboard form -> success message shown
+- [ ] Verified user visits `/accounts/my-archive/` -> redirected to dashboard archive tab
+- [ ] Verified user visits `/accounts/delete/` -> confirmation page loads
+- [ ] User submits delete -> account removed, redirected to home, message shown
+- [ ] Superuser delete attempt -> blocked with message
 
-#### Product Catalog
+#### Product Catalog and Preview
 
-- [ ] Anonymous user visits /archive/ → lists only active products
-- [ ] Product detail page shows title, image, description, price
-- [ ] Active product accessible to anonymous user
-- [ ] Staff user can edit product in admin → changes save
-- [ ] Staff user marks product as inactive → removed from catalog for regular users
-- [ ] Staff user can toggle featured status → appears/disappears in featured list
+- [ ] Anonymous user visits `/archive/` -> active products listed
+- [ ] Product detail page shows title, description, price, and CTA
+- [ ] Inactive products do not appear in the list for non-staff users
+- [ ] Staff user can edit product in admin and save changes
 
-#### Shopping Cart
+#### Cart
 
-- [ ] Verified user adds product to cart → success message shown
-- [ ] Cart persists across page visits
-- [ ] Cart shows product title, price, quantity
-- [ ] User removes product from cart → removed from display
-- [ ] User views empty cart → "empty" message or CTA to browse
+- [ ] Verified user adds product to cart from preview page -> success message
+- [ ] Visit `/cart/` -> items listed and totals shown
+- [ ] Remove item via cart -> item removed
+- [ ] Empty cart shows empty state
+- [ ] Unverified user visits `/cart/` or `/cart/add/` -> redirected to `/accounts/email/`
 
-#### Checkout
+#### Checkout (Stripe Test Mode)
 
-- [ ] Verified user with items in cart accesses /checkout/
-- [ ] Redirects to Stripe hosted checkout (test mode)
-- [ ] User enters test Stripe card (4242 4242 4242 4242, exp 12/34, CVC 567)
-- [ ] Stripe redirects to success page after payment
-- [ ] Order appears in user's My Archive
-- [ ] Admin can view order in Django admin with order details
+- [ ] Verified user clicks checkout -> POST to `/checkout/` and redirect to Stripe
+- [ ] Use test card `4242 4242 4242 4242` with any future expiry and CVC
+- [ ] Stripe success -> redirected to `/checkout/success/<order_number>/`
+- [ ] Stripe cancel -> redirected to `/checkout/cancel/`
+- [ ] Order visible in admin (`/admin/orders/order/`)
+
+Webhook endpoint for Stripe CLI testing:
+- `/checkout/wh/` (alias `/checkout/webhook/`)
 
 #### Reviews
 
-- [ ] User who purchased product can post review on product detail page
-- [ ] User without purchase cannot see/post review form
-- [ ] Posted review appears on product detail page
-- [ ] User cannot post second review for same product (form disabled or error message)
-
-#### Admin Interface
-
-- [ ] Staff user accesses /admin/ → Django admin loads
-- [ ] Regular user tries to access /admin/ → 403 Forbidden
-- [ ] Admin bulk delete product with entitlements → error message, not deleted
-- [ ] Admin bulk mark/remove featured → appears/disappears in featured list
-- [ ] Admin edits product form → saves changes
-- [ ] Admin deactivates product → removed from catalog for users
+- [ ] Buyer sees review form on product detail page
+- [ ] Non-buyer does not see review form
+- [ ] Buyer submits review -> appears on product detail page
+- [ ] Buyer edits review via `/archive/<slug>/review/<id>/edit/`
+- [ ] Buyer deletes review via POST to `/archive/<slug>/review/<id>/delete/`
+- [ ] Non-owner edit/delete -> redirected with error message
+- [ ] Delete via GET returns 405
 
 #### Archive Reading Experience
 
-- [ ] Owner clicks "Read" in My Archive → opens reading page with full content
-- [ ] Owner clicks "Read Full Archive" on preview page → opens reading page
-- [ ] Preview page never shows full content, even for owners
-- [ ] Anonymous user tries to access `/archive/<slug>/read/` → redirected to login
-- [ ] Non-owner tries to access reading page → 403 Forbidden
-- [ ] Reading page displays hero image, title, and complete archive text
-- [ ] Reading page has "Back to My Archive" link
-- [ ] Reading page has "View Details" link to preview page
+- [ ] Owner clicks "Read Full Archive" -> `/archive/<slug>/read/` opens
+- [ ] Preview page does not show full content
+- [ ] Anonymous user visits `/archive/<slug>/read/` -> redirected to login
+- [ ] Verified user without entitlement -> 403
+- [ ] Unverified user with entitlement -> redirected to `/accounts/email/`
+- [ ] Reading page contains navigation back to My Archive and to preview page
 
-#### Review Management
+#### Admin Interface
 
-- [ ] Buyer submits review → appears on product page with "Verified purchase" badge
-- [ ] User sees "Edit Review" and "Delete Review" buttons on their own review
-- [ ] User clicks "Edit Review" → opens edit page with pre-filled form
-- [ ] User edits review and saves → changes appear immediately on product page
-- [ ] User clicks "Delete Review" → confirmation prompt appears
-- [ ] User confirms deletion → review removed from product page
-- [ ] User tries to edit another user's review → access denied
-- [ ] User tries to delete another user's review → access denied
+- [ ] Staff user accesses `/admin/` -> admin loads
+- [ ] Regular user accesses `/admin/` -> 403 or redirect to login
+- [ ] Staff user edits products and toggles `is_featured`
+- [ ] Staff user can view order list and order detail pages
+- [ ] Test delete and bulk delete in admin and confirm observed behaviour
 
----
+### Error Page Testing
+
+Staff-only test URLs exist for error pages:
+
+- `/_test/errors/` (dashboard)
+- `/_test/errors/400/`
+- `/_test/errors/403/`
+- `/_test/errors/404/`
+- `/_test/errors/500/`
+
+Verify each renders the intended themed error page. These should be tested with `DEBUG=False` for production parity.
+
+### Security Headers
+
+With `DEBUG=False`, confirm response headers include:
+
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
 
 ## Known Issues
 
-None. All 128 automated tests pass.
+None known.
 
----
+## CI/CD and Continuous Integration (Recommended)
 
-## CI/CD & Continuous Integration
+No CI workflow is included in the repository. If you add one, keep it aligned with the repo's Python version.
 
-For production, tests should run in CI/CD pipeline:
-
-- **GitHub Actions:** Add workflow file (example: `.github/workflows/test.yml`)
-- **Pre-commit:** Run `pytest` before allowing commits
-- **Deployment:** Require all tests to pass before deploying
-
-### Example GitHub Actions Workflow
+Example GitHub Actions workflow:
 
 ```yaml
 name: Run Tests
@@ -412,172 +370,93 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.14'
       - run: pip install -r dev-requirements.txt
       - run: pytest --tb=short
 ```
 
----
-
 ## Debugging Failed Tests
 
-If a test fails during development:
+1. Verbose traceback:
 
-1. **Run with verbose traceback:**
+```bash
+pytest <test_name> -vv --tb=long
+```
 
-   ```bash
-   pytest <test_name> -vv --tb=long
-   ```
+2. Show print/debug output:
 
-2. **Show print/debug output:**
+```bash
+pytest <test_name> -vv -s
+```
 
-   ```bash
-   pytest <test_name> -vv -s
-   ```
+3. Stop on first failure:
 
-3. **Stop on first failure:**
+```bash
+pytest -x
+```
 
-   ```bash
-   pytest -x
-   ```
+4. Run in debugger (pdb):
 
-4. **Run in debugger (pdb):**
+```bash
+pytest <test_name> --pdb
+```
 
-   ```bash
-   pytest <test_name> --pdb
-   ```
+Notes:
 
-5. **Check database state:**
-
-   - Automated tests use in-memory SQLite (:memory:)
-   - Each test gets a fresh database
-   - Use `client.get()` and `response.context` to inspect request context
-   - Print queries: `from django.db import connection; print(connection.queries)`
-
----
+- pytest-django uses Django's test database based on `elysium_archive.settings_test`.
+- Use `response.context` to inspect template context in tests.
+- Print queries with:
+  `from django.db import connection; print(connection.queries)`
 
 ## Adding New Tests
 
-When adding new features:
+Tests live under `TESTS/` and are discovered by `testpaths = ["TESTS"]`.
 
-1. Create test file in app's `tests/` folder or `tests.py`:
+Example layout:
 
-   ```text
-   apps/<app_name>/tests/
-   ├── __init__.py
-   ├── test_feature1.py
-   └── test_feature2.py
-   ```
+```text
+TESTS/
+  accounts/
+    test_auth_pages.py
+    test_new_feature.py
+```
 
-2. Use existing fixtures from `conftest.py`:
+Example test using existing fixtures:
 
-   ```python
-   import pytest
+```python
+import pytest
+from django.urls import reverse
 
-   @pytest.mark.django_db
-   class TestNewFeature:
-       def test_something(self, client, verified_user, product_active):
-           """Test description in present tense."""
-           # Arrange
-           client.force_login(verified_user)
-           
-           # Act
-           response = client.get(reverse("feature_url"))
-           
-           # Assert
-           assert response.status_code == 200
-   ```
+@pytest.mark.django_db
+class TestNewFeature:
+    def test_something(self, client, verified_user, product_active):
+        client.force_login(verified_user)
+        response = client.get(reverse("archive"))
+        assert response.status_code == 200
+```
 
-3. Run tests to ensure they pass:
+Run a new file:
 
-   ```bash
-   pytest <new_test_file> -v
-   ```
-
----
+```bash
+pytest TESTS/accounts/test_new_feature.py -v
+```
 
 ## Test Fixtures (conftest.py)
 
-Available pytest fixtures in `conftest.py`:
+Available fixtures defined in `conftest.py`:
 
-- **`verified_user`** - User with verified email (for protected pages)
-- **`unverified_user`** - User without verified email
-- **`staff_user`** - Django superuser (for admin tests)
-- **`category`** - Test Category object
-- **`product_active`** - Active Product (is_active=True)
-- **`product_inactive`** - Inactive Product (is_active=False)
-- **`entitlement`** - AccessEntitlement for verified_user
-- **`order_pending`** - Pending Order with line items
-- **`order_paid`** - Paid Order (status='paid')
-- **`client`** - Django test client (built-in pytest-django)
-- **`db`** - Database access marker (built-in pytest-django)
+- `category`
+- `product_active`
+- `product_inactive`
+- `verified_user`
+- `unverified_user`
+- `staff_user`
+- `client_with_cart`
+- `entitlement`
+- `order_pending`
+- `order_paid`
 
----
-
-## Manual Testing Checklist
-
-### Error Pages Testing
-
-To verify custom error pages work correctly in production:
-
-1. **Test 404 Page:**
-   - Navigate to `/nonexistent-url/`
-   - Verify custom 404 page displays with dark fantasy styling
-   - Check navigation links (Home, Archive, My Archive) work
-   - Confirm page extends base template (has navbar, footer)
-
-2. **Test 403 Page:**
-   - Try accessing `/archive/<slug>/read/` without purchase
-   - Verify custom 403 page displays
-   - Check login/purchase prompts appear for non-authenticated users
-   - Confirm "My Archive" link appears for authenticated users
-
-3. **Test 500 Page:**
-   - Temporarily introduce a server error (e.g., in a view)
-   - Verify custom 500 page displays with inline styles
-   - Check page works even when static files fail to load
-   - Confirm basic navigation links work (no Django template tags)
-
-4. **Test 400 Page:**
-   - Send malformed POST request (e.g., missing CSRF token)
-   - Verify custom 400 page displays
-   - Check error message is clear and user-friendly
-
-**Note:** Error pages should only be tested with `DEBUG=False` in settings.
-
-### Security Headers Verification
-
-Test security headers are properly set in production:
-
-1. Open browser DevTools → Network tab
-2. Load any page on live site
-3. Check Response Headers for:
-   - `X-Frame-Options: DENY`
-   - `X-Content-Type-Options: nosniff`
-   - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
-
-Use online tools like [securityheaders.com](https://securityheaders.com/) for comprehensive analysis.
-
----
-
-## Performance Notes
-
-- **Full test suite:** ~1.5 seconds (110 tests)
-- **Single test file:** ~0.3-0.5 seconds
-- **Stripe mocking:** Uses `@patch()` to avoid real API calls
-- **Database:** In-memory SQLite (fast, isolated, no cleanup needed)
-- **Email:** In-memory backend (no real emails, checked via `response.context['messages']`)
-
----
-
-## Support & Questions
-
-For test failures or questions:
-
-1. Check test output: `pytest -vv --tb=short`
-2. Review test source code in app `tests/` folders
-3. Check fixtures in `conftest.py`
-4. Verify app views and models match test expectations
+pytest-django built-ins such as `client` and `db` are also available.
