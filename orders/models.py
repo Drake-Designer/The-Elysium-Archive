@@ -31,10 +31,10 @@ class Order(models.Model):
     stripe_payment_intent_id: models.CharField
     created_at: models.DateTimeField
     updated_at: models.DateTimeField
-    
+
     # Django auto-generated
     id: int
-    
+
     # Reverse relations
     if TYPE_CHECKING:
         line_items: "QuerySet[OrderLineItem]"
@@ -61,13 +61,13 @@ class Order(models.Model):
         max_length=255,
         blank=True,
         default="",
-        help_text="Stripe checkout session ID for tracing"
+        help_text="Stripe checkout session ID for tracing",
     )
     stripe_payment_intent_id = models.CharField(
         max_length=255,
         blank=True,
         default="",
-        help_text="Stripe payment intent ID for auditing"
+        help_text="Stripe payment intent ID for auditing",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -96,7 +96,7 @@ class OrderLineItem(models.Model):
     product_price: models.DecimalField
     quantity: models.PositiveIntegerField
     line_total: models.DecimalField
-    
+
     # Django auto-generated
     id: int
 
@@ -128,9 +128,7 @@ class OrderLineItem(models.Model):
     )
 
     def __str__(self) -> str:
-        return (
-            f"{self.quantity}x {self.product_title} (Order {self.order.order_number})"
-        )
+        return f"{self.quantity}x {self.product_title} (Order {self.order.order_number})"
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Calculate line total before saving."""
@@ -143,7 +141,7 @@ class AccessEntitlement(models.Model):
 
     # Type hints for fields
     granted_at: models.DateTimeField
-    
+
     # Django auto-generated
     id: int
 
@@ -154,7 +152,7 @@ class AccessEntitlement(models.Model):
     )
     product = models.ForeignKey(
         Product,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="entitlements",
     )
     order = models.ForeignKey(
@@ -169,7 +167,8 @@ class AccessEntitlement(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "product"], name="unique_entitlement_per_user_product"
+                fields=["user", "product"],
+                name="unique_entitlement_per_user_product",
             )
         ]
         ordering = ["-granted_at"]

@@ -1,8 +1,8 @@
 """Admin configuration for products app."""
+from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from django import forms
 
 from .admin_utils import admin_display
 from .models import Category, DealBanner, Product, sync_products_deal_status
@@ -18,9 +18,9 @@ class ProductAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "image_alt" in self.fields:
-            # Set maxlength attribute so browser blocks typing beyond 150 chars
+            # This sets maxlength so the browser blocks typing beyond 150 chars.
             self.fields["image_alt"].widget.attrs["maxlength"] = "150"
-            # Helpful placeholder
+            # This adds a helpful placeholder for the admin form.
             self.fields["image_alt"].widget.attrs["placeholder"] = "Short descriptive text (60–125 chars recommended)"
 
 
@@ -41,11 +41,8 @@ class CategoryAdmin(admin.ModelAdmin):
     ]
 
     list_display_links = ["name_display"]
-
     search_fields = ["name", "slug", "description"]
-
     prepopulated_fields = {"slug": ("name",)}
-
     readonly_fields = ["created_at", "updated_at"]
 
     fieldsets = (
@@ -118,13 +115,9 @@ class ProductAdmin(admin.ModelAdmin):
     ]
 
     search_fields = ["title", "tagline", "description"]
-
     prepopulated_fields = {"slug": ("title",)}
-
     date_hierarchy = "created_at"
-
     autocomplete_fields = ["category"]
-
     readonly_fields = ["created_at", "updated_at", "is_deal"]
 
     fieldsets = (
@@ -137,13 +130,35 @@ class ProductAdmin(admin.ModelAdmin):
     )
 
     actions = [
-        "mark_as_active",
-        "mark_as_inactive",
+        "publish_products",
+        "unpublish_products",
         "mark_as_deal_manual",
         "remove_deal_manual",
         "exclude_from_category_deals",
         "include_in_category_deals",
     ]
+
+    def has_delete_permission(self, request, obj=None):
+        """Allow the delete view so admin can unpublish through delete."""
+        return super().has_delete_permission(request, obj=obj)
+
+    def delete_model(self, request, obj):
+        """Convert admin delete into unpublish."""
+        obj.is_active = False
+        obj.save(update_fields=["is_active", "updated_at"])
+        self.message_user(request, "Product removed from catalog (unpublished).")
+
+    def delete_queryset(self, request, queryset):
+        """Convert bulk admin delete into unpublish."""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} product(s) removed from catalog (unpublished).")
+
+    def get_actions(self, request):
+        """Remove built-in bulk delete action."""
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
 
     @admin_display("Image")
     def image_thumbnail(self, obj):
@@ -182,7 +197,7 @@ class ProductAdmin(admin.ModelAdmin):
         if obj.is_active:
             badges.append('<span class="product-status-badge active">✓ Active</span>')
         else:
-            badges.append('<span class="product-status-badge inactive">✗ Inactive</span>')
+            badges.append('<span class="product-status-badge inactive">✗ Unpublished</span>')
 
         if obj.is_featured:
             badges.append('<span class="product-status-badge featured">⭐ Featured</span>')
@@ -201,23 +216,22 @@ class ProductAdmin(admin.ModelAdmin):
             mark_safe("".join(badges)),
         )
 
-    def mark_as_active(self, request, queryset):
-        """Mark products as active."""
+    def publish_products(self, request, queryset):
+        """Publish products to the public catalog."""
         updated = queryset.update(is_active=True)
-        self.message_user(request, f"{updated} product(s) marked as active.")
-    mark_as_active.short_description = "✓ Mark as active"
+        self.message_user(request, f"{updated} product(s) published to catalog.")
+    publish_products.short_description = "✅ Publish selected products"
 
-    def mark_as_inactive(self, request, queryset):
-        """Mark products as inactive."""
+    def unpublish_products(self, request, queryset):
+        """Unpublish products from the public catalog."""
         updated = queryset.update(is_active=False)
-        self.message_user(request, f"{updated} product(s) marked as inactive.")
-    mark_as_inactive.short_description = "✗ Mark as inactive"
+        self.message_user(request, f"{updated} product(s) removed from catalog.")
+    unpublish_products.short_description = "🚫 Remove from catalog (unpublish)"
 
     def mark_as_deal_manual(self, request, queryset):
         """Force products as deals using manual flag."""
         product_pks = list(queryset.values_list("pk", flat=True))
         updated = queryset.update(deal_manual=True)
-        # Recalculate only the affected products
         sync_products_deal_status(product_pks=product_pks)
         self.message_user(request, f"{updated} product(s) forced as deals.")
     mark_as_deal_manual.short_description = "💰 Force deal (manual)"
@@ -276,15 +290,10 @@ class DealBannerAdmin(admin.ModelAdmin):
     ]
 
     search_fields = ["title", "message", "url"]
-
     list_editable = ["order"]
-
     autocomplete_fields = ["product", "category"]
-
     readonly_fields = ["created_at", "preview_banner"]
-
     date_hierarchy = "created_at"
-
     ordering = ["order", "-created_at"]
 
     fieldsets = (
@@ -293,17 +302,17 @@ class DealBannerAdmin(admin.ModelAdmin):
             "description": "Main text and icon displayed in the banner",
         }),
         ("🔗 Link Settings", {
-    "fields": ("product", "category", "url"),
-    "description": mark_safe(
-        '<div class="deal-banner-fieldset-description">'
-        "<strong>Link Priority Order:</strong><br>"
-        "1. <strong>Product</strong> → Links directly to the selected product page<br>"
-        "2. <strong>URL</strong> → Uses the custom URL provided<br>"
-        "3. <strong>Category</strong> → Links to archive filtered by category + deals<br>"
-        "4. <strong>None</strong> → Links to archive with deals filter only"
-        "</div>"
-    ),
-}),
+            "fields": ("product", "category", "url"),
+            "description": mark_safe(
+                '<div class="deal-banner-fieldset-description">'
+                "<strong>Link Priority Order:</strong><br>"
+                "1. <strong>Product</strong> → Links directly to the selected product page<br>"
+                "2. <strong>URL</strong> → Uses the custom URL provided<br>"
+                "3. <strong>Category</strong> → Links to archive filtered by category + deals<br>"
+                "4. <strong>None</strong> → Links to archive with deals filter only"
+                "</div>"
+            ),
+        }),
         ("🎨 Display Options", {
             "fields": ("is_active", "order"),
             "description": "Category also adds a badge to the banner. Lower order number = displayed first.",
@@ -422,7 +431,6 @@ class DealBannerAdmin(admin.ModelAdmin):
 
     def activate_banners(self, request, queryset):
         """Bulk activate selected banners."""
-        # Collect affected products/categories before the bulk update
         product_pks = list(queryset.filter(product__isnull=False).values_list("product__pk", flat=True))
         category_pks = list(queryset.filter(category__isnull=False).values_list("category__pk", flat=True))
         updated = queryset.update(is_active=True)

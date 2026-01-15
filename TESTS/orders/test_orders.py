@@ -437,14 +437,15 @@ class TestAccessEntitlementModel:
         )
         assert entitlements.count() == 1
 
-    def test_entitlement_deleted_with_product(self, verified_user, product_active):
-        """Entitlement deleted when product is deleted (CASCADE)."""
+    def test_entitlement_survives_product_unpublish(self, verified_user, product_active):
+        """Entitlement still exists when product is unpublished."""
         entitlement = AccessEntitlement.objects.create(
             user=verified_user, product=product_active
         )
 
         assert AccessEntitlement.objects.filter(id=entitlement.id).exists()
 
-        product_active.delete()
+        product_active.is_active = False
+        product_active.save(update_fields=["is_active", "updated_at"])
 
-        assert not AccessEntitlement.objects.filter(id=entitlement.id).exists()
+        assert AccessEntitlement.objects.filter(id=entitlement.id).exists()

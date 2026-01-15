@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import EmailMessage
+from django.db.models import Exists, OuterRef, Q
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_GET
@@ -41,11 +42,41 @@ def home_view(request):
         .order_by("-created_at")[:3]
     )
 
-    deal_banners = (
+    has_any_active_deals = Product.objects.filter(is_active=True, is_deal=True).exists()
+
+    active_deals_in_banner_category = Product.objects.filter(
+        category_id=OuterRef("category_id"),
+        is_active=True,
+        is_deal=True,
+        deal_exclude=False,
+    )
+
+    raw_banners = (
         DealBanner.objects.filter(is_active=True)
         .select_related("product", "category")
-        .order_by("order", "-created_at")[:10]
+        .annotate(has_active_category_deals=Exists(active_deals_in_banner_category))
+        # Category banners show only when category has at least one eligible active deal product.
+        .filter(Q(category__isnull=True) | Q(has_active_category_deals=True))
+        # Product-linked banners are hidden only when product is inactive and there is no fallback.
+        .exclude(
+            Q(
+                product__isnull=False,
+                product__is_active=False,
+                url="",
+                category__isnull=True,
+            )
+        )
     )
+
+    if not has_any_active_deals:
+        # Hide global deals banners (no product, no category, no url) when there are no active deal products.
+        raw_banners = raw_banners.exclude(
+            product__isnull=True,
+            category__isnull=True,
+            url="",
+        )
+
+    deal_banners = list(raw_banners.order_by("order", "-created_at")[:10])
 
     context = {
         "featured_products": featured_products,
@@ -65,11 +96,6 @@ def lore_view(request):
     return render(request, "home/lore.html")
 
 
-# ==========================================
-# ERROR PAGE TESTING (Staff Only)
-# ==========================================
-
-
 @staff_member_required
 @require_GET
 def test_errors_dashboard(request):
@@ -81,33 +107,28 @@ def test_errors_dashboard(request):
 @require_GET
 def test_error_400(request):
     """Render custom 400 template for local testing."""
-    return render(request, "error_pages/400.html", status=400)
+    return render(request, "400.html", status=400)
 
 
 @staff_member_required
 @require_GET
 def test_error_403(request):
     """Render custom 403 template for local testing."""
-    return render(request, "error_pages/403.html", status=403)
+    return render(request, "403.html", status=403)
 
 
 @staff_member_required
 @require_GET
 def test_error_404(request):
     """Render custom 404 template for local testing."""
-    return render(request, "error_pages/404.html", status=404)
+    return render(request, "404.html", status=404)
 
 
 @staff_member_required
 @require_GET
 def test_error_500(request):
     """Render custom 500 template for local testing."""
-    return render(request, "error_pages/500.html", status=500)
-
-
-# ==========================================
-# FOOTER PAGES - Covenant, Archiver, Lore
-# ==========================================
+    return render(request, "500.html", status=500)
 
 
 class PrivacyCovenantView(TemplateView):

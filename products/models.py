@@ -165,7 +165,7 @@ class DealBanner(models.Model):
 
     def get_url(self):
         """This method returns the appropriate URL for this banner."""
-        if self.product:
+        if self.product and self.product.is_active:
             return self.product.get_absolute_url()
 
         if self.url:
@@ -194,7 +194,9 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
     if not product_pks and not category_pks:
         return
 
-    qs = Product.objects.filter(Q(pk__in=product_pks) | Q(category__pk__in=category_pks)).select_related("category")
+    qs = Product.objects.filter(
+        Q(pk__in=product_pks) | Q(category__pk__in=category_pks)
+    ).select_related("category")
 
     active_banners = DealBanner.objects.filter(is_active=True)
 

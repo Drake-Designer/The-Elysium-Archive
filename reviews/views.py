@@ -2,7 +2,7 @@
 
 from django.contrib import messages
 from django.db import IntegrityError
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
 from accounts.decorators import verified_email_required
@@ -13,25 +13,26 @@ from .forms import ReviewForm
 from .models import Review
 
 
+def _user_has_entitlement(user, product) -> bool:
+    """Check if the user has purchased the given product."""
+    return AccessEntitlement.objects.filter(user=user, product=product).exists()
+
+
+def _user_is_review_owner(user, review) -> bool:
+    """Check if the current user owns the given review."""
+    return review.user.pk == user.pk
+
+
 @verified_email_required
 @require_http_methods(["POST"])
 def create_review(request, slug):
     """Create a review for a purchased product."""
-    try:
-        product = Product.objects.get(slug=slug, is_active=True)
-    except Product.DoesNotExist:
-        messages.error(request, "Product not found.")
-        return redirect("archive")
+    product = get_object_or_404(Product, slug=slug)
 
-    # Check if user has purchased this product.
-    entitlement = AccessEntitlement.objects.filter(
-        user=request.user, product=product
-    ).first()
-    if not entitlement:
+    if not _user_has_entitlement(request.user, product):
         messages.error(request, "You must purchase this archive to leave a review.")
         return redirect("product_detail", slug=slug)
 
-    # Check if user already reviewed this product.
     existing_review = Review.objects.filter(user=request.user, product=product).first()
     if existing_review:
         messages.info(request, "You have already reviewed this archive entry.")
@@ -49,7 +50,6 @@ def create_review(request, slug):
             messages.info(request, "You have already reviewed this archive entry.")
         return redirect("product_detail", slug=slug)
 
-    # If form invalid, redirect back with error.
     messages.error(request, "Please correct the errors in your review.")
     return redirect("product_detail", slug=slug)
 
@@ -58,19 +58,11 @@ def create_review(request, slug):
 @require_http_methods(["GET", "POST"])
 def edit_review(request, slug, review_id):
     """Edit an existing review for a purchased product."""
-    try:
-        product = Product.objects.get(slug=slug)
-    except Product.DoesNotExist:
-        messages.error(request, "Product not found.")
-        return redirect("archive")
+    product = get_object_or_404(Product, slug=slug)
+    review = get_object_or_404(Review, id=review_id, product=product)
 
-    # Get review and verify ownership
-    try:
-        review = Review.objects.get(id=review_id, user=request.user, product=product)
-    except Review.DoesNotExist:
-        messages.error(
-            request, "Review not found or you don't have permission to edit it."
-        )
+    if not _user_is_review_owner(request.user, review):
+        messages.error(request, "Review not found or you don't have permission to edit it.")
         return redirect("product_detail", slug=slug)
 
     if request.method == "POST":
@@ -79,8 +71,7 @@ def edit_review(request, slug, review_id):
             form.save()
             messages.success(request, "Your review has been updated.")
             return redirect("product_detail", slug=slug)
-        else:
-            messages.error(request, "Please correct the errors in your review.")
+        messages.error(request, "Please correct the errors in your review.")
     else:
         form = ReviewForm(instance=review)
 
@@ -97,20 +88,13 @@ def edit_review(request, slug, review_id):
 @require_http_methods(["POST"])
 def delete_review(request, slug, review_id):
     """Delete an existing review."""
-    try:
-        product = Product.objects.get(slug=slug)
-    except Product.DoesNotExist:
-        messages.error(request, "Product not found.")
-        return redirect("archive")
+    product = get_object_or_404(Product, slug=slug)
+    review = get_object_or_404(Review, id=review_id, product=product)
 
-    # Get review and verify ownership
-    try:
-        review = Review.objects.get(id=review_id, user=request.user, product=product)
-        review.delete()
-        messages.success(request, "Your review has been deleted.")
-    except Review.DoesNotExist:
-        messages.error(
-            request, "Review not found or you don't have permission to delete it."
-        )
+    if not _user_is_review_owner(request.user, review):
+        messages.error(request, "Review not found or you don't have permission to delete it.")
+        return redirect("product_detail", slug=slug)
 
+    review.delete()
+    messages.success(request, "Your review has been deleted.")
     return redirect("product_detail", slug=slug)

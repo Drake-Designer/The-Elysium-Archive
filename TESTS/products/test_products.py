@@ -42,11 +42,14 @@ class TestProductCRUD:
         updated = Product.objects.get(slug="test-forbidden")
         assert updated.title == "Updated Title"
 
-    def test_delete_product(self):
-        """Test deleting a product."""
+    def test_unpublish_product(self):
+        """Test unpublishing a product instead of deleting it."""
         product_id = self.product.pk
-        self.product.delete()
-        assert not Product.objects.filter(pk=product_id).exists()
+        self.product.is_active = False
+        self.product.save(update_fields=["is_active", "updated_at"])
+
+        assert Product.objects.filter(pk=product_id).exists()
+        assert Product.objects.get(pk=product_id).is_active is False
 
 
 @pytest.mark.django_db

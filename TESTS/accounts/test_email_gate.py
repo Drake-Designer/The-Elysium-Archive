@@ -73,7 +73,6 @@ class TestMyArchiveDisplay:
         from orders.models import AccessEntitlement
         from decimal import Decimal
 
-        # Create multiple products and orders
         prod1 = Product.objects.create(
             title="Product 1",
             slug="prod-1",
@@ -95,7 +94,6 @@ class TestMyArchiveDisplay:
             is_active=True,
         )
 
-        # Create entitlements
         AccessEntitlement.objects.create(user=verified_user, product=prod1)
         AccessEntitlement.objects.create(user=verified_user, product=prod2)
 
@@ -104,17 +102,16 @@ class TestMyArchiveDisplay:
 
         assert response.status_code == 200
 
-    def test_my_archive_filters_deleted_products(
+    def test_my_archive_handles_unpublished_products(
         self, client, verified_user, order_paid
     ):
-        """My Archive gracefully handles deleted products (no crash)."""
+        """My Archive still works when a purchased product is unpublished."""
         client.force_login(verified_user)
 
-        # Get the product and delete it
         product = order_paid.line_items.first().product
-        product.delete()
+        product.is_active = False
+        product.save(update_fields=["is_active", "updated_at"])
 
-        # Request should not crash
         response = client.get(reverse("my_archive"), follow=True)
 
         assert response.status_code == 200
