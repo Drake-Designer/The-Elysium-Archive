@@ -111,6 +111,7 @@ JAZZMIN_SETTINGS = {
     "search_model": ["auth.User", "auth.Group"],
     "topmenu_links": [
         {"name": "View site", "url": "/", "new_window": False},
+        {"name": "Test Errors", "url": "/_test/errors/", "new_window": False},
         {"model": "auth.User"},
         {"model": "auth.Group"},
     ],
@@ -276,7 +277,7 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 )
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
-#Contact recipient is configurable via env
+# Contact recipient is configurable via env
 CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL)
 
 # Optional but helps consistency

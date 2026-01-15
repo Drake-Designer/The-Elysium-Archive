@@ -644,6 +644,7 @@ Error pages follow the site's styling and provide clear navigation:
 All error templates extend `base.html` (except 500, which uses inline critical CSS for reliability).
 
 Error handlers are configured in `elysium_archive/urls.py` and work in both development and production.
+When `DEBUG=True`, Django shows its debug pages; to verify the themed error templates, test with `DEBUG=False` in a production-like local run.
 
 ## Stripe Payments
 
@@ -662,7 +663,11 @@ Stripe sessions are created server-side using `stripe.checkout.Session.create`. 
 
 ### Webhook Confirmation
 
-Payments are confirmed server-side via Stripe webhooks at `/checkout/wh/`. Orders are marked paid and access entitlements are granted only after Stripe signature verification succeeds.
+Payments are confirmed server-side via Stripe webhooks at `/checkout/webhook/`. Orders are marked paid and access entitlements are granted only after Stripe signature verification succeeds.
+
+The checkout success page includes a fallback verification step if webhook delivery is delayed: it re-checks the Stripe session and, when `payment_status == "paid"`, finalises the order (mark paid, store the payment intent ID, create entitlements, and clear the cart).
+
+Entitlements are created idempotently to prevent duplicate access grants if webhook events are replayed or users refresh the success page.
 
 ### Test Mode
 
@@ -691,9 +696,9 @@ Follow these steps to test the checkout flow:
 ### Webhook Testing (optional)
 
 - Install Stripe CLI and run `stripe login`
-- Start a listener with `stripe listen --forward-to localhost:8000/checkout/wh/`
+- Start a listener with `stripe listen --forward-to http://127.0.0.1:8000/checkout/webhook/`
 - Complete a test checkout to let `checkout.session.completed` post back
-- Ensure `STRIPE_WH_SECRET` is set from the CLI output before running locally
+- Ensure `STRIPE_WH_SECRET` matches the webhook signing secret printed by Stripe CLI
 
 ### Test Card Details
 
@@ -733,6 +738,7 @@ All Stripe keys and configuration are stored in environment variables and are ne
 - `django-jazzmin` enhances the Django admin UI.
 - Jazzmin is configured in `settings.py`.
 - It improves layout and usability without changing admin logic.
+- The top menu includes a staff-only quick link to `/_test/errors/` for the error testing dashboard.
 
 ### Superuser Creation
 
@@ -972,6 +978,19 @@ session = stripe.checkout.Session.create(
   - Verified `AccessEntitlement` creation.
   - Confirmed cart clearing after payment.
   - Ran unit tests to ensure no regressions.
+
+### Checkout: atomic paid + entitlements (idempotent) + fallback success confirmation
+
+- Symptoms:
+  - Delayed webhooks or refreshes could leave orders unpaid and entitlements missing, or risk duplicate entitlements after event replay.
+- Root Cause:
+  - Payment confirmation relied on webhook timing without a guarded fallback and lacked explicit idempotent entitlement checks in the success flow.
+- Fix:
+  - Add success-page fallback that re-checks Stripe session `payment_status == "paid"` and finalises the order atomically; create entitlements idempotently to prevent duplicates.
+- How it was tested:
+  - Stripe CLI forwarding with test card `4242 4242 4242 4242`.
+  - Delayed webhook scenario followed by success-page refresh.
+  - Replayed duplicate webhook events and verified no duplicate entitlements.
 
 ### Static assets missing on Heroku
 

@@ -6,6 +6,7 @@ import stripe
 from stripe import SignatureVerificationError
 
 from django.conf import settings
+from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -47,7 +48,9 @@ def _get_order_from_metadata(data):
 def _grant_entitlements(order):
     """Create entitlements for purchased products."""
     if not order.user:
-        logger.warning("Order has no user, cannot grant entitlements (order=%s).", order.order_number)
+        logger.warning(
+            "Order has no user, cannot grant entitlements (order=%s).", order.order_number
+        )
         return
 
     for line in order.line_items.select_related("product").all():
@@ -65,43 +68,50 @@ def _mark_order_paid(order, data):
     payment_intent = data.get("payment_intent")
     session_id = data.get("id")
 
-    order.status = "paid"
-    if payment_intent:
-        order.stripe_payment_intent_id = payment_intent
-    if session_id:
-        order.stripe_session_id = session_id
+    with transaction.atomic():
+        order = Order.objects.select_for_update().get(pk=order.pk)
 
-    order.save(
-        update_fields=[
-            "status",
-            "stripe_payment_intent_id",
-            "stripe_session_id",
-            "updated_at",
-        ]
-    )
+        order.status = "paid"
+        if payment_intent:
+            order.stripe_payment_intent_id = payment_intent
+        if session_id:
+            order.stripe_session_id = session_id
 
-    _grant_entitlements(order)
+        order.save(
+            update_fields=[
+                "status",
+                "stripe_payment_intent_id",
+                "stripe_session_id",
+                "updated_at",
+            ]
+        )
+
+        _grant_entitlements(order)
 
 
 def _ensure_paid_order_consistency(order, data):
     """Ensure a paid order has Stripe IDs and entitlements."""
-    updated_fields = []
     payment_intent = data.get("payment_intent")
     session_id = data.get("id")
 
-    if payment_intent and not order.stripe_payment_intent_id:
-        order.stripe_payment_intent_id = payment_intent
-        updated_fields.append("stripe_payment_intent_id")
+    with transaction.atomic():
+        order = Order.objects.select_for_update().get(pk=order.pk)
 
-    if session_id and not order.stripe_session_id:
-        order.stripe_session_id = session_id
-        updated_fields.append("stripe_session_id")
+        updated_fields = []
 
-    if updated_fields:
-        updated_fields.append("updated_at")
-        order.save(update_fields=updated_fields)
+        if payment_intent and not order.stripe_payment_intent_id:
+            order.stripe_payment_intent_id = payment_intent
+            updated_fields.append("stripe_payment_intent_id")
 
-    _grant_entitlements(order)
+        if session_id and not order.stripe_session_id:
+            order.stripe_session_id = session_id
+            updated_fields.append("stripe_session_id")
+
+        if updated_fields:
+            updated_fields.append("updated_at")
+            order.save(update_fields=updated_fields)
+
+        _grant_entitlements(order)
 
 
 def _handle_checkout_completed(data):
@@ -122,10 +132,14 @@ def _handle_checkout_completed(data):
             "Checkout completed but payment not paid yet (order=%s).",
             order.order_number,
         )
+
         session_id = data.get("id")
-        if session_id and not order.stripe_session_id:
-            order.stripe_session_id = session_id
-            order.save(update_fields=["stripe_session_id", "updated_at"])
+        if session_id:
+            with transaction.atomic():
+                locked = Order.objects.select_for_update().get(pk=order.pk)
+                if not locked.stripe_session_id:
+                    locked.stripe_session_id = session_id
+                    locked.save(update_fields=["stripe_session_id", "updated_at"])
         return
 
     _mark_order_paid(order, data)
@@ -158,12 +172,18 @@ def _handle_checkout_expired(data):
     if order.status == "paid":
         return
 
-    order.status = "failed"
     session_id = data.get("id")
-    if session_id and not order.stripe_session_id:
-        order.stripe_session_id = session_id
 
-    order.save(update_fields=["status", "stripe_session_id", "updated_at"])
+    with transaction.atomic():
+        locked = Order.objects.select_for_update().get(pk=order.pk)
+        if locked.status == "paid":
+            return
+
+        locked.status = "failed"
+        if session_id and not locked.stripe_session_id:
+            locked.stripe_session_id = session_id
+
+        locked.save(update_fields=["status", "stripe_session_id", "updated_at"])
 
 
 def _handle_payment_failed(data):
@@ -173,11 +193,13 @@ def _handle_payment_failed(data):
         logger.warning("Webhook missing order reference on payment failure")
         return
 
-    if order.status == "paid":
-        return
+    with transaction.atomic():
+        locked = Order.objects.select_for_update().get(pk=order.pk)
+        if locked.status == "paid":
+            return
 
-    order.status = "failed"
-    order.save(update_fields=["status", "updated_at"])
+        locked.status = "failed"
+        locked.save(update_fields=["status", "updated_at"])
 
 
 @csrf_exempt

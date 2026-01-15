@@ -67,18 +67,20 @@ pytest -v -s
 
 ### Test Inventory Summary
 
-Test discovery (under `TESTS/`) currently finds 136 tests across 11 files.
+Test discovery (under `TESTS/`) currently finds 124 tests across 11 files. This number can change as tests evolve; use pytest collection output as the source of truth.
 
 ## Automated Test Coverage by App
 
 ### Accounts
 
 Files:
+
 - `TESTS/accounts/test_auth_pages.py`
 - `TESTS/accounts/test_email_gate.py`
 - `TESTS/accounts/test_profile.py`
 
 Coverage:
+
 - Login, signup, and logout page behaviour (200/302)
 - Email verification gate for dashboard, profile, and my-archive redirects
 - Anonymous users redirected to login for account pages
@@ -88,6 +90,7 @@ Coverage:
 - Account deletion flow (confirmation, delete, logout, redirect, message, profile removal)
 
 Key assertions:
+
 - Status codes and redirect targets (`/accounts/login/`, `/accounts/email/`)
 - Template rendering and message presence
 - User/Profile database updates after delete
@@ -95,11 +98,13 @@ Key assertions:
 ### Products
 
 Files:
+
 - `TESTS/products/test_access_control.py`
 - `TESTS/products/test_archive_read.py`
 - `TESTS/products/test_products.py`
 
 Coverage:
+
 - Active vs inactive product visibility for anonymous, verified, staff, and entitled users
 - Product list includes only active items; featured items appear; inactive featured items do not
 - Product detail shows title/description/price for active items
@@ -111,6 +116,7 @@ Coverage:
 - Archive card layout class checks
 
 Key assertions:
+
 - Status codes (200/302/403/404)
 - Content presence or absence on preview vs reading pages
 - Correct links for reading and detail pages
@@ -119,9 +125,11 @@ Key assertions:
 ### Cart
 
 File:
+
 - `TESTS/cart/test_cart.py`
 
 Coverage:
+
 - Add to cart redirects and session storage
 - Cart view renders with items or empty state
 - Remove from cart updates session
@@ -131,6 +139,7 @@ Coverage:
 - Totals for single and multiple items
 
 Key assertions:
+
 - Session cart contents
 - Redirects and status codes
 - Expected product titles in rendered cart
@@ -138,9 +147,11 @@ Key assertions:
 ### Checkout
 
 File:
+
 - `TESTS/checkout/test_checkout.py`
 
 Coverage:
+
 - Verified email gate for checkout and anonymous login redirect
 - Stripe session creation mocked and redirects to Stripe
 - Order and OrderLineItem creation from cart
@@ -148,9 +159,11 @@ Coverage:
 - Stripe error cleanup (Order and OrderLineItem removal)
 - Empty cart redirects to cart
 - Success page template rendering and wrong-user access
+- Success fallback confirms Stripe session `payment_status == "paid"` can mark the order paid and create entitlements when webhook delivery is delayed
 - Cancel page template rendering and message presence
 
 Key assertions:
+
 - Status codes and redirect targets
 - Order database state
 - Stripe session URL handling
@@ -158,9 +171,11 @@ Key assertions:
 ### Orders and Webhooks
 
 File:
+
 - `TESTS/orders/test_orders.py`
 
 Coverage:
+
 - Webhook handling for `checkout.session.completed` (paid and unpaid)
 - Webhook handling for `payment_intent.payment_failed`
 - Webhook handling for `checkout.session.expired`
@@ -173,6 +188,7 @@ Coverage:
 - Order default status test exists (no explicit assertion)
 
 Key assertions:
+
 - Response codes for webhook endpoints
 - Order status transitions and stripe ID fields
 - Entitlement counts and uniqueness
@@ -180,9 +196,11 @@ Key assertions:
 ### Reviews
 
 File:
+
 - `TESTS/reviews/test_reviews.py`
 
 Coverage:
+
 - Review form visibility for buyers vs non-buyers
 - Review creation for buyers
 - Anonymous redirect to login on review POST
@@ -196,6 +214,7 @@ Coverage:
 - Delete requires POST
 
 Key assertions:
+
 - Status codes and redirects
 - Review database state and uniqueness
 - Content displayed on product detail page
@@ -203,9 +222,11 @@ Key assertions:
 ### Admin (Home)
 
 File:
+
 - `TESTS/home/test_home.py`
 
 Coverage:
+
 - Admin access for anonymous, regular, and staff users
 - Admin delete actions for products (single delete and bulk delete exercised)
 - Featured flag toggled via admin change form
@@ -214,6 +235,7 @@ Coverage:
 - A placeholder test exists for delete without entitlements (no assertions)
 
 Key assertions:
+
 - Status codes for admin access
 - Product database changes after admin POSTs
 - Staff-only access to orders in admin
@@ -302,7 +324,22 @@ Note: In DEBUG, email is sent to the console backend. Use the verification link 
 - [ ] Order visible in admin (`/admin/orders/order/`)
 
 Webhook endpoint for Stripe CLI testing:
-- `/checkout/wh/` (alias `/checkout/webhook/`)
+- `/checkout/webhook/`
+
+Stripe CLI listener:
+
+```bash
+stripe listen --forward-to http://127.0.0.1:8000/checkout/webhook/
+```
+
+Post-payment verification checklist:
+
+- latest Order is marked "paid"
+- Stripe payment intent ID stored on the order
+- AccessEntitlement exists for the order/product
+- no duplicate entitlements for the same user/product
+- cart cleared after payment
+- `/archive/<slug>/read/` accessible for the entitled user
 
 #### Reviews
 
@@ -332,6 +369,12 @@ Webhook endpoint for Stripe CLI testing:
 - [ ] Test delete and bulk delete in admin and confirm observed behaviour
 
 ### Error Page Testing
+
+Steps:
+
+1. Log in as a staff user.
+2. Visit `/_test/errors/` and use the dashboard to trigger each error.
+3. With `DEBUG=True`, Django will show debug pages; set `DEBUG=False` locally for production-parity template checks.
 
 Staff-only test URLs exist for error pages:
 

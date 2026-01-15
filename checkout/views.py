@@ -2,14 +2,15 @@
 
 from datetime import timedelta
 
+import stripe
+
 from django.conf import settings
 from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-
-import stripe
 
 from accounts.decorators import verified_email_required
 from cart.cart import clear_cart, get_cart_items, get_cart_total
@@ -157,7 +158,9 @@ def checkout(request):
         return redirect("cart")
 
     # Ensure products still exist and are active.
-    valid_products = list(Product.objects.filter(pk__in=[p.pk for p in cart_products], is_active=True))
+    valid_products = list(
+        Product.objects.filter(pk__in=[p.pk for p in cart_products], is_active=True)
+    )
     if not valid_products:
         messages.warning(request, "Your cart is empty.")
         clear_cart(request.session)
@@ -244,13 +247,17 @@ def checkout_success(request, order_number):
     # If webhook already marked it as paid, we still must clear the cart
     # and ensure entitlements exist.
     if order.status == "paid":
-        for line_item in order.line_items.select_related("product").all():
-            if line_item.product:
-                AccessEntitlement.objects.get_or_create(
-                    user=request.user,
-                    product=line_item.product,
-                    defaults={"order": order},
-                )
+        with transaction.atomic():
+            locked = Order.objects.select_for_update().get(pk=order.pk)
+
+            for line_item in locked.line_items.select_related("product").all():
+                if line_item.product:
+                    AccessEntitlement.objects.get_or_create(
+                        user=request.user,
+                        product=line_item.product,
+                        defaults={"order": locked},
+                    )
+
         clear_cart(request.session)
         context = {"order": order}
         return render(request, "checkout/success.html", context)
@@ -260,19 +267,22 @@ def checkout_success(request, order_number):
         try:
             session = stripe.checkout.Session.retrieve(order.stripe_session_id)
             if session.payment_status == "paid":
-                order.status = "paid"
-                order.stripe_payment_intent_id = session.get("payment_intent") or ""
-                order.save(
-                    update_fields=["status", "stripe_payment_intent_id", "updated_at"]
-                )
+                with transaction.atomic():
+                    locked = Order.objects.select_for_update().get(pk=order.pk)
 
-                for line_item in order.line_items.select_related("product").all():
-                    if line_item.product:
-                        AccessEntitlement.objects.get_or_create(
-                            user=request.user,
-                            product=line_item.product,
-                            defaults={"order": order},
-                        )
+                    locked.status = "paid"
+                    locked.stripe_payment_intent_id = session.get("payment_intent") or ""
+                    locked.save(
+                        update_fields=["status", "stripe_payment_intent_id", "updated_at"]
+                    )
+
+                    for line_item in locked.line_items.select_related("product").all():
+                        if line_item.product:
+                            AccessEntitlement.objects.get_or_create(
+                                user=request.user,
+                                product=line_item.product,
+                                defaults={"order": locked},
+                            )
 
                 clear_cart(request.session)
 
