@@ -62,6 +62,20 @@ def _get_recent_pending_order(request, minutes=15):
     )
 
 
+def _get_recent_pending_order_any(request, minutes=15):
+    """Return a recent pending order for the user, even without Stripe session id."""
+    cutoff = timezone.now() - timedelta(minutes=minutes)
+    return (
+        Order.objects.filter(
+            user=request.user,
+            status="pending",
+            created_at__gte=cutoff,
+        )
+        .order_by("-created_at")
+        .first()
+    )
+
+
 def _try_reuse_stripe_session(request, order):
     """Reuse an existing Stripe session if it is still open."""
     try:
@@ -114,6 +128,18 @@ def _fail_recent_pending_order(request, minutes=30):
     return order
 
 
+def _fail_stale_pending_orders(request, minutes=30):
+    """Mark stale pending orders for the current user as failed."""
+    cutoff = timezone.now() - timedelta(minutes=minutes)
+    (
+        Order.objects.filter(
+            user=request.user,
+            status="pending",
+            created_at__lt=cutoff,
+        ).update(status="failed")
+    )
+
+
 @verified_email_required
 @require_http_methods(["POST"])
 def checkout(request):
@@ -122,12 +148,7 @@ def checkout(request):
         messages.error(request, "Payment is not configured yet. Please try again later.")
         return redirect("cart")
 
-    # Reuse a recent pending order if possible.
-    recent_order = _get_recent_pending_order(request)
-    if recent_order:
-        reused = _try_reuse_stripe_session(request, recent_order)
-        if reused:
-            return reused
+    _fail_stale_pending_orders(request)
 
     cart_items = get_cart_items(request.session)
     if not cart_items:
@@ -167,36 +188,50 @@ def checkout(request):
         return redirect("cart")
 
     total = get_cart_total(request.session, [{"product": p} for p in valid_products])
-    order = Order.objects.create(
-        user=request.user,
-        total=total,
-        status="pending",
-    )
 
-    line_items = []
-    for product in valid_products:
-        OrderLineItem.objects.create(
-            order=order,
-            product=product,
-            product_title=product.title,
-            product_price=product.price,
-            quantity=1,
-            line_total=product.price,
-        )
+    with transaction.atomic():
+        existing_pending = _get_recent_pending_order_any(request)
+        if existing_pending:
+            locked = Order.objects.select_for_update().get(pk=existing_pending.pk)
+            if locked.status == "pending" and locked.stripe_session_id:
+                reused = _try_reuse_stripe_session(request, locked)
+                if reused:
+                    return reused
+            order = locked
+        else:
+            order = Order.objects.create(
+                user=request.user,
+                total=total,
+                status="pending",
+            )
 
-        line_items.append(
-            {
-                "price_data": {
-                    "currency": "eur",
-                    "product_data": {
-                        "name": product.title,
-                        "description": product.tagline or "",
+        if order.line_items.exists():
+            order.line_items.all().delete()
+
+        line_items = []
+        for product in valid_products:
+            OrderLineItem.objects.create(
+                order=order,
+                product=product,
+                product_title=product.title,
+                product_price=product.price,
+                quantity=1,
+                line_total=product.price,
+            )
+
+            line_items.append(
+                {
+                    "price_data": {
+                        "currency": "eur",
+                        "product_data": {
+                            "name": product.title,
+                            "description": product.tagline or "",
+                        },
+                        "unit_amount": int(product.price * 100),
                     },
-                    "unit_amount": int(product.price * 100),
-                },
-                "quantity": 1,
-            }
-        )
+                    "quantity": 1,
+                }
+            )
 
     try:
         session = stripe.checkout.Session.create(

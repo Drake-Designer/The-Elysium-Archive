@@ -1,21 +1,25 @@
 """Views for the products app."""
 
+from __future__ import annotations
+
+from typing import Any, cast
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView
-from typing import Any, cast
 
-from .models import Category, Product
 from elysium_archive.helpers import user_has_access
 from elysium_archive.type_guards import is_authenticated_user
 from reviews.forms import ReviewForm
 
+from .models import Category, Product
+
 
 class ProductListView(ListView):
-    """Public archive catalog with pagination."""
+    """Show a public archive catalog with pagination."""
 
     model = Product
     template_name = "products/product_list.html"
@@ -23,7 +27,7 @@ class ProductListView(ListView):
     paginate_by = 12
 
     def get_queryset(self) -> QuerySet[Product]:
-        """Return active products, optionally filtered by search query, category tag, or deals."""
+        """Return active products, optionally filtered by search, category, or deals."""
         queryset = (
             Product.objects.filter(is_active=True)
             .select_related("category")
@@ -51,7 +55,7 @@ class ProductListView(ListView):
         return queryset
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add search query, category tags, and deals filter to context for template."""
+        """Add search query, category tags, and deals filter to context."""
         context = super().get_context_data(**kwargs)
 
         search_query = self.request.GET.get("q", "").strip()
@@ -73,7 +77,7 @@ class ProductListView(ListView):
 
 
 class ProductDetailView(DetailView):
-    """Archive preview page with purchase call to action."""
+    """Show an archive preview page with purchase call to action."""
 
     model = Product
     template_name = "products/product_detail.html"
@@ -82,12 +86,16 @@ class ProductDetailView(DetailView):
     slug_url_kwarg = "slug"
 
     def get_queryset(self) -> QuerySet[Product]:
-        """Return all products (access control happens in get_object)."""
-        return Product.objects.all().select_related("category")
+        """Return all products and prefetch related data for the detail view."""
+        return (
+            Product.objects.all()
+            .select_related("category")
+            .prefetch_related("reviews", "reviews__user")
+        )
 
     def get_object(self, queryset: QuerySet[Product] | None = None) -> Product:
-        """Return product if accessible, raise 404 otherwise."""
-        obj: Product = super().get_object(queryset)
+        """Return a product if it is accessible, raise 404 otherwise."""
+        obj = cast(Product, super().get_object(queryset))
 
         if obj.is_active:
             return obj
@@ -101,7 +109,8 @@ class ProductDetailView(DetailView):
             from orders.models import AccessEntitlement
 
             if AccessEntitlement.objects.filter(
-                user=cast(Any, self.request.user), product=obj
+                user=cast(Any, self.request.user),
+                product=obj,
             ).exists():
                 return obj
 
@@ -110,23 +119,25 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Add cart, purchase status, and reviews to context."""
         context = super().get_context_data(**kwargs)
-        product: Product = self.get_object()
+        product = cast(Product, context["product"])
 
         purchased = user_has_access(self.request.user, product)
         cart_product_ids = set(self.request.session.get("cart", {}).keys())
 
-        reviews = product.reviews.all()
+        reviews = product.reviews.all()  # type: ignore[attr-defined]
         user_review = None
         can_review = False
         form = None
 
         if is_authenticated_user(self.request.user) and purchased:
-            user_review = product.reviews.filter(user=cast(Any, self.request.user)).first()
+            user_review = (
+                product.reviews.filter(user=cast(Any, self.request.user)).first()  # type: ignore[attr-defined]
+            )
             can_review = not user_review
             if can_review:
                 form = ReviewForm()
 
-        context["in_cart"] = str(product.id) in cart_product_ids
+        context["in_cart"] = str(product.pk) in cart_product_ids
         context["purchased"] = purchased
         context["reviews"] = reviews
         context["user_review"] = user_review
@@ -137,17 +148,16 @@ class ProductDetailView(DetailView):
 
 
 class ArchiveReadView(LoginRequiredMixin, DetailView):
-    """Private reading page for purchased archive entries."""
+    """Show a private reading page for purchased archive entries."""
 
     model = Product
     template_name = "products/archive_read.html"
     context_object_name = "product"
     slug_field = "slug"
     slug_url_kwarg = "slug"
-    login_url = "/accounts/login/"
 
     def dispatch(self, request, *args, **kwargs):
-        """Check email verification before processing request."""
+        """Check email verification before processing the request."""
         if is_authenticated_user(request.user) and request.user.is_superuser:  # type: ignore[attr-defined]
             return super().dispatch(request, *args, **kwargs)
 
@@ -155,9 +165,7 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
             from allauth.account.models import EmailAddress
             from django.contrib import messages
 
-            if not EmailAddress.objects.filter(
-                user=request.user, verified=True
-            ).exists():
+            if not EmailAddress.objects.filter(user=request.user, verified=True).exists():
                 messages.warning(
                     request,
                     "Please verify your email address to access archive content.",
@@ -168,7 +176,7 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset: QuerySet[Product] | None = None) -> Product:
         """Return product and verify user has access."""
-        obj: Product = super().get_object(queryset)
+        obj = cast(Product, super().get_object(queryset))
 
         if is_authenticated_user(self.request.user) and self.request.user.is_superuser:  # type: ignore[attr-defined]
             return obj

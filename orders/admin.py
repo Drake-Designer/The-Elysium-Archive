@@ -1,6 +1,7 @@
 """Admin configuration for the orders app."""
 
 from django.contrib import admin
+from django.db import transaction
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -111,8 +112,38 @@ class OrderAdmin(admin.ModelAdmin):
     
     def mark_as_paid(self, request, queryset):
         """Mark orders as paid."""
-        updated = queryset.update(status='paid')
-        self.message_user(request, f'{updated} order(s) marked as paid.')
+        updated = 0
+        granted = 0
+        skipped_no_user = 0
+
+        for order in queryset.select_related("user").prefetch_related("line_items__product"):
+            with transaction.atomic():
+                locked = Order.objects.select_for_update().get(pk=order.pk)
+
+                if locked.status != "paid":
+                    locked.status = "paid"
+                    locked.save(update_fields=["status", "updated_at"])
+                    updated += 1
+
+                if not locked.user:
+                    skipped_no_user += 1
+                    continue
+
+                for line_item in locked.line_items.all():
+                    if not line_item.product:
+                        continue
+                    _, created = AccessEntitlement.objects.get_or_create(
+                        user=locked.user,
+                        product=line_item.product,
+                        defaults={"order": locked},
+                    )
+                    if created:
+                        granted += 1
+
+        self.message_user(
+            request,
+            f"{updated} order(s) marked as paid. {granted} access entitlement(s) granted. {skipped_no_user} order(s) had no user.",
+        )
     mark_as_paid.short_description = '✓ Mark as paid'
     
     def mark_as_failed(self, request, queryset):

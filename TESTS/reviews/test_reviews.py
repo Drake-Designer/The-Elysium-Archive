@@ -25,7 +25,7 @@ class ReviewCreationTest(TestCase):
         self.non_buyer = User.objects.create_user(
             username="nonbuyer", email="nonbuyer@test.com", password="pass123"
         )
-        
+
         # Verify emails for both users
         EmailAddress.objects.create(
             user=self.buyer, email=self.buyer.email, verified=True, primary=True
@@ -33,10 +33,8 @@ class ReviewCreationTest(TestCase):
         EmailAddress.objects.create(
             user=self.non_buyer, email=self.non_buyer.email, verified=True, primary=True
         )
-        
-        self.category = Category.objects.create(
-            name="Test Category", slug="test-category"
-        )
+
+        self.category = Category.objects.create(name="Test Category", slug="test-category")
         self.product = Product.objects.create(
             title="Test Archive",
             slug="test-archive",
@@ -47,7 +45,7 @@ class ReviewCreationTest(TestCase):
             image_alt="Test image",
             category=self.category,
         )
-        
+
         # Grant entitlement to buyer
         AccessEntitlement.objects.create(user=self.buyer, product=self.product)
 
@@ -80,9 +78,7 @@ class ReviewCreationTest(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(
-            Review.objects.filter(user=self.buyer, product=self.product).exists()
-        )
+        self.assertTrue(Review.objects.filter(user=self.buyer, product=self.product).exists())
 
     def test_non_buyer_cannot_post_review(self):
         """Non-buyers cannot submit reviews - redirected with error."""
@@ -97,9 +93,7 @@ class ReviewCreationTest(TestCase):
         )
         # View redirects with error message, not 403
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(
-            Review.objects.filter(user=self.non_buyer, product=self.product).exists()
-        )
+        self.assertFalse(Review.objects.filter(user=self.non_buyer, product=self.product).exists())
 
     def test_anonymous_cannot_post_review(self):
         """Anonymous users are redirected to login."""
@@ -123,16 +117,14 @@ class ReviewDuplicatePreventionTest(TestCase):
         self.user = User.objects.create_user(
             username="testuser", email="test@test.com", password="pass123"
         )
-        
+
         # Verify email
         EmailAddress.objects.create(
             user=self.user, email=self.user.email, verified=True, primary=True
         )
-        
-        self.category = Category.objects.create(
-            name="Test Category", slug="test-category"
-        )
-        
+
+        self.category = Category.objects.create(name="Test Category", slug="test-category")
+
         self.product = Product.objects.create(
             title="Test Product",
             slug="test-product",
@@ -143,9 +135,9 @@ class ReviewDuplicatePreventionTest(TestCase):
             image_alt="Test",
             category=self.category,
         )
-        
+
         AccessEntitlement.objects.create(user=self.user, product=self.product)
-        
+
         # Create first review
         Review.objects.create(
             user=self.user,
@@ -179,11 +171,9 @@ class ReviewDisplayTest(TestCase):
         self.user = User.objects.create_user(
             username="reviewer", email="reviewer@test.com", password="pass123"
         )
-        
-        self.category = Category.objects.create(
-            name="Test Category", slug="test-category"
-        )
-        
+
+        self.category = Category.objects.create(name="Test Category", slug="test-category")
+
         self.product = Product.objects.create(
             title="Product with Reviews",
             slug="product-reviews",
@@ -194,7 +184,7 @@ class ReviewDisplayTest(TestCase):
             image_alt="Test",
             category=self.category,
         )
-        
+
         self.review = Review.objects.create(
             user=self.user,
             product=self.product,
@@ -205,9 +195,7 @@ class ReviewDisplayTest(TestCase):
 
     def test_review_appears_on_product_detail(self):
         """Reviews should be visible on product detail page."""
-        response = self.client.get(
-            reverse("product_detail", kwargs={"slug": self.product.slug})
-        )
+        response = self.client.get(reverse("product_detail", kwargs={"slug": self.product.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Excellent!", response.content)
         self.assertIn(b"Highly recommended.", response.content)
@@ -224,10 +212,8 @@ class ReviewDisplayTest(TestCase):
             title="Good",
             body="Pretty good overall.",
         )
-        
-        response = self.client.get(
-            reverse("product_detail", kwargs={"slug": self.product.slug})
-        )
+
+        response = self.client.get(reverse("product_detail", kwargs={"slug": self.product.slug}))
         self.assertIn(b"Excellent!", response.content)
         self.assertIn(b"Good", response.content)
 
@@ -240,16 +226,14 @@ class ReviewRatingTest(TestCase):
         self.user = User.objects.create_user(
             username="rater", email="rater@test.com", password="pass123"
         )
-        
+
         # Verify email
         EmailAddress.objects.create(
             user=self.user, email=self.user.email, verified=True, primary=True
         )
-        
-        self.category = Category.objects.create(
-            name="Test Category", slug="test-category"
-        )
-        
+
+        self.category = Category.objects.create(name="Test Category", slug="test-category")
+
         self.product = Product.objects.create(
             title="Rated Product",
             slug="rated-product",
@@ -265,7 +249,7 @@ class ReviewRatingTest(TestCase):
     def test_review_rating_valid_range(self):
         """Rating must be between 1 and 5."""
         self.client.force_login(self.user)
-        
+
         # Valid ratings
         for rating in [1, 2, 3, 4, 5]:
             Review.objects.all().delete()
@@ -293,9 +277,7 @@ class ReviewModelTest(TestCase):
         self.user = User.objects.create_user(
             username="modeltest", email="modeltest@test.com", password="pass123"
         )
-        self.category = Category.objects.create(
-            name="Test Category", slug="test-category"
-        )
+        self.category = Category.objects.create(name="Test Category", slug="test-category")
         self.product = Product.objects.create(
             title="Model Test Product",
             slug="model-test",
@@ -354,7 +336,7 @@ class ReviewEditTest(TestCase):
         self.other_user = User.objects.create_user(
             username="other", email="other@test.com", password="pass123"
         )
-        
+
         # Verify emails
         EmailAddress.objects.create(
             user=self.owner, email=self.owner.email, verified=True, primary=True
@@ -362,11 +344,9 @@ class ReviewEditTest(TestCase):
         EmailAddress.objects.create(
             user=self.other_user, email=self.other_user.email, verified=True, primary=True
         )
-        
-        self.category = Category.objects.create(
-            name="Test Category", slug="test-category"
-        )
-        
+
+        self.category = Category.objects.create(name="Test Category", slug="test-category")
+
         self.product = Product.objects.create(
             title="Edit Test",
             slug="edit-test",
@@ -391,7 +371,7 @@ class ReviewEditTest(TestCase):
         response = self.client.post(
             reverse(
                 "edit_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk},
             ),
             {"rating": 4, "title": "Updated", "body": "Updated body"},
         )
@@ -405,12 +385,12 @@ class ReviewEditTest(TestCase):
         response = self.client.post(
             reverse(
                 "edit_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk},
             ),
             {"rating": 1, "title": "Hacked", "body": "Hacked body"},
         )
-        # View redirects with error message
-        self.assertEqual(response.status_code, 302)
+        # Non-owners should not be able to access the edit endpoint.
+        self.assertEqual(response.status_code, 404)
         self.review.refresh_from_db()
         self.assertEqual(self.review.title, "Original")
 
@@ -420,7 +400,7 @@ class ReviewEditTest(TestCase):
         response = self.client.get(
             reverse(
                 "edit_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk},
             )
         )
         self.assertEqual(response.status_code, 200)
@@ -438,7 +418,7 @@ class ReviewDeleteTest(TestCase):
         self.other_user = User.objects.create_user(
             username="hacker", email="hacker@test.com", password="pass123"
         )
-        
+
         # Verify emails
         EmailAddress.objects.create(
             user=self.owner, email=self.owner.email, verified=True, primary=True
@@ -446,11 +426,9 @@ class ReviewDeleteTest(TestCase):
         EmailAddress.objects.create(
             user=self.other_user, email=self.other_user.email, verified=True, primary=True
         )
-        
-        self.category = Category.objects.create(
-            name="Test Category", slug="test-category"
-        )
-        
+
+        self.category = Category.objects.create(name="Test Category", slug="test-category")
+
         self.product = Product.objects.create(
             title="Delete Test",
             slug="delete-test",
@@ -474,7 +452,7 @@ class ReviewDeleteTest(TestCase):
         response = self.client.post(
             reverse(
                 "delete_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk},
             )
         )
         self.assertEqual(response.status_code, 302)
@@ -486,11 +464,11 @@ class ReviewDeleteTest(TestCase):
         response = self.client.post(
             reverse(
                 "delete_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk},
             )
         )
-        # View redirects with error message
-        self.assertEqual(response.status_code, 302)
+        # Non-owners should not be able to access the delete endpoint.
+        self.assertEqual(response.status_code, 404)
         self.assertTrue(Review.objects.filter(pk=self.review.pk).exists())
 
     def test_delete_review_requires_post(self):
@@ -499,7 +477,7 @@ class ReviewDeleteTest(TestCase):
         response = self.client.get(
             reverse(
                 "delete_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.pk}
+                kwargs={"slug": self.product.slug, "review_id": self.review.pk},
             )
         )
         self.assertEqual(response.status_code, 405)

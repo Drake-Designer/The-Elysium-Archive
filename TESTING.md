@@ -67,7 +67,7 @@ pytest -v -s
 
 ### Test Inventory Summary
 
-Test discovery (under `TESTS/`) currently finds 124 tests across 11 files. This number can change as tests evolve; use pytest collection output as the source of truth.
+Test discovery (under `TESTS/`) currently finds 131 tests across 11 files. This number can change as tests evolve; use pytest collection output as the source of truth.
 
 ## Automated Test Coverage by App
 
@@ -153,13 +153,16 @@ File:
 Coverage:
 
 - Verified email gate for checkout and anonymous login redirect
-- Stripe session creation mocked and redirects to Stripe
+- Stripe session creation mocked and redirects to Stripe, including redirect handling
 - Order and OrderLineItem creation from cart
 - Order total calculation
 - Stripe error cleanup (Order and OrderLineItem removal)
 - Empty cart redirects to cart
 - Success page template rendering and wrong-user access
+- Double POST to `/checkout/` in quick succession (reuse of a recent pending order)
+- Reuse of a recent pending order to prevent duplicate pending orders
 - Success fallback confirms Stripe session `payment_status == "paid"` can mark the order paid and create entitlements when webhook delivery is delayed
+- Cart clearing after success
 - Cancel page template rendering and message presence
 
 Key assertions:
@@ -179,7 +182,9 @@ Coverage:
 - Webhook handling for `checkout.session.completed` (paid and unpaid)
 - Webhook handling for `payment_intent.payment_failed`
 - Webhook handling for `checkout.session.expired`
-- Idempotent entitlement creation
+- Idempotent entitlement creation (unique constraint + `get_or_create` on replay)
+- Paid orders can be made consistent when Stripe IDs are missing (fill Stripe session/payment intent IDs, ensure entitlements)
+- Atomic operations and locking (`select_for_update`) used in critical flows
 - Missing/invalid signature handling and POST-only enforcement
 - Missing order ID and order without user
 - Stripe session/payment intent ID storage
@@ -322,6 +327,9 @@ Note: In DEBUG, email is sent to the console backend. Use the verification link 
 - [ ] Stripe success -> redirected to `/checkout/success/<order_number>/`
 - [ ] Stripe cancel -> redirected to `/checkout/cancel/`
 - [ ] Order visible in admin (`/admin/orders/order/`)
+- [ ] Rapid double click / double submit checkout: only one pending order is created/reused
+- [ ] Refresh success page multiple times: no duplicate entitlements; cart remains cleared
+- [ ] Simulated delayed webhook: fallback confirmation still finalises paid order and unlocks access
 
 Webhook endpoint for Stripe CLI testing:
 - `/checkout/webhook/`
@@ -340,6 +348,13 @@ Post-payment verification checklist:
 - no duplicate entitlements for the same user/product
 - cart cleared after payment
 - `/archive/<slug>/read/` accessible for the entitled user
+
+### Data Integrity and Idempotency
+
+- No duplicate entitlements (unique constraint + `get_or_create`)
+- Double-submit checkout safety (reuse/locking prevents duplicate pending orders)
+- Success-page refresh safety (idempotent entitlement creation and cart clearing)
+- Webhook replay safety
 
 #### Reviews
 

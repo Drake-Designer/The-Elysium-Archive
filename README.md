@@ -667,6 +667,8 @@ Payments are confirmed server-side via Stripe webhooks at `/checkout/webhook/`. 
 
 The checkout success page includes a fallback verification step if webhook delivery is delayed: it re-checks the Stripe session and, when `payment_status == "paid"`, finalises the order (mark paid, store the payment intent ID, create entitlements, and clear the cart).
 
+The checkout flow is protected against duplicate submissions by reusing a recent pending order when a double POST happens in quick succession. Confirmation is robust through webhooks plus the success-page fallback, and entitlement creation is idempotent so refreshes or webhook replays do not create duplicates.
+
 Entitlements are created idempotently to prevent duplicate access grants if webhook events are replayed or users refresh the success page.
 
 ### Test Mode
@@ -935,7 +937,7 @@ Testing is the area where I struggle the most and find the hardest to understand
 
 I reviewed the suggested code carefully, understood it, and adapted it to match my project architecture. Mentor support and senior developer guidance were also essential in completing a project of this scope.
 
-All automated tests pass locally with 100% success and can be reproduced by following the steps in [TESTING.md](TESTING.md).
+All automated tests pass locally (see [TESTING.md](TESTING.md) and pytest output).
 
 ## Testing and Bug Fixes
 
