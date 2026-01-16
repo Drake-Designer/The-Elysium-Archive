@@ -16,6 +16,7 @@ from django.views.decorators.http import require_http_methods
 from accounts.decorators import verified_email_required
 from cart.cart import clear_cart, get_cart_items, get_cart_total
 from orders.models import AccessEntitlement, Order, OrderLineItem
+from orders.services import grant_entitlements_for_order
 from products.models import Product
 
 
@@ -120,17 +121,6 @@ def _fail_stale_pending_orders(request, minutes=30):
     ).update(status="failed")
 
 
-def _grant_entitlements_for_order(user, order):
-    """Create entitlements for each line item product."""
-    for line_item in order.line_items.select_related("product").all():
-        if line_item.product:
-            AccessEntitlement.objects.get_or_create(
-                user=user,
-                product=line_item.product,
-                defaults={"order": order},
-            )
-
-
 def _verify_and_finalize_order_if_paid(user, order):
     """Verify Stripe session and finalize order if Stripe reports paid."""
     if order.status != "pending":
@@ -147,7 +137,9 @@ def _verify_and_finalize_order_if_paid(user, order):
     except stripe.error.StripeError:
         return False
 
-    payment_status = getattr(session, "payment_status", None) or session.get("payment_status")
+    payment_status = (
+        getattr(session, "payment_status", None) or session.get("payment_status")
+    )
 
     if payment_status != "paid":
         return False
@@ -161,7 +153,7 @@ def _verify_and_finalize_order_if_paid(user, order):
         locked.stripe_payment_intent_id = session.get("payment_intent") or ""
         locked.save(update_fields=["status", "stripe_payment_intent_id", "updated_at"])
 
-        _grant_entitlements_for_order(user, locked)
+        grant_entitlements_for_order(locked, user=user)
 
     return True
 
@@ -285,7 +277,13 @@ def checkout(request):
         messages.error(
             request, f"Payment initialization failed: {exc}. Please try again."
         )
-        order.delete()
+
+        try:
+            order.status = "failed"
+            order.save(update_fields=["status", "updated_at"])
+        except Exception:
+            pass
+
         return redirect("cart")
 
 
@@ -307,9 +305,7 @@ def checkout_success(request, order_number):
         return redirect("archive")
 
     if order.status == "paid":
-        with transaction.atomic():
-            locked = Order.objects.select_for_update().get(pk=order.pk)
-            _grant_entitlements_for_order(request.user, locked)
+        grant_entitlements_for_order(order, user=request.user)
         clear_cart(request.session)
         return render(request, "checkout/success.html", {"order": order})
 

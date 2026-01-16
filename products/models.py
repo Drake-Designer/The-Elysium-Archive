@@ -1,15 +1,17 @@
 """Product, category, and deal banner models for The Elysium Archive."""
+from django.core.validators import MaxLengthValidator
 from django.db import models
 from django.db.models import Q
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
-from django.core.validators import MaxLengthValidator
 
 
 class Category(models.Model):
     """Product category model."""
+
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
@@ -32,6 +34,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     """Archive entry (product) model."""
+
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     tagline = models.CharField(max_length=250, help_text="Short preview text")
@@ -82,17 +85,25 @@ class Product(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        """This method saves the product and syncs deal status."""
+        """This method saves the product and syncs deal status when needed."""
+        update_fields = kwargs.get("update_fields")
+        update_fields_set = set(update_fields) if update_fields else None
+        is_create = self.pk is None
+
         if not self.slug:
             self.slug = slugify(self.title)
 
-        # Enforce model-level validation on save to ensure ORM/API saves
-        # cannot bypass the 150-char image_alt constraint.
-        self.full_clean()
+        validate_fields = {"image_alt", "title", "slug"}
+        should_validate = is_create or update_fields_set is None or bool(update_fields_set & validate_fields)
+        if should_validate:
+            self.full_clean()
 
         super().save(*args, **kwargs)
-        # Recalculate only this product's deal status after save.
-        sync_products_deal_status(product_pks=[self.pk])
+
+        deal_fields = {"deal_manual", "deal_exclude", "category", "category_id"}
+        should_sync_deals = is_create or update_fields_set is None or bool(update_fields_set & deal_fields)
+        if should_sync_deals:
+            sync_products_deal_status(product_pks=[self.pk])
 
     def get_absolute_url(self):
         """This method returns the canonical URL for this product."""
@@ -101,6 +112,7 @@ class Product(models.Model):
 
 class DealBanner(models.Model):
     """Custom promotional banner message for the deals marquee."""
+
     title = models.CharField(
         max_length=100,
         help_text="Main text to display (e.g. 'DEAL', 'HOT', 'NEW')",
@@ -148,19 +160,11 @@ class DealBanner(models.Model):
         return f"{self.title}: {self.message}"
 
     def save(self, *args, **kwargs):
-        """Save banner. Deal syncing is handled by model signals and admin actions.
-
-        Avoid running sync here to prevent duplicate recalculations when bulk
-        operations or admin actions already perform updates.
-        """
+        """Save banner. Deal syncing is handled by model signals and admin actions."""
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        """Delete banner. Deal syncing is handled by post-delete signal.
-
-        We avoid calling sync here to keep deletion path minimal; the
-        `post_delete` signal will trigger recalculation for affected products.
-        """
+        """Delete banner. Deal syncing is handled by post-delete signal."""
         super().delete(*args, **kwargs)
 
     def get_url(self):
@@ -180,17 +184,10 @@ class DealBanner(models.Model):
 
 
 def sync_products_deal_status(product_pks=None, category_pks=None):
-    """Recalculate deal status for affected products.
-
-    To avoid expensive full-table recalculations, this function requires at
-    least one of `product_pks` or `category_pks` to be provided. If both are
-    empty, the function is a no-op. Use an explicit full-recalculation utility
-    if needed.
-    """
+    """Recalculate deal status for affected products."""
     product_pks = list(product_pks or [])
     category_pks = list(category_pks or [])
 
-    # If nothing specified, skip to avoid scanning all products unintentionally.
     if not product_pks and not category_pks:
         return
 
@@ -231,10 +228,7 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
         Product.objects.filter(pk__in=false_pks).update(is_deal=False, updated_at=now)
 
 
-# Signals to ensure sync runs for save/delete events (covers bulk delete via
-# QuerySet.delete which still emits post_delete per-instance).
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
+from django.db.models.signals import post_delete, post_save
 
 
 @receiver(post_save, sender=DealBanner)

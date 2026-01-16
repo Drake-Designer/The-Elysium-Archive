@@ -1,7 +1,6 @@
 """Session helpers for the shopping cart."""
 
 from decimal import Decimal
-from typing import Any
 
 from products.models import Product
 
@@ -46,6 +45,31 @@ def _sync_session_to_db(session, user):
 
     session["cart"] = {str(pid): 1 for pid in valid_products}
     session.modified = True
+
+
+def merge_db_cart_into_session(session, user):
+    """Merge a user's DB cart with the current session cart and sync the result."""
+    session_cart = session.get("cart", {})
+    if session_cart is None:
+        session_cart = {}
+
+    db_cart = _get_or_create_user_cart(user)
+
+    db_items = (
+        CartItem.objects.filter(cart=db_cart)
+        .select_related("product")
+        .filter(product__is_active=True)
+    )
+    db_ids = {str(item.product.pk) for item in db_items if item.product}
+
+    merged = dict(session_cart)
+    for pid_str in db_ids:
+        merged[pid_str] = 1
+
+    session["cart"] = merged
+    session.modified = True
+
+    _sync_session_to_db(session, user)
 
 
 def get_cart(session):

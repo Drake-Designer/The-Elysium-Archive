@@ -10,7 +10,7 @@ from .models import UserProfile
 
 
 class ElysiumSignupForm(SignupForm):
-    """Style the signup form fields."""
+    """Style the signup form fields and enforce unique email."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +42,18 @@ class ElysiumSignupForm(SignupForm):
                 "placeholder": "Repeat your password",
             }
         )
+
+    def clean_email(self):
+        """Reject duplicate emails using a case-insensitive lookup."""
+        email = (self.cleaned_data.get("email") or "").strip()
+        if not email:
+            return email
+
+        UserModel = get_user_model()
+        if UserModel.objects.filter(email__iexact=email).exists():
+            raise ValidationError(_("An account with this email already exists."))
+
+        return email
 
 
 class ElysiumLoginForm(LoginForm):
@@ -95,13 +107,13 @@ class ElysiumLoginForm(LoginForm):
             self.add_error("login", _("Incorrect username or email."))
             self.add_error("password", _("Incorrect password."))
             raise ValidationError(
-                _("Incorrect username or email and incorrect password. Login is case sensitive.")
+                _(
+                    "Incorrect username or email and incorrect password. Login is case sensitive."
+                )
             )
 
         self.add_error("login", _("Incorrect username or email."))
-        raise ValidationError(
-            _("Incorrect username or email. Login is case sensitive.")
-        )
+        raise ValidationError(_("Incorrect username or email. Login is case sensitive."))
 
     def _get_user_exact(self, login_input):
         """Return a user using an exact match on username or email."""
@@ -112,14 +124,14 @@ class ElysiumLoginForm(LoginForm):
         except UserModel.DoesNotExist:
             pass
         except UserModel.MultipleObjectsReturned:
-            return UserModel.objects.filter(**{UserModel.USERNAME_FIELD: login_input}).first()
+            return None
 
         try:
             return UserModel.objects.get(email=login_input)
         except UserModel.DoesNotExist:
             return None
         except UserModel.MultipleObjectsReturned:
-            return UserModel.objects.filter(email=login_input).first()
+            return None
 
     def _get_user_case_insensitive(self, login_input):
         """Return a user using a case insensitive match on username or email."""
@@ -141,7 +153,7 @@ class UserProfileForm(forms.ModelForm):
     remove_picture = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-        label="Remove profile picture"
+        label="Remove profile picture",
     )
 
     class Meta:

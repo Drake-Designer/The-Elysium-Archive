@@ -10,7 +10,8 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from orders.models import AccessEntitlement, Order
+from orders.models import Order
+from orders.services import grant_entitlements_for_order
 
 logger = logging.getLogger(__name__)
 
@@ -45,24 +46,6 @@ def _get_order_from_metadata(data):
     return None
 
 
-def _grant_entitlements(order):
-    """Create entitlements for purchased products."""
-    if not order.user:
-        logger.warning(
-            "Order has no user, cannot grant entitlements (order=%s).", order.order_number
-        )
-        return
-
-    for line in order.line_items.select_related("product").all():
-        if not line.product:
-            continue
-        AccessEntitlement.objects.get_or_create(
-            user=order.user,
-            product=line.product,
-            defaults={"order": order},
-        )
-
-
 def _mark_order_paid(order, data):
     """Mark order as paid and store Stripe IDs."""
     payment_intent = data.get("payment_intent")
@@ -86,7 +69,7 @@ def _mark_order_paid(order, data):
             ]
         )
 
-        _grant_entitlements(order)
+        grant_entitlements_for_order(order)
 
 
 def _ensure_paid_order_consistency(order, data):
@@ -111,7 +94,7 @@ def _ensure_paid_order_consistency(order, data):
             updated_fields.append("updated_at")
             order.save(update_fields=updated_fields)
 
-        _grant_entitlements(order)
+        grant_entitlements_for_order(order)
 
 
 def _handle_checkout_completed(data):
