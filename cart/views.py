@@ -3,6 +3,7 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 
+from accounts.decorators import verified_email_required
 from orders.models import AccessEntitlement
 from products.models import Product
 
@@ -12,7 +13,6 @@ from .cart import (
     get_cart_total,
     remove_from_cart as remove_product_from_cart,
 )
-from accounts.decorators import verified_email_required
 
 
 def _parse_int(value, default):
@@ -74,7 +74,7 @@ def add_to_cart(request):
         messages.info(request, "You already own this archive.")
         return redirect("product_detail", slug=product.slug)
 
-    result = add_product_to_cart(request.session, product_id)
+    result = add_product_to_cart(request.session, product_id, user=request.user)
 
     if result is True:
         messages.success(request, f"✓ {product.title} added to cart!")
@@ -96,7 +96,7 @@ def cart_view(request):
             "Your cart was updated because some items were already purchased.",
         )
 
-    cart_items = get_cart_items(request.session)
+    cart_items = get_cart_items(request.session, user=request.user)
     context = {
         "cart_items": cart_items,
         "cart_total": get_cart_total(request.session, cart_items),
@@ -117,7 +117,7 @@ def remove_from_cart(request):
 
     product = get_object_or_404(Product, id=product_id)
 
-    if remove_product_from_cart(request.session, product_id):
+    if remove_product_from_cart(request.session, product_id, user=request.user):
         messages.success(request, f"✓ {product.title} removed from cart.")
     else:
         messages.info(request, f"{product.title} was not in your cart.")

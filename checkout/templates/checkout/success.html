@@ -6,8 +6,8 @@
 {% block meta_description %}
     Review your order confirmation and payment status after checkout.
 {% endblock meta_description %}
+
 {% block content %}
-    <!-- Checkout success page -->
     <section class="container py-5">
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
@@ -17,18 +17,21 @@
                 <li class="breadcrumb-item active" aria-current="page">Order Confirmation</li>
             </ol>
         </nav>
+
         {% if order %}
             <div class="row mb-5">
                 <div class="col-12">
-                    <div class="text-center mb-5">
+                    <div class="text-center mb-5"
+                         id="paymentStatusPanel"
+                         data-status-url="{% url 'checkout_status' order.order_number %}">
                         {% if order.status == "paid" %}
                             <i class="fa-solid fa-check-circle fa-5x text-success mb-3"></i>
                             <h1 class="display-6 mb-2">Payment Successful</h1>
                             <p class="lead muted">Your archive access unlocks immediately.</p>
                         {% elif order.status == "pending" %}
                             <i class="fa-solid fa-hourglass-half fa-5x text-warning mb-3"></i>
-                            <h1 class="display-6 mb-2">Payment Processing</h1>
-                            <p class="lead muted">Payment is being confirmed. Refresh shortly.</p>
+                            <h1 class="display-6 mb-2" id="paymentStatusText">Payment Processing</h1>
+                            <p class="lead muted" id="paymentStatusHint">Payment is being confirmed. Refresh shortly.</p>
                         {% else %}
                             <i class="fa-solid fa-circle-xmark fa-5x text-danger mb-3"></i>
                             <h1 class="display-6 mb-2">Payment Failed</h1>
@@ -37,10 +40,9 @@
                     </div>
                 </div>
             </div>
-            <!-- Order confirmation summary -->
+
             <div class="row">
                 <div class="col-12 col-lg-8 mx-auto">
-                    <!-- Order summary card -->
                     <div class="panel p-5 mb-4">
                         <div class="row mb-4">
                             <div class="col-md-6">
@@ -52,11 +54,11 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <span class="small muted d-block mb-1">Order Date</span>
-                                    <span class="h5">{{ order.created_at|date:"M d, Y \a\t H:i" }}</span>
+                                    <span class="h5">{{ order.created_at|date:"M d, Y \\a\\t H:i" }}</span>
                                 </div>
                             </div>
                         </div>
-                        <!-- Order items breakdown -->
+
                         <div class="mb-4 pb-4 border-bottom">
                             <h3 class="h6 mb-3">Archives in This Order</h3>
                             {% for item in order.line_items.all %}
@@ -73,7 +75,7 @@
                                 </div>
                             {% endfor %}
                         </div>
-                        <!-- Order total -->
+
                         <div class="row">
                             <div class="col-8">
                                 <span class="h5">Order Total</span>
@@ -83,9 +85,9 @@
                             </div>
                         </div>
                     </div>
-                    <!-- NO REFUNDS policy confirmation -->
+
                     {% include "includes/no_refunds_policy.html" %}
-                    <!-- Call-to-action buttons -->
+
                     <div class="d-grid gap-3">
                         <a href="{% url 'account_dashboard' %}?tab=my-archive"
                            class="btn btn-danger btn-lg">
@@ -97,8 +99,11 @@
                     </div>
                 </div>
             </div>
+
+            {% if order.status == "pending" %}
+                <script src="{% static 'js/checkout-status.js' %}" defer></script>
+            {% endif %}
         {% else %}
-            <!-- Fallback if order not found -->
             <div class="row">
                 <div class="col-12 col-md-8 mx-auto">
                     <div class="alert alert-info">

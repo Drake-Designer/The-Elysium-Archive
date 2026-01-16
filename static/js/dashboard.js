@@ -1,4 +1,5 @@
 // Dashboard tab switching
+
 (() => {
   'use strict';
 

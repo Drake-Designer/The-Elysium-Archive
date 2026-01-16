@@ -1,4 +1,5 @@
 // Message auto-dismiss handler
+
 document.addEventListener('DOMContentLoaded', () => {
   const messages = document.querySelectorAll('.js-django-message');
   if (!messages.length) {

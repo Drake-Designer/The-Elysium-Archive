@@ -1,4 +1,5 @@
 // Effects toggle feature
+
 (() => {
   'use strict';
 

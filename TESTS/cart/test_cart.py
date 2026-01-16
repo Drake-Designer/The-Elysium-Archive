@@ -1,8 +1,10 @@
 """Tests for shopping cart functionality."""
 
+from decimal import Decimal
+from typing import Any, cast
+
 import pytest
 from django.urls import reverse
-from decimal import Decimal
 
 
 @pytest.mark.django_db
@@ -13,40 +15,40 @@ class TestCartOperations:
         """POST to add_to_cart redirects to product detail page."""
         client.force_login(verified_user)
 
+        product_pk = cast(Any, product_active).pk
+
         response = client.post(
             reverse("add_to_cart"),
-            {"product_id": str(product_active.id)},
+            {"product_id": str(product_pk)},
             follow=False,
         )
 
         assert response.status_code == 302
-        assert (
-            reverse("product_detail", kwargs={"slug": product_active.slug})
-            in response.url
-        )
+        assert reverse("product_detail", kwargs={"slug": product_active.slug}) in response.url
 
     def test_add_to_cart_stores_in_session(self, client, verified_user, product_active):
         """Product added to cart is stored in session."""
         client.force_login(verified_user)
 
+        product_pk = cast(Any, product_active).pk
+
         client.post(
             reverse("add_to_cart"),
-            {"product_id": str(product_active.id)},
+            {"product_id": str(product_pk)},
         )
 
-        # Check session cart (stores as {product_id_str: quantity})
         cart = client.session.get("cart", {})
-        assert str(product_active.id) in cart
-        assert cart[str(product_active.id)] == 1
+        assert str(product_pk) in cart
+        assert cart[str(product_pk)] == 1
 
     def test_cart_view_shows_items(self, client, verified_user, product_active):
         """Cart view displays added items."""
         client.force_login(verified_user)
 
-        # Add item to cart
-        client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
+        product_pk = cast(Any, product_active).pk
 
-        # View cart
+        client.post(reverse("add_to_cart"), {"product_id": str(product_pk)})
+
         response = client.get(reverse("cart"))
 
         assert response.status_code == 200
@@ -60,41 +62,52 @@ class TestCartOperations:
         response = client.get(reverse("cart"))
 
         assert response.status_code == 200
-        # Should show empty cart template
         assert "cart/cart.html" in [t.name for t in response.templates]
 
     def test_remove_from_cart(self, client, verified_user, product_active):
         """Remove from cart removes product from session."""
         client.force_login(verified_user)
 
-        # Add to cart
-        client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
+        product_pk = cast(Any, product_active).pk
+
+        client.post(reverse("add_to_cart"), {"product_id": str(product_pk)})
         assert len(client.session.get("cart", {})) == 1
 
-        # Remove from cart
-        client.post(
-            reverse("remove_from_cart"),
-            {"product_id": str(product_active.id)},
-        )
+        client.post(reverse("remove_from_cart"), {"product_id": str(product_pk)})
 
-        # Check removed from session
         cart = client.session.get("cart", {})
-        assert str(product_active.id) not in cart
+        assert str(product_pk) not in cart
 
     def test_cart_persists_across_pages(self, client, verified_user, product_active):
         """Cart items persist when visiting other pages."""
         client.force_login(verified_user)
 
-        # Add to cart
-        client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
+        product_pk = cast(Any, product_active).pk
+
+        client.post(reverse("add_to_cart"), {"product_id": str(product_pk)})
         first_cart_size = len(client.session.get("cart", {}))
 
-        # Visit another page
         client.get(reverse("home"))
 
-        # Cart should still have items
         second_cart_size = len(client.session.get("cart", {}))
         assert first_cart_size == second_cart_size
+
+    def test_cart_persists_after_logout_and_login(self, client, verified_user, product_active):
+        """Cart items persist after logout and login."""
+        client.force_login(verified_user)
+
+        product_pk = cast(Any, product_active).pk
+
+        client.post(reverse("add_to_cart"), {"product_id": str(product_pk)})
+        assert str(product_pk) in client.session.get("cart", {})
+
+        client.logout()
+        assert client.session.get("cart") in (None, {})
+
+        client.force_login(verified_user)
+
+        client.get(reverse("cart"))
+        assert str(product_pk) in client.session.get("cart", {})
 
 
 @pytest.mark.django_db
@@ -111,37 +124,33 @@ class TestCartValidation:
             follow=True,
         )
 
-        # Should either 404 or redirect with message
         assert response.status_code == 200 or response.status_code == 404
 
-    def test_add_inactive_product_to_cart(
-        self, client, verified_user, product_inactive
-    ):
+    def test_add_inactive_product_to_cart(self, client, verified_user, product_inactive):
         """Adding inactive product to cart may be allowed (purchase can be historical)."""
         client.force_login(verified_user)
 
+        product_pk = cast(Any, product_inactive).pk
+
         response = client.post(
             reverse("add_to_cart"),
-            {"product_id": str(product_inactive.id)},
+            {"product_id": str(product_pk)},
         )
 
-        # Behavior depends on implementation, but should handle gracefully
         assert response.status_code in [302, 400, 404]
 
-    def test_cart_add_requires_verified_email(
-        self, client, unverified_user, product_active
-    ):
+    def test_cart_add_requires_verified_email(self, client, unverified_user, product_active):
         """Adding to cart requires verified email address."""
         client.force_login(unverified_user)
 
-        # Add to cart should redirect to email verification
+        product_pk = cast(Any, product_active).pk
+
         response = client.post(
             reverse("add_to_cart"),
-            {"product_id": str(product_active.id)},
+            {"product_id": str(product_pk)},
             follow=False,
         )
 
-        # Should redirect to email verification, not allow cart addition
         assert response.status_code == 302
         assert reverse("account_email") in response.url
 
@@ -154,13 +163,13 @@ class TestCartTotals:
         """Cart displays correct total for single item."""
         client.force_login(verified_user)
 
-        client.post(reverse("add_to_cart"), {"product_id": str(product_active.id)})
+        product_pk = cast(Any, product_active).pk
+
+        client.post(reverse("add_to_cart"), {"product_id": str(product_pk)})
         response = client.get(reverse("cart"))
 
-        # Response should contain product price (9.99)
         assert response.status_code == 200
         content = response.content.decode()
-        # Price formatting may vary
         assert "9.99" in content or "€9.99" in content or "9,99" in content
 
     def test_cart_multiple_items_total(self, client, verified_user, category):
@@ -190,12 +199,11 @@ class TestCartTotals:
 
         client.force_login(verified_user)
 
-        client.post(reverse("add_to_cart"), {"product_id": str(prod1.id)})
-        client.post(reverse("add_to_cart"), {"product_id": str(prod2.id)})
+        client.post(reverse("add_to_cart"), {"product_id": str(cast(Any, prod1).pk)})
+        client.post(reverse("add_to_cart"), {"product_id": str(cast(Any, prod2).pk)})
 
         response = client.get(reverse("cart"))
 
         assert response.status_code == 200
-        # Both products should appear
         assert "Prod1" in response.content.decode()
         assert "Prod2" in response.content.decode()

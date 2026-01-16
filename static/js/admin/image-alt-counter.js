@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-  var input = document.getElementById('id_image_alt') || document.querySelector('input[name="image_alt"]');
+  let input = document.getElementById('id_image_alt') || document.querySelector('input[name="image_alt"]');
   if (!input) return;
 
   // Ensure maxlength is present as a safeguard
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ignore
   }
 
-  var counter = document.createElement('div');
+  let counter = document.createElement('div');
   counter.className = 'char-counter';
   counter.textContent = (input.value ? input.value.length : 0) + '/150';
 
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function update() {
-    var len = input.value.length;
+    let len = input.value.length;
     counter.textContent = len + '/150';
     if (len >= 150) {
       counter.classList.add('is-max');

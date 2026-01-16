@@ -1,6 +1,4 @@
-/**
- * Deal Banner Carousel
- */
+// Deal Banner Carousel
 
 document.addEventListener('DOMContentLoaded', () => {
   const marquee = document.querySelector('.deal-banner-marquee');

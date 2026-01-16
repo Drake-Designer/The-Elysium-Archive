@@ -94,7 +94,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "home",
     "products",
-    "cart",
+    "cart.apps.CartConfig",
     "checkout",
     "orders",
     "reviews",

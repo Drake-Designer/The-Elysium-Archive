@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+from allauth.account.utils import has_verified_email
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
@@ -101,7 +103,8 @@ class ProductDetailView(DetailView):
             return obj
 
         if is_authenticated_user(self.request.user) and (
-            self.request.user.is_staff or self.request.user.is_superuser  # type: ignore[attr-defined]
+            getattr(self.request.user, "is_staff", False)
+            or getattr(self.request.user, "is_superuser", False)
         ):
             return obj
 
@@ -158,19 +161,15 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """Check email verification before processing the request."""
-        if is_authenticated_user(request.user) and request.user.is_superuser:  # type: ignore[attr-defined]
+        if is_authenticated_user(request.user) and getattr(request.user, "is_superuser", False):
             return super().dispatch(request, *args, **kwargs)
 
-        if is_authenticated_user(request.user):
-            from allauth.account.models import EmailAddress
-            from django.contrib import messages
-
-            if not EmailAddress.objects.filter(user=request.user, verified=True).exists():
-                messages.warning(
-                    request,
-                    "Please verify your email address to access archive content.",
-                )
-                return redirect("account_email")
+        if is_authenticated_user(request.user) and not has_verified_email(request.user):
+            messages.warning(
+                request,
+                "Please verify your email address to access archive content.",
+            )
+            return redirect("account_email")
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -178,7 +177,7 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
         """Return product and verify user has access."""
         obj = cast(Product, super().get_object(queryset))
 
-        if is_authenticated_user(self.request.user) and self.request.user.is_superuser:  # type: ignore[attr-defined]
+        if is_authenticated_user(self.request.user) and getattr(self.request.user, "is_superuser", False):
             return obj
 
         if not user_has_access(self.request.user, obj):

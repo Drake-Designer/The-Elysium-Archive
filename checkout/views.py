@@ -7,6 +7,7 @@ import stripe
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -46,22 +47,6 @@ def _remove_purchased_from_session_cart(request, product_ids):
     return removed
 
 
-def _get_recent_pending_order(request, minutes=15):
-    """Return a recent pending order with a Stripe session id, if any."""
-    cutoff = timezone.now() - timedelta(minutes=minutes)
-    return (
-        Order.objects.filter(
-            user=request.user,
-            status="pending",
-            stripe_session_id__isnull=False,
-            created_at__gte=cutoff,
-        )
-        .exclude(stripe_session_id="")
-        .order_by("-created_at")
-        .first()
-    )
-
-
 def _get_recent_pending_order_any(request, minutes=15):
     """Return a recent pending order for the user, even without Stripe session id."""
     cutoff = timezone.now() - timedelta(minutes=minutes)
@@ -87,18 +72,15 @@ def _try_reuse_stripe_session(request, order):
     payment_status = session.get("payment_status")
     session_url = session.get("url")
 
-    # If Stripe says paid, send user to success page.
     if payment_status == "paid":
         return redirect(
             reverse("checkout_success", kwargs={"order_number": order.order_number})
         )
 
-    # If the session is still open, reuse it.
     if session_status == "open" and session_url:
         messages.info(request, "You already have an active checkout session.")
         return redirect(session_url, code=303)
 
-    # If the session is not usable anymore, mark the order as failed.
     if session_status in ("expired", "complete"):
         order.status = "failed"
         order.save(update_fields=["status", "updated_at"])
@@ -131,13 +113,57 @@ def _fail_recent_pending_order(request, minutes=30):
 def _fail_stale_pending_orders(request, minutes=30):
     """Mark stale pending orders for the current user as failed."""
     cutoff = timezone.now() - timedelta(minutes=minutes)
-    (
-        Order.objects.filter(
-            user=request.user,
-            status="pending",
-            created_at__lt=cutoff,
-        ).update(status="failed")
-    )
+    Order.objects.filter(
+        user=request.user,
+        status="pending",
+        created_at__lt=cutoff,
+    ).update(status="failed")
+
+
+def _grant_entitlements_for_order(user, order):
+    """Create entitlements for each line item product."""
+    for line_item in order.line_items.select_related("product").all():
+        if line_item.product:
+            AccessEntitlement.objects.get_or_create(
+                user=user,
+                product=line_item.product,
+                defaults={"order": order},
+            )
+
+
+def _verify_and_finalize_order_if_paid(user, order):
+    """Verify Stripe session and finalize order if Stripe reports paid."""
+    if order.status != "pending":
+        return False
+
+    if not order.stripe_session_id:
+        return False
+
+    if not stripe.api_key:
+        return False
+
+    try:
+        session = stripe.checkout.Session.retrieve(order.stripe_session_id)
+    except stripe.error.StripeError:
+        return False
+
+    payment_status = getattr(session, "payment_status", None) or session.get("payment_status")
+
+    if payment_status != "paid":
+        return False
+
+    with transaction.atomic():
+        locked = Order.objects.select_for_update().get(pk=order.pk)
+        if locked.status != "pending":
+            return True
+
+        locked.status = "paid"
+        locked.stripe_payment_intent_id = session.get("payment_intent") or ""
+        locked.save(update_fields=["status", "stripe_payment_intent_id", "updated_at"])
+
+        _grant_entitlements_for_order(user, locked)
+
+    return True
 
 
 @verified_email_required
@@ -178,7 +204,6 @@ def checkout(request):
         clear_cart(request.session)
         return redirect("cart")
 
-    # Ensure products still exist and are active.
     valid_products = list(
         Product.objects.filter(pk__in=[p.pk for p in cart_products], is_active=True)
     )
@@ -208,7 +233,7 @@ def checkout(request):
         if order.line_items.exists():
             order.line_items.all().delete()
 
-        line_items = []
+        stripe_line_items = []
         for product in valid_products:
             OrderLineItem.objects.create(
                 order=order,
@@ -219,7 +244,7 @@ def checkout(request):
                 line_total=product.price,
             )
 
-            line_items.append(
+            stripe_line_items.append(
                 {
                     "price_data": {
                         "currency": "eur",
@@ -235,7 +260,7 @@ def checkout(request):
 
     try:
         session = stripe.checkout.Session.create(
-            line_items=line_items,
+            line_items=stripe_line_items,
             mode="payment",
             success_url=request.build_absolute_uri(
                 reverse("checkout_success", kwargs={"order_number": order.order_number})
@@ -265,9 +290,11 @@ def checkout(request):
 
 
 @verified_email_required
+@require_http_methods(["GET"])
 def checkout_success(request, order_number):
     """Display order confirmation after successful payment."""
-    if not _set_stripe_key():
+    stripe_ready = _set_stripe_key()
+    if not stripe_ready:
         messages.warning(
             request,
             "Payment verification is not available right now. Please refresh in a moment.",
@@ -277,58 +304,41 @@ def checkout_success(request, order_number):
         order = Order.objects.get(order_number=order_number, user=request.user)
     except Order.DoesNotExist:
         messages.error(request, "Order not found.")
-        return redirect("product_list")
+        return redirect("archive")
 
-    # If webhook already marked it as paid, we still must clear the cart
-    # and ensure entitlements exist.
     if order.status == "paid":
         with transaction.atomic():
             locked = Order.objects.select_for_update().get(pk=order.pk)
-
-            for line_item in locked.line_items.select_related("product").all():
-                if line_item.product:
-                    AccessEntitlement.objects.get_or_create(
-                        user=request.user,
-                        product=line_item.product,
-                        defaults={"order": locked},
-                    )
-
+            _grant_entitlements_for_order(request.user, locked)
         clear_cart(request.session)
-        context = {"order": order}
-        return render(request, "checkout/success.html", context)
+        return render(request, "checkout/success.html", {"order": order})
 
-    # Fallback: if webhook did not arrive yet, verify via Stripe session.
-    if order.status == "pending" and order.stripe_session_id and stripe.api_key:
-        try:
-            session = stripe.checkout.Session.retrieve(order.stripe_session_id)
-            if session.payment_status == "paid":
-                with transaction.atomic():
-                    locked = Order.objects.select_for_update().get(pk=order.pk)
+    if stripe_ready and order.status == "pending":
+        paid_now = _verify_and_finalize_order_if_paid(request.user, order)
+        if paid_now:
+            order.refresh_from_db()
+            clear_cart(request.session)
 
-                    locked.status = "paid"
-                    locked.stripe_payment_intent_id = session.get("payment_intent") or ""
-                    locked.save(
-                        update_fields=["status", "stripe_payment_intent_id", "updated_at"]
-                    )
+    return render(request, "checkout/success.html", {"order": order})
 
-                    for line_item in locked.line_items.select_related("product").all():
-                        if line_item.product:
-                            AccessEntitlement.objects.get_or_create(
-                                user=request.user,
-                                product=line_item.product,
-                                defaults={"order": locked},
-                            )
 
-                clear_cart(request.session)
+@verified_email_required
+@require_http_methods(["GET"])
+def checkout_status(request, order_number):
+    """Return order status as JSON and finalize if Stripe reports paid."""
+    stripe_ready = _set_stripe_key()
 
-        except stripe.error.StripeError:
-            messages.info(
-                request,
-                "Your payment is being confirmed. If this page still shows pending, refresh in a moment.",
-            )
+    try:
+        order = Order.objects.get(order_number=order_number, user=request.user)
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "not_found"}, status=404)
 
-    context = {"order": order}
-    return render(request, "checkout/success.html", context)
+    if stripe_ready and order.status == "pending":
+        paid_now = _verify_and_finalize_order_if_paid(request.user, order)
+        if paid_now:
+            order.refresh_from_db()
+
+    return JsonResponse({"status": order.status})
 
 
 @verified_email_required
