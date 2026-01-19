@@ -292,6 +292,7 @@ Note: In DEBUG, email is sent to the console backend. Use the verification link 
 - [ ] Anonymous user visits `/accounts/login/` -> page loads
 - [ ] Anonymous user visits `/accounts/signup/` -> page loads
 - [ ] New user signs up -> verification email appears in console
+- [ ] Sign up with an email already used is rejected (case-insensitive, e.g., `Test@Test.com` vs `test@test.com`)
 - [ ] User confirms email -> verification succeeds
 - [ ] Unverified user visits `/accounts/dashboard/` -> redirected to `/accounts/email/`
 - [ ] Verified user visits `/accounts/dashboard/` -> dashboard loads
@@ -310,6 +311,7 @@ Note: In DEBUG, email is sent to the console backend. Use the verification link 
 - [ ] Anonymous user visits `/archive/` -> active products listed
 - [ ] Product detail page shows title, description, price, and CTA
 - [ ] Inactive products do not appear in the list for non-staff users
+- [ ] Unpublished products are not listed publicly, but entitled buyers can access preview/read pages; non-entitled users cannot
 - [ ] Staff user can edit product in admin and save changes
 
 #### Cart
@@ -327,6 +329,7 @@ Note: In DEBUG, email is sent to the console backend. Use the verification link 
 - [ ] Stripe success -> redirected to `/checkout/success/<order_number>/`
 - [ ] Stripe cancel -> redirected to `/checkout/cancel/`
 - [ ] Order visible in admin (`/admin/orders/order/`)
+- [ ] Simulate a server crash after Stripe session creation -> no broken state; retry yields consistent pending order handling and no duplicate entitlements
 - [ ] Rapid double click / double submit checkout: only one pending order is created/reused
 - [ ] Refresh success page multiple times: no duplicate entitlements; cart remains cleared
 - [ ] Simulated delayed webhook: fallback confirmation still finalises paid order and unlocks access

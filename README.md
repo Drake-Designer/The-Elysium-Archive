@@ -100,6 +100,7 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 - Private "My Archive" area
 - Individual protected archive pages
 - Direct URL access is blocked
+- Unpublished products are hidden from the public archive list but remain reachable by entitled buyers (and superusers) via direct link; non-entitled users cannot access them
 
 ### Reviews (Verified Buyers Only)
 
@@ -230,6 +231,7 @@ This section documents implemented features organised by category.
 ### User Authentication
 
 - **Registration** - Create account with username, email, and password validation
+- **Unique Email Enforcement** - Signup enforces unique emails case-insensitively (no duplicate accounts with different casing)
 - **Email Verification** - Mandatory email verification via SendGrid
 - **Login** - Secure authentication with username or email
 - **Login Warnings** - Shows one warning at a time, distinguishes wrong password vs wrong username/email, and only shows the case-sensitive reminder when relevant
@@ -670,6 +672,9 @@ The checkout success page includes a fallback verification step if webhook deliv
 The checkout flow is protected against duplicate submissions by reusing a recent pending order when a double POST happens in quick succession. Confirmation is robust through webhooks plus the success-page fallback, and entitlement creation is idempotent so refreshes or webhook replays do not create duplicates.
 
 Entitlements are created idempotently to prevent duplicate access grants if webhook events are replayed or users refresh the success page.
+
+- Entitlement creation is idempotent (DB unique constraint + `get_or_create`), so webhook replays and success-page refreshes do not create duplicates.
+- Order finalisation is atomic and uses transactions/row locking to prevent race conditions (double-submit safe).
 
 ### Test Mode
 
