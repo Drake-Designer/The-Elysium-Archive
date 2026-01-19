@@ -2,12 +2,14 @@
     DEAL BANNER MARQUEE
    ==================== */
 
-/* Deal Banner Marquee (tight + clean) */
+/* Deal Banner Marquee wrapper - clean, no border */
 .deal-banner-marquee-wrapper {
   padding: 0.35rem 0.9rem;
-  border: 1px solid rgba(194, 161, 77, 0.25);
+  border: none;
   background: rgba(15, 15, 20, 0.6);
   backdrop-filter: blur(2px);
+  position: relative;
+  overflow: hidden;
 }
 
 .deal-banner-marquee {
@@ -16,61 +18,46 @@
   width: 100%;
 }
 
-.deal-banner-marquee::before,
-.deal-banner-marquee::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 30px;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.deal-banner-marquee::before {
-  left: 0;
-  background: linear-gradient(to right, rgba(15, 15, 20, 1), rgba(15, 15, 20, 0));
-}
-
-.deal-banner-marquee::after {
-  right: 0;
-  background: linear-gradient(to left, rgba(15, 15, 20, 1), rgba(15, 15, 20, 0));
-}
-
-/* This track uses a CSS variable for duration. */
+/* Track uses CSS variable for duration */
 .deal-banner-marquee-track {
   display: flex;
   align-items: center;
   gap: 22px;
   width: max-content;
   will-change: transform;
-  animation: dealMarqueeScroll var(--marquee-duration, 16s) linear infinite;
+  animation: dealMarqueeScroll var(--marquee-duration, 20s) linear infinite;
 }
 
+/* Individual marquee item - no hover effects */
 .deal-banner-marquee-item {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   text-decoration: none;
   color: rgba(230, 230, 240, 0.9);
-  padding: 0.1rem 0;
+  padding: 0.5rem 1rem;
   white-space: nowrap;
+  transition: color 0.2s ease;
 }
 
+/* Subtle color change on hover only */
 .deal-banner-marquee-item:hover {
   color: rgba(255, 255, 255, 1);
 }
 
+/* Focus visible state for accessibility */
 .deal-banner-marquee-item:focus-visible {
-  outline: 2px solid rgba(194, 161, 77, 0.75);
+  outline: 2px solid rgba(255, 255, 255, 0.5);
   outline-offset: 3px;
 }
 
+/* Item icon */
 .deal-banner-marquee-icon {
   font-size: 16px;
   flex-shrink: 0;
 }
 
+/* Text content wrapper */
 .deal-banner-marquee-text {
   display: inline-flex;
   align-items: center;
@@ -80,32 +67,36 @@
   line-height: 1.1;
 }
 
+/* Deal title badge */
 .deal-banner-marquee-title {
-  color: rgba(194, 161, 77, 0.95);
+  color: rgba(200, 200, 200, 0.95);
   letter-spacing: 0.6px;
   font-weight: 800;
 }
 
+/* Deal message text */
 .deal-banner-marquee-message {
   color: rgba(230, 230, 240, 0.9);
   font-weight: 500;
 }
 
+/* Category badge pill */
 .deal-banner-marquee-badge {
   display: inline-flex;
   align-items: center;
   height: 18px;
   padding: 0 8px;
   border-radius: 999px;
-  border: 1px solid rgba(194, 161, 77, 0.35);
-  background-color: rgba(194, 161, 77, 0.12);
-  color: rgba(194, 161, 77, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(230, 230, 240, 0.95);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.7px;
   text-transform: uppercase;
 }
 
+/* Marquee scroll animation - seamless loop */
 @keyframes dealMarqueeScroll {
   0% {
     transform: translateX(0);
@@ -115,6 +106,7 @@
   }
 }
 
+/* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .deal-banner-marquee-wrapper {
     padding: 0.3rem 0.75rem;
@@ -122,6 +114,10 @@
 
   .deal-banner-marquee-track {
     gap: 16px;
+  }
+
+  .deal-banner-marquee-item {
+    padding: 0.4rem 0.8rem;
   }
 
   .deal-banner-marquee-text {
@@ -136,54 +132,59 @@
   }
 }
 
+/* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce) {
   .deal-banner-marquee-track {
     animation: none;
     transform: none;
   }
+
+  .deal-banner-marquee-item {
+    transition: none;
+  }
 }
 
-/* Speed classes set duration without inline styles */
+/* Speed classes - slowed down for smoother viewing */
 .deal-banner-marquee.deal-marquee-speed-10 {
-  --marquee-duration: 10s;
-}
-
-.deal-banner-marquee.deal-marquee-speed-12 {
   --marquee-duration: 12s;
 }
 
-.deal-banner-marquee.deal-marquee-speed-14 {
+.deal-banner-marquee.deal-marquee-speed-12 {
   --marquee-duration: 14s;
 }
 
+.deal-banner-marquee.deal-marquee-speed-14 {
+  --marquee-duration: 17s;
+}
+
 .deal-banner-marquee.deal-marquee-speed-16 {
-  --marquee-duration: 16s;
-}
-
-.deal-banner-marquee.deal-marquee-speed-18 {
-  --marquee-duration: 18s;
-}
-
-.deal-banner-marquee.deal-marquee-speed-20 {
   --marquee-duration: 20s;
 }
 
+.deal-banner-marquee.deal-marquee-speed-18 {
+  --marquee-duration: 22s;
+}
+
+.deal-banner-marquee.deal-marquee-speed-20 {
+  --marquee-duration: 25s;
+}
+
 .deal-banner-marquee.deal-marquee-speed-24 {
-  --marquee-duration: 24s;
+  --marquee-duration: 30s;
 }
 
 .deal-banner-marquee.deal-marquee-speed-28 {
-  --marquee-duration: 28s;
+  --marquee-duration: 35s;
 }
 
 .deal-banner-marquee.deal-marquee-speed-32 {
-  --marquee-duration: 32s;
+  --marquee-duration: 40s;
 }
 
 .deal-banner-marquee.deal-marquee-speed-36 {
-  --marquee-duration: 36s;
+  --marquee-duration: 45s;
 }
 
 .deal-banner-marquee.deal-marquee-speed-40 {
-  --marquee-duration: 40s;
+  --marquee-duration: 50s;
 }

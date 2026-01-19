@@ -6,14 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!marquee || !track) return;
 
+  // Speed configuration - reduced for smoother scrolling
   const speedSteps = [10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40];
-  const desktopSpeed = 110;
-  const mobileSpeed = 140;
+  const desktopSpeed = 70;
+  const mobileSpeed = 90;
 
+  // Clear all speed classes from marquee element
   const clearSpeedClasses = () => {
     speedSteps.forEach((s) => marquee.classList.remove(`deal-marquee-speed-${s}`));
   };
 
+  // Find closest speed step to calculated duration
   const pickClosestStep = (seconds) => {
     let best = speedSteps[0];
     let bestDiff = Math.abs(seconds - best);
@@ -29,10 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return best;
   };
 
+  // Get original visible items (non-clones)
   const getVisibleItems = () => {
     return Array.from(track.children).filter((item) => item.getAttribute('aria-hidden') !== 'true');
   };
 
+  // Duplicate items to fill track for seamless loop
   const fillTrack = () => {
     const viewportWidth = marquee.clientWidth;
     if (!viewportWidth) return;
@@ -40,10 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const items = getVisibleItems();
     if (!items.length) return;
 
-    const targetWidth = viewportWidth * 2.2;
+    // Target width increased for smoother loop transition
+    const targetWidth = viewportWidth * 2.5;
     let rounds = 0;
 
-    while (track.scrollWidth < targetWidth && rounds < 8) {
+    while (track.scrollWidth < targetWidth && rounds < 10) {
       items.forEach((item) => {
         const clone = item.cloneNode(true);
         clone.setAttribute('aria-hidden', 'true');
@@ -54,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Calculate and apply animation speed based on track width
   const updateSpeed = () => {
     clearSpeedClasses();
 
@@ -68,15 +75,20 @@ document.addEventListener('DOMContentLoaded', () => {
     marquee.classList.add(`deal-marquee-speed-${step}`);
   };
 
+  // Handle window resize with debounce
   let resizeTimer = null;
   const onResize = () => {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
+      const clones = track.querySelectorAll('[aria-hidden="true"]');
+      clones.forEach((clone) => clone.remove());
+
       fillTrack();
       updateSpeed();
     }, 150);
   };
 
+  // Initialize marquee
   fillTrack();
   updateSpeed();
   window.addEventListener('resize', onResize);
