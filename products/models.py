@@ -1,5 +1,7 @@
-"""Product, category, and deal banner models for The Elysium Archive."""
-from django.core.validators import MaxLengthValidator
+""" Product, category, and deal banner models """
+from decimal import Decimal
+
+from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
 from django.dispatch import receiver
@@ -109,6 +111,41 @@ class Product(models.Model):
         """This method returns the canonical URL for this product."""
         return reverse("product_detail", kwargs={"slug": self.slug})
 
+    def get_discount_percentage(self):
+        """
+        Get the discount percentage for this product from active deal banners.
+        Returns the percentage as an integer (e.g., 20 for 20%).
+        """
+        if not self.is_deal:
+            return 0
+
+        active_banners = DealBanner.objects.filter(is_active=True)
+
+        # Check product-specific banners first
+        product_banner = active_banners.filter(product=self).first()
+        if product_banner and product_banner.discount_percentage > 0:
+            return int(product_banner.discount_percentage)
+
+        # Check category banners if product has a category
+        if self.category:
+            category_banner = active_banners.filter(category=self.category).first()
+            if category_banner and category_banner.discount_percentage > 0:
+                return int(category_banner.discount_percentage)
+
+        return 0
+
+    def get_discounted_price(self):
+        """
+        Calculate and return the discounted price.
+        Returns a Decimal with 2 decimal places.
+        """
+        discount_percentage = self.get_discount_percentage()
+        if discount_percentage > 0:
+            discount_amount = self.price * (Decimal(discount_percentage) / Decimal('100'))
+            discounted_price = self.price - discount_amount
+            return discounted_price.quantize(Decimal('0.01'))
+        return self.price
+
 
 class DealBanner(models.Model):
     """Custom promotional banner message for the deals marquee."""
@@ -138,6 +175,13 @@ class DealBanner(models.Model):
         null=True,
         blank=True,
         help_text="Optional: Show category badge and filter by category when clicked",
+    )
+    discount_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text="Discount percentage (0-100). Applied to linked product or category products.",
     )
     icon = models.CharField(
         max_length=10,
@@ -233,6 +277,7 @@ from django.db.models.signals import post_delete, post_save
 
 @receiver(post_save, sender=DealBanner)
 def deal_banner_post_save(sender, instance, created, **kwargs):
+    """Sync product deal status when a banner is created or updated."""
     product_pks = [instance.product.pk] if instance.product else []
     category_pks = [instance.category.pk] if instance.category else []
     if product_pks or category_pks:
@@ -241,6 +286,7 @@ def deal_banner_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=DealBanner)
 def deal_banner_post_delete(sender, instance, **kwargs):
+    """Sync product deal status when a banner is deleted."""
     product_pks = [instance.product.pk] if instance.product else []
     category_pks = [instance.category.pk] if instance.category else []
     if product_pks or category_pks:

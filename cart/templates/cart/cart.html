@@ -51,13 +51,26 @@
                                                 <h5 class="mb-1">{{ item.product.title }}</h5>
                                             </a>
                                             {% if item.product.tagline %}<p class="small muted mb-2">{{ item.product.tagline }}</p>{% endif %}
-                                            {% if item.product.category %}<span class="badge text-bg-danger">{{ item.product.category.name }}</span>{% endif %}
+                                            <div class="d-flex gap-2 align-items-center">
+                                                {% if item.product.category %}<span class="badge text-bg-danger">{{ item.product.category.name }}</span>{% endif %}
+                                                {% if item.product.is_deal %}<span class="badge badge-deal-gold">💰 DEAL</span>{% endif %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                                     <div class="mb-3">
-                                        <span class="h4 text-danger mb-0">€{{ item.product.price|floatformat:2 }}</span>
+                                        {% if item.product.is_deal and item.product.get_discount_percentage > 0 %}
+                                            <div class="d-flex flex-column align-items-md-end">
+                                                <span class="cart-item-price-original mb-1">€{{ item.product.price|floatformat:2 }}</span>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="h4 cart-item-price-discounted mb-0">€{{ item.product.get_discounted_price|floatformat:2 }}</span>
+                                                    <span class="badge bg-danger">-{{ item.product.get_discount_percentage }}%</span>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <span class="h4 text-danger mb-0">€{{ item.product.price|floatformat:2 }}</span>
+                                        {% endif %}
                                     </div>
                                     <form method="post" action="{% url 'remove_from_cart' %}" class="d-inline">
                                         {% csrf_token %}

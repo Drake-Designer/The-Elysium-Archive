@@ -89,3 +89,23 @@
 .section-header-text {
   min-width: 220px;
 }
+
+/* Featured Carousel Discount Styling */
+.entry-card--featured .price--original {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.entry-card--featured .price--discounted {
+  font-size: 1.5rem;
+}
+
+.entry-card--featured .discount-badge {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.625rem;
+}
+
+/* Featured carousel footer alignment for deals */
+.entry-card-footer--featured {
+  align-items: flex-start;
+}

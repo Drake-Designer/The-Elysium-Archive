@@ -24,6 +24,7 @@
                   <strong class="deal-banner-marquee-title">{{ banner.title|upper }}</strong>
                   <span class="deal-banner-marquee-message">{{ banner.message }}</span>
                   {% if banner.category %}<span class="deal-banner-marquee-badge">{{ banner.category.name }}</span>{% endif %}
+                  {% if banner.discount_percentage > 0 %}<span class="deal-banner-marquee-discount">-{{ banner.discount_percentage }}%</span>{% endif %}
                 </span>
               </a>
             {% endfor %}
@@ -37,6 +38,7 @@
                   <strong class="deal-banner-marquee-title">{{ banner.title|upper }}</strong>
                   <span class="deal-banner-marquee-message">{{ banner.message }}</span>
                   {% if banner.category %}<span class="deal-banner-marquee-badge">{{ banner.category.name }}</span>{% endif %}
+                  {% if banner.discount_percentage > 0 %}<span class="deal-banner-marquee-discount">-{{ banner.discount_percentage }}%</span>{% endif %}
                 </span>
               </a>
             {% endfor %}
@@ -177,13 +179,26 @@
                       <div class="entry-card-body entry-card-body--featured">
                         <div class="entry-card-head">
                           <h3 class="entry-card-title">{{ product.title }}</h3>
-                          <span class="badge badge-sealed">Sealed</span>
+                          <div class="d-flex gap-2 align-items-center">
+                            {% if product.is_deal %}<span class="badge badge-deal-gold">💰 DEAL</span>{% endif %}
+                            <span class="badge badge-sealed">Sealed</span>
+                          </div>
                         </div>
                         <p class="entry-card-desc muted">{{ product.tagline|default:product.description|truncatewords:25 }}</p>
                       </div>
                       <!-- Entry footer area -->
                       <div class="entry-card-footer entry-card-footer--featured">
-                        <span class="price price--featured">€{{ product.price }}</span>
+                        {% if product.is_deal and product.get_discount_percentage > 0 %}
+                          <div class="d-flex flex-column align-items-start">
+                            <span class="small text-muted text-decoration-line-through">€{{ product.price }}</span>
+                            <div class="d-flex align-items-center gap-2">
+                              <span class="price price--featured">€{{ product.get_discounted_price }}</span>
+                              <span class="badge bg-danger">-{{ product.get_discount_percentage }}%</span>
+                            </div>
+                          </div>
+                        {% else %}
+                          <span class="price price--featured">€{{ product.price }}</span>
+                        {% endif %}
                         <a class="btn btn-outline-light btn-icon"
                            href="{% url 'product_detail' slug=product.slug %}">
                           <i class="fa-solid fa-eye"></i>

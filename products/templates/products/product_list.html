@@ -157,10 +157,19 @@
                             </div>
 
                             <p class="small muted mb-3">{{ product.tagline }}</p>
-
-                            <!-- CHANGED: push CTA row to bottom of card -->
+                           
                             <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
-                                <span class="price">{{ product.price }} €</span>
+                                {% if product.is_deal and product.get_discount_percentage > 0 %}
+                                    <div class="d-flex flex-column">
+                                        <span class="small text-muted text-decoration-line-through">{{ product.price }} €</span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="price">{{ product.get_discounted_price }} €</span>
+                                            <span class="badge bg-danger small">-{{ product.get_discount_percentage }}%</span>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="price">{{ product.price }} €</span>
+                                {% endif %}
 
                                 {% if product.id|stringformat:"s" in cart_product_ids %}
                                     <div class="d-flex align-items-center gap-2">

@@ -8,77 +8,90 @@ import dj_database_url
 from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
 
-# Base directory and local environment loading
+# Project root directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load local environment file if exists (gitignored, for dev only)
 if (BASE_DIR / "env.py").exists():
     import env  # noqa: F401
 
 
-# Environment helper functions
+# Helper: Parse boolean from environment variable
 def _env_bool(value, default=False):
-    """Parse a boolean environment variable."""
+    """Convert string like 'true', '1', 'yes' to boolean."""
     if value is None:
         return default
     return str(value).strip().lower() in ("true", "1", "yes", "y", "on")
 
 
+# Helper: Parse comma-separated list from environment variable
 def _env_list(name, default=None):
-    """Parse a comma-separated environment variable into a list."""
+    """Convert 'value1,value2,value3' to ['value1', 'value2', 'value3']."""
     raw = os.environ.get(name)
     if raw is None:
         return default or []
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
-# Core security and environment flags
+# Secret key for Django cryptographic signing (sessions, tokens, etc.)
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
+
+# Debug mode (detailed error pages, auto static serving)
 DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
 
+# Prevent production deployment with unsafe secret key
 if not DEBUG and (not SECRET_KEY or SECRET_KEY == "unsafe-dev-secret-key"):
     raise ImproperlyConfigured(
         "SECRET_KEY must be set to a secure value when DEBUG=False."
     )
 
+# Check if running on Heroku
 IS_HEROKU = os.environ.get("DYNO") is not None
 
-# Hosts and CSRF configuration
+# Domains allowed to serve this site (prevents HTTP Host header attacks)
 ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", default=[])
 
+# Auto-allow Heroku domains in production
 if not ALLOWED_HOSTS and IS_HEROKU:
     ALLOWED_HOSTS = [".herokuapp.com"]
 
+# Always allow localhost in development
 if DEBUG:
     for host in ("localhost", "127.0.0.1"):
         if host not in ALLOWED_HOSTS:
             ALLOWED_HOSTS.append(host)
 
+# Trusted origins for CSRF protection (needed for HTTPS POST requests)
 CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", default=[])
 
+# Auto-configure CSRF trusted origins for Heroku
 if not CSRF_TRUSTED_ORIGINS and IS_HEROKU:
     CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com"]
 
+# Allow localhost CSRF in development
 if DEBUG and not CSRF_TRUSTED_ORIGINS:
     CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1", "http://localhost"]
 
+# Trust proxy headers for HTTPS detection (required for Heroku)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
+# Production security settings (HTTPS enforcement, secure cookies)
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-# Security headers
+# Additional security headers
 X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Installed applications
+# Django apps loaded for this project
 INSTALLED_APPS = [
-    "jazzmin",
+    "jazzmin", 
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -86,23 +99,24 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-    "allauth",
+    "allauth",  
     "allauth.account",
-    "django_ckeditor_5",
-    "cloudinary",
+    "django_ckeditor_5",  
+    "cloudinary", 
     "cloudinary_storage",
-    "accounts.apps.AccountsConfig",
-    "home",
-    "products",
-    "cart.apps.CartConfig",
-    "checkout",
-    "orders",
-    "reviews",
+    "accounts.apps.AccountsConfig",  
+    "home",  
+    "products",  
+    "cart.apps.CartConfig",  
+    "checkout",  
+    "orders",  
+    "reviews",  
 ]
 
+# Required for django.contrib.sites
 SITE_ID = int(os.environ.get("SITE_ID", "1"))
 
-# Admin interface configuration
+# Jazzmin admin interface customization
 JAZZMIN_SETTINGS = {
     "site_title": "The Elysium Archive Admin",
     "site_header": "The Elysium Archive",
@@ -124,10 +138,10 @@ JAZZMIN_SETTINGS = {
     },
 }
 
-# Middleware configuration
+# Middleware processing order (request/response pipeline)
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware", 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -137,7 +151,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Django message tag mapping
+# Map Django message levels to Bootstrap CSS classes
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",
     messages.INFO: "info",
@@ -146,29 +160,31 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
-# URL and template configuration
+# Main URL configuration module
 ROOT_URLCONF = "elysium_archive.urls"
 
+# Template engine configuration
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
+        "DIRS": [BASE_DIR / "templates"],  
+        "APP_DIRS": True,  
         "OPTIONS": {
             "context_processors": [
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.request",  
+                "django.contrib.auth.context_processors.auth",  
+                "django.contrib.messages.context_processors.messages",  
                 "elysium_archive.context_processors.cart_context",
-                "elysium_archive.context_processors.deals_context",
+                "elysium_archive.context_processors.deals_context",  
             ],
         },
     }
 ]
 
+# WSGI application entry point
 WSGI_APPLICATION = "elysium_archive.wsgi.application"
 
-# Database configuration
+# Database configuration (SQLite for dev, PostgreSQL for production)
 DATABASES: dict[str, Any] = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -176,11 +192,12 @@ DATABASES: dict[str, Any] = {
     }
 }
 
+# Override with PostgreSQL if DATABASE_URL is set (Heroku)
 if os.environ.get("DATABASE_URL"):
     db_config = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES["default"] = cast(dict[str, Any], db_config)
 
-# Password validation
+# Password validation rules for user accounts
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -190,22 +207,24 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Internationalization settings
+# Localization settings
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Europe/Dublin"
-USE_I18N = True
-USE_TZ = True
+USE_I18N = True  
+USE_TZ = True  
 
-# Static files configuration
+# Static files (CSS, JS, images) configuration
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]  
+STATIC_ROOT = BASE_DIR / "staticfiles" 
 
-# Media files and storage configuration
+# User-uploaded media files configuration
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Storage backends (Cloudinary for production, local filesystem for dev)
 if os.environ.get("CLOUDINARY_URL"):
+    # Production: Use Cloudinary for media, WhiteNoise for static
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -220,6 +239,7 @@ if os.environ.get("CLOUDINARY_URL"):
 
     cloudinary.config(secure=True)
 else:
+    # Development: Use local filesystem for both media and static
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -230,76 +250,79 @@ else:
     }
     CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
-# Default model field configuration
+# Default primary key field type for models
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Authentication redirects
+# Authentication URL redirects
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
-# Authentication backends
+# Authentication backends (Django default + custom case-sensitive backend)
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "accounts.backends.CaseSensitiveAuthenticationBackend",
 ]
 
-# Allauth configuration
-ACCOUNT_LOGIN_METHODS = {"username", "email"}
+# Django-allauth configuration (user registration and authentication)
+ACCOUNT_LOGIN_METHODS = {"username", "email"}  
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
-ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_UNIQUE_EMAIL = True  
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = True 
 
+# Custom allauth forms
 ACCOUNT_FORMS = {
     "signup": "accounts.forms.ElysiumSignupForm",
     "login": "accounts.forms.ElysiumLoginForm",
 }
 
-# Make links in emails correct on Heroku
+# Use HTTPS for email links in production
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if DEBUG else "https"
 
-# Email configuration
+# Email backend (console for dev, SMTP for production)
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
+# SMTP configuration (using SendGrid)
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.sendgrid.net")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = _env_bool(os.environ.get("EMAIL_USE_TLS"), default=True)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "apikey")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
-# Important: the From domain must align with your authenticated sending domain
+# Email sender addresses
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",
     "The Elysium Archive <no-reply@the-elysium-archive.com>",
 )
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
-# Contact recipient is configurable via env
+# Contact form recipient
 CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL)
 
-# Optional but helps consistency
+# Email subject prefix for allauth emails
 ACCOUNT_EMAIL_SUBJECT_PREFIX = os.environ.get(
     "ACCOUNT_EMAIL_SUBJECT_PREFIX",
     "[The Elysium Archive] ",
 )
 
-# Fail fast in production if SMTP creds are missing
+# Prevent production deployment without email credentials
 if not DEBUG and not EMAIL_HOST_PASSWORD:
     raise ImproperlyConfigured("EMAIL_HOST_PASSWORD must be set when DEBUG=False.")
 
-# Stripe configuration
+# Stripe payment gateway configuration
 STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev")
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev")
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")
 
-# CKEditor 5 configuration
+# CKEditor 5 rich text editor configuration
 CKEDITOR_5_UPLOAD_PATH = "ckeditor5/"
 
 CKEDITOR_5_CONFIGS = {
+    # Configuration for product content (full featured)
     "product_content": {
         "toolbar": [
             "heading",
@@ -349,6 +372,7 @@ CKEDITOR_5_CONFIGS = {
         },
         "height": "500px",
     },
+    # Configuration for general writing (simplified toolbar)
     "writer": {
         "toolbar": [
             "heading",
@@ -390,6 +414,7 @@ CKEDITOR_5_CONFIGS = {
         "table": {"contentToolbar": ["tableColumn", "tableRow", "mergeTableCells"]},
         "height": "600px",
     },
+    # Default configuration (full featured)
     "default": {
         "toolbar": [
             "heading",

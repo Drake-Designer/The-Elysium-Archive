@@ -162,11 +162,11 @@ def get_cart_items(session, user=None):
 
 
 def get_cart_total(session, cart_items=None):
-    """Return the total value of the cart."""
+    """Return the total value of the cart with discounts applied."""
     total = Decimal("0.00")
     items = cart_items if cart_items is not None else get_cart_items(session)
     for item in items:
-        total += item["product"].price
+        total += item["product"].get_discounted_price()
     return total
 
 

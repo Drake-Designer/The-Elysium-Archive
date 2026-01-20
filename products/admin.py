@@ -98,6 +98,8 @@ class ProductAdmin(admin.ModelAdmin):
         "title",
         "category_display",
         "price_display",
+        "discount_display",
+        "discounted_price_display",
         "status_badges",
         "created_at",
     ]
@@ -189,6 +191,30 @@ class ProductAdmin(admin.ModelAdmin):
             obj.price,
         )
 
+    @admin_display("Discount")
+    def discount_display(self, obj):
+        """Display discount percentage if product is a deal."""
+        if obj.is_deal:
+            discount = obj.get_discount_percentage()
+            if discount > 0:
+                return format_html(
+                    '<span class="badge bg-danger">-{}%</span>',
+                    discount,
+                )
+        return mark_safe('<span class="text-muted">—</span>')
+
+    @admin_display("Final Price")
+    def discounted_price_display(self, obj):
+        """Display discounted price if product is a deal."""
+        if obj.is_deal:
+            discount = obj.get_discount_percentage()
+            if discount > 0:
+                return format_html(
+                    '<span class="product-price-display text-success">€{}</span>',
+                    obj.get_discounted_price(),
+                )
+        return mark_safe('<span class="text-muted">—</span>')
+
     @admin_display("Status")
     def status_badges(self, obj):
         """Display all status badges."""
@@ -275,6 +301,7 @@ class DealBannerAdmin(admin.ModelAdmin):
         "icon_display",
         "title",
         "message_preview",
+        "discount_display",
         "destination_display",
         "category_badge",
         "status_badge",
@@ -301,10 +328,18 @@ class DealBannerAdmin(admin.ModelAdmin):
             "fields": ("title", "message", "icon"),
             "description": "Main text and icon displayed in the banner",
         }),
+        ("💰 Discount Settings", {
+            "fields": ("discount_percentage",),
+            "description": "Discount applied to linked product or all products in linked category",
+        }),
         ("🔗 Link Settings", {
             "fields": ("product", "category", "url"),
             "description": mark_safe(
                 '<div class="deal-banner-fieldset-description">'
+                "<strong>⚠️ Exclusivity Rules:</strong><br>"
+                "• Only products and categories WITHOUT existing active banners are shown<br>"
+                "• Products in categories with active banners are automatically hidden<br>"
+                "• Categories with products that have active banners are automatically hidden<br><br>"
                 "<strong>Link Priority Order:</strong><br>"
                 "1. <strong>Product</strong> → Links directly to the selected product page<br>"
                 "2. <strong>URL</strong> → Uses the custom URL provided<br>"
@@ -325,6 +360,92 @@ class DealBannerAdmin(admin.ModelAdmin):
 
     actions = ["activate_banners", "deactivate_banners", "duplicate_banner"]
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Filter available products and categories to prevent conflicts."""
+        
+        if db_field.name == "product":
+            # Exclude products that already have an active banner
+            products_with_banners = list(
+                DealBanner.objects.filter(
+                    is_active=True,
+                    product__isnull=False
+                ).values_list('product_id', flat=True)
+            )
+            
+            # Exclude products whose category has an active banner
+            categories_with_banners = list(
+                DealBanner.objects.filter(
+                    is_active=True,
+                    category__isnull=False
+                ).values_list('category_id', flat=True)
+            )
+            
+            # If editing existing banner, allow current product
+            try:
+                resolver_match = getattr(request, 'resolver_match', None)
+                if resolver_match:
+                    object_id = resolver_match.kwargs.get('object_id')
+                    if object_id:
+                        current_banner = DealBanner.objects.get(pk=object_id)
+                        if hasattr(current_banner, 'product') and current_banner.product:
+                            current_product_id = current_banner.product.pk
+                            products_with_banners = [
+                                pid for pid in products_with_banners 
+                                if pid != current_product_id
+                            ]
+            except (DealBanner.DoesNotExist, AttributeError, KeyError):
+                pass
+            
+            kwargs["queryset"] = Product.objects.filter(
+                is_active=True
+            ).exclude(
+                pk__in=products_with_banners
+            ).exclude(
+                category_id__in=categories_with_banners
+            )
+        
+        if db_field.name == "category":
+            # Exclude categories that already have an active banner
+            categories_with_banners = list(
+                DealBanner.objects.filter(
+                    is_active=True,
+                    category__isnull=False
+                ).values_list('category_id', flat=True)
+            )
+            
+            # Exclude categories that have products with active banners
+            categories_with_product_banners = list(
+                Product.objects.filter(
+                    dealbanner__is_active=True
+                ).values_list('category_id', flat=True).distinct()
+            )
+            
+            # If editing existing banner, allow current category
+            try:
+                resolver_match = getattr(request, 'resolver_match', None)
+                if resolver_match:
+                    object_id = resolver_match.kwargs.get('object_id')
+                    if object_id:
+                        current_banner = DealBanner.objects.get(pk=object_id)
+                        if hasattr(current_banner, 'category') and current_banner.category:
+                            current_category_id = current_banner.category.pk
+                            categories_with_banners = [
+                                cid for cid in categories_with_banners 
+                                if cid != current_category_id
+                            ]
+                            categories_with_product_banners = [
+                                cid for cid in categories_with_product_banners 
+                                if cid != current_category_id
+                            ]
+            except (DealBanner.DoesNotExist, AttributeError, KeyError):
+                pass
+            
+            kwargs["queryset"] = Category.objects.exclude(
+                pk__in=list(set(categories_with_banners + categories_with_product_banners))
+            )
+        
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     @admin_display("🎨")
     def icon_display(self, obj):
         """Display icon with larger size."""
@@ -332,6 +453,16 @@ class DealBannerAdmin(admin.ModelAdmin):
             '<span class="deal-banner-icon">{}</span>',
             obj.icon,
         )
+
+    @admin_display("Discount")
+    def discount_display(self, obj):
+        """Display discount percentage."""
+        if obj.discount_percentage > 0:
+            return format_html(
+                '<span class="badge bg-danger">-{}%</span>',
+                int(obj.discount_percentage),
+            )
+        return mark_safe('<span class="text-muted">No discount</span>')
 
     @admin_display("Message")
     def message_preview(self, obj):
@@ -408,13 +539,20 @@ class DealBannerAdmin(admin.ModelAdmin):
                 obj.category.name,
             )
 
+        discount_html = ""
+        if obj.discount_percentage > 0:
+            discount_html = format_html(
+                '<span class="badge bg-danger ms-2">-{}%</span>',
+                int(obj.discount_percentage),
+            )
+
         return format_html(
             '<div class="deal-banner-preview-wrapper">'
             '<a href="{}" target="_blank" class="deal-banner-preview-link">'
             '<span class="deal-banner-preview-icon">{}</span>'
             '<span class="deal-banner-preview-text">'
             '<strong class="deal-banner-preview-title">{}</strong> {}'
-            "{}"
+            "{}{}"
             "</span>"
             "</a>"
             "</div>"
@@ -426,6 +564,7 @@ class DealBannerAdmin(admin.ModelAdmin):
             obj.title.upper(),
             obj.message,
             category_html,
+            discount_html,
             obj.get_url(),
         )
 

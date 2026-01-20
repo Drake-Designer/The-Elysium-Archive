@@ -227,13 +227,15 @@ def checkout(request):
 
         stripe_line_items = []
         for product in valid_products:
+            discounted_price = product.get_discounted_price()
+            
             OrderLineItem.objects.create(
                 order=order,
                 product=product,
                 product_title=product.title,
-                product_price=product.price,
+                product_price=discounted_price,
                 quantity=1,
-                line_total=product.price,
+                line_total=discounted_price,
             )
 
             stripe_line_items.append(
@@ -244,7 +246,7 @@ def checkout(request):
                             "name": product.title,
                             "description": product.tagline or "",
                         },
-                        "unit_amount": int(product.price * 100),
+                        "unit_amount": int(discounted_price * 100),
                     },
                     "quantity": 1,
                 }
