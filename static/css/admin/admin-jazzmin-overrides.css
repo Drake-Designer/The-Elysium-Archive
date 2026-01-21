@@ -10,11 +10,12 @@
 
 .jazzmin-sidebar a {
   color: var(--admin-text);
+  transition: all 0.2s ease;
 }
 
 .jazzmin-sidebar a:hover {
-  color: var(--admin-gold);
   background-color: rgba(194, 161, 77, 0.05);
+  color: var(--admin-gold);
 }
 
 /* Improve admin header contrast. */
@@ -32,9 +33,19 @@
 .jazzmin-form select {
   background-color: rgba(230, 230, 235, 0.05);
   border: 1px solid var(--admin-border);
+  border-radius: 4px;
   color: var(--admin-text);
   padding: 0.5rem 0.75rem;
-  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.jazzmin-form input[type='text']:hover,
+.jazzmin-form input[type='email']:hover,
+.jazzmin-form input[type='password']:hover,
+.jazzmin-form input[type='number']:hover,
+.jazzmin-form textarea:hover,
+.jazzmin-form select:hover {
+  background-color: rgba(230, 230, 235, 0.08);
 }
 
 .jazzmin-form input[type='text']:focus,
@@ -43,9 +54,9 @@
 .jazzmin-form input[type='number']:focus,
 .jazzmin-form textarea:focus,
 .jazzmin-form select:focus {
+  background-color: rgba(194, 161, 77, 0.05);
   border-color: var(--admin-gold);
   outline: none;
-  background-color: rgba(194, 161, 77, 0.05);
 }
 
 /* Nicer admin cards / modules spacing. */
@@ -53,8 +64,13 @@
   background-color: var(--admin-panel);
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius);
-  padding: 1rem;
   margin-bottom: 1rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.jazzmin-module:hover {
+  border-color: var(--admin-gold-border);
 }
 
 .jazzmin-module h2,
@@ -77,15 +93,19 @@
 
 .jazzmin-table th {
   background-color: rgba(194, 161, 77, 0.08);
+  border-bottom: 1px solid var(--admin-border);
   color: var(--admin-text);
   font-weight: 600;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--admin-border);
 }
 
 .jazzmin-table td {
-  padding: 0.6rem 1rem;
   border-bottom: 1px solid var(--admin-border);
+  padding: 0.6rem 1rem;
+}
+
+.jazzmin-table tbody tr {
+  transition: all 0.2s ease;
 }
 
 .jazzmin-table tbody tr:hover {
@@ -103,9 +123,14 @@
 }
 
 .jazzmin-message {
-  padding: 1rem;
   border-radius: 4px;
   margin-bottom: 0.75rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.jazzmin-message:hover {
+  transform: translateX(2px);
 }
 
 .jazzmin-message-error {
@@ -128,14 +153,14 @@
 
 /* Better admin action buttons. */
 .jazzmin-action-button {
-  padding: 0.5rem 1rem;
   border-radius: 4px;
-  font-weight: 500;
   cursor: pointer;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
   transition: all 0.2s ease;
 }
 
 .jazzmin-action-button:hover {
-  transform: translateY(-1px);
   box-shadow: var(--admin-shadow);
+  transform: translateY(-1px);
 }

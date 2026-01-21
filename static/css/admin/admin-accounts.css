@@ -1,32 +1,51 @@
-/* Accounts admin customization */
+/* ============================
+   ACCOUNTS ADMIN CUSTOMIZATION
+   ============================ */
 
 /* User profile display */
 .user-profile-display {
-  display: flex;
   align-items: center;
+  display: flex;
   gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.user-profile-display:hover {
+  transform: translateX(2px);
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
   border: 2px solid var(--admin-gold-border);
+  border-radius: 50%;
+  height: 40px;
+  object-fit: cover;
+  transition: all 0.2s ease;
+  width: 40px;
+}
+
+.user-avatar:hover {
+  border-color: var(--admin-gold);
+  box-shadow: 0 0 8px rgba(194, 161, 77, 0.4);
 }
 
 .user-avatar-placeholder {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  align-items: center;
   background-color: var(--admin-gold-soft);
   border: 2px solid var(--admin-gold-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 50%;
   color: var(--admin-gold);
-  font-weight: 700;
+  display: flex;
   font-size: 16px;
+  font-weight: 700;
+  height: 40px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 40px;
+}
+
+.user-avatar-placeholder:hover {
+  background-color: rgba(194, 161, 77, 0.18);
+  border-color: var(--admin-gold);
 }
 
 .user-info {
@@ -36,33 +55,49 @@
 }
 
 .user-display-name {
-  font-weight: 600;
   color: var(--admin-text);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.user-profile-display:hover .user-display-name {
+  color: var(--admin-gold);
 }
 
 .user-username {
-  font-size: 12px;
   color: var(--admin-muted);
+  font-size: 12px;
 }
 
 /* Email verification badges */
 .badge-warning {
   background-color: rgba(255, 152, 0, 0.15);
   border: 1px solid rgba(255, 152, 0, 0.45);
-  color: var(--admin-warning);
-  padding: 3px 8px;
   border-radius: 3px;
+  color: var(--admin-warning);
   font-size: 11px;
   font-weight: 600;
+  padding: 3px 8px;
+  transition: all 0.2s ease;
+}
+
+.badge-warning:hover {
+  background-color: rgba(255, 152, 0, 0.25);
+  transform: translateY(-1px);
 }
 
 /* Staff/Superuser badges */
 .user-role-badge {
-  padding: 3px 8px;
   border-radius: 3px;
+  display: inline-block;
   font-size: 11px;
   font-weight: 600;
-  display: inline-block;
+  padding: 3px 8px;
+  transition: all 0.2s ease;
+}
+
+.user-role-badge:hover {
+  transform: scale(1.05);
 }
 
 .user-role-badge.staff {
@@ -71,8 +106,16 @@
   color: #9c27b0;
 }
 
+.user-role-badge.staff:hover {
+  background-color: rgba(156, 39, 176, 0.25);
+}
+
 .user-role-badge.superuser {
   background-color: rgba(244, 67, 54, 0.15);
   border: 1px solid rgba(244, 67, 54, 0.45);
   color: #f44336;
+}
+
+.user-role-badge.superuser:hover {
+  background-color: rgba(244, 67, 54, 0.25);
 }

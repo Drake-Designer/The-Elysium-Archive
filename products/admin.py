@@ -4,8 +4,10 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
+
 from .admin_utils import admin_display
 from .models import Category, DealBanner, Product, sync_products_deal_status
+
 
 
 class ProductAdminForm(forms.ModelForm):
@@ -18,10 +20,13 @@ class ProductAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "image_alt" in self.fields:
-            # This sets maxlength so the browser blocks typing beyond 150 chars.
+            # Set maxlength so the browser blocks typing beyond 150 chars
             self.fields["image_alt"].widget.attrs["maxlength"] = "150"
-            # This adds a helpful placeholder for the admin form.
-            self.fields["image_alt"].widget.attrs["placeholder"] = "Short descriptive text (60–125 chars recommended)"
+            # Add a helpful placeholder for the admin form
+            self.fields["image_alt"].widget.attrs["placeholder"] = (
+                "Short descriptive text (60–125 chars recommended)"
+            )
+
 
 
 @admin.register(Category)
@@ -44,10 +49,14 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ["name", "slug", "description"]
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ["created_at", "updated_at"]
+    date_hierarchy = "created_at"
 
     fieldsets = (
         ("📂 Category Information", {"fields": ("name", "slug", "description")}),
-        ("📊 Metadata", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            "📊 Metadata",
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
 
     @admin_display("Name")
@@ -82,24 +91,27 @@ class CategoryAdmin(admin.ModelAdmin):
         )
 
 
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Admin interface for Product model."""
+
     form = ProductAdminForm
 
     class Media:
         css = {
-            "all": ("css/admin/admin-products.css", "css/admin/admin-product-image-alt.css"),
+            "all": (
+                "css/admin/admin-products.css",
+                "css/admin/admin-product-image-alt.css",
+            ),
         }
         js = ("js/admin/image-alt-counter.js",)
 
     list_display = [
         "image_thumbnail",
         "title",
-        "category_display",
-        "price_display",
+        "category",
         "discount_display",
-        "discounted_price_display",
         "status_badges",
         "created_at",
     ]
@@ -110,10 +122,7 @@ class ProductAdmin(admin.ModelAdmin):
         "is_active",
         "is_featured",
         "is_deal",
-        "deal_manual",
-        "deal_exclude",
         "category",
-        "created_at",
     ]
 
     search_fields = ["title", "tagline", "description"]
@@ -123,21 +132,31 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ["created_at", "updated_at", "is_deal"]
 
     fieldsets = (
-        ("📝 Product Information", {"fields": ("title", "slug", "tagline", "category")}),
+        (
+            "📝 Product Information",
+            {"fields": ("title", "slug", "tagline", "category")},
+        ),
         ("💰 Pricing & Status", {"fields": ("price", "is_active", "is_featured")}),
-        ("💰 Deal Rules", {"fields": ("is_deal", "deal_manual", "deal_exclude")}),
+        (
+            "💰 Deal Status",
+            {
+                "fields": ("is_deal",),
+                "description": "Deal status is automatically calculated based on active deal banners.",
+            },
+        ),
         ("📄 Content", {"fields": ("description", "content")}),
         ("🖼️ Media", {"fields": ("image", "image_alt")}),
-        ("📊 Metadata", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+        (
+            "📊 Metadata",
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
 
     actions = [
         "publish_products",
         "unpublish_products",
-        "mark_as_deal_manual",
-        "remove_deal_manual",
-        "exclude_from_category_deals",
-        "include_in_category_deals",
+        "mark_as_featured",
+        "unmark_as_featured",
     ]
 
     def has_delete_permission(self, request, obj=None):
@@ -153,7 +172,9 @@ class ProductAdmin(admin.ModelAdmin):
     def delete_queryset(self, request, queryset):
         """Convert bulk admin delete into unpublish."""
         updated = queryset.update(is_active=False)
-        self.message_user(request, f"{updated} product(s) removed from catalog (unpublished).")
+        self.message_user(
+            request, f"{updated} product(s) removed from catalog (unpublished)."
+        )
 
     def get_actions(self, request):
         """Remove built-in bulk delete action."""
@@ -173,24 +194,6 @@ class ProductAdmin(admin.ModelAdmin):
             )
         return mark_safe('<div class="product-no-image">📦</div>')
 
-    @admin_display("Category")
-    def category_display(self, obj):
-        """Display category with badge."""
-        if obj.category:
-            return format_html(
-                '<span class="product-category-badge">{}</span>',
-                obj.category.name,
-            )
-        return mark_safe('<span class="product-no-category">No category</span>')
-
-    @admin_display("Price")
-    def price_display(self, obj):
-        """Display price with styling."""
-        return format_html(
-            '<span class="product-price-display">€{}</span>',
-            obj.price,
-        )
-
     @admin_display("Discount")
     def discount_display(self, obj):
         """Display discount percentage if product is a deal."""
@@ -203,18 +206,6 @@ class ProductAdmin(admin.ModelAdmin):
                 )
         return mark_safe('<span class="text-muted">—</span>')
 
-    @admin_display("Final Price")
-    def discounted_price_display(self, obj):
-        """Display discounted price if product is a deal."""
-        if obj.is_deal:
-            discount = obj.get_discount_percentage()
-            if discount > 0:
-                return format_html(
-                    '<span class="product-price-display text-success">€{}</span>',
-                    obj.get_discounted_price(),
-                )
-        return mark_safe('<span class="text-muted">—</span>')
-
     @admin_display("Status")
     def status_badges(self, obj):
         """Display all status badges."""
@@ -223,19 +214,17 @@ class ProductAdmin(admin.ModelAdmin):
         if obj.is_active:
             badges.append('<span class="product-status-badge active">✓ Active</span>')
         else:
-            badges.append('<span class="product-status-badge inactive">✗ Unpublished</span>')
+            badges.append(
+                '<span class="product-status-badge inactive">✗ Unpublished</span>'
+            )
 
         if obj.is_featured:
-            badges.append('<span class="product-status-badge featured">⭐ Featured</span>')
+            badges.append(
+                '<span class="product-status-badge featured">⭐ Featured</span>'
+            )
 
         if obj.is_deal:
             badges.append('<span class="product-status-badge deal">💰 DEAL</span>')
-
-        if obj.deal_manual:
-            badges.append('<span class="product-status-badge manual">✋ Manual</span>')
-
-        if obj.deal_exclude:
-            badges.append('<span class="product-status-badge excluded">⛔ Excluded</span>')
 
         return format_html(
             '<div class="product-status-container">{}</div>',
@@ -246,45 +235,40 @@ class ProductAdmin(admin.ModelAdmin):
         """Publish products to the public catalog."""
         updated = queryset.update(is_active=True)
         self.message_user(request, f"{updated} product(s) published to catalog.")
+
     publish_products.short_description = "✅ Publish selected products"
 
     def unpublish_products(self, request, queryset):
         """Unpublish products from the public catalog."""
         updated = queryset.update(is_active=False)
         self.message_user(request, f"{updated} product(s) removed from catalog.")
+
     unpublish_products.short_description = "🚫 Remove from catalog (unpublish)"
 
-    def mark_as_deal_manual(self, request, queryset):
-        """Force products as deals using manual flag."""
-        product_pks = list(queryset.values_list("pk", flat=True))
-        updated = queryset.update(deal_manual=True)
-        sync_products_deal_status(product_pks=product_pks)
-        self.message_user(request, f"{updated} product(s) forced as deals.")
-    mark_as_deal_manual.short_description = "💰 Force deal (manual)"
+    def mark_as_featured(self, request, queryset):
+        """Mark products as featured and sync with banners."""
+        count = 0
+        for product in queryset:
+            if not product.is_featured:
+                product.is_featured = True
+                product.save(update_fields=["is_featured", "updated_at"])
+                count += 1
+        self.message_user(request, f"{count} product(s) marked as featured.")
 
-    def remove_deal_manual(self, request, queryset):
-        """Remove manual deal flag from products."""
-        product_pks = list(queryset.values_list("pk", flat=True))
-        updated = queryset.update(deal_manual=False)
-        sync_products_deal_status(product_pks=product_pks)
-        self.message_user(request, f"{updated} product(s) removed from manual deals.")
-    remove_deal_manual.short_description = "🚫 Remove manual deal"
+    mark_as_featured.short_description = "⭐ Mark as featured"
 
-    def exclude_from_category_deals(self, request, queryset):
-        """Exclude products from category deal banners."""
-        product_pks = list(queryset.values_list("pk", flat=True))
-        updated = queryset.update(deal_exclude=True)
-        sync_products_deal_status(product_pks=product_pks)
-        self.message_user(request, f"{updated} product(s) excluded from category deals.")
-    exclude_from_category_deals.short_description = "⛔ Exclude from category deals"
+    def unmark_as_featured(self, request, queryset):
+        """Remove featured status from products and sync with banners."""
+        count = 0
+        for product in queryset:
+            if product.is_featured:
+                product.is_featured = False
+                product.save(update_fields=["is_featured", "updated_at"])
+                count += 1
+        self.message_user(request, f"{count} product(s) unmarked as featured.")
 
-    def include_in_category_deals(self, request, queryset):
-        """Include products in category deal banners."""
-        product_pks = list(queryset.values_list("pk", flat=True))
-        updated = queryset.update(deal_exclude=False)
-        sync_products_deal_status(product_pks=product_pks)
-        self.message_user(request, f"{updated} product(s) included in category deals.")
-    include_in_category_deals.short_description = "✅ Include in category deals"
+    unmark_as_featured.short_description = "⭐ Remove featured status"
+
 
 
 @admin.register(DealBanner)
@@ -298,22 +282,19 @@ class DealBannerAdmin(admin.ModelAdmin):
 
     list_display = [
         "order",
-        "icon_display",
         "title",
-        "message_preview",
         "discount_display",
         "destination_display",
-        "category_badge",
-        "status_badge",
+        "status_badges",
         "created_at",
     ]
 
-    list_display_links = ["title", "message_preview"]
+    list_display_links = ["title"]
 
     list_filter = [
         "is_active",
+        "is_featured",
         "category",
-        "created_at",
     ]
 
     search_fields = ["title", "message", "url"]
@@ -324,135 +305,154 @@ class DealBannerAdmin(admin.ModelAdmin):
     ordering = ["order", "-created_at"]
 
     fieldsets = (
-        ("📝 Banner Content", {
-            "fields": ("title", "message", "icon"),
-            "description": "Main text and icon displayed in the banner",
-        }),
-        ("💰 Discount Settings", {
-            "fields": ("discount_percentage",),
-            "description": "Discount applied to linked product or all products in linked category",
-        }),
-        ("🔗 Link Settings", {
-            "fields": ("product", "category", "url"),
-            "description": mark_safe(
-                '<div class="deal-banner-fieldset-description">'
-                "<strong>⚠️ Exclusivity Rules:</strong><br>"
-                "• Only products and categories WITHOUT existing active banners are shown<br>"
-                "• Products in categories with active banners are automatically hidden<br>"
-                "• Categories with products that have active banners are automatically hidden<br><br>"
-                "<strong>Link Priority Order:</strong><br>"
-                "1. <strong>Product</strong> → Links directly to the selected product page<br>"
-                "2. <strong>URL</strong> → Uses the custom URL provided<br>"
-                "3. <strong>Category</strong> → Links to archive filtered by category + deals<br>"
-                "4. <strong>None</strong> → Links to archive with deals filter only"
-                "</div>"
-            ),
-        }),
-        ("🎨 Display Options", {
-            "fields": ("is_active", "order"),
-            "description": "Category also adds a badge to the banner. Lower order number = displayed first.",
-        }),
-        ("📊 Metadata", {
-            "fields": ("created_at", "preview_banner"),
-            "classes": ("collapse",),
-        }),
+        (
+            "📝 Banner Content",
+            {
+                "fields": ("title", "message", "icon"),
+                "description": "Main text and icon displayed in the banner",
+            },
+        ),
+        (
+            "💰 Discount Settings",
+            {
+                "fields": ("discount_percentage",),
+                "description": "Discount applied to linked product or all products in linked category",
+            },
+        ),
+        (
+            "🔗 Link Settings",
+            {
+                "fields": ("product", "category", "url"),
+                "description": mark_safe(
+                    '<div class="deal-banner-fieldset-description">'
+                    "<strong>⚠️ Exclusivity Rules:</strong><br>"
+                    "• Only products and categories WITHOUT existing active banners are shown<br>"
+                    "• Products in categories with active banners are automatically hidden<br>"
+                    "• Categories with products that have active banners are automatically hidden<br><br>"
+                    "<strong>Link Priority Order:</strong><br>"
+                    "1. <strong>Product</strong> → Links directly to the selected product page<br>"
+                    "2. <strong>URL</strong> → Uses the custom URL provided<br>"
+                    "3. <strong>Category</strong> → Links to archive filtered by category + deals<br>"
+                    "4. <strong>None</strong> → Links to archive with deals filter only"
+                    "</div>"
+                ),
+            },
+        ),
+        (
+            "🎨 Display Options",
+            {
+                "fields": ("is_active", "is_featured", "order"),
+                "description": "Featured banners appear first. Lower order number = displayed first.",
+            },
+        ),
+        (
+            "📊 Metadata",
+            {
+                "fields": ("created_at", "preview_banner"),
+                "classes": ("collapse",),
+            },
+        ),
     )
 
-    actions = ["activate_banners", "deactivate_banners", "duplicate_banner"]
+    actions = [
+        "activate_banners",
+        "deactivate_banners",
+        "mark_as_featured",
+        "unmark_as_featured",
+        "duplicate_banner",
+    ]
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """Filter available products and categories to prevent conflicts."""
-        
+
         if db_field.name == "product":
             # Exclude products that already have an active banner
             products_with_banners = list(
                 DealBanner.objects.filter(
-                    is_active=True,
-                    product__isnull=False
-                ).values_list('product_id', flat=True)
+                    is_active=True, product__isnull=False
+                ).values_list("product_id", flat=True)
             )
-            
+
             # Exclude products whose category has an active banner
             categories_with_banners = list(
                 DealBanner.objects.filter(
-                    is_active=True,
-                    category__isnull=False
-                ).values_list('category_id', flat=True)
+                    is_active=True, category__isnull=False
+                ).values_list("category_id", flat=True)
             )
-            
+
             # If editing existing banner, allow current product
             try:
-                resolver_match = getattr(request, 'resolver_match', None)
+                resolver_match = getattr(request, "resolver_match", None)
                 if resolver_match:
-                    object_id = resolver_match.kwargs.get('object_id')
+                    object_id = resolver_match.kwargs.get("object_id")
                     if object_id:
                         current_banner = DealBanner.objects.get(pk=object_id)
-                        if hasattr(current_banner, 'product') and current_banner.product:
+                        if (
+                            hasattr(current_banner, "product")
+                            and current_banner.product
+                        ):
                             current_product_id = current_banner.product.pk
                             products_with_banners = [
-                                pid for pid in products_with_banners 
+                                pid
+                                for pid in products_with_banners
                                 if pid != current_product_id
                             ]
             except (DealBanner.DoesNotExist, AttributeError, KeyError):
                 pass
-            
-            kwargs["queryset"] = Product.objects.filter(
-                is_active=True
-            ).exclude(
-                pk__in=products_with_banners
-            ).exclude(
-                category_id__in=categories_with_banners
+
+            kwargs["queryset"] = (
+                Product.objects.filter(is_active=True)
+                .exclude(pk__in=products_with_banners)
+                .exclude(category_id__in=categories_with_banners)
             )
-        
+
         if db_field.name == "category":
             # Exclude categories that already have an active banner
             categories_with_banners = list(
                 DealBanner.objects.filter(
-                    is_active=True,
-                    category__isnull=False
-                ).values_list('category_id', flat=True)
+                    is_active=True, category__isnull=False
+                ).values_list("category_id", flat=True)
             )
-            
+
             # Exclude categories that have products with active banners
             categories_with_product_banners = list(
-                Product.objects.filter(
-                    dealbanner__is_active=True
-                ).values_list('category_id', flat=True).distinct()
+                Product.objects.filter(dealbanner__is_active=True)
+                .values_list("category_id", flat=True)
+                .distinct()
             )
-            
+
             # If editing existing banner, allow current category
             try:
-                resolver_match = getattr(request, 'resolver_match', None)
+                resolver_match = getattr(request, "resolver_match", None)
                 if resolver_match:
-                    object_id = resolver_match.kwargs.get('object_id')
+                    object_id = resolver_match.kwargs.get("object_id")
                     if object_id:
                         current_banner = DealBanner.objects.get(pk=object_id)
-                        if hasattr(current_banner, 'category') and current_banner.category:
+                        if (
+                            hasattr(current_banner, "category")
+                            and current_banner.category
+                        ):
                             current_category_id = current_banner.category.pk
                             categories_with_banners = [
-                                cid for cid in categories_with_banners 
+                                cid
+                                for cid in categories_with_banners
                                 if cid != current_category_id
                             ]
                             categories_with_product_banners = [
-                                cid for cid in categories_with_product_banners 
+                                cid
+                                for cid in categories_with_product_banners
                                 if cid != current_category_id
                             ]
             except (DealBanner.DoesNotExist, AttributeError, KeyError):
                 pass
-            
-            kwargs["queryset"] = Category.objects.exclude(
-                pk__in=list(set(categories_with_banners + categories_with_product_banners))
-            )
-        
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    @admin_display("🎨")
-    def icon_display(self, obj):
-        """Display icon with larger size."""
-        return format_html(
-            '<span class="deal-banner-icon">{}</span>',
-            obj.icon,
-        )
+            kwargs["queryset"] = Category.objects.exclude(
+                pk__in=list(
+                    set(categories_with_banners + categories_with_product_banners)
+                )
+            )
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     @admin_display("Discount")
     def discount_display(self, obj):
@@ -463,18 +463,6 @@ class DealBannerAdmin(admin.ModelAdmin):
                 int(obj.discount_percentage),
             )
         return mark_safe('<span class="text-muted">No discount</span>')
-
-    @admin_display("Message")
-    def message_preview(self, obj):
-        """Display truncated message with full text on hover."""
-        if len(obj.message) > 50:
-            truncated = obj.message[:50] + "..."
-            return format_html(
-                '<span class="deal-banner-message-preview" title="{}">{}</span>',
-                obj.message,
-                truncated,
-            )
-        return obj.message
 
     @admin_display("Destination")
     def destination_display(self, obj):
@@ -499,8 +487,8 @@ class DealBannerAdmin(admin.ModelAdmin):
             css_class = "type-default"
 
         return format_html(
-            '<div class="deal-banner-destination">'
-            '<span class="deal-banner-destination-label {}">{} {}</span>'
+            '<div class="deal-banner-destination {}">'
+            '<span class="deal-banner-destination-label">{} {}</span>'
             '<span class="deal-banner-destination-url">{}</span>'
             "</div>",
             css_class,
@@ -509,22 +497,29 @@ class DealBannerAdmin(admin.ModelAdmin):
             url,
         )
 
-    @admin_display("Badge")
-    def category_badge(self, obj):
-        """Display category badge if present."""
-        if obj.category:
-            return format_html(
-                '<span class="deal-banner-category-badge">{}</span>',
-                obj.category.name,
-            )
-        return mark_safe('<span class="deal-banner-no-badge">No badge</span>')
-
     @admin_display("Status")
-    def status_badge(self, obj):
-        """Display active or inactive status."""
+    def status_badges(self, obj):
+        """Display active and featured status."""
+        badges = []
+
         if obj.is_active:
-            return mark_safe('<span class="deal-banner-status-badge active">✓ ACTIVE</span>')
-        return mark_safe('<span class="deal-banner-status-badge inactive">✗ INACTIVE</span>')
+            badges.append(
+                '<span class="deal-banner-status-badge active">✓ ACTIVE</span>'
+            )
+        else:
+            badges.append(
+                '<span class="deal-banner-status-badge inactive">✗ INACTIVE</span>'
+            )
+
+        if obj.is_featured:
+            badges.append(
+                '<span class="deal-banner-status-badge featured">⭐ FEATURED</span>'
+            )
+
+        return format_html(
+            '<div class="deal-banner-status-container">{}</div>',
+            mark_safe("".join(badges)),
+        )
 
     @admin_display("Banner Preview")
     def preview_banner(self, obj):
@@ -552,13 +547,11 @@ class DealBannerAdmin(admin.ModelAdmin):
             '<span class="deal-banner-preview-icon">{}</span>'
             '<span class="deal-banner-preview-text">'
             '<strong class="deal-banner-preview-title">{}</strong> {}'
-            "{}{}"
             "</span>"
+            "{}{}"
             "</a>"
             "</div>"
-            '<p class="deal-banner-preview-url">'
-            "<strong>Clicks to:</strong> {}"
-            "</p>",
+            '<p class="deal-banner-preview-url"><strong>Clicks to:</strong> {}</p>',
             obj.get_url(),
             obj.icon,
             obj.title.upper(),
@@ -570,23 +563,59 @@ class DealBannerAdmin(admin.ModelAdmin):
 
     def activate_banners(self, request, queryset):
         """Bulk activate selected banners."""
-        product_pks = list(queryset.filter(product__isnull=False).values_list("product__pk", flat=True))
-        category_pks = list(queryset.filter(category__isnull=False).values_list("category__pk", flat=True))
-        updated = queryset.update(is_active=True)
-        if product_pks or category_pks:
-            sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
-        self.message_user(request, f"{updated} banner(s) successfully activated.")
-    activate_banners.short_description = "✓ Activate selected banners"
+        # Use .save() on each banner to trigger the sync logic
+        count = 0
+        for banner in queryset:
+            if not banner.is_active:
+                banner.is_active = True
+                banner.save()
+                count += 1
+
+        self.message_user(request, f"{count} banner(s) successfully activated.")
+
+    activate_banners.short_description = "✅ Activate selected banners"
 
     def deactivate_banners(self, request, queryset):
         """Bulk deactivate selected banners."""
-        product_pks = list(queryset.filter(product__isnull=False).values_list("product__pk", flat=True))
-        category_pks = list(queryset.filter(category__isnull=False).values_list("category__pk", flat=True))
-        updated = queryset.update(is_active=False)
-        if product_pks or category_pks:
-            sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
-        self.message_user(request, f"{updated} banner(s) successfully deactivated.")
-    deactivate_banners.short_description = "✗ Deactivate selected banners"
+        # Use .save() on each banner to trigger the sync logic
+        count = 0
+        for banner in queryset:
+            if banner.is_active:
+                banner.is_active = False
+                banner.save()
+                count += 1
+
+        self.message_user(request, f"{count} banner(s) successfully deactivated.")
+
+    deactivate_banners.short_description = "🚫 Deactivate selected banners"
+
+    def mark_as_featured(self, request, queryset):
+        """Mark banners as featured."""
+        # Use .save() on each banner to trigger the sync logic
+        count = 0
+        for banner in queryset:
+            if not banner.is_featured:
+                banner.is_featured = True
+                banner.save()
+                count += 1
+
+        self.message_user(request, f"{count} banner(s) marked as featured.")
+
+    mark_as_featured.short_description = "⭐ Mark as featured"
+
+    def unmark_as_featured(self, request, queryset):
+        """Remove featured status from banners."""
+        # Use .save() on each banner to trigger the sync logic
+        count = 0
+        for banner in queryset:
+            if banner.is_featured:
+                banner.is_featured = False
+                banner.save()
+                count += 1
+
+        self.message_user(request, f"{count} banner(s) unmarked as featured.")
+
+    unmark_as_featured.short_description = "⭐ Remove featured status"
 
     def duplicate_banner(self, request, queryset):
         """Duplicate selected banners."""
@@ -597,5 +626,7 @@ class DealBannerAdmin(admin.ModelAdmin):
             banner.is_active = False
             banner.save()
             count += 1
+
         self.message_user(request, f"{count} banner(s) duplicated successfully.")
+
     duplicate_banner.short_description = "📋 Duplicate selected banners"

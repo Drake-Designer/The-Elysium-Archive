@@ -44,10 +44,28 @@
                                     <i class="fa-solid fa-folder me-1"></i>{{ product.category.name }}
                                 </span>
                             {% endif %}
+                            {% if product.is_deal %}
+                                <span class="badge badge-deal-gold">
+                                    <i class="fa-solid fa-tag me-1"></i>💰 DEAL
+                                </span>
+                            {% endif %}
                             <span class="muted">
                                 <i class="fa-solid fa-calendar-days me-1"></i>
                                 Archived {{ product.created_at|date:"M d, Y" }}
                             </span>
+                            <!-- Purchase price info -->
+                            {% if product.is_deal and product.get_discount_percentage > 0 %}
+                                <span class="muted">
+                                    <i class="fa-solid fa-euro-sign me-1"></i>
+                                    Purchased: <del>€{{ product.price }}</del> <strong class="text-success">€{{ product.get_discounted_price }}</strong>
+                                    <span class="badge bg-danger ms-1">-{{ product.get_discount_percentage }}%</span>
+                                </span>
+                            {% else %}
+                                <span class="muted">
+                                    <i class="fa-solid fa-euro-sign me-1"></i>
+                                    Purchased: €{{ product.price }}
+                                </span>
+                            {% endif %}
                         </div>
                     </header>
                     <!-- Full archive content -->

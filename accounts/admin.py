@@ -9,22 +9,23 @@ from django.utils.safestring import mark_safe
 
 from .models import UserProfile
 
+
 User = get_user_model()
 
 
 class HasPurchasesFilter(admin.SimpleListFilter):
     """Filter users by purchase history."""
-
+    
     title = "purchases"
     parameter_name = "has_purchases"
-
+    
     def lookups(self, request, model_admin):
         """Return filter options."""
         return (
             ("yes", "Has purchases"),
             ("no", "No purchases"),
         )
-
+    
     def queryset(self, request, queryset):
         """Filter users based on entitlements."""
         if self.value() == "yes":
@@ -41,13 +42,14 @@ class UserAdmin(BaseUserAdmin):
         css = {
             'all': ('css/admin/admin-accounts.css',)
         }
-
+    
     list_display = (
         "user_display",
         "email",
         "email_verified_badge",
         "purchase_count",
-        "role_badges",
+        "is_staff",
+        "is_active",
         "date_joined",
     )
     
@@ -57,7 +59,6 @@ class UserAdmin(BaseUserAdmin):
         "is_staff",
         "is_superuser",
         "is_active",
-        "groups",
         HasPurchasesFilter,
     )
     
@@ -70,7 +71,6 @@ class UserAdmin(BaseUserAdmin):
     
     def user_display(self, obj):
         """Display user with avatar/placeholder."""
-        # Try to get profile picture
         try:
             if hasattr(obj, 'profile') and obj.profile.profile_picture:
                 return format_html(
@@ -104,7 +104,7 @@ class UserAdmin(BaseUserAdmin):
             obj.username
         )
     user_display.short_description = 'User'
-
+    
     def email_verified_badge(self, obj):
         """Display email verification status as badge."""
         try:
@@ -120,7 +120,7 @@ class UserAdmin(BaseUserAdmin):
         else:
             return mark_safe('<span class="badge-warning">⚠ Unverified</span>')
     email_verified_badge.short_description = 'Email'
-
+    
     def purchase_count(self, obj):
         """Display number of purchases as badge."""
         count = getattr(obj, "entitlement_total", 0) or 0
@@ -132,21 +132,6 @@ class UserAdmin(BaseUserAdmin):
             )
         return mark_safe('<span class="badge-muted">No purchases</span>')
     purchase_count.short_description = 'Purchases'
-    
-    def role_badges(self, obj):
-        """Display staff/superuser badges."""
-        badges = []
-        
-        if obj.is_superuser:
-            badges.append('<span class="user-role-badge superuser">👑 SUPERUSER</span>')
-        elif obj.is_staff:
-            badges.append('<span class="user-role-badge staff">🛡️ STAFF</span>')
-        
-        if not badges:
-            return mark_safe('<span class="badge-muted">User</span>')
-        
-        return mark_safe(''.join(badges))
-    role_badges.short_description = 'Role'
 
 
 # Unregister the default User admin and register our custom one
@@ -162,7 +147,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         css = {
             'all': ('css/admin/admin-accounts.css',)
         }
-
+    
     list_display = [
         "profile_display",
         "user",
@@ -173,7 +158,9 @@ class UserProfileAdmin(admin.ModelAdmin):
     
     search_fields = ["user__username", "user__email", "display_name"]
     
-    readonly_fields = ["created_at", "updated_at", "profile_preview"]
+    readonly_fields = ["created_at", "updated_at"]
+    
+    date_hierarchy = "created_at"
     
     fieldsets = (
         ('👤 User', {
@@ -181,9 +168,6 @@ class UserProfileAdmin(admin.ModelAdmin):
         }),
         ('🎨 Profile', {
             'fields': ('display_name', 'profile_picture')
-        }),
-        ('👁️ Preview', {
-            'fields': ('profile_preview',)
         }),
         ('📊 Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -214,37 +198,3 @@ class UserProfileAdmin(admin.ModelAdmin):
             obj.get_display_name()
         )
     profile_display.short_description = 'Profile'
-    
-    def profile_preview(self, obj):
-        """Display profile preview."""
-        if not obj.pk:
-            return "Save the profile to see preview"
-        
-        if obj.profile_picture:
-            avatar_html = format_html(
-                '<img src="{}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--admin-gold-border);" alt="{}">',
-                obj.profile_picture.url,
-                obj.get_display_name()
-            )
-        else:
-            initial = obj.user.username[0].upper() if obj.user.username else '?'
-            avatar_html = format_html(
-                '<div style="width: 80px; height: 80px; border-radius: 50%; background-color: var(--admin-gold-soft); border: 3px solid var(--admin-gold-border); display: flex; align-items: center; justify-content: center; color: var(--admin-gold); font-weight: 700; font-size: 32px;">{}</div>',
-                initial
-            )
-        
-        return format_html(
-            '<div style="background-color: var(--admin-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--admin-border); display: flex; align-items: center; gap: 20px;">'
-            '{}'
-            '<div>'
-            '<h3 style="color: var(--admin-text); margin: 0 0 8px 0;">{}</h3>'
-            '<p style="color: var(--admin-muted); margin: 0;">@{}</p>'
-            '<p style="color: var(--admin-muted); margin: 8px 0 0 0; font-size: 14px;">{}</p>'
-            '</div>'
-            '</div>',
-            avatar_html,
-            obj.get_display_name(),
-            obj.user.username,
-            obj.user.email
-        )
-    profile_preview.short_description = 'Profile Preview'

@@ -4,12 +4,17 @@
 
 /* Badge base styling for admin. */
 .badge {
-  display: inline-block;
-  font-weight: 700;
-  padding: 0.35rem 0.55rem;
   border-radius: 4px;
+  display: inline-block;
   font-size: 0.75rem;
+  font-weight: 700;
   letter-spacing: 0.5px;
+  padding: 0.35rem 0.55rem;
+  transition: all 0.2s ease;
+}
+
+.badge:hover {
+  transform: translateY(-1px);
 }
 
 /* Gold badge for purchase counts. */
@@ -17,6 +22,10 @@
   background-color: var(--admin-gold-soft);
   border: 1px solid var(--admin-gold-border);
   color: var(--admin-gold);
+}
+
+.badge-gold:hover {
+  background-color: rgba(194, 161, 77, 0.18);
 }
 
 /* Muted badge for archived/inactive status. */
@@ -36,11 +45,19 @@
   font-weight: 600;
 }
 
+.badge-success:hover {
+  background-color: rgba(76, 175, 80, 0.28);
+}
+
 /* Danger badge for blocked/error status. */
 .badge-danger {
   background-color: rgba(139, 30, 45, 0.12);
   border: 1px solid rgba(139, 30, 45, 0.35);
   color: var(--admin-danger);
+}
+
+.badge-danger:hover {
+  background-color: rgba(139, 30, 45, 0.22);
 }
 
 /* Featured badge for prominent products. */
@@ -49,6 +66,10 @@
   border: 1px solid rgba(255, 193, 7, 0.45);
   color: #ffc107;
   font-weight: 600;
+}
+
+.badge-featured:hover {
+  background-color: rgba(255, 193, 7, 0.25);
 }
 
 /* Not featured badge - neutral gray. */
@@ -67,6 +88,10 @@
   font-weight: 600;
 }
 
+.badge-image:hover {
+  background-color: rgba(25, 103, 210, 0.18);
+}
+
 /* No image badge - indicates missing media. */
 .badge-no-image {
   background-color: rgba(160, 160, 168, 0.08);
@@ -79,17 +104,24 @@
 .chip {
   background-color: var(--admin-panel);
   border: 1px solid var(--admin-border);
+  border-radius: 20px;
   color: var(--admin-text);
   display: inline-block;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  border-color: var(--admin-gold-border);
+  transform: translateY(-1px);
 }
 
 /* Improve admin list display table readability. */
 .admin-list-table tbody tr {
   border-bottom: 1px solid var(--admin-border);
+  transition: all 0.2s ease;
 }
 
 .admin-list-table tbody tr:hover {
@@ -119,21 +151,23 @@
 /* Admin form label improvements. */
 .admin-label {
   color: var(--admin-text);
+  display: block;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  display: block;
 }
 
 /* Admin toggle button styling - click to toggle featured status. */
 .admin-btn-toggle {
   background: none;
   border: none;
-  cursor: pointer;
-  padding: 0;
-  font-size: inherit;
   color: inherit;
-  transition: opacity 0.2s ease, transform 0.1s ease;
+  cursor: pointer;
+  font-size: inherit;
   outline: none;
+  padding: 0;
+  transition:
+    opacity 0.2s ease,
+    transform 0.1s ease;
 }
 
 .admin-btn-toggle:hover {
@@ -146,9 +180,9 @@
 }
 
 .admin-btn-toggle:focus-visible {
+  border-radius: 4px;
   outline: 2px solid var(--admin-gold-border);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 /* Inline form for toggle button. */
@@ -162,18 +196,19 @@ form.admin-inline-form {
 .admin-inline-form button {
   background: none;
   border: none;
-  padding: 0;
-  font-size: inherit;
   color: inherit;
   cursor: pointer;
+  font-size: inherit;
+  padding: 0;
 }
+
 /* Admin card/module spacing. */
 .admin-module {
   background-color: var(--admin-panel);
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius);
-  padding: 1.5rem;
   margin-bottom: 1.5rem;
+  padding: 1.5rem;
 }
 
 /* Admin breadcrumb improvements. */
@@ -185,6 +220,7 @@ form.admin-inline-form {
 .admin-breadcrumb a {
   color: var(--admin-gold);
   text-decoration: none;
+  transition: all 0.2s ease;
 }
 
 .admin-breadcrumb a:hover {

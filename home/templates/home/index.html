@@ -105,28 +105,6 @@
       </div>
       <!-- Featured entries column -->
       <div class="col-12 col-lg-7">
-        <!-- Featured section header -->
-        <div class="section-header mb-3" id="archives">
-          <div class="section-header-text">
-            <h2 class="h3 mb-1 section-title">Archive Entries</h2>
-            <p class="small muted mb-0">A rotating selection of sealed previews from the public catalog.</p>
-          </div>
-          <!-- Carousel header controls -->
-          {% if featured_products %}
-            <div class="section-header-actions">
-              <button class="btn btn-sm btn-outline-light section-nav-btn"
-                      type="button"
-                      data-bs-target="#entryCarousel"
-                      data-bs-slide="prev"
-                      aria-label="Previous entry">‹</button>
-              <button class="btn btn-sm btn-outline-light section-nav-btn"
-                      type="button"
-                      data-bs-target="#entryCarousel"
-                      data-bs-slide="next"
-                      aria-label="Next entry">›</button>
-            </div>
-          {% endif %}
-        </div>
         <!-- Featured carousel panel -->
         <div class="panel p-3 p-lg-4">
           {% if featured_products %}
@@ -209,15 +187,32 @@
                   </div>
                 {% endfor %}
               </div>
-              <!-- Carousel indicators -->
-              <div class="carousel-indicators entry-carousel-dots position-static mt-3 mb-0">
-                {% for product in featured_products %}
-                  <button type="button"
-                          data-bs-target="#entryCarousel"
-                          data-bs-slide-to="{{ forloop.counter0 }}"
-                          {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                          aria-label="Slide {{ forloop.counter }}"></button>
-                {% endfor %}
+              <!-- Carousel indicators with navigation -->
+              <div class="d-flex align-items-center justify-content-center gap-3 mt-3 mb-0">
+                <!-- Previous button -->
+                <button class="btn btn-sm btn-outline-light section-nav-btn"
+                        type="button"
+                        data-bs-target="#entryCarousel"
+                        data-bs-slide="prev"
+                        aria-label="Previous entry">‹</button>
+                
+                <!-- Dots indicators -->
+                <div class="carousel-indicators entry-carousel-dots position-static m-0">
+                  {% for product in featured_products %}
+                    <button type="button"
+                            data-bs-target="#entryCarousel"
+                            data-bs-slide-to="{{ forloop.counter0 }}"
+                            {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                            aria-label="Slide {{ forloop.counter }}"></button>
+                  {% endfor %}
+                </div>
+                
+                <!-- Next button -->
+                <button class="btn btn-sm btn-outline-light section-nav-btn"
+                        type="button"
+                        data-bs-target="#entryCarousel"
+                        data-bs-slide="next"
+                        aria-label="Next entry">›</button>
               </div>
             </div>
           {% else %}

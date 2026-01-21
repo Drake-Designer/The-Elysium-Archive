@@ -4,8 +4,13 @@
 
 .char-counter {
   font-size: 12px;
-  opacity: 0.8;
   margin-top: 4px;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.char-counter:hover {
+  opacity: 1;
 }
 
 .char-counter.is-max {

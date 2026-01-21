@@ -33,7 +33,7 @@ def home_view(request):
     featured_products = (
         Product.objects.filter(is_active=True, is_featured=True)
         .select_related("category")
-        .order_by("-created_at")[:6]
+        .order_by("-created_at")
     )
 
     latest_products = (
@@ -48,7 +48,6 @@ def home_view(request):
         category_id=OuterRef("category_id"),
         is_active=True,
         is_deal=True,
-        deal_exclude=False,
     )
 
     raw_banners = (
@@ -76,7 +75,7 @@ def home_view(request):
             url="",
         )
 
-    deal_banners = list(raw_banners.order_by("order", "-created_at")[:10])
+    deal_banners = list(raw_banners.order_by("-is_featured", "order", "-created_at")[:10])
 
     context = {
         "featured_products": featured_products,
@@ -133,18 +132,21 @@ def test_error_500(request):
 
 class PrivacyCovenantView(TemplateView):
     """Privacy of the Covenant footer page."""
+
     template_name = "footer/privacy_covenant.html"
     extra_context = {"page_title": "Privacy of the Covenant"}
 
 
 class TermsArchiverView(TemplateView):
     """Terms of the Archiver footer page."""
+
     template_name = "footer/terms_archiver.html"
     extra_context = {"page_title": "Terms of the Archiver"}
 
 
 class ContactLoreView(FormView):
     """Contact the Lore footer page with contact form."""
+
     template_name = "footer/contact_lore.html"
     form_class = ContactForm
     success_url = reverse_lazy("contact_lore")

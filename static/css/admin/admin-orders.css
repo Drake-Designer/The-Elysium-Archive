@@ -4,12 +4,18 @@
 
 /* Order status badges */
 .order-status-badge {
-  padding: 5px 12px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
+  padding: 5px 12px;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.order-status-badge:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
 }
 
 .order-status-badge.pending {
@@ -18,10 +24,18 @@
   color: var(--admin-warning);
 }
 
+.order-status-badge.pending:hover {
+  background-color: rgba(255, 152, 0, 0.25);
+}
+
 .order-status-badge.paid {
   background-color: rgba(76, 175, 80, 0.18);
   border: 1px solid rgba(76, 175, 80, 0.45);
   color: var(--admin-success);
+}
+
+.order-status-badge.paid:hover {
+  background-color: rgba(76, 175, 80, 0.28);
 }
 
 .order-status-badge.failed {
@@ -30,22 +44,38 @@
   color: var(--admin-danger);
 }
 
+.order-status-badge.failed:hover {
+  background-color: rgba(139, 30, 45, 0.22);
+}
+
 /* Order number display */
 .order-number-display {
-  font-family: 'Courier New', monospace;
-  font-weight: 600;
   background-color: rgba(230, 230, 235, 0.05);
-  padding: 4px 10px;
   border-radius: 4px;
-  font-size: 13px;
   color: var(--admin-gold);
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  transition: all 0.2s ease;
+}
+
+.order-number-display:hover {
+  background-color: rgba(194, 161, 77, 0.15);
+  color: var(--admin-text);
 }
 
 /* Order total display */
 .order-total-display {
-  font-weight: 700;
-  font-size: 16px;
   color: var(--admin-gold);
+  font-size: 16px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.order-total-display:hover {
+  color: var(--admin-text);
+  text-shadow: 0 0 8px rgba(194, 161, 77, 0.4);
 }
 
 /* User info display */
@@ -56,25 +86,36 @@
 }
 
 .order-username {
-  font-weight: 600;
   color: var(--admin-text);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.order-user-info:hover .order-username {
+  color: var(--admin-gold);
 }
 
 .order-email {
-  font-size: 12px;
   color: var(--admin-muted);
+  font-size: 12px;
 }
 
 /* Access entitlement granted badge */
 .entitlement-granted-badge {
+  align-items: center;
   background-color: rgba(76, 175, 80, 0.18);
   border: 1px solid rgba(76, 175, 80, 0.45);
-  color: var(--admin-success);
-  padding: 3px 8px;
   border-radius: 3px;
+  color: var(--admin-success);
+  display: inline-flex;
   font-size: 11px;
   font-weight: 600;
-  display: inline-flex;
-  align-items: center;
   gap: 4px;
+  padding: 3px 8px;
+  transition: all 0.2s ease;
+}
+
+.entitlement-granted-badge:hover {
+  background-color: rgba(76, 175, 80, 0.28);
+  transform: translateY(-1px);
 }

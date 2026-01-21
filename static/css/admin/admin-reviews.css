@@ -4,14 +4,19 @@
 
 /* Star rating display */
 .review-rating-display {
-  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  display: inline-flex;
   font-size: 16px;
+  gap: 4px;
 }
 
 .review-star {
   color: #ffc107;
+  transition: all 0.2s ease;
+}
+
+.review-star:hover {
+  transform: scale(1.2);
 }
 
 .review-star.empty {
@@ -19,18 +24,23 @@
 }
 
 .review-rating-text {
-  margin-left: 6px;
-  font-weight: 600;
   color: var(--admin-text);
   font-size: 14px;
+  font-weight: 600;
+  margin-left: 6px;
 }
 
 /* Review title display */
 .review-title-display {
-  font-weight: 600;
   color: var(--admin-text);
   font-size: 14px;
+  font-weight: 600;
   margin-bottom: 4px;
+  transition: all 0.2s ease;
+}
+
+.review-title-display:hover {
+  color: var(--admin-gold);
 }
 
 /* Review body preview */
@@ -42,14 +52,20 @@
 
 /* Verified badge */
 .review-verified-badge {
+  align-items: center;
   background-color: rgba(33, 150, 243, 0.15);
   border: 1px solid rgba(33, 150, 243, 0.45);
-  color: #2196f3;
-  padding: 3px 8px;
   border-radius: 3px;
+  color: #2196f3;
+  display: inline-flex;
   font-size: 11px;
   font-weight: 600;
-  display: inline-flex;
-  align-items: center;
   gap: 4px;
+  padding: 3px 8px;
+  transition: all 0.2s ease;
+}
+
+.review-verified-badge:hover {
+  background-color: rgba(33, 150, 243, 0.25);
+  transform: translateY(-1px);
 }

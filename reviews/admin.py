@@ -27,7 +27,7 @@ class ReviewAdmin(admin.ModelAdmin):
     
     list_display_links = ['title_display']
     
-    list_filter = ['rating', 'created_at', 'product']
+    list_filter = ['rating', 'product']
     
     search_fields = ['user__username', 'user__email', 'product__title', 'title', 'body']
     
@@ -61,10 +61,11 @@ class ReviewAdmin(admin.ModelAdmin):
         stars_html = ''.join(['<span class="review-star">★</span>' for _ in range(full_stars)])
         stars_html += ''.join(['<span class="review-star empty">☆</span>' for _ in range(empty_stars)])
         
-        return format_html(
-            '<div class="review-rating-display">{}<span class="review-rating-text">{}/5</span></div>',
-            stars_html,
-            obj.rating
+        return mark_safe(
+            f'<div class="review-rating-display">'
+            f'{stars_html}'
+            f'<span class="review-rating-text">{obj.rating}/5</span>'
+            f'</div>'
         )
     rating_display.short_description = 'Rating'
     
@@ -114,23 +115,17 @@ class ReviewAdmin(admin.ModelAdmin):
         empty_stars = 5 - obj.rating
         stars_html = '⭐' * full_stars + '☆' * empty_stars
         
-        return format_html(
-            '<div style="background-color: var(--admin-panel); padding: 20px; border-radius: 8px; border: 1px solid var(--admin-border);">'
-            '<div style="margin-bottom: 12px;">'
-            '<span style="font-size: 20px;">{}</span>'
-            '<span style="margin-left: 8px; font-weight: 600; color: var(--admin-gold);">{}/5</span>'
-            '</div>'
-            '<h3 style="color: var(--admin-text); margin-bottom: 8px;">{}</h3>'
-            '<p style="color: var(--admin-muted); line-height: 1.6;">{}</p>'
-            '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--admin-border);">'
-            '<small style="color: var(--admin-muted);">By {} on {}</small>'
-            '</div>'
-            '</div>',
-            stars_html,
-            obj.rating,
-            obj.title or '(No title)',
-            obj.body,
-            obj.user.username,
-            obj.created_at.strftime('%b %d, %Y')
+        return mark_safe(
+            f'<div class="admin-review-preview">'
+            f'<div class="admin-review-stars">'
+            f'<span class="stars-display">{stars_html}</span>'
+            f'<span class="rating-score">{obj.rating}/5</span>'
+            f'</div>'
+            f'<h3 class="review-preview-title">{obj.title or "(No title)"}</h3>'
+            f'<p class="review-preview-body">{obj.body}</p>'
+            f'<div class="review-preview-meta">'
+            f'<small>By {obj.user.username} on {obj.created_at.strftime("%b %d, %Y")}</small>'
+            f'</div>'
+            f'</div>'
         )
     full_review_preview.short_description = 'Review Preview'
