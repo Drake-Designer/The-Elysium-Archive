@@ -244,34 +244,40 @@
     <!-- Footer -->
     <footer class="mt-auto site-footer" data-bs-theme="dark">
       <div class="container py-4">
-        <div class="row align-items-start align-items-lg-center g-3">
-          <div class="col-12 col-lg">
-            <p class="mb-0 site-footer-title fw-bold text-center text-lg-start">The Elysium Archive</p>
-            <p class="mb-0 small opacity-75 site-footer-text text-center text-lg-start">
-              <em>No downloads. No refunds. Access is the product.</em>
-            </p>
-          </div>
-
-          <div class="col-12 col-lg-auto">
-            <ul class="site-footer-links mb-0">
-              <li>
-                <a class="link-light text-decoration-none opacity-85 footer-link" href="{% url 'privacy_covenant' %}">
-                  <i class="fa-solid fa-shield-halved"></i><span>Privacy of the Covenant</span>
-                </a>
-              </li>
-              <li>
-                <a class="link-light text-decoration-none opacity-85 footer-link" href="{% url 'terms_archiver' %}">
-                  <i class="fa-solid fa-scroll"></i><span>Terms of the Archiver</span>
-                </a>
-              </li>
-              <li>
-                <a class="link-light text-decoration-none opacity-85 footer-link" href="{% url 'contact_lore' %}">
-                  <i class="fa-solid fa-book-open"></i><span>Contact the Lore</span>
-                </a>
-              </li>
-            </ul>
-          </div>
+        <!-- Title + Tagline section -->
+        <div class="site-footer-brand text-center mb-3 mb-lg-0">
+          <p class="site-footer-title fw-bold mb-2">The Elysium Archive</p>
+          <p class="site-footer-tagline mb-0">
+            <em>No downloads. No refunds. Access is the product.</em>
+          </p>
         </div>
+        
+        <!-- Divider (only on mobile/tablet) -->
+        <hr class="site-footer-divider d-lg-none my-3">
+        
+        <!-- Links section -->
+        <nav class="site-footer-nav" aria-label="Footer links">
+          <ul class="site-footer-links">
+            <li class="site-footer-link-item">
+              <a class="footer-link" href="{% url 'privacy_covenant' %}">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Privacy of the Covenant</span>
+              </a>
+            </li>
+            <li class="site-footer-link-item">
+              <a class="footer-link" href="{% url 'terms_archiver' %}">
+                <i class="fa-solid fa-scroll"></i>
+                <span>Terms of the Archiver</span>
+              </a>
+            </li>
+            <li class="site-footer-link-item">
+              <a class="footer-link" href="{% url 'contact_lore' %}">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Contact the Lore</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
       </div>
     </footer>
 
