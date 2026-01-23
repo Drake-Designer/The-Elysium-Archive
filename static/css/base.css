@@ -766,33 +766,74 @@ main .container,
   opacity: 1;
 }
 
-/* =======================
-   COMING SOON CARDS LAYOUT
-   ======================= */
-.coming-card {
+/* ======================
+   WHAT LIES AHEAD LAYOUT
+   ====================== */
+.panel.coming-card {
   align-items: center;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: clamp(1rem, 0.85rem + 0.5vw, 1.4rem) !important;
+  justify-content: flex-start;
   min-height: 100%;
+  padding: clamp(1.5rem, 1.3rem + 0.8vw, 2rem) !important;
   text-align: center;
+  transition: all 0.3s ease;
 }
 
-.coming-card-icon {
+.panel.coming-card:hover {
+  border-color: rgba(194, 161, 77, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+  transform: translateY(-4px);
+}
+
+.panel.coming-card .coming-card-icon {
   align-items: center;
   background: linear-gradient(135deg, var(--blood-crimson), rgba(139, 30, 45, 0.6));
   border-radius: 50%;
   box-shadow: 0 4px 15px rgba(139, 30, 45, 0.4);
   color: var(--ash-white);
   display: flex;
-  font-size: 1.5rem;
-  height: 60px;
+  flex-shrink: 0;
+  font-size: clamp(1.75rem, 1.5rem + 1.3vw, 2.4rem);
+  height: clamp(85px, 75px + 3vw, 100px);
   justify-content: center;
-  width: 60px;
+  transition: all 0.3s ease;
+  width: clamp(85px, 75px + 3vw, 100px);
 }
 
-.coming-card .card-actions {
+.panel.coming-card:hover .coming-card-icon {
+  box-shadow: 0 6px 20px rgba(139, 30, 45, 0.6);
+  transform: scale(1.08);
+}
+
+.panel.coming-card h3 {
+  color: var(--ash-white);
+  font-size: clamp(1.05rem, 0.98rem + 0.4vw, 1.28rem);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+  margin-bottom: clamp(0.5rem, 0.45rem + 0.3vw, 0.75rem);
+  margin-top: 0;
+}
+
+.panel.coming-card p {
+  color: rgba(230, 230, 235, 0.82);
+  flex-grow: 1;
+  font-size: clamp(0.88rem, 0.85rem + 0.2vw, 0.98rem);
+  line-height: 1.45;
+  margin-bottom: clamp(0.6rem, 0.5rem + 0.3vw, 0.9rem);
+}
+
+.panel.coming-card .card-actions {
   margin-top: auto;
+  width: 100%;
+}
+
+.panel.coming-card .btn {
+  font-size: clamp(0.88rem, 0.84rem + 0.2vw, 0.98rem) !important;
+  font-weight: 500;
+  padding: clamp(0.6rem, 0.55rem + 0.2vw, 0.75rem) clamp(1.05rem, 0.95rem + 0.35vw, 1.35rem) !important;
   width: 100%;
 }
 
@@ -1009,6 +1050,25 @@ body.reduced-effects .entry-card:hover {
 @media (max-width: 575.98px) {
   .error-icon-lg {
     font-size: 4.25rem;
+  }
+
+  .panel.coming-card {
+    gap: 1rem !important;
+    padding: 1.4rem !important;
+  }
+
+  .panel.coming-card .coming-card-icon {
+    height: 75px;
+    width: 75px;
+    font-size: 1.55rem;
+  }
+
+  .panel.coming-card h3 {
+    font-size: 1.02rem;
+  }
+
+  .panel.coming-card p {
+    font-size: 0.88rem;
   }
 }
 

@@ -21,19 +21,11 @@
   display: flex;
   flex-direction: column;
   text-align: center;
+  width: 100%;
 }
 
-.coming-card-icon {
-  align-items: center;
-  background: linear-gradient(135deg, var(--blood-crimson), rgba(139, 30, 45, 0.6));
-  border-radius: 50%;
-  box-shadow: 0 4px 15px rgba(139, 30, 45, 0.4);
-  color: var(--ash-white);
+#coming-next .row.g-3 > [class*='col'] {
   display: flex;
-  font-size: 1.5rem;
-  height: 60px;
-  justify-content: center;
-  width: 60px;
 }
 
 /* Hero Panel */

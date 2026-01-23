@@ -18,7 +18,6 @@ bandit==1.9.2
 
 # Type checking
 django-stubs[compatible-mypy]==5.2.8
-types-stripe==14.1.0.20250101
 
 # Optional formatting utilities
 cssbeautifier==1.15.4
