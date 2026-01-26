@@ -24,7 +24,7 @@ def _env_bool(value, default=False):
 
 # Helper: Parse comma-separated list from environment variable
 def _env_list(name, default=None):
-    """Convert 'value1,value2,value3' to ['value1', 'value2', 'value3']."""
+    """Convert 'value1,value2,value3' to ['value1', 'value2', 'value3']."""  # noqa: D400
     raw = os.environ.get(name)
     if raw is None:
         return default or []
@@ -275,7 +275,10 @@ ACCOUNT_FORMS = {
 }
 
 # Use HTTPS for email links in production
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if DEBUG else "https"
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.environ.get(
+    "ACCOUNT_DEFAULT_HTTP_PROTOCOL",
+    "http" if DEBUG else "https",
+)
 
 # Email backend (console for dev, SMTP for production)
 if DEBUG:
@@ -283,12 +286,16 @@ if DEBUG:
 else:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-# SMTP configuration (using SendGrid)
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.sendgrid.net")
+# SMTP configuration (using Resend SMTP by default)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.resend.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = _env_bool(os.environ.get("EMAIL_USE_TLS"), default=True)
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "apikey")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "resend")
+
+# Resend uses the API key as the SMTP password
+EMAIL_HOST_PASSWORD = os.environ.get("RESEND_API_KEY") or os.environ.get(
+    "EMAIL_HOST_PASSWORD", ""
+)
 
 # Email sender addresses
 DEFAULT_FROM_EMAIL = os.environ.get(
@@ -308,7 +315,9 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = os.environ.get(
 
 # Prevent production deployment without email credentials
 if not DEBUG and not EMAIL_HOST_PASSWORD:
-    raise ImproperlyConfigured("EMAIL_HOST_PASSWORD must be set when DEBUG=False.")
+    raise ImproperlyConfigured(
+        "RESEND_API_KEY (or EMAIL_HOST_PASSWORD) must be set when DEBUG=False."
+    )
 
 # Stripe payment gateway configuration
 STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev")
