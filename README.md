@@ -57,6 +57,8 @@ The dark fantasy theme supports the core logic of the platform by providing a na
 - Secure account system (register, login, logout)
 - Stripe checkout and order confirmation
 - A private "My Archive" area with unlocked entries
+- Account dashboard tabs for Profile, My Archive, My Orders, My Reviews, and Delete Account
+- Track orders and reviews from the dashboard
 - Protected archive reading pages
 - Verified buyer reviews
 - Profile management and full account deletion
@@ -288,6 +290,20 @@ This section documents implemented features organised by category.
 - **Empty State** - When no products are purchased, displays a friendly message and link to the archive catalog
 - **Permanent Retention** - Once purchased, products remain in My Archive indefinitely; no expiration or revocation
 
+### My Orders
+
+- **Dashboard Tab** - Order history is available from the account dashboard
+- **Order Summary** - Displays order number, created date/time, status, and total
+- **Line Items** - Lists purchased items with quantity, line total, and product links when available
+- **Empty State** - Shows a message when no orders exist
+
+### My Reviews
+
+- **Dashboard Tab** - Lists the user's reviews in the account dashboard
+- **Review Details** - Displays product, rating, optional title, date/time, and body
+- **Edit and Delete** - Includes edit/delete actions with server-side ownership enforcement
+- **Empty State** - Shows a message when no reviews exist
+
 ### Product Preview Pages
 
 - **Public Browsing** - Product detail pages serve as previews for all visitors
@@ -319,7 +335,7 @@ This section documents implemented features organised by category.
 | Register | `/accounts/signup/` | Anonymous only | Create a new account |
 | Login | `/accounts/login/` | Anonymous only | Sign in to existing account |
 | Logout | `/accounts/logout/` | Authenticated | Sign out (POST only) |
-| Dashboard | `/accounts/dashboard/` | Authenticated | Account hub with profile, archive, and delete tabs |
+| Dashboard | `/accounts/dashboard/` | Authenticated | Account hub with profile, archive, orders, reviews, and delete tabs |
 | Profile | `/accounts/profile/` | Authenticated | Redirects to dashboard profile tab |
 | My Archive | `/accounts/my-archive/` | Authenticated | Redirects to dashboard archive tab |
 | Delete Account | `/accounts/delete/` | Authenticated | Permanently delete account |

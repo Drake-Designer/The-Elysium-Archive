@@ -83,6 +83,9 @@ Coverage:
 
 - Login, signup, and logout page behaviour (200/302)
 - Email verification gate for dashboard, profile, and my-archive redirects
+- Dashboard "My Orders" tab rendering/availability for verified users
+- Dashboard "My Reviews" tab rendering/availability for verified users
+- Redirect helpers `/accounts/my-orders/` and `/accounts/my-reviews/` target the correct dashboard tabs
 - Anonymous users redirected to login for account pages
 - My Archive display for verified users, including deleted-product handling
 - Dashboard form POST updates display_name
@@ -305,6 +308,13 @@ Note: In DEBUG, email is sent to the console backend. Use the verification link 
 - [ ] Verified user visits `/accounts/delete/` -> confirmation page loads
 - [ ] User submits delete -> account removed, redirected to home, message shown
 - [ ] Superuser delete attempt -> blocked with message
+
+#### Dashboard Tabs
+
+- [ ] Verified user opens My Orders tab -> sees order list or empty state
+- [ ] Verified user opens My Reviews tab -> sees review list or empty state
+- [ ] Review edit link from dashboard works (ownership rules still apply)
+- [ ] Review delete from dashboard requires POST and removes the review
 
 #### Product Catalog and Preview
 

@@ -3,15 +3,16 @@
 from allauth.account.utils import has_verified_email
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
-from orders.models import AccessEntitlement
+from orders.models import AccessEntitlement, Order, OrderLineItem
+from reviews.models import Review
 
 from .forms import UserProfileForm
 from .models import UserProfile
-
 
 def _verified_or_redirect(request):
     if not has_verified_email(request.user):
@@ -19,11 +20,9 @@ def _verified_or_redirect(request):
         return redirect("account_email")
     return None
 
-
 def _dashboard_url_with_tab(tab_name):
     base_url = reverse("account_dashboard")
     return f"{base_url}?tab={tab_name}"
-
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -59,6 +58,12 @@ def dashboard(request):
             "archive": "archive",
             "my-archive": "archive",
             "my_archive": "archive",
+            "orders": "orders",
+            "my-orders": "orders",
+            "my_orders": "orders",
+            "reviews": "reviews",
+            "my-reviews": "reviews",
+            "my_reviews": "reviews",
             "delete": "delete",
         }
         active_tab = tab_map.get(requested_tab, "profile")
@@ -73,13 +78,27 @@ def dashboard(request):
         {"product": e.product, "purchase_date": e.granted_at} for e in entitlements
     ]
 
+    line_items_qs = OrderLineItem.objects.select_related("product")
+    orders = (
+        Order.objects.filter(user=request.user)
+        .prefetch_related(Prefetch("line_items", queryset=line_items_qs))
+        .order_by("-created_at")
+    )
+
+    reviews = (
+        Review.objects.filter(user=request.user)
+        .select_related("product")
+        .order_by("-created_at")
+    )
+
     context = {
         "active_tab": active_tab,
         "form": form,
         "unlocked_products": unlocked_products,
+        "orders": orders,
+        "reviews": reviews,
     }
     return render(request, "accounts/dashboard.html", context)
-
 
 @login_required
 def my_archive(request):
@@ -87,8 +106,23 @@ def my_archive(request):
     if redirect_response:
         return redirect_response
 
-    return redirect(_dashboard_url_with_tab("my-archive"))
+    return redirect(_dashboard_url_with_tab("archive"))
 
+@login_required
+def my_orders(request):
+    redirect_response = _verified_or_redirect(request)
+    if redirect_response:
+        return redirect_response
+
+    return redirect(_dashboard_url_with_tab("orders"))
+
+@login_required
+def my_reviews(request):
+    redirect_response = _verified_or_redirect(request)
+    if redirect_response:
+        return redirect_response
+
+    return redirect(_dashboard_url_with_tab("reviews"))
 
 @login_required
 def profile(request):
@@ -97,7 +131,6 @@ def profile(request):
         return redirect_response
 
     return redirect(_dashboard_url_with_tab("profile"))
-
 
 @login_required
 @require_http_methods(["GET", "POST"])

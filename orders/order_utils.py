@@ -6,7 +6,6 @@ from cart.cart import clear_cart, get_cart_items
 
 from .models import Order, OrderLineItem
 
-
 def create_order_from_cart(session, user=None):
     """Create an order from the current cart session."""
     cart_items = get_cart_items(session)

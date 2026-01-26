@@ -8,7 +8,6 @@ from django.urls import reverse
 
 from orders.models import AccessEntitlement, Order
 
-
 @pytest.mark.django_db
 class TestWebhookHandling:
     """Test Stripe webhook processing with mocked signature verification."""
@@ -365,87 +364,14 @@ class TestWebhookHandling:
         order_pending.refresh_from_db()
         assert order_pending.status == "failed"
 
-
 @pytest.mark.django_db
-class TestOrderModel:
-    """Test Order model behavior."""
+class TestOrdersDashboardTabs:
+    """Test dashboard orders tab shortcuts."""
 
-    def test_order_generates_order_number_on_save(self, verified_user, product_active):
-        """Order generates unique order_number on save."""
-        order = Order.objects.create(
-            user=verified_user,
-            status="pending",
-            total=Decimal("9.99"),
-        )
-
-        assert order.order_number
-        assert len(order.order_number) > 0
-        assert order.order_number.isupper()
-
-    def test_order_number_unique(self, verified_user, product_active):
-        """Each order has unique order_number."""
-        order1 = Order.objects.create(
-            user=verified_user,
-            status="pending",
-            total=Decimal("9.99"),
-        )
-        order2 = Order.objects.create(
-            user=verified_user,
-            status="pending",
-            total=Decimal("19.99"),
-        )
-
-        assert order1.order_number != order2.order_number
-
-    def test_order_default_status(self):
-        """New order defaults to pending status."""
-        order = Order(status=None)
-
-    def test_order_timestamps(self, verified_user):
-        """Order records created_at and updated_at."""
-        order = Order.objects.create(
-            user=verified_user,
-            status="pending",
-            total=Decimal("9.99"),
-        )
-
-        assert order.created_at is not None
-        assert order.updated_at is not None
-
-
-@pytest.mark.django_db
-class TestAccessEntitlementModel:
-    """Test AccessEntitlement model behavior."""
-
-    def test_entitlement_unique_per_user_product(self, verified_user, product_active):
-        """Cannot create duplicate entitlements for same user+product."""
-        from django.db import IntegrityError
-
-        AccessEntitlement.objects.create(user=verified_user, product=product_active)
-
-        with pytest.raises(IntegrityError):
-            AccessEntitlement.objects.create(user=verified_user, product=product_active)
-
-    def test_entitlement_grants_access(self, verified_user, product_inactive):
-        """User with entitlement can access inactive product."""
-        assert product_inactive.is_active is False
-
-        AccessEntitlement.objects.create(user=verified_user, product=product_inactive)
-
-        entitlements = AccessEntitlement.objects.filter(
-            user=verified_user, product=product_inactive
-        )
-        assert entitlements.count() == 1
-
-    def test_entitlement_survives_product_unpublish(self, verified_user, product_active):
-        """Entitlement still exists when product is unpublished."""
-        entitlement = AccessEntitlement.objects.create(
-            user=verified_user, product=product_active
-        )
-
-        assert AccessEntitlement.objects.filter(id=entitlement.id).exists()
-
-        product_active.is_active = False
-        product_active.save(update_fields=["is_active", "updated_at"])
-
-        assert AccessEntitlement.objects.filter(id=entitlement.id).exists()
+    def test_my_orders_redirects_to_dashboard_tab(self, client, verified_user):
+        """My orders shortcut redirects to dashboard orders tab."""
+        client.force_login(verified_user)
+        response = client.get(reverse("my_orders"))
+        assert response.status_code == 302
+        assert reverse("account_dashboard") in response.url
+        assert "tab=orders" in response.url

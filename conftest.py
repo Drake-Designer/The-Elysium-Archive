@@ -1,22 +1,21 @@
 """Pytest configuration and fixtures."""
 
+from decimal import Decimal
+from typing import Any, cast
+
 import pytest
 from allauth.account.models import EmailAddress
-from decimal import Decimal
 from django.contrib.auth import get_user_model
-from typing import Any, cast
 
 from orders.models import AccessEntitlement, Order
 from products.models import Category, Product
 
 User = get_user_model()
 
-
 @pytest.fixture
 def category():
     """Create a test category."""
     return Category.objects.create(name="Test Category", slug="test-category")
-
 
 @pytest.fixture
 def product_active(category):
@@ -33,7 +32,6 @@ def product_active(category):
         category=category,
     )
 
-
 @pytest.fixture
 def product_inactive(category):
     """Create an inactive test product."""
@@ -49,40 +47,41 @@ def product_inactive(category):
         category=category,
     )
 
-
 @pytest.fixture
 def verified_user(db):
     """Create a verified test user."""
-    user = User.objects.create_user(
-        username="verified", email="verified@test.com", password="testpass123"
+    user_model = cast(Any, User)
+    user = user_model.objects.create_user(
+        username="verified",
+        email="verified@test.com",
+        password="testpass123",
     )
     EmailAddress.objects.create(user=user, email=user.email, verified=True, primary=True)
     return user
 
-
 @pytest.fixture
 def unverified_user(db):
     """Create an unverified test user."""
-    user = User.objects.create_user(
-        username="unverified", email="unverified@test.com", password="testpass123"
+    user_model = cast(Any, User)
+    user = user_model.objects.create_user(
+        username="unverified",
+        email="unverified@test.com",
+        password="testpass123",
     )
-    EmailAddress.objects.create(
-        user=user, email=user.email, verified=False, primary=True
-    )
+    EmailAddress.objects.create(user=user, email=user.email, verified=False, primary=True)
     return user
-
 
 @pytest.fixture
 def staff_user(db):
     """Create a staff user."""
-    return User.objects.create_user(
+    user_model = cast(Any, User)
+    return user_model.objects.create_user(
         username="staff",
         email="staff@test.com",
         password="testpass123",
         is_staff=True,
         is_superuser=True,
     )
-
 
 @pytest.fixture
 def client_with_cart(client, product_active):
@@ -92,20 +91,21 @@ def client_with_cart(client, product_active):
     session.save()
     return client
 
-
 @pytest.fixture
 def entitlement(verified_user, product_active):
     """Create an entitlement (purchase) for a user."""
     return AccessEntitlement.objects.create(
-        user=cast(Any, verified_user), product=product_active
+        user=cast(Any, verified_user),
+        product=product_active,
     )
-
 
 @pytest.fixture
 def order_pending(verified_user, product_active):
     """Create a pending order."""
     order = Order.objects.create(
-        user=cast(Any, verified_user), total=product_active.price, status="pending"
+        user=cast(Any, verified_user),
+        total=product_active.price,
+        status="pending",
     )
     from orders.models import OrderLineItem
 
@@ -119,12 +119,13 @@ def order_pending(verified_user, product_active):
     )
     return order
 
-
 @pytest.fixture
 def order_paid(verified_user, product_active):
     """Create a paid order with entitlement."""
     order = Order.objects.create(
-        user=cast(Any, verified_user), total=product_active.price, status="paid"
+        user=cast(Any, verified_user),
+        total=product_active.price,
+        status="paid",
     )
     from orders.models import OrderLineItem
 
@@ -137,6 +138,8 @@ def order_paid(verified_user, product_active):
         line_total=product_active.price,
     )
     AccessEntitlement.objects.create(
-        user=cast(Any, verified_user), product=product_active, order=order
+        user=cast(Any, verified_user),
+        product=product_active,
+        order=order,
     )
     return order

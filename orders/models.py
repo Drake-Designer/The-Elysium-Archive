@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
     from django.contrib.auth.models import AbstractUser
 
-
 class Order(models.Model):
     """Store a purchase order."""
 
@@ -87,7 +86,6 @@ class Order(models.Model):
             self.order_number = uuid.uuid4().hex.upper()[:16]
         super().save(*args, **kwargs)
 
-
 class OrderLineItem(models.Model):
     """Store individual products within an order."""
 
@@ -134,7 +132,6 @@ class OrderLineItem(models.Model):
         """Calculate line total before saving."""
         self.line_total = self.product_price * self.quantity
         super().save(*args, **kwargs)
-
 
 class AccessEntitlement(models.Model):
     """Grant a user access to a purchased product."""

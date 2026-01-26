@@ -6,9 +6,7 @@ from django.urls import reverse
 
 from accounts.models import UserProfile
 
-
 User = get_user_model()
-
 
 @pytest.mark.django_db
 class TestProfileView:
@@ -88,7 +86,6 @@ class TestProfileView:
         profile = UserProfile.objects.get_or_create(user=verified_user)[0]
         profile.refresh_from_db()
         assert profile.display_name != long_name
-
 
 @pytest.mark.django_db
 class TestAccountDelete:

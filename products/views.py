@@ -19,7 +19,6 @@ from reviews.forms import ReviewForm
 
 from .models import Category, Product
 
-
 class ProductListView(ListView):
     """Show a public archive catalog with pagination."""
 
@@ -76,7 +75,6 @@ class ProductListView(ListView):
         context["show_deals"] = show_deals
 
         return context
-
 
 class ProductDetailView(DetailView):
     """Show an archive preview page with purchase call to action."""
@@ -148,7 +146,6 @@ class ProductDetailView(DetailView):
         context["form"] = form
 
         return context
-
 
 class ArchiveReadView(LoginRequiredMixin, DetailView):
     """Show a private reading page for purchased archive entries."""

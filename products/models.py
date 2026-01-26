@@ -12,7 +12,6 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
 
-
 class Category(models.Model):
     """Product category model."""
 
@@ -34,7 +33,6 @@ class Category(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-
 
 class Product(models.Model):
     """Archive entry (product) model."""
@@ -169,7 +167,6 @@ class Product(models.Model):
             discounted_price = self.price - discount_amount
             return discounted_price.quantize(Decimal("0.01"))
         return self.price
-
 
 class DealBanner(models.Model):
     """Custom promotional banner message for the deals marquee."""
@@ -331,7 +328,6 @@ class DealBanner(models.Model):
 
         return f"{archive_url}?deals=true"
 
-
 def sync_products_deal_status(product_pks=None, category_pks=None):
     """Recalculate deal status for affected products."""
     product_pks = list(product_pks or [])
@@ -380,7 +376,6 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
     if false_pks:
         Product.objects.filter(pk__in=false_pks).update(is_deal=False, updated_at=now)
 
-
 def sync_banner_featured_to_product(product_pk):
     """Sync featured status from banners to product."""
     try:
@@ -410,7 +405,6 @@ def sync_banner_featured_to_product(product_pk):
             product.is_featured = False
             product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
 
-
 def sync_product_featured_to_banners(product_pk, is_featured):
     """Sync featured status from product to its banners."""
     # Get all active banners linked to this product
@@ -425,7 +419,6 @@ def sync_product_featured_to_banners(product_pk, is_featured):
             banner.is_featured = is_featured
             banner.save(_skip_featured_sync=True)
 
-
 def sync_category_banner_featured_to_products(category_pk, is_featured):
     """Sync featured status from category banner to all active products in category."""
     products = Product.objects.filter(
@@ -437,7 +430,6 @@ def sync_category_banner_featured_to_products(category_pk, is_featured):
         if product.is_featured != is_featured:
             product.is_featured = is_featured
             product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
-
 
 def sync_product_featured_from_category_banner(product_pk):
     """Check if product should be featured based on its category's banner."""
@@ -472,7 +464,6 @@ def sync_product_featured_from_category_banner(product_pk):
             product.is_featured = False
             product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
 
-
 # Signals
 @receiver(post_save, sender=DealBanner)
 def deal_banner_post_save(sender, instance, created, **kwargs):
@@ -482,7 +473,6 @@ def deal_banner_post_save(sender, instance, created, **kwargs):
 
     if product_pks or category_pks:
         sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
-
 
 @receiver(post_delete, sender=DealBanner)
 def deal_banner_post_delete(sender, instance, **kwargs):

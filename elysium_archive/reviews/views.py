@@ -12,11 +12,9 @@ from products.models import Product
 from .forms import ReviewForm
 from .models import Review
 
-
 def _user_has_entitlement(user, product) -> bool:
     """Check if the user has purchased the given product."""
     return AccessEntitlement.objects.filter(user=user, product=product).exists()
-
 
 @verified_email_required
 @require_http_methods(["POST"])
@@ -48,7 +46,6 @@ def create_review(request, slug):
     messages.error(request, "Please correct the errors in your review.")
     return redirect("product_detail", slug=slug)
 
-
 @verified_email_required
 @require_http_methods(["GET", "POST"])
 def edit_review(request, slug, review_id):
@@ -73,7 +70,6 @@ def edit_review(request, slug, review_id):
         "is_edit": True,
     }
     return render(request, "reviews/edit_review.html", context)
-
 
 @verified_email_required
 @require_http_methods(["POST"])

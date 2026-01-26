@@ -178,6 +178,111 @@
   margin: 0;
 }
 
+/* Profile layout helpers */
+.account-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.account-info-row {
+  align-items: baseline;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.account-info-label {
+  flex: 0 0 auto;
+}
+
+.account-info-value {
+  flex: 1 1 auto;
+  text-align: right;
+  min-width: 0;
+}
+
+.dashboard-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dashboard-profile-actions .btn {
+  flex: 1 1 240px;
+  justify-content: center;
+  width: 100%;
+}
+
+.dashboard-profile-save {
+  display: grid;
+  justify-items: start;
+}
+
+.dashboard-profile-save .btn {
+  width: 100%;
+  max-width: 280px;
+}
+
+/* My Archive thumbnails */
+.my-archive-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.my-archive-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  min-width: 0;
+  flex: 1 1 360px;
+}
+
+.my-archive-thumb-wrap {
+  flex: 0 0 auto;
+}
+
+.my-archive-thumb {
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(194, 161, 77, 0.25);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  display: block;
+}
+
+.my-archive-thumb-placeholder {
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  background: rgba(20, 20, 27, 0.65);
+  border: 1px solid rgba(194, 161, 77, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(194, 161, 77, 0.65);
+}
+
+.my-archive-meta {
+  min-width: 0;
+}
+
+.my-archive-title {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.my-archive-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
 /* Media Queries */
 @media (max-width: 991.98px) {
   .dashboard-sidebar {
@@ -206,5 +311,35 @@
     border-bottom-color: var(--relic-gold);
     border-left: none;
     padding-left: 0.5rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .account-info-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .account-info-value {
+    text-align: left;
+    width: 100%;
+  }
+
+  .dashboard-profile-save {
+    justify-items: stretch;
+  }
+
+  .dashboard-profile-save .btn {
+    max-width: none;
+  }
+
+  .my-archive-left {
+    flex: 1 1 100%;
+  }
+
+  .my-archive-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

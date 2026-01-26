@@ -11,7 +11,6 @@ from products.models import Product
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractUser
 
-
 class Review(models.Model):
     """Store a verified buyer review for a purchased product."""
 
@@ -30,7 +29,7 @@ class Review(models.Model):
     body: models.TextField
     created_at: models.DateTimeField
     updated_at: models.DateTimeField
-    
+
     # Django auto-generated
     id: int
 

@@ -21,7 +21,15 @@
         return 'archive';
       }
 
-      if (clean === 'profile' || clean === 'archive' || clean === 'delete') {
+      if (clean === 'my-orders' || clean === 'my_orders') {
+        return 'orders';
+      }
+
+      if (clean === 'my-reviews' || clean === 'my_reviews') {
+        return 'reviews';
+      }
+
+      if (clean === 'profile' || clean === 'archive' || clean === 'orders' || clean === 'reviews' || clean === 'delete') {
         return clean;
       }
 
@@ -48,7 +56,17 @@
 
     const setUrlTab = (tabName) => {
       const url = new URL(window.location.href);
-      url.searchParams.set('tab', tabName === 'archive' ? 'my-archive' : tabName);
+
+      if (tabName === 'archive') {
+        url.searchParams.set('tab', 'my-archive');
+      } else if (tabName === 'orders') {
+        url.searchParams.set('tab', 'my-orders');
+      } else if (tabName === 'reviews') {
+        url.searchParams.set('tab', 'my-reviews');
+      } else {
+        url.searchParams.set('tab', tabName);
+      }
+
       window.history.replaceState({}, '', url);
     };
 
