@@ -15,14 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if (BASE_DIR / "env.py").exists():
     import env  # noqa: F401
 
-
 # Helper: Parse boolean from environment variable
 def _env_bool(value, default=False):
     """Convert string like 'true', '1', 'yes' to boolean."""
     if value is None:
         return default
     return str(value).strip().lower() in ("true", "1", "yes", "y", "on")
-
 
 # Helper: Parse comma-separated list from environment variable
 def _env_list(name, default=None):
@@ -31,7 +29,6 @@ def _env_list(name, default=None):
     if raw is None:
         return default or []
     return [item.strip() for item in raw.split(",") if item.strip()]
-
 
 # Secret key for Django cryptographic signing (sessions, tokens, etc.)
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
@@ -91,7 +88,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Django apps loaded for this project
 INSTALLED_APPS = [
-    "jazzmin", 
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -99,18 +96,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-    "allauth",  
+    "allauth",
     "allauth.account",
-    "django_ckeditor_5",  
-    "cloudinary", 
+    "django_ckeditor_5",
+    "cloudinary",
     "cloudinary_storage",
-    "accounts.apps.AccountsConfig",  
-    "home",  
-    "products",  
-    "cart.apps.CartConfig",  
-    "checkout",  
-    "orders",  
-    "reviews",  
+    "accounts.apps.AccountsConfig",
+    "home",
+    "products",
+    "cart.apps.CartConfig",
+    "checkout",
+    "orders",
+    "reviews",
 ]
 
 # Required for django.contrib.sites
@@ -141,7 +138,7 @@ JAZZMIN_SETTINGS = {
 # Middleware processing order (request/response pipeline)
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware", 
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -167,15 +164,15 @@ ROOT_URLCONF = "elysium_archive.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  
-        "APP_DIRS": True,  
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "django.template.context_processors.request",  
-                "django.contrib.auth.context_processors.auth",  
-                "django.contrib.messages.context_processors.messages",  
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
                 "elysium_archive.context_processors.cart_context",
-                "elysium_archive.context_processors.deals_context",  
+                "elysium_archive.context_processors.deals_context",
             ],
         },
     }
@@ -210,13 +207,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Localization settings
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Europe/Dublin"
-USE_I18N = True  
-USE_TZ = True  
+USE_I18N = True
+USE_TZ = True
 
 # Static files (CSS, JS, images) configuration
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]  
-STATIC_ROOT = BASE_DIR / "staticfiles" 
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # User-uploaded media files configuration
 MEDIA_URL = "/media/"
@@ -265,11 +262,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Django-allauth configuration (user registration and authentication)
-ACCOUNT_LOGIN_METHODS = {"username", "email"}  
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
-ACCOUNT_UNIQUE_EMAIL = True  
+ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
-ACCOUNT_EMAIL_REQUIRED = True 
+ACCOUNT_EMAIL_REQUIRED = True
 
 # Custom allauth forms
 ACCOUNT_FORMS = {
