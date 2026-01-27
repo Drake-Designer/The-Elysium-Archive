@@ -2,8 +2,6 @@
 
 ![Code Institute Project](documentation/code-institute-img.png)
 
-![The Elysium Archive homepage screenshot](documentation/validation/am-i-responsive.webp)
-
 **Live Site:** [The Elysium Archive](https://the-elysium-archive-a51393fa9431.herokuapp.com/)
 
 The Elysium Archive is a story-driven, dark fantasy ecommerce site where each purchase unlocks a private archive page inside the website.
@@ -234,7 +232,7 @@ This section documents implemented features organised by category.
 
 - **Registration** - Create account with username, email, and password validation
 - **Unique Email Enforcement** - Signup enforces unique emails case-insensitively (no duplicate accounts with different casing)
-- **Email Verification** - Mandatory email verification via SendGrid
+- **Email Verification** - Mandatory email verification via SMTP (Resend by default; see `elysium_archive/settings.py`)
 - **Login** - Secure authentication with username or email
 - **Login Warnings** - Shows one warning at a time, distinguishes wrong password vs wrong username/email, and only shows the case-sensitive reminder when relevant
 - **Password Reset** - Complete password reset flow with email link
@@ -263,6 +261,7 @@ This section documents implemented features organised by category.
 - **Homepage**: Hero section, featured entries carousel, membership information
 - **Archive Catalog**: Browse all available archive entries
 - **Lore Page**: Background story and world-building content
+- **Footer Pages**: Privacy, Terms, and Contact form
 
 ### User Feedback
 
@@ -332,18 +331,18 @@ This section documents implemented features organised by category.
 | Privacy of the Covenant | `/privacy-of-the-covenant/` | Public | Privacy policy and site data practices |
 | Terms of the Archiver | `/terms-of-the-archiver/` | Public | Terms and conditions for site use |
 | Contact the Lore | `/contact-the-lore/` | Public | Public contact form to reach site maintainers |
-| Register | `/accounts/signup/` | Anonymous only | Create a new account |
-| Login | `/accounts/login/` | Anonymous only | Sign in to existing account |
+| Register | `/accounts/signup/` | Public | Create a new account |
+| Login | `/accounts/login/` | Public | Sign in to existing account |
 | Logout | `/accounts/logout/` | Authenticated | Sign out (POST only) |
-| Dashboard | `/accounts/dashboard/` | Authenticated | Account hub with profile, archive, orders, reviews, and delete tabs |
-| Profile | `/accounts/profile/` | Authenticated | Redirects to dashboard profile tab |
-| My Archive | `/accounts/my-archive/` | Authenticated | Redirects to dashboard archive tab |
-| Delete Account | `/accounts/delete/` | Authenticated | Permanently delete account |
+| Dashboard | `/accounts/dashboard/` | Authenticated + verified email | Account hub with profile, archive, orders, reviews, and delete tabs |
+| Profile | `/accounts/profile/` | Authenticated + verified email | Redirects to dashboard profile tab |
+| My Archive | `/accounts/my-archive/` | Authenticated + verified email | Redirects to dashboard archive tab |
+| Delete Account | `/accounts/delete/` | Authenticated + verified email | Permanently delete account |
 | Product Preview | `/archive/<slug>/` | Public | Preview page with purchase flow |
-| Archive Reading | `/archive/<slug>/read/` | Owners only | Dedicated reading page for purchased content |
-| Submit Review | `/archive/<slug>/review/` | Authenticated (POST) | Submit review for purchased product |
-| Edit Review | `/archive/<slug>/review/<id>/edit/` | Review owner | Edit your own review |
-| Delete Review | `/archive/<slug>/review/<id>/delete/` | Review owner (POST) | Delete your own review |
+| Archive Reading | `/archive/<slug>/read/` | Owners only + verified email | Dedicated reading page for purchased content |
+| Submit Review | `/archive/<slug>/review/` | Verified buyers (POST) | Submit review for purchased product |
+| Edit Review | `/archive/<slug>/review/<id>/edit/` | Review owner + verified email | Edit your own review |
+| Delete Review | `/archive/<slug>/review/<id>/delete/` | Review owner + verified email (POST) | Delete your own review |
 | Admin | `/admin/` | Staff only | Django admin panel |
 
 ## Technical Overview
@@ -377,7 +376,7 @@ Production requirements for professional email management, password resets, and 
 **What changed:**
 
 - Replaced custom login/register views with allauth's built-in views
-- Integrated SendGrid for professional email delivery
+- Integrated SMTP delivery (Resend by default) for account emails
 - Added email verification, password reset, and account management flows
 - Implemented allauth email templates with project styling
 
@@ -455,7 +454,7 @@ The project uses a modular CSS architecture to keep styles scoped and maintainab
 **Loading Strategy:**
 
 - `base.css` is loaded globally in `base.html` (applies to all pages)
-- Page-specific CSS is loaded conditionally using `{% block extracss %}` in individual templates
+- Page-specific CSS is loaded conditionally using `{% block extra_css %}` in individual templates
 
 **Example (homepage template):**
 
@@ -525,12 +524,14 @@ All static files are collected using Django's `collectstatic` command and are co
 
 ### Email Templates and Notifications
 
-All emails sent via SendGrid use custom HTML templates styled to match the project:
+All account emails are delivered via SMTP (Resend by default; configured in `elysium_archive/settings.py`) and use custom HTML templates styled to match the project:
 
 - **Email Verification** - Sent when users register (mandatory verification)
 - **Password Reset** - Sent when users request password reset
 - **Password Reset Complete** - Confirmation after successful reset
 - **Email Change Notification** - Sent when users update their email address
+
+Templates live in `templates/account/` and `templates/account/email/`.
 
 Each template:
 
@@ -578,7 +579,7 @@ All atmospheric images used throughout the project are sourced from [Stockcake](
 
 - **django-allauth 65.13.1**
   - User registration, login, logout
-  - Email verification via SendGrid
+- Email verification via SMTP (Resend by default)
   - Password reset and change functionality
   - Email address management
   - Social authentication ready
@@ -594,7 +595,7 @@ All atmospheric images used throughout the project are sourced from [Stockcake](
 
 - **Stripe 14.1.0**
 - **Cloudinary 1.44.1**
-- **SendGrid (via django-allauth)**
+- **Resend SMTP** (email delivery via `EMAIL_HOST` / `RESEND_API_KEY`)
 
 ### Admin and Development
 
@@ -605,11 +606,11 @@ All atmospheric images used throughout the project are sourced from [Stockcake](
 
 ### Development and Testing Tools
 
-- **pytest 9.0.2**
-- **pytest-django 4.11.1**
-- **black 25.12.0**
-- **flake8 7.3.0**
-- **bandit 1.9.2**
+- Tools available via `dev-requirements.txt`:
+  - **pytest 9.0.2**, **pytest-django 4.11.1**, **pytest-cov 7.0.0**
+  - **black 25.12.0**, **isort 7.0.0**, **flake8 7.3.0**, **pylint 4.0.4**, **djlint 1.36.4**
+  - **bandit 1.9.2**
+  - **django-stubs 5.2.8** (type checking support)
 
 ### Deployment
 
@@ -641,7 +642,7 @@ The Elysium Archive implements industry-standard security headers and Django bes
 - All secrets stored in environment variables
 - `env.py` excluded from version control
 - Heroku Config Vars used for production
-- No hardcoded API keys, tokens, or passwords
+- Settings use safe placeholders for local defaults; production secrets are not committed
 
 **Access Control:**
 
@@ -809,6 +810,15 @@ This project uses a relational database designed to support secure access contro
 - **Category**
   Organises products for browsing and deal banners.
 
+- **DealBanner**
+  Promotional banners that drive deal logic and front-end messaging.
+
+- **Cart**
+  Persistent cart container linked to a user.
+
+- **CartItem**
+  Items inside a user cart (one product per line).
+
 - **Order**
   Stores checkout and payment-related information.
 
@@ -825,7 +835,7 @@ Each entity and relationship is designed to be Django-friendly and simple to rea
 
 ### Data Model Overview
 
-The database uses Django ORM with PostgreSQL in production and SQLite locally. Core models are listed above and designed to keep access control simple and auditable.
+The database uses Django ORM with PostgreSQL in production and SQLite locally. Core models include cart persistence and deal banner logic, while keeping access control simple and auditable.
 
 ### Current Relationships
 
@@ -840,14 +850,20 @@ The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagrammi
 ```mermaid
 erDiagram
     USER ||--|| USERPROFILE : has
+    USER ||--|| CART : owns
+    CART ||--o{ CARTITEM : contains
+    CARTITEM }o--|| PRODUCT : item
     USER ||--o{ ORDER : places
-    USER ||--o{ ACCESSENTITLEMENT : grants
-    ACCESSENTITLEMENT }o--|| PRODUCT : "grants access to"
     ORDER ||--o{ ORDERLINEITEM : contains
     ORDERLINEITEM }o--|| PRODUCT : item
+    USER ||--o{ ACCESSENTITLEMENT : grants
+    ACCESSENTITLEMENT }o--|| PRODUCT : "grants access to"
+    ACCESSENTITLEMENT }o--|| ORDER : "linked to"
     PRODUCT }o--|| CATEGORY : "belongs to"
     PRODUCT ||--o{ REVIEW : has
     USER ||--o{ REVIEW : writes
+    DEALBANNER }o--|| PRODUCT : "optional"
+    DEALBANNER }o--|| CATEGORY : "optional"
 
     USERPROFILE {
         int id PK
@@ -865,6 +881,20 @@ erDiagram
         string password
         boolean is_active
         boolean is_staff
+        boolean is_superuser
+    }
+
+    CART {
+        int id PK
+        int user_id FK
+        datetime updated_at
+    }
+
+    CARTITEM {
+        int id PK
+        int cart_id FK
+        int product_id FK
+        int quantity
     }
 
     CATEGORY {
@@ -872,6 +902,23 @@ erDiagram
         string name
         string slug UK
         text description
+        datetime created_at
+        datetime updated_at
+    }
+
+    DEALBANNER {
+        int id PK
+        string title
+        string message
+        int product_id FK
+        string url
+        int category_id FK
+        decimal discount_percentage
+        string icon
+        boolean is_active
+        boolean is_featured
+        int order
+        datetime created_at
     }
 
     ORDER {
@@ -880,6 +927,8 @@ erDiagram
         string order_number
         string status
         decimal total
+        string stripe_session_id
+        string stripe_payment_intent_id
         datetime created_at
         datetime updated_at
     }
@@ -907,8 +956,6 @@ erDiagram
         boolean is_active
         boolean is_featured
         boolean is_deal
-        boolean deal_manual
-        boolean deal_exclude
         datetime created_at
         datetime updated_at
     }
@@ -945,12 +992,16 @@ Each model uses Django's default primary key. Relationships are defined using fo
 ### Core Relationships
 
 - **User to UserProfile**: One-to-one relationship for profile data.
+- **User to Cart**: One-to-one relationship for persistent cart storage.
+- **Cart to CartItem**: One-to-many relationship for cart contents.
+- **CartItem to Product**: Many-to-one relationship for cart items.
 - **User to Order**: One-to-many relationship to track purchase history.
 - **Order to OrderLineItem**: One-to-many relationship for purchased items.
 - **User to Product**: Many-to-many relationship implemented via AccessEntitlement.
 - **AccessEntitlement**: Grants access to a specific product for a specific user after payment.
 - **Product to Review**: One-to-many relationship for verified buyer reviews.
 - **Product to Category**: Many-to-one relationship for archive categorisation.
+- **DealBanner to Product/Category**: Optional links that drive deal messaging and discount badges.
 
 ## AI-Assisted Development (Testing and Complex Features)
 
@@ -958,11 +1009,24 @@ Testing is the area where I struggle the most and find the hardest to understand
 
 I reviewed the suggested code carefully, understood it, and adapted it to match my project architecture. Mentor support and senior developer guidance were also essential in completing a project of this scope.
 
-All automated tests pass locally (see [TESTING.md](TESTING.md) and pytest output).
+Automated tests are provided; run `pytest` locally and see [TESTING.md](TESTING.md) for details.
 
 ## Testing and Bug Fixes
 
 For detailed testing, see [TESTING.md](TESTING.md).
+
+### Testing Summary (Quick Start)
+
+- Run the automated test suite: `pytest`
+- Verbose output: `pytest -v`
+- Optional Django deployment checks: `python manage.py check --deploy`
+- Optional code quality checks (available in `dev-requirements.txt`):
+  - `python -m black --check .`
+  - `python -m isort --check-only .`
+  - `flake8`
+  - `pylint`
+  - `djlint --check .`
+- HTML/CSS validation is manual (W3C + Jigsaw). See TESTING.md for current evidence/status.
 
 These are selected real bugs found and fixed during development. Fixes were validated with manual tests and deployment verification.
 
@@ -1183,11 +1247,13 @@ os.environ.setdefault("STRIPE_WH_SECRET", "whsec_xxx")
 os.environ.setdefault("CONTACT_RECIPIENT_EMAIL", "your-contact@example.com")
 os.environ.setdefault("DEFAULT_FROM_EMAIL", "no-reply@example.com")
 
-# SMTP placeholders (optional)
-os.environ.setdefault("EMAIL_HOST", "smtp.example.com")
+# SMTP (Resend default)
+os.environ.setdefault("EMAIL_HOST", "smtp.resend.com")
 os.environ.setdefault("EMAIL_PORT", "587")
 os.environ.setdefault("EMAIL_USE_TLS", "True")
-os.environ.setdefault("EMAIL_HOST_USER", "smtp-user@example.com")
+os.environ.setdefault("EMAIL_HOST_USER", "resend")
+os.environ.setdefault("RESEND_API_KEY", "re_xxx")
+# Optional fallback if you are not using RESEND_API_KEY
 os.environ.setdefault("EMAIL_HOST_PASSWORD", "your-smtp-password")
 ```
 
@@ -1229,7 +1295,8 @@ The following environment variables are expected on Heroku:
 - `EMAIL_PORT`
 - `EMAIL_USE_TLS`
 - `EMAIL_HOST_USER`
-- `EMAIL_HOST_PASSWORD` (required when `DEBUG=False`)
+- `RESEND_API_KEY` (preferred when using Resend SMTP)
+- `EMAIL_HOST_PASSWORD` (fallback; required when `DEBUG=False` if `RESEND_API_KEY` is not set)
 - `DEFAULT_FROM_EMAIL`
 - `CONTACT_RECIPIENT_EMAIL`
 
@@ -1250,7 +1317,7 @@ The project includes a Django admin interface with custom management features fo
 ### Product Management
 
 - Status badges for active, featured, and deal flags
-- Deal rules exposed via manual and exclusion flags
+- Deal status is derived from active Deal Banners (`is_deal` is read-only in admin)
 - Filters for active status, featured status, deals, category, and creation date
 - Category admin with product counts and styled badges
 
@@ -1293,24 +1360,19 @@ The banner system is connected to the product flag `is_deal`, used by filters an
 - Activating a banner linked to a **category** marks all products in that category as deals
 - Disabling or deleting a banner triggers a recalculation and updates affected products automatically
 
-### Per-Product Exceptions
+### Deal Rules (Current Implementation)
 
-To support edge cases (for example: "one product in the category should NOT be a deal"):
+- Deal status is computed from active `DealBanner` records and synced to `Product.is_deal` in `products/models.py`.
+- Product-linked banners set deal status for that product; category-linked banners set deal status for all active products in that category.
+- Banner visibility rules (inactive products/categories and global banners) are enforced in `home/views.py` and covered by tests in `TESTS/home/test_home.py`.
 
-- `deal_exclude`: prevents a product from becoming a deal via category banners
-- `deal_manual`: forces a product to be a deal even without banners
+### Deal Banner Evidence (no screenshots stored in repo)
 
-### Deal Banner Screenshots
-
-#### Frontend - Deal Banner Bar
-
---------------------SCREENSHOT HERE---------------------
-
-#### Admin - Deal Banner Management
-
---------------------SCREENSHOT HERE---------------------
-
---------------------SCREENSHOT HERE---------------------
+- Frontend marquee: `home/templates/home/index.html`
+- Banner styling: `static/css/components/deal-banner.css`
+- Admin configuration: `products/admin.py`
+- Sync logic: `products/models.py`
+- Tests: `TESTS/home/test_home.py`
 
 ## Alt Text Safety
 

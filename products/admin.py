@@ -1,12 +1,14 @@
 """Admin configuration for products app."""
 from django import forms
 from django.contrib import admin
+from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 
 from .admin_utils import admin_display
 from .models import Category, DealBanner, Product, sync_products_deal_status
+from orders.models import AccessEntitlement
 
 
 
@@ -120,6 +122,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     list_filter = [
         "is_active",
+        "is_removed",
         "is_featured",
         "is_deal",
         "category",
@@ -136,7 +139,7 @@ class ProductAdmin(admin.ModelAdmin):
             "📝 Product Information",
             {"fields": ("title", "slug", "tagline", "category")},
         ),
-        ("💰 Pricing & Status", {"fields": ("price", "is_active", "is_featured")}),
+        ("💰 Pricing & Status", {"fields": ("price", "is_active", "is_removed", "is_featured")}),
         (
             "💰 Deal Status",
             {
@@ -157,6 +160,7 @@ class ProductAdmin(admin.ModelAdmin):
         "unpublish_products",
         "mark_as_featured",
         "unmark_as_featured",
+        "remove_products_permanently",
     ]
 
     def has_delete_permission(self, request, obj=None):
@@ -211,12 +215,12 @@ class ProductAdmin(admin.ModelAdmin):
         """Display all status badges."""
         badges = []
 
-        if obj.is_active:
+        if obj.is_removed:
+            badges.append('<span class="product-status-badge removed">🗑 Removed</span>')
+        elif obj.is_active:
             badges.append('<span class="product-status-badge active">✓ Active</span>')
         else:
-            badges.append(
-                '<span class="product-status-badge inactive">✗ Unpublished</span>'
-            )
+            badges.append('<span class="product-status-badge inactive">✗ Unpublished</span>')
 
         if obj.is_featured:
             badges.append(
@@ -269,6 +273,53 @@ class ProductAdmin(admin.ModelAdmin):
 
     unmark_as_featured.short_description = "⭐ Remove featured status"
 
+    def remove_products_permanently(self, request, queryset):
+        """Remove products from the public site or delete if never purchased."""
+        product_ids = list(queryset.values_list("id", flat=True))
+        if not product_ids:
+            self.message_user(request, "No products selected.")
+            return
+
+        entitled_ids = set(
+            AccessEntitlement.objects.filter(product_id__in=product_ids).values_list(
+                "product_id", flat=True
+            )
+        )
+
+        to_soft_remove = queryset.filter(pk__in=entitled_ids)
+        to_hard_delete = queryset.exclude(pk__in=entitled_ids)
+
+        now = timezone.now()
+        soft_count = 0
+        if to_soft_remove.exists():
+            soft_count = to_soft_remove.update(
+                is_removed=True,
+                is_active=False,
+                is_featured=False,
+                updated_at=now,
+            )
+
+        hard_count = to_hard_delete.count()
+        if hard_count:
+            to_hard_delete.delete()
+
+        if soft_count and hard_count:
+            message = (
+                f"{soft_count} product(s) removed from public site (buyers kept). "
+                f"{hard_count} product(s) permanently deleted."
+            )
+        elif soft_count:
+            message = f"{soft_count} product(s) removed from public site (buyers kept)."
+        elif hard_count:
+            message = f"{hard_count} product(s) permanently deleted."
+        else:
+            message = "No products were changed."
+
+        self.message_user(request, message)
+
+    remove_products_permanently.short_description = (
+        "🗑️ Delete permanently (keep access for buyers)"
+    )
 
 
 @admin.register(DealBanner)
@@ -401,7 +452,7 @@ class DealBannerAdmin(admin.ModelAdmin):
                 pass
 
             kwargs["queryset"] = (
-                Product.objects.filter(is_active=True)
+                Product.objects.filter(is_active=True, is_removed=False)
                 .exclude(pk__in=products_with_banners)
                 .exclude(category_id__in=categories_with_banners)
             )
@@ -416,7 +467,7 @@ class DealBannerAdmin(admin.ModelAdmin):
 
             # Exclude categories that have products with active banners
             categories_with_product_banners = list(
-                Product.objects.filter(dealbanner__is_active=True)
+                Product.objects.filter(dealbanner__is_active=True, is_removed=False)
                 .values_list("category_id", flat=True)
                 .distinct()
             )

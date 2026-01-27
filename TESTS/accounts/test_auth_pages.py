@@ -3,65 +3,56 @@ from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
 
-
 @pytest.mark.django_db
 class TestAuthPages:
-    """Test that allauth authentication pages resolve correctly."""
+    """Test that authentication pages behave correctly for anonymous and authenticated users."""
 
     def setup_method(self):
         """Set up test client."""
         self.client = Client()
+        self.user_model = get_user_model()
 
-    def test_login_page_get(self):
-        """Test that GET /accounts/login/ returns 200."""
+    def _create_and_login_user(self):
+        """Create and log in a standard user."""
+        user = self.user_model.objects.create(
+            username="testuser",
+            email="test@example.com",
+            is_active=True,
+        )
+        user.set_password("testpass123")
+        user.save(update_fields=["password"])
+        logged_in = self.client.login(username="testuser", password="testpass123")
+        assert logged_in is True
+
+    def test_login_page_get_anonymous(self):
+        """Test that anonymous users can access the login page."""
         response = self.client.get(reverse("account_login"))
         assert response.status_code == 200
 
-    def test_signup_page_get(self):
-        """Test that GET /accounts/signup/ returns 200."""
+    def test_signup_page_get_anonymous(self):
+        """Test that anonymous users can access the signup page."""
         response = self.client.get(reverse("account_signup"))
         assert response.status_code == 200
 
-    def test_logout_post(self):
-        """Test that POST /accounts/logout/ logs out user and redirects."""
-        User = get_user_model()
-        User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="testpass123",
-        )
-
-        self.client.login(username="testuser", password="testpass123")
-
-        response = self.client.post(reverse("account_logout"), follow=True)
-
-        assert response.status_code == 200
-        assert response.wsgi_request.user.is_authenticated is False
-
-    def test_login_page_authenticated_redirect(self):
-        """Test that authenticated users cannot access login page (if configured)."""
-        User = get_user_model()
-        User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="testpass123",
-        )
-        self.client.login(username="testuser", password="testpass123")
-
+    def test_login_page_authenticated_redirects_to_home(self):
+        """Test that authenticated users are redirected away from the login page."""
+        self._create_and_login_user()
         response = self.client.get(reverse("account_login"))
+        assert response.status_code == 302
+        assert response["Location"] == reverse("home")
 
-        assert response.status_code in [200, 302]
-
-    def test_signup_page_authenticated_redirect(self):
-        """Test that authenticated users cannot access signup page (if configured)."""
-        User = get_user_model()
-        User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="testpass123",
-        )
-        self.client.login(username="testuser", password="testpass123")
-
+    def test_signup_page_authenticated_redirects_to_home(self):
+        """Test that authenticated users are redirected away from the signup page."""
+        self._create_and_login_user()
         response = self.client.get(reverse("account_signup"))
+        assert response.status_code == 302
+        assert response["Location"] == reverse("home")
 
-        assert response.status_code in [200, 302]
+    def test_logout_post_redirects_and_logs_out_user(self):
+        """Test that POST logout redirects and ends the session."""
+        self._create_and_login_user()
+        response = self.client.post(reverse("account_logout"))
+        assert response.status_code == 302
+        self.client.get(response["Location"])
+        response_after = self.client.get(reverse("home"))
+        assert response_after.wsgi_request.user.is_authenticated is False

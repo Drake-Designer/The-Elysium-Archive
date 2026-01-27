@@ -31,22 +31,27 @@ def home_view(request):
     - Latest archive entries (up to 3)
     """
     featured_products = (
-        Product.objects.filter(is_active=True, is_featured=True)
+        Product.objects.filter(is_active=True, is_removed=False, is_featured=True)
         .select_related("category")
         .order_by("-created_at")
     )
 
     latest_products = (
-        Product.objects.filter(is_active=True)
+        Product.objects.filter(is_active=True, is_removed=False)
         .select_related("category")
         .order_by("-created_at")[:3]
     )
 
-    has_any_active_deals = Product.objects.filter(is_active=True, is_deal=True).exists()
+    has_any_active_deals = Product.objects.filter(
+        is_active=True,
+        is_removed=False,
+        is_deal=True,
+    ).exists()
 
     active_deals_in_banner_category = Product.objects.filter(
         category_id=OuterRef("category_id"),
         is_active=True,
+        is_removed=False,
         is_deal=True,
     )
 
@@ -61,6 +66,12 @@ def home_view(request):
             Q(
                 product__isnull=False,
                 product__is_active=False,
+                url="",
+                category__isnull=True,
+            )
+            | Q(
+                product__isnull=False,
+                product__is_removed=True,
                 url="",
                 category__isnull=True,
             )

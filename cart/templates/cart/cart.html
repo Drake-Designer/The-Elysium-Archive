@@ -36,7 +36,7 @@
                                     <div class="d-flex align-items-start gap-3">
                                         {% if item.product.image %}
                                             <img src="{{ item.product.image.url }}"
-                                                 alt="{{ item.product.image_alt }}"
+                                                 alt="{{ item.product.image_alt|default:item.product.title }}"
                                                  class="rounded cart-product-thumb"
                                                  width="80"
                                                  height="80">

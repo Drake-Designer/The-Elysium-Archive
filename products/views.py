@@ -30,7 +30,7 @@ class ProductListView(ListView):
     def get_queryset(self) -> QuerySet[Product]:
         """Return active products, optionally filtered by search, category, or deals."""
         queryset = (
-            Product.objects.filter(is_active=True)
+            Product.objects.filter(is_active=True, is_removed=False)
             .select_related("category")
             .order_by("-created_at")
         )
@@ -64,7 +64,7 @@ class ProductListView(ListView):
         show_deals = self.request.GET.get("deals", "").strip().lower() == "true"
 
         categories = (
-            Category.objects.filter(products__is_active=True)
+            Category.objects.filter(products__is_active=True, products__is_removed=False)
             .distinct()
             .order_by("name")
         )
@@ -97,6 +97,14 @@ class ProductDetailView(DetailView):
         """Return a product if it is accessible, raise 404 otherwise."""
         obj = cast(Product, super().get_object(queryset))
 
+        if obj.is_removed:
+            if is_authenticated_user(self.request.user) and (
+                getattr(self.request.user, "is_staff", False)
+                or getattr(self.request.user, "is_superuser", False)
+            ):
+                return obj
+            raise Http404("Product not found")
+
         if obj.is_active:
             return obj
 
@@ -125,18 +133,21 @@ class ProductDetailView(DetailView):
         purchased = user_has_access(self.request.user, product)
         cart_product_ids = set(self.request.session.get("cart", {}).keys())
 
-        reviews = product.reviews.all()  # type: ignore[attr-defined]
+        reviews = []
         user_review = None
         can_review = False
         form = None
 
-        if is_authenticated_user(self.request.user) and purchased:
-            user_review = (
-                product.reviews.filter(user=cast(Any, self.request.user)).first()  # type: ignore[attr-defined]
-            )
-            can_review = not user_review
-            if can_review:
-                form = ReviewForm()
+        if not product.is_removed:
+            reviews = product.reviews.all()  # type: ignore[attr-defined]
+
+            if is_authenticated_user(self.request.user) and purchased:
+                user_review = (
+                    product.reviews.filter(user=cast(Any, self.request.user)).first()  # type: ignore[attr-defined]
+                )
+                can_review = not user_review
+                if can_review:
+                    form = ReviewForm()
 
         context["in_cart"] = str(product.pk) in cart_product_ids
         context["purchased"] = purchased

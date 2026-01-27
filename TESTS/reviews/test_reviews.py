@@ -185,3 +185,129 @@ class DashboardReviewsTabTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Dashboard Title", response.content)
         self.assertIn(b"Dashboard body text", response.content)
+
+
+class ReviewRemovalTest(TestCase):
+    """Test that removed products block review actions."""
+
+    def setUp(self):
+        """Set up test data."""
+        user_model = cast(Any, User)
+
+        self.buyer = user_model.objects.create_user(
+            username="reviewbuyer",
+            email="reviewbuyer@test.com",
+            password="pass123",
+        )
+        self.other_buyer = user_model.objects.create_user(
+            username="reviewbuyer2",
+            email="reviewbuyer2@test.com",
+            password="pass123",
+        )
+
+        EmailAddress.objects.create(
+            user=self.buyer,
+            email=self.buyer.email,
+            verified=True,
+            primary=True,
+        )
+        EmailAddress.objects.create(
+            user=self.other_buyer,
+            email=self.other_buyer.email,
+            verified=True,
+            primary=True,
+        )
+
+        self.category = Category.objects.create(
+            name="Removed Review Category",
+            slug="removed-review-category",
+        )
+        self.product = Product.objects.create(
+            title="Removed Review Product",
+            slug="removed-review-product",
+            tagline="Test tagline",
+            description="Test description",
+            content="<p>Test premium content.</p>",
+            price=Decimal("9.99"),
+            image_alt="Test image",
+            category=self.category,
+        )
+
+        AccessEntitlement.objects.create(
+            user=self.buyer,
+            product=self.product,
+        )
+        AccessEntitlement.objects.create(
+            user=self.other_buyer,
+            product=self.product,
+        )
+
+        self.review = Review.objects.create(
+            user=self.buyer,
+            product=self.product,
+            rating=5,
+            title="Original Review Title",
+            body="Original review body.",
+        )
+
+    def test_removed_product_blocks_new_review(self):
+        """Removed product blocks new review creation."""
+        self.product.is_removed = True
+        self.product.save()
+
+        self.client.force_login(self.other_buyer)
+        response = self.client.post(
+            reverse("create_review", kwargs={"slug": self.product.slug}),
+            {
+                "rating": 4,
+                "title": "Blocked Review",
+                "body": "Should not be saved.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(
+            Review.objects.filter(user=self.other_buyer, product=self.product).exists()
+        )
+
+    def test_removed_product_blocks_edit_review(self):
+        """Removed product blocks review edits."""
+        self.product.is_removed = True
+        self.product.save()
+
+        self.client.force_login(self.buyer)
+        response = self.client.get(
+            reverse(
+                "edit_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.id},
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.post(
+            reverse(
+                "edit_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.id},
+            ),
+            {"rating": 3, "title": "Updated", "body": "Updated body."},
+        )
+        self.assertEqual(response.status_code, 404)
+
+        self.review.refresh_from_db()
+        self.assertEqual(self.review.title, "Original Review Title")
+
+    def test_removed_product_blocks_delete_review(self):
+        """Removed product blocks review deletions."""
+        self.product.is_removed = True
+        self.product.save()
+
+        self.client.force_login(self.buyer)
+        response = self.client.post(
+            reverse(
+                "delete_review",
+                kwargs={"slug": self.product.slug, "review_id": self.review.id},
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Review.objects.filter(pk=self.review.pk).exists())

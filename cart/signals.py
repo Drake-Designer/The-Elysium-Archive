@@ -18,7 +18,7 @@ def restore_cart_to_session(sender, request, user, **kwargs):
     items = (
         CartItem.objects.filter(cart=cart)
         .select_related("product")
-        .filter(product__is_active=True)
+        .filter(product__is_active=True, product__is_removed=False)
     )
 
     request.session["cart"] = {str(item.product.pk): 1 for item in items}

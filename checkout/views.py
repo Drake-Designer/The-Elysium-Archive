@@ -197,7 +197,11 @@ def checkout(request):
         return redirect("cart")
 
     valid_products = list(
-        Product.objects.filter(pk__in=[p.pk for p in cart_products], is_active=True)
+        Product.objects.filter(
+            pk__in=[p.pk for p in cart_products],
+            is_active=True,
+            is_removed=False,
+        )
     )
     if not valid_products:
         messages.warning(request, "Your cart is empty.")

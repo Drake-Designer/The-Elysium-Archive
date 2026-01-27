@@ -179,10 +179,18 @@
                                                             {% endif %}
                                                         </div>
                                                         <div class="my-archive-meta">
-                                                            <a href="{{ item.product.get_absolute_url }}"
-                                                               class="text-decoration-none my-archive-title">
-                                                                <strong>{{ item.product.title }}</strong>
-                                                            </a>
+                                                            {% if item.product.is_removed %}
+                                                                <a href="{% url 'archive_read' slug=item.product.slug %}"
+                                                                   class="text-decoration-none my-archive-title">
+                                                                    <strong>{{ item.product.title }}</strong>
+                                                                </a>
+                                                                <span class="badge text-bg-danger ms-2">Removed</span>
+                                                            {% else %}
+                                                                <a href="{{ item.product.get_absolute_url }}"
+                                                                   class="text-decoration-none my-archive-title">
+                                                                    <strong>{{ item.product.title }}</strong>
+                                                                </a>
+                                                            {% endif %}
                                                             <div class="muted small mt-1">Unlocked: {{ item.purchase_date|date:"Y-m-d H:i" }}</div>
                                                         </div>
                                                     </div>
@@ -238,10 +246,15 @@
                                                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                                                 <div>
                                                                     {% if item.product %}
-                                                                        <a href="{{ item.product.get_absolute_url }}"
-                                                                           class="text-decoration-none">
+                                                                        {% if item.product.is_removed %}
                                                                             <strong>{{ item.product_title }}</strong>
-                                                                        </a>
+                                                                            <div class="muted small">Removed from catalog</div>
+                                                                        {% else %}
+                                                                            <a href="{{ item.product.get_absolute_url }}"
+                                                                               class="text-decoration-none">
+                                                                                <strong>{{ item.product_title }}</strong>
+                                                                            </a>
+                                                                        {% endif %}
                                                                     {% else %}
                                                                         <strong>{{ item.product_title }}</strong>
                                                                     {% endif %}
@@ -273,10 +286,15 @@
                                                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
                                                     <div>
                                                         <div class="muted small">Product</div>
-                                                        <a href="{{ review.product.get_absolute_url }}"
-                                                           class="text-decoration-none">
+                                                        {% if review.product.is_removed %}
                                                             <strong>{{ review.product.title }}</strong>
-                                                        </a>
+                                                            <span class="badge text-bg-danger ms-2">Removed</span>
+                                                        {% else %}
+                                                            <a href="{{ review.product.get_absolute_url }}"
+                                                               class="text-decoration-none">
+                                                                <strong>{{ review.product.title }}</strong>
+                                                            </a>
+                                                        {% endif %}
                                                     </div>
                                                     <div class="text-end">
                                                         <div class="muted small">Rating</div>
@@ -286,19 +304,26 @@
                                                 {% if review.title %}<div class="fw-bold mb-1">{{ review.title }}</div>{% endif %}
                                                 <div class="muted small mb-2">{{ review.created_at|date:"Y-m-d H:i" }}</div>
                                                 <p class="mb-0">{{ review.body }}</p>
-                                                <div class="d-flex gap-2 flex-wrap mt-3">
-                                                    <a class="btn btn-outline-light btn-sm btn-icon"
-                                                       href="{% url 'edit_review' slug=review.product.slug review_id=review.id %}">
-                                                        <i class="fa-solid fa-pen"></i>Edit
-                                                    </a>
-                                                    <form method="post"
-                                                          action="{% url 'delete_review' slug=review.product.slug review_id=review.id %}">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm btn-icon">
-                                                            <i class="fa-solid fa-trash"></i>Delete
-                                                        </button>
-                                                    </form>
-                                                </div>
+                                                {% if review.product.is_removed %}
+                                                    <div class="alert alert-warning mt-3 mb-0" role="alert">
+                                                        <i class="fa-solid fa-lock me-2"></i>
+                                                        This archive entry has been removed; reviews are locked.
+                                                    </div>
+                                                {% else %}
+                                                    <div class="d-flex gap-2 flex-wrap mt-3">
+                                                        <a class="btn btn-outline-light btn-sm btn-icon"
+                                                           href="{% url 'edit_review' slug=review.product.slug review_id=review.id %}">
+                                                            <i class="fa-solid fa-pen"></i>Edit
+                                                        </a>
+                                                        <form method="post"
+                                                              action="{% url 'delete_review' slug=review.product.slug review_id=review.id %}">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-outline-danger btn-sm btn-icon">
+                                                                <i class="fa-solid fa-trash"></i>Delete
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                {% endif %}
                                             </div>
                                         {% endfor %}
                                     </div>

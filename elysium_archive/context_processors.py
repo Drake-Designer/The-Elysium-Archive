@@ -33,7 +33,7 @@ def deals_context(request):
         from products.models import Product
 
         deal_products = (
-            Product.objects.filter(is_active=True, is_deal=True)
+            Product.objects.filter(is_active=True, is_removed=False, is_deal=True)
             .select_related("category")[:10]
         )
     except Exception:  # noqa: BLE001

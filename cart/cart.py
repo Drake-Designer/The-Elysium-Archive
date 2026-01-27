@@ -35,7 +35,11 @@ def _sync_session_to_db(session, user):
         return
 
     valid_products = set(
-        Product.objects.filter(id__in=product_ids, is_active=True).values_list("id", flat=True)
+        Product.objects.filter(
+            id__in=product_ids,
+            is_active=True,
+            is_removed=False,
+        ).values_list("id", flat=True)
     )
 
     CartItem.objects.filter(cart=db_cart).exclude(product_id__in=valid_products).delete()
@@ -58,7 +62,7 @@ def merge_db_cart_into_session(session, user):
     db_items = (
         CartItem.objects.filter(cart=db_cart)
         .select_related("product")
-        .filter(product__is_active=True)
+        .filter(product__is_active=True, product__is_removed=False)
     )
     db_ids = {str(item.product.pk) for item in db_items if item.product}
 
@@ -84,7 +88,7 @@ def get_cart(session):
 def add_to_cart(session, product_id, user=None):
     """Add a product to the cart as a single purchase."""
     try:
-        Product.objects.get(id=product_id, is_active=True)
+        Product.objects.get(id=product_id, is_active=True, is_removed=False)
     except Product.DoesNotExist:
         return False
 
@@ -138,7 +142,7 @@ def get_cart_items(session, user=None):
         session.modified = True
         return []
 
-    qs = Product.objects.filter(id__in=valid_ids, is_active=True)
+    qs = Product.objects.filter(id__in=valid_ids, is_active=True, is_removed=False)
     products = list(qs)
     active_ids = set(qs.values_list("id", flat=True))
 

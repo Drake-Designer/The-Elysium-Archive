@@ -1,6 +1,17 @@
 # Testing Guide - The Elysium Archive
 
-This document describes the current automated test suite and the manual testing that matches the repository as it stands.
+This document describes the current automated test suite and manual testing procedures for the repository as it stands.
+
+## Evidence Status (Testing and Quality Checklist)
+
+- Automated test suite documented: **Yes** (pytest, coverage listed below)
+- Manual testing checklist provided: **Yes**
+- Responsiveness testing results recorded: **To be completed**
+- Accessibility testing results recorded: **To be completed**
+- HTML/CSS validation results recorded: **To be completed**
+- Python style/lint check results recorded: **To be completed**
+
+This checklist is used to track the current state of testing, validation, and quality evidence within the repository.
 
 ## Automated Tests
 
@@ -9,6 +20,15 @@ This document describes the current automated test suite and the manual testing 
 - pytest 9.0.2
 - pytest-django 4.11.1
 - Tests are a mix of pytest-style functions and Django TestCase classes (notably in reviews).
+
+### Automated Coverage Summary (Core Application Features)
+
+The automated suite covers:
+
+- CRUD workflows for products, reviews, and orders (model + view behavior)
+- Authentication and email‑verification gates (allauth flows and protected pages)
+- Payment flow logic (Stripe checkout session creation, webhooks, and entitlement creation)
+- Data management and access control (entitlements, inactive product access rules)
 
 ### Test Configuration
 
@@ -67,7 +87,7 @@ pytest -v -s
 
 ### Test Inventory Summary
 
-Test discovery (under `TESTS/`) currently finds 131 tests across 11 files. This number can change as tests evolve; use pytest collection output as the source of truth.
+Test discovery (under `TESTS/`) is controlled by `pyproject.toml`. Run `pytest --collect-only` to confirm the current test count.
 
 ## Automated Test Coverage by App
 
@@ -252,6 +272,14 @@ Key assertions:
 
 Manual tests validate user-facing behaviour, page rendering, and third-party flows that are not fully covered by automated tests.
 
+Key user journeys covered below:
+
+- Sign up, email verification, login/logout
+- Access to protected content (dashboard, archive reading, reviews)
+- Cart operations (add/remove, totals)
+- Checkout success/cancel and entitlement creation
+- Review create/edit/delete (verified buyers)
+
 ### Test Environment Setup
 
 1. Create a superuser:
@@ -396,6 +424,40 @@ Post-payment verification checklist:
 - [ ] Staff user can view order list and order detail pages
 - [ ] Test delete and bulk delete in admin and confirm observed behaviour
 
+## Responsiveness Testing (To be completed)
+
+- [ ] 320x568 (iPhone SE) – Chrome DevTools
+- [ ] 375x667 (iPhone 8) – Chrome DevTools
+- [ ] 390x844 (iPhone 12/13) – Chrome DevTools
+- [ ] 768x1024 (iPad) – Chrome DevTools
+- [ ] 820x1180 (iPad Air) – Chrome DevTools
+- [ ] 1366x768 (Laptop) – Browser resize
+- [ ] 1440x900 (Desktop) – Browser resize
+- [ ] 1920x1080 (Desktop) – Browser resize
+
+Browser coverage:
+
+- [ ] Chrome
+- [ ] Firefox
+- [ ] Edge
+- [ ] Safari (if available)
+
+Record pass/fail and any layout issues in this section when testing is completed.
+
+## Accessibility Testing (To be completed)
+
+No accessibility audit results are stored in the repository yet. Use one of the methods below and record outcomes.
+
+### Lighthouse (recommended)
+
+- [ ] Run Lighthouse Accessibility audits on key pages (Home, Archive, Product Detail, Cart, Dashboard)
+- [ ] Record scores and key findings here
+
+### WAVE (alternative)
+
+- [ ] Run WAVE checks on key pages
+- [ ] Record issues and fixes here
+
 ### Error Page Testing
 
 Steps:
@@ -414,6 +476,52 @@ Staff-only test URLs exist for error pages:
 
 Verify each renders the intended themed error page. These should be tested with `DEBUG=False` for production parity.
 
+## Validation and Code Quality (To be completed)
+
+No validator or lint results are stored in the repository yet. Use the steps below to capture evidence.
+
+### HTML Validation (W3C)
+
+Suggested pages/templates:
+
+- `templates/base.html`
+- `home/templates/home/index.html`
+- `products/templates/products/product_list.html`
+- `products/templates/products/product_detail.html`
+- `cart/templates/cart/cart.html`
+- `checkout/templates/checkout/success.html`
+
+How to validate:
+
+- Use https://validator.w3.org/ (direct input or file upload)
+- Record results and fixes here once completed
+
+### CSS Validation (Jigsaw)
+
+Suggested files:
+
+- `static/css/base.css`
+- `static/css/components/*`
+- `static/css/pages/*`
+
+How to validate:
+
+- Use https://jigsaw.w3.org/css-validator/
+- Record results and fixes here once completed
+
+### Python Style/Lint Checks (optional)
+
+Available via `dev-requirements.txt`:
+
+- `python -m black --check .`
+- `python -m isort --check-only .`
+- `flake8`
+- `pylint`
+- `bandit -r .`
+- `djlint --check .`
+
+Record results and any fixes here once completed.
+
 ### Security Headers
 
 With `DEBUG=False`, confirm response headers include:
@@ -424,7 +532,7 @@ With `DEBUG=False`, confirm response headers include:
 
 ## Known Issues
 
-None known.
+None recorded in this document yet. Update this section if issues are discovered during testing.
 
 ## CI/CD and Continuous Integration (Recommended)
 

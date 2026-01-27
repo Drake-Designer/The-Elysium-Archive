@@ -62,6 +62,10 @@ class Product(models.Model):
         help_text="Recommended 60-125 chars. Max 150.",
     )
     is_active = models.BooleanField(default=True)
+    is_removed = models.BooleanField(
+        default=False,
+        help_text="Removed from the public site but retained for entitled users.",
+    )
     is_featured = models.BooleanField(default=False)
     is_deal = models.BooleanField(
         default=False,
@@ -88,6 +92,9 @@ class Product(models.Model):
 
         if not self.slug:
             self.slug = slugify(self.title)
+
+        if self.is_removed:
+            self.is_active = False
 
         # Validate fields before saving
         validate_fields = {"image_alt", "title", "slug"}
@@ -315,7 +322,7 @@ class DealBanner(models.Model):
 
     def get_url(self):
         """Return the appropriate URL for this banner."""
-        if self.product and self.product.is_active:
+        if self.product and self.product.is_active and not self.product.is_removed:
             return self.product.get_absolute_url()
 
         if self.url:
@@ -337,9 +344,13 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
         return
 
     # Get products to update
-    qs = Product.objects.filter(
-        Q(pk__in=product_pks) | Q(category__pk__in=category_pks)
-    ).select_related("category")
+    qs = (
+        Product.objects.filter(
+            Q(pk__in=product_pks) | Q(category__pk__in=category_pks)
+        )
+        .filter(is_removed=False)
+        .select_related("category")
+    )
 
     # Get active banners
     active_banners = DealBanner.objects.filter(is_active=True)
@@ -383,6 +394,12 @@ def sync_banner_featured_to_product(product_pk):
     except Product.DoesNotExist:
         return
 
+    if product.is_removed:
+        if product.is_featured:
+            product.is_featured = False
+            product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
+        return
+
     # Check if product has any active AND featured banners
     has_featured_banner = DealBanner.objects.filter(
         product=product,
@@ -423,7 +440,8 @@ def sync_category_banner_featured_to_products(category_pk, is_featured):
     """Sync featured status from category banner to all active products in category."""
     products = Product.objects.filter(
         category_id=category_pk,
-        is_active=True
+        is_active=True,
+        is_removed=False,
     )
 
     for product in products:
@@ -436,6 +454,9 @@ def sync_product_featured_from_category_banner(product_pk):
     try:
         product = Product.objects.select_related('category').get(pk=product_pk)
     except Product.DoesNotExist:
+        return
+
+    if product.is_removed:
         return
 
     if not product.category:

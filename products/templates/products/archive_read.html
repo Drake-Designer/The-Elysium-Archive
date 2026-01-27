@@ -30,7 +30,7 @@
                     {% if product.image %}
                         <div class="mb-5">
                             <img src="{{ product.image.url }}"
-                                 alt="{{ product.image_alt }}"
+                                 alt="{{ product.image_alt|default:product.title }}"
                                  class="img-fluid rounded shadow w-100 archive-hero-image">
                         </div>
                     {% endif %}
@@ -81,10 +81,12 @@
                             <a href="{% url 'my_archive' %}" class="btn btn-outline-light btn-icon">
                                 <i class="fa-solid fa-arrow-left me-2"></i>Back to My Archive
                             </a>
-                            <a href="{% url 'product_detail' product.slug %}"
-                               class="btn btn-outline-light btn-icon">
-                                <i class="fa-solid fa-info-circle me-2"></i>View Details
-                            </a>
+                            {% if not product.is_removed %}
+                                <a href="{% url 'product_detail' product.slug %}"
+                                   class="btn btn-outline-light btn-icon">
+                                    <i class="fa-solid fa-info-circle me-2"></i>View Details
+                                </a>
+                            {% endif %}
                         </div>
                     </footer>
                 </article>
