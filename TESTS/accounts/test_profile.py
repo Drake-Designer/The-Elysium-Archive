@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from accounts.models import UserProfile
+from accounts.signals import create_user_profile
 
 User = get_user_model()
 
@@ -86,6 +87,19 @@ class TestProfileView:
         profile = UserProfile.objects.get_or_create(user=verified_user)[0]
         profile.refresh_from_db()
         assert profile.display_name != long_name
+
+    def test_profile_creation_signal_is_idempotent(self, db):
+        """Ensure duplicate profile creation attempts do not error."""
+        user = User.objects.create_user(
+            username="signal_user",
+            email="signal_user@example.com",
+            password="testpass123",
+        )
+
+        create_user_profile(sender=User, instance=user, created=True)
+        create_user_profile(sender=User, instance=user, created=True)
+
+        assert UserProfile.objects.filter(user=user).count() == 1
 
 @pytest.mark.django_db
 class TestAccountDelete:

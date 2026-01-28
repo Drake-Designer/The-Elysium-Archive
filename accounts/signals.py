@@ -9,13 +9,12 @@ from .models import UserProfile
 def create_user_profile(sender, instance, created, **kwargs):
     """Create a profile when a user is created."""
     if created:
-        UserProfile.objects.create(user=instance)
+        UserProfile.objects.get_or_create(user=instance)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_user_profile(sender, instance, **kwargs):
     """Save the profile when the user is saved."""
-    if hasattr(instance, "profile"):
-        instance.profile.save()
-    else:
-        UserProfile.objects.create(user=instance)
+    profile, created = UserProfile.objects.get_or_create(user=instance)
+    if not created:
+        profile.save()
