@@ -275,10 +275,13 @@ ACCOUNT_FORMS = {
 }
 
 # Use HTTPS for email links in production
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.environ.get(
-    "ACCOUNT_DEFAULT_HTTP_PROTOCOL",
-    "http" if DEBUG else "https",
-)
+if DEBUG:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.environ.get(
+        "ACCOUNT_DEFAULT_HTTP_PROTOCOL",
+        "http",
+    )
+else:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 # Email backend (console for dev, SMTP for production)
 if DEBUG:
@@ -290,6 +293,7 @@ else:
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.resend.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = _env_bool(os.environ.get("EMAIL_USE_TLS"), default=True)
+EMAIL_USE_SSL = _env_bool(os.environ.get("EMAIL_USE_SSL"), default=False)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "resend")
 
 # Resend uses the API key as the SMTP password
@@ -297,10 +301,20 @@ EMAIL_HOST_PASSWORD = os.environ.get("RESEND_API_KEY") or os.environ.get(
     "EMAIL_HOST_PASSWORD", ""
 )
 
+# Normalize TLS/SSL based on standard SMTP ports if mismatched
+if EMAIL_PORT == 465:
+    if EMAIL_USE_TLS or not EMAIL_USE_SSL:
+        EMAIL_USE_TLS = False
+        EMAIL_USE_SSL = True
+elif EMAIL_PORT == 587:
+    if EMAIL_USE_SSL or not EMAIL_USE_TLS:
+        EMAIL_USE_SSL = False
+        EMAIL_USE_TLS = True
+
 # Email sender addresses
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",
-    "The Elysium Archive <no-reply@the-elysium-archive.com>",
+    "The Elysium Archive <noreply@drakedrumstudio.ie>",
 )
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
