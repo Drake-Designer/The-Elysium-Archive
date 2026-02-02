@@ -48,7 +48,7 @@
                                         <div>
                                             <a href="{% url 'product_detail' slug=item.product.slug %}"
                                                class="text-decoration-none">
-                                                <h5 class="mb-1">{{ item.product.title }}</h5>
+                                                <h2 class="h5 mb-1">{{ item.product.title }}</h2>
                                             </a>
                                             {% if item.product.tagline %}<p class="small muted mb-2">{{ item.product.tagline }}</p>{% endif %}
                                             <div class="d-flex gap-2 align-items-center">

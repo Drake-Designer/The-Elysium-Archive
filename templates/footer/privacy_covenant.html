@@ -1,131 +1,127 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-
-{% block title %}Privacy of the Covenant - The Elysium Archive{% endblock %}
-
+{% block title %}
+  Privacy of the Covenant - The Elysium Archive
+{% endblock title %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/footer-pages.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages/footer-pages.css' %}">
 {% endblock extra_css %}
-
 {% block content %}
-<!-- Privacy Covenant Page -->
-<div class="container py-5 min-vh-100">
-  <div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-8">
-
-      <!-- Page Header -->
-      <header class="text-center mb-5 footer-page-header">
-        <h1 class="display-3 fw-bold mb-4 lh-1 footer-page-title">Privacy of the Covenant</h1>
-        <p class="lead opacity-75 mb-0 fs-4 footer-page-subtitle">The sacred veil that guards your secrets within the Archive</p>
-        <div class="mt-4">
-          <small class="opacity-50 footer-page-date">Last updated: January 12, 2026</small>
-        </div>
-      </header>
-
-      <!-- Content Sections -->
-      <div class="covenant-content">
-        <!-- Section I -->
-        <section class="mb-5">
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">I. The Keeper's Oath</h2>
-          <p class="lead mb-4 opacity-90">
-            The Elysium Archive swears by ancient covenant to protect the secrets entrusted to its vaults. Your name, your purchases,
-            your journey through forbidden knowledge - all are bound by this sacred oath.
+  <!-- Privacy Covenant Page -->
+  <div class="container py-5 min-vh-100">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <!-- Page Header -->
+        <header class="text-center mb-5 footer-page-header">
+          <h1 class="display-3 fw-bold mb-4 lh-1 footer-page-title">Privacy of the Covenant</h1>
+          <p class="lead opacity-75 mb-0 fs-4 footer-page-subtitle">
+            The sacred veil that guards your secrets within the Archive
           </p>
-        </section>
-
-        <!-- Section II -->
-        <section class="mb-5">
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">II. What We Guard</h2>
-          <div class="row g-4">
-            <div class="col-md-6">
-              <div class="footer-info-card">
-                <div class="card-body">
-                  <h5 class="footer-card-title">
-                    <i class="fa-solid fa-user-shield"></i>
-                    <span>Account Secrets</span>
-                  </h5>
-                  <ul class="opacity-90">
-                    <li>Username & display name</li>
-                    <li>Email addresses</li>
-                    <li>Password hashes</li>
-                    <li>Profile images</li>
-                  </ul>
+          <div class="mt-4">
+            <small class="opacity-50 footer-page-date">Last updated: January 12, 2026</small>
+          </div>
+        </header>
+        <!-- Content Sections -->
+        <div class="covenant-content">
+          <!-- Section I -->
+          <section class="mb-5">
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">I. The Keeper's Oath</h2>
+            <p class="lead mb-4 opacity-90">
+              The Elysium Archive swears by ancient covenant to protect the secrets entrusted to its vaults. Your name, your purchases,
+              your journey through forbidden knowledge - all are bound by this sacred oath.
+            </p>
+          </section>
+          <!-- Section II -->
+          <section class="mb-5">
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">II. What We Guard</h2>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="footer-info-card">
+                  <div class="card-body">
+                    <h3 class="footer-card-title">
+                      <i class="fa-solid fa-user-shield"></i>
+                      <span>Account Secrets</span>
+                    </h3>
+                    <ul class="opacity-90">
+                      <li>Username & display name</li>
+                      <li>Email addresses</li>
+                      <li>Password hashes</li>
+                      <li>Profile images</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="footer-info-card">
+                  <div class="card-body">
+                    <h3 class="footer-card-title">
+                      <i class="fa-solid fa-lock"></i>
+                      <span>Purchase Records</span>
+                    </h3>
+                    <ul class="opacity-90">
+                      <li>Archive entries accessed</li>
+                      <li>Purchase dates</li>
+                      <li>Payment metadata</li>
+                      <li>Review history</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div class="col-md-6">
-              <div class="footer-info-card">
-                <div class="card-body">
-                  <h5 class="footer-card-title">
-                    <i class="fa-solid fa-lock"></i>
-                    <span>Purchase Records</span>
-                  </h5>
-                  <ul class="opacity-90">
-                    <li>Archive entries accessed</li>
-                    <li>Purchase dates</li>
-                    <li>Payment metadata</li>
-                    <li>Review history</li>
-                  </ul>
-                </div>
+          </section>
+          <!-- Section III -->
+          <section class="mb-5">
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">III. The Third Party Shadows</h2>
+            <p class="opacity-90">Only the essential shadows receive fragments of your data, bound by ironclad oaths:</p>
+            <ul class="list-unstyled">
+              <li class="footer-highlight-item">
+                <strong>Stripe:</strong> Payment processing only. Card details never touch our vaults.
+              </li>
+              <li class="footer-highlight-item">
+                <strong>Cloudinary:</strong> Profile images only. Optimized, secure, encrypted.
+              </li>
+              <li class="footer-highlight-item">
+                <strong>SendGrid:</strong> Email verification & notifications only.
+              </li>
+            </ul>
+          </section>
+          <!-- Section IV -->
+          <section class="mb-5">
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">
+              IV. Your Rights in the Archive
+            </h2>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <h3 class="footer-rights-title">
+                  <i class="fa-solid fa-eye"></i>
+                  <span>View & Verify</span>
+                </h3>
+                <p>
+                  Your <a href="{% url 'account_dashboard' %}?tab=profile"
+    class="footer-page-link">profile</a> shows all data we hold.
+                </p>
+              </div>
+              <div class="col-md-6">
+                <h3 class="footer-rights-title">
+                  <i class="fa-solid fa-eraser"></i>
+                  <span>Eternal Oblivion</span>
+                </h3>
+                <p>Account deletion erases everything permanently. Contact support for assistance.</p>
               </div>
             </div>
-          </div>
-        </section>
-
-        <!-- Section III -->
-        <section class="mb-5">
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">III. The Third Party Shadows</h2>
-          <p class="opacity-90">Only the essential shadows receive fragments of your data, bound by ironclad oaths:</p>
-          <ul class="list-unstyled">
-            <li class="footer-highlight-item">
-              <strong>Stripe:</strong> Payment processing only. Card details never touch our vaults.
-            </li>
-            <li class="footer-highlight-item">
-              <strong>Cloudinary:</strong> Profile images only. Optimized, secure, encrypted.
-            </li>
-            <li class="footer-highlight-item">
-              <strong>SendGrid:</strong> Email verification & notifications only.
-            </li>
-          </ul>
-        </section>
-
-        <!-- Section IV -->
-        <section class="mb-5">
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">IV. Your Rights in the Archive</h2>
-          <div class="row g-4">
-            <div class="col-md-6">
-              <h5 class="footer-rights-title">
-                <i class="fa-solid fa-eye"></i>
-                <span>View & Verify</span>
-              </h5>
-              <p>
-                Your <a href="{% url 'account_dashboard' %}?tab=profile" class="footer-page-link">profile</a> shows all data we hold.
-              </p>
+          </section>
+          <!-- Section V -->
+          <section>
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">V. Contact the Keeper</h2>
+            <div class="text-center">
+              <p class="lead mb-4">Questions about the Covenant? The Keeper awaits.</p>
+              <a href="{% url 'contact_lore' %}" class="btn btn-primary btn-icon">
+                <i class="fa-solid fa-mask me-2"></i>Call the Keeper
+              </a>
             </div>
-
-            <div class="col-md-6">
-              <h5 class="footer-rights-title">
-                <i class="fa-solid fa-eraser"></i>
-                <span>Eternal Oblivion</span>
-              </h5>
-              <p>Account deletion erases everything permanently. Contact support for assistance.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Section V -->
-        <section>
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">V. Contact the Keeper</h2>
-          <div class="text-center">
-            <p class="lead mb-4">Questions about the Covenant? The Keeper awaits.</p>
-            <a href="{% url 'contact_lore' %}" class="btn btn-primary btn-icon">
-              <i class="fa-solid fa-mask me-2"></i>Call the Keeper
-            </a>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   </div>
-</div>
-{% endblock %}
+{% endblock content %}

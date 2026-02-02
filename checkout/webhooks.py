@@ -15,14 +15,12 @@ from orders.services import grant_entitlements_for_order
 
 logger = logging.getLogger(__name__)
 
-
 def _set_stripe_key() -> bool:
     """Set Stripe API key from settings and return True if available."""
     if not getattr(settings, "STRIPE_SECRET_KEY", ""):
         return False
     stripe.api_key = settings.STRIPE_SECRET_KEY
     return True
-
 
 def _get_order_from_metadata(data):
     """Return order from Stripe metadata."""
@@ -44,7 +42,6 @@ def _get_order_from_metadata(data):
             return None
 
     return None
-
 
 def _mark_order_paid(order, data):
     """Mark order as paid and store Stripe IDs."""
@@ -71,7 +68,6 @@ def _mark_order_paid(order, data):
 
         grant_entitlements_for_order(order)
 
-
 def _ensure_paid_order_consistency(order, data):
     """Ensure a paid order has Stripe IDs and entitlements."""
     payment_intent = data.get("payment_intent")
@@ -95,7 +91,6 @@ def _ensure_paid_order_consistency(order, data):
             order.save(update_fields=updated_fields)
 
         grant_entitlements_for_order(order)
-
 
 def _handle_checkout_completed(data):
     """Handle checkout.session.completed event."""
@@ -127,7 +122,6 @@ def _handle_checkout_completed(data):
 
     _mark_order_paid(order, data)
 
-
 def _handle_async_payment_succeeded(data):
     """Handle checkout.session.async_payment_succeeded event."""
     order = _get_order_from_metadata(data)
@@ -143,7 +137,6 @@ def _handle_async_payment_succeeded(data):
 
     if data.get("payment_status") == "paid":
         _mark_order_paid(order, data)
-
 
 def _handle_checkout_expired(data):
     """Handle checkout.session.expired event."""
@@ -168,7 +161,6 @@ def _handle_checkout_expired(data):
 
         locked.save(update_fields=["status", "stripe_session_id", "updated_at"])
 
-
 def _handle_payment_failed(data):
     """Handle payment failure event."""
     order = _get_order_from_metadata(data)
@@ -183,7 +175,6 @@ def _handle_payment_failed(data):
 
         locked.status = "failed"
         locked.save(update_fields=["status", "updated_at"])
-
 
 @csrf_exempt
 def stripe_webhook(request):

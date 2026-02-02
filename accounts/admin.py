@@ -9,23 +9,21 @@ from django.utils.safestring import mark_safe
 
 from .models import UserProfile
 
-
 User = get_user_model()
-
 
 class HasPurchasesFilter(admin.SimpleListFilter):
     """Filter users by purchase history."""
-    
+
     title = "purchases"
     parameter_name = "has_purchases"
-    
+
     def lookups(self, request, model_admin):
         """Return filter options."""
         return (
             ("yes", "Has purchases"),
             ("no", "No purchases"),
         )
-    
+
     def queryset(self, request, queryset):
         """Filter users based on entitlements."""
         if self.value() == "yes":
@@ -34,15 +32,14 @@ class HasPurchasesFilter(admin.SimpleListFilter):
             return queryset.filter(entitlements__isnull=True)
         return queryset
 
-
 class UserAdmin(BaseUserAdmin):
     """Custom user admin with purchase tracking."""
-    
+
     class Media:
         css = {
             'all': ('css/admin/admin-accounts.css',)
         }
-    
+
     list_display = (
         "user_display",
         "email",
@@ -52,23 +49,23 @@ class UserAdmin(BaseUserAdmin):
         "is_active",
         "date_joined",
     )
-    
+
     list_display_links = ("user_display",)
-    
+
     list_filter = (
         "is_staff",
         "is_superuser",
         "is_active",
         HasPurchasesFilter,
     )
-    
+
     search_fields = ('username', 'email', 'first_name', 'last_name')
-    
+
     def get_queryset(self, request):
         """Annotate users with entitlement count."""
         queryset = super().get_queryset(request)
         return queryset.annotate(entitlement_total=Count("entitlements"))
-    
+
     def user_display(self, obj):
         """Display user with avatar/placeholder."""
         try:
@@ -88,7 +85,7 @@ class UserAdmin(BaseUserAdmin):
                 )
         except:
             pass
-        
+
         # Fallback: first letter avatar
         initial = obj.username[0].upper() if obj.username else '?'
         return format_html(
@@ -104,7 +101,7 @@ class UserAdmin(BaseUserAdmin):
             obj.username
         )
     user_display.short_description = 'User'
-    
+
     def email_verified_badge(self, obj):
         """Display email verification status as badge."""
         try:
@@ -114,13 +111,13 @@ class UserAdmin(BaseUserAdmin):
             ).exists()
         except:
             verified = False
-        
+
         if verified:
             return mark_safe('<span class="badge-success">✓ Verified</span>')
         else:
             return mark_safe('<span class="badge-warning">⚠ Unverified</span>')
     email_verified_badge.short_description = 'Email'
-    
+
     def purchase_count(self, obj):
         """Display number of purchases as badge."""
         count = getattr(obj, "entitlement_total", 0) or 0
@@ -133,35 +130,33 @@ class UserAdmin(BaseUserAdmin):
         return mark_safe('<span class="badge-muted">No purchases</span>')
     purchase_count.short_description = 'Purchases'
 
-
 # Unregister the default User admin and register our custom one
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
-
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """Admin interface for user profiles."""
-    
+
     class Media:
         css = {
             'all': ('css/admin/admin-accounts.css',)
         }
-    
+
     list_display = [
         "profile_display",
         "user",
         "created_at"
     ]
-    
+
     list_display_links = ["profile_display", "user"]
-    
+
     search_fields = ["user__username", "user__email", "display_name"]
-    
+
     readonly_fields = ["created_at", "updated_at"]
-    
+
     date_hierarchy = "created_at"
-    
+
     fieldsets = (
         ('👤 User', {
             'fields': ('user',)
@@ -174,7 +169,7 @@ class UserProfileAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
-    
+
     def profile_display(self, obj):
         """Display profile with avatar."""
         if obj.profile_picture:
@@ -187,7 +182,7 @@ class UserProfileAdmin(admin.ModelAdmin):
                 obj.get_display_name(),
                 obj.get_display_name()
             )
-        
+
         initial = obj.user.username[0].upper() if obj.user.username else '?'
         return format_html(
             '<div class="user-profile-display">'

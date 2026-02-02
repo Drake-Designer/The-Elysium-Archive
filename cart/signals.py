@@ -5,7 +5,6 @@ from django.dispatch import receiver
 
 from .models import Cart, CartItem
 
-
 @receiver(user_logged_in)
 def restore_cart_to_session(sender, request, user, **kwargs):
     """Restore a user's persistent cart into the session on login if the session cart is empty."""

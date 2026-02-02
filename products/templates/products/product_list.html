@@ -33,7 +33,12 @@
                 <div class="col-12 col-md-4">
                     <select name="cat" class="form-select" aria-label="Filter by category">
                         <option value="">All Categories</option>
-                        {% for category in categories %}<option value="{{ category.slug }}" {% if active_category == category.slug %}selected{% endif %}>{{ category.name }}</option>{% endfor %}
+                        {% for category in categories %}
+                            <option value="{{ category.slug }}"
+                                    {% if active_category == category.slug %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
                     </select>
                 </div>
                 <!-- Filter button -->
@@ -92,13 +97,15 @@
         </div>
         <!-- Product grid -->
         {% if products %}
+            <h2 class="visually-hidden">Archive entries</h2>
             <div class="row g-4 mb-5">
                 {% for product in products %}
                     <div class="col-12 col-sm-6 col-lg-4">
                         <article class="entry-card h-100">
                             <!-- Product image -->
                             <div class="entry-card-media">
-                                <a href="{% url 'product_detail' product.slug %}" aria-label="View {{ product.title }}">
+                                <a href="{% url 'product_detail' product.slug %}"
+                                   aria-label="View {{ product.title }}">
                                     {% if product.image %}
                                         {% cloudinary_fill product.image 400 225 as img_src %}
                                         {% cloudinary_fill_srcset product.image 400 225 600 338 800 450 as img_srcset %}
@@ -106,99 +113,103 @@
                                             <img class="entry-card-img"
                                                  src="{{ img_src }}"
                                                  srcset="{{ img_srcset }}"
-                                                 sizes="(max-width: 575px) 100vw, (max-width: 991px) 50vw, 33vw"
+                                                 sizes="(max-width: 575px) 100vw,
+                                                        (max-width: 991px) 50vw,
+                                                        33vw"
                                                  alt="{{ product.image_alt|default:product.title }}"
                                                  loading="lazy"
                                                  decoding="async"
                                                  onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'entry-card-img-placeholder\' role=\'img\' aria-label=\'Image unavailable\'></div>';">
-                                        {% else %}
-                                            <img class="entry-card-img"
-                                                 src="{{ product.image.url }}"
-                                                 alt="{{ product.image_alt|default:product.title }}"
-                                                 loading="lazy"
-                                                 decoding="async"
-                                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'entry-card-img-placeholder\' role=\'img\' aria-label=\'Image unavailable\'></div>';">
-                                        {% endif %}
-                                    {% else %}
-                                        <div class="entry-card-img-placeholder" role="img" aria-label="Image unavailable"></div>
-                                    {% endif %}
-                                </a>
-                            </div>
-                            <!-- Product body -->
-                            <div class="entry-card-body">
-                                <div class="entry-card-head">
-                                    <h3 class="entry-card-title">
-                                        <a href="{% url 'product_detail' product.slug %}">{{ product.title }}</a>
-                                    </h3>
-                                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                                        {% if product.is_deal %}<span class="badge badge-deal-gold">💰 DEAL</span>{% endif %}
-                                        {% if product.category %}<span class="badge text-bg-secondary">{{ product.category.name }}</span>{% endif %}
+                                            {% else %}
+                                                <img class="entry-card-img"
+                                                     src="{{ product.image.url }}"
+                                                     alt="{{ product.image_alt|default:product.title }}"
+                                                     loading="lazy"
+                                                     decoding="async"
+                                                     onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'entry-card-img-placeholder\' role=\'img\' aria-label=\'Image unavailable\'></div>';">
+                                                {% endif %}
+                                            {% else %}
+                                                <div class="entry-card-img-placeholder"
+                                                     role="img"
+                                                     aria-label="Image unavailable"></div>
+                                            {% endif %}
+                                        </a>
                                     </div>
-                                </div>
-                                <p class="entry-card-desc muted">{{ product.tagline|default:product.description|truncatewords:20 }}</p>
-                            </div>
-                            <!-- Product footer -->
-                            <div class="entry-card-footer">
-                                {% if product.is_deal and product.get_discount_percentage > 0 %}
-                                    <div class="d-flex flex-column align-items-start">
-                                        <span class="small text-muted text-decoration-line-through">€{{ product.price }}</span>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="price">€{{ product.get_discounted_price }}</span>
-                                            <span class="badge bg-danger">-{{ product.get_discount_percentage }}%</span>
+                                    <!-- Product body -->
+                                    <div class="entry-card-body">
+                                        <div class="entry-card-head">
+                                            <h3 class="entry-card-title">
+                                                <a href="{% url 'product_detail' product.slug %}">{{ product.title }}</a>
+                                            </h3>
+                                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                                {% if product.is_deal %}<span class="badge badge-deal-gold">💰 DEAL</span>{% endif %}
+                                                {% if product.category %}<span class="badge text-bg-secondary">{{ product.category.name }}</span>{% endif %}
+                                            </div>
                                         </div>
+                                        <p class="entry-card-desc muted">{{ product.tagline|default:product.description|truncatewords:20 }}</p>
                                     </div>
-                                {% else %}
-                                    <span class="price">€{{ product.price }}</span>
-                                {% endif %}
-                                <a class="btn btn-outline-light btn-sm btn-icon"
-                                   href="{% url 'product_detail' product.slug %}">
-                                    <i class="fa-solid fa-eye"></i>
-                                    View
-                                </a>
+                                    <!-- Product footer -->
+                                    <div class="entry-card-footer">
+                                        {% if product.is_deal and product.get_discount_percentage > 0 %}
+                                            <div class="d-flex flex-column align-items-start">
+                                                <span class="small text-muted text-decoration-line-through">€{{ product.price }}</span>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="price">€{{ product.get_discounted_price }}</span>
+                                                    <span class="badge bg-danger">-{{ product.get_discount_percentage }}%</span>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <span class="price">€{{ product.price }}</span>
+                                        {% endif %}
+                                        <a class="btn btn-outline-light btn-sm btn-icon"
+                                           href="{% url 'product_detail' product.slug %}">
+                                            <i class="fa-solid fa-eye"></i>
+                                            View
+                                        </a>
+                                    </div>
+                                </article>
                             </div>
-                        </article>
-                    </div>
-                {% endfor %}
-            </div>
-            <!-- Pagination -->
-            {% if is_paginated %}
-                <nav aria-label="Archive pagination">
-                    <ul class="pagination justify-content-center">
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if page_obj.number == num %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ num }}</span>
-                                </li>
-                            {% else %}
-                                <li class="page-item">
-                                    <a class="page-link"
-                                       href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if active_category %}&cat={{ active_category }}{% endif %}{% if show_deals %}&deals=true{% endif %}">{{ num }}</a>
-                                </li>
-                            {% endif %}
                         {% endfor %}
-                    </ul>
-                </nav>
-            {% endif %}
-        {% else %}
-            <!-- Empty state -->
-            <div class="panel p-5 text-center">
-                <i class="fa-solid fa-inbox fa-3x mb-4 text-muted"></i>
-                <h3 class="mb-3">No Entries Found</h3>
-                <p class="muted mb-4">
-                    {% if search_query %}
-                        No results for "{{ search_query }}".
-                    {% elif active_category %}
-                        No entries in this category.
-                    {% elif show_deals %}
-                        No deals available right now.
-                    {% else %}
-                        The archive is currently empty.
+                    </div>
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                        <nav aria-label="Archive pagination">
+                            <ul class="pagination justify-content-center">
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if active_category %}&cat={{ active_category }}{% endif %}{% if show_deals %}&deals=true{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </nav>
                     {% endif %}
-                </p>
-                <a href="{% url 'archive' %}" class="btn btn-outline-light">
-                    <i class="fa-solid fa-arrow-left me-2"></i>View All Entries
-                </a>
-            </div>
-        {% endif %}
-    </section>
-{% endblock content %}
+                {% else %}
+                    <!-- Empty state -->
+                    <div class="panel p-5 text-center">
+                        <i class="fa-solid fa-inbox fa-3x mb-4 text-muted"></i>
+                        <h3 class="mb-3">No Entries Found</h3>
+                        <p class="muted mb-4">
+                            {% if search_query %}
+                                No results for "{{ search_query }}".
+                            {% elif active_category %}
+                                No entries in this category.
+                            {% elif show_deals %}
+                                No deals available right now.
+                            {% else %}
+                                The archive is currently empty.
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'archive' %}" class="btn btn-outline-light">
+                            <i class="fa-solid fa-arrow-left me-2"></i>View All Entries
+                        </a>
+                    </div>
+                {% endif %}
+            </section>
+        {% endblock content %}

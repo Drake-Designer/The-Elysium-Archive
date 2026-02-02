@@ -1,9 +1,11 @@
 """Authentication backends for the accounts app."""
 
+from typing import cast
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
-
+from django.contrib.auth.models import AbstractUser
 
 class CaseSensitiveAuthenticationBackend(ModelBackend):
     """Authenticate users using case sensitive matching for username and email."""
@@ -28,7 +30,7 @@ class CaseSensitiveAuthenticationBackend(ModelBackend):
 
     def _get_user_by_login(self, login):
         """Return a user using an exact match on username or email."""
-        UserModel = get_user_model()
+        UserModel = cast(type[AbstractUser], get_user_model())
         methods = getattr(settings, "ACCOUNT_LOGIN_METHODS", {"username"})
 
         lookups = []

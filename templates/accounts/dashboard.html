@@ -21,31 +21,45 @@
                         <h3 class="h5 mb-1">{{ user.profile.get_display_name }}</h3>
                         <p class="muted mb-0">{{ user.email }}</p>
                     </div>
-                    <nav class="dashboard-nav" aria-label="Account dashboard navigation">
+                    <nav class="dashboard-nav"
+                         aria-label="Account dashboard navigation"
+                         role="tablist">
                         <button type="button"
                                 class="dashboard-nav-item {% if active_tab == 'profile' %}active{% endif %}"
+                                id="tab-profile"
                                 data-dashboard-tab="profile"
+                                role="tab"
+                                aria-controls="profile"
                                 aria-selected="{% if active_tab == 'profile' %}true{% else %}false{% endif %}">
                             <i class="fa-solid fa-user-gear"></i>
                             <span>Profile</span>
                         </button>
                         <button type="button"
                                 class="dashboard-nav-item {% if active_tab == 'archive' %}active{% endif %}"
+                                id="tab-archive"
                                 data-dashboard-tab="archive"
+                                role="tab"
+                                aria-controls="archive"
                                 aria-selected="{% if active_tab == 'archive' %}true{% else %}false{% endif %}">
                             <i class="fa-solid fa-book-open"></i>
                             <span>My Archive</span>
                         </button>
                         <button type="button"
                                 class="dashboard-nav-item {% if active_tab == 'orders' %}active{% endif %}"
+                                id="tab-orders"
                                 data-dashboard-tab="orders"
+                                role="tab"
+                                aria-controls="orders"
                                 aria-selected="{% if active_tab == 'orders' %}true{% else %}false{% endif %}">
                             <i class="fa-solid fa-receipt"></i>
                             <span>My Orders</span>
                         </button>
                         <button type="button"
                                 class="dashboard-nav-item {% if active_tab == 'reviews' %}active{% endif %}"
+                                id="tab-reviews"
                                 data-dashboard-tab="reviews"
+                                role="tab"
+                                aria-controls="reviews"
                                 aria-selected="{% if active_tab == 'reviews' %}true{% else %}false{% endif %}">
                             <i class="fa-solid fa-star"></i>
                             <span>My Reviews</span>
@@ -53,7 +67,10 @@
                         {% if not user.is_superuser %}
                             <button type="button"
                                     class="dashboard-nav-item {% if active_tab == 'delete' %}active{% endif %}"
+                                    id="tab-delete"
                                     data-dashboard-tab="delete"
+                                    role="tab"
+                                    aria-controls="delete"
                                     aria-selected="{% if active_tab == 'delete' %}true{% else %}false{% endif %}">
                                 <i class="fa-solid fa-trash"></i>
                                 <span>Delete Account</span>
@@ -72,7 +89,9 @@
                 <div id="dashboardContent">
                     <div class="tab-content">
                         <div class="tab-pane fade {% if active_tab == 'profile' %}show active{% endif %}"
-                             id="profile">
+                             id="profile"
+                             role="tabpanel"
+                             aria-labelledby="tab-profile">
                             <div class="panel p-4 p-lg-5">
                                 <h1 class="h3 mb-4">
                                     <i class="fa-solid fa-user-circle me-2"></i>Profile Settings
@@ -156,7 +175,9 @@
                             </div>
                         </div>
                         <div class="tab-pane fade {% if active_tab == 'archive' %}show active{% endif %}"
-                             id="archive">
+                             id="archive"
+                             role="tabpanel"
+                             aria-labelledby="tab-archive">
                             <div class="panel p-4 p-lg-5">
                                 <h2 class="h3 mb-4">
                                     <i class="fa-solid fa-book-open me-2"></i>My Archive
@@ -210,7 +231,9 @@
                             </div>
                         </div>
                         <div class="tab-pane fade {% if active_tab == 'orders' %}show active{% endif %}"
-                             id="orders">
+                             id="orders"
+                             role="tabpanel"
+                             aria-labelledby="tab-orders">
                             <div class="panel p-4 p-lg-5">
                                 <h2 class="h3 mb-4">
                                     <i class="fa-solid fa-receipt me-2"></i>My Orders
@@ -274,7 +297,9 @@
                             </div>
                         </div>
                         <div class="tab-pane fade {% if active_tab == 'reviews' %}show active{% endif %}"
-                             id="reviews">
+                             id="reviews"
+                             role="tabpanel"
+                             aria-labelledby="tab-reviews">
                             <div class="panel p-4 p-lg-5">
                                 <h2 class="h3 mb-4">
                                     <i class="fa-solid fa-star me-2"></i>My Reviews
@@ -334,7 +359,9 @@
                         </div>
                         {% if not user.is_superuser %}
                             <div class="tab-pane fade {% if active_tab == 'delete' %}show active{% endif %}"
-                                 id="delete">
+                                 id="delete"
+                                 role="tabpanel"
+                                 aria-labelledby="tab-delete">
                                 <div class="panel p-4 p-lg-5">
                                     <h2 class="h3 mb-4">
                                         <i class="fa-solid fa-trash me-2"></i>Delete Account

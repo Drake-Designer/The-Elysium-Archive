@@ -25,7 +25,7 @@ def create_order_from_cart(session, user=None):
             product_price=item["product"].price,
             quantity=1,
         )
-        order_total += line_item.line_total
+        order_total += Decimal(str(line_item.line_total))
 
     order.total = order_total
     order.save()

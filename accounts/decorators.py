@@ -8,7 +8,6 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse
 
-
 def verified_email_required(view_func):
     """Ensure the user is authenticated and has a verified email."""
 

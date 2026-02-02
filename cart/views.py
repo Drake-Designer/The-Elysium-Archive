@@ -14,14 +14,12 @@ from .cart import (
     remove_from_cart as remove_product_from_cart,
 )
 
-
 def _parse_int(value, default):
     """Parse an integer from input safely."""
     try:
         return int(value)
     except (TypeError, ValueError):
         return default
-
 
 def _remove_purchased_items_from_cart(request):
     """Remove already purchased products from the cart session."""
@@ -56,7 +54,6 @@ def _remove_purchased_items_from_cart(request):
 
     return removed
 
-
 @verified_email_required
 def add_to_cart(request):
     """Add a product to the shopping cart."""
@@ -85,7 +82,6 @@ def add_to_cart(request):
 
     return redirect("product_detail", slug=product.slug)
 
-
 @verified_email_required
 def cart_view(request):
     """Render the shopping cart view."""
@@ -102,7 +98,6 @@ def cart_view(request):
         "cart_total": get_cart_total(request.session, cart_items),
     }
     return render(request, "cart/cart.html", context)
-
 
 @verified_email_required
 def remove_from_cart(request):

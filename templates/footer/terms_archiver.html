@@ -1,118 +1,119 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-
-{% block title %}Terms of the Archiver - The Elysium Archive{% endblock %}
-
+{% block title %}
+  Terms of the Archiver - The Elysium Archive
+{% endblock title %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages/footer-pages.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages/footer-pages.css' %}">
 {% endblock extra_css %}
-
 {% block content %}
-<!-- Terms Archiver Page -->
-<div class="container py-5 min-vh-100">
-  <div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-8">
-
-      <!-- Page Header -->
-      <header class="text-center mb-5 footer-page-header">
-        <h1 class="display-3 fw-bold mb-4 lh-1 footer-page-title">Terms of the Archiver</h1>
-        <p class="lead opacity-75 mb-0 fs-4 footer-page-subtitle">The eternal laws that govern access to forbidden knowledge</p>
-        <div class="mt-4">
-          <small class="opacity-50 footer-page-date">Effective: January 12, 2026</small>
+  <!-- Terms Archiver Page -->
+  <div class="container py-5 min-vh-100">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <!-- Page Header -->
+        <header class="text-center mb-5 footer-page-header">
+          <h1 class="display-3 fw-bold mb-4 lh-1 footer-page-title">Terms of the Archiver</h1>
+          <p class="lead opacity-75 mb-0 fs-4 footer-page-subtitle">
+            The eternal laws that govern access to forbidden knowledge
+          </p>
+          <div class="mt-4">
+            <small class="opacity-50 footer-page-date">Effective: January 12, 2026</small>
+          </div>
+        </header>
+        <div class="archiver-content">
+          <!-- Section I -->
+          <section class="mb-5">
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">I. The Nature of the Archive</h2>
+            <ol class="opacity-90 footer-page-list">
+              <li class="mb-4 fs-5">
+                The Elysium Archive contains forbidden texts, rituals, and lore accessible only through verified purchase.
+              </li>
+              <li class="mb-4 fs-5">
+                <strong>No downloads.</strong> Content exists only within the sacred site.
+              </li>
+              <li class="mb-4 fs-5">
+                <strong>No refunds.</strong> Access is granted immediately and eternally upon payment.
+              </li>
+            </ol>
+          </section>
+          <!-- Section II -->
+          <section class="mb-5">
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">II. The Rite of Access</h2>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="footer-info-card">
+                  <div class="card-body">
+                    <h3 class="footer-card-title">
+                      <i class="fa-solid fa-gift"></i>
+                      <span>Purchase Grants:</span>
+                    </h3>
+                    <ul class="opacity-90">
+                      <li>Permanent archive access</li>
+                      <li>My Archive listing</li>
+                      <li>Review eligibility</li>
+                      <li>Protected reading pages</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="footer-info-card">
+                  <div class="card-body">
+                    <h3 class="footer-card-title">
+                      <i class="fa-solid fa-shield-halved"></i>
+                      <span>Access Requires:</span>
+                    </h3>
+                    <ul class="opacity-90">
+                      <li>Verified email</li>
+                      <li>Authentication</li>
+                      <li>Purchase entitlement</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Section III -->
+          <section class="mb-5">
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">III. Prohibited Rites</h2>
+            <ul class="list-unstyled">
+              <li class="footer-highlight-item danger">
+                <strong>URL Manipulation:</strong> Direct access to protected content forbidden
+              </li>
+              <li class="footer-highlight-item danger">
+                <strong>Multiple Accounts:</strong> One soul, one account. Multiple accounts = banishment
+              </li>
+              <li class="footer-highlight-item danger">
+                <strong>Content Scraping:</strong> No downloads, screenshots, or copying permitted
+              </li>
+            </ul>
+          </section>
+          <!-- Section IV -->
+          <section class="mb-5">
+            <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">IV. The Final Reckoning</h2>
+            <p class="lead mb-4">
+              By accessing this site, you swear the Archiver's Oath. Violation leads to eternal banishment from the Archive.
+            </p>
+            <div class="footer-oath" role="note" aria-label="Archiver oath notice">
+              <div class="footer-oath-line footer-oath-line-1">
+                <span class="footer-oath-em">Your access</span>
+                <span class="footer-oath-eq">=</span>
+                <span class="footer-oath-em">Your oath</span>
+              </div>
+              <div class="footer-oath-line footer-oath-line-2">No warnings. No appeals.</div>
+            </div>
+          </section>
+          <!-- Footer navigation links -->
+          <section class="footer-page-actions" aria-labelledby="footer-actions-heading">
+            <h2 id="footer-actions-heading" class="visually-hidden">Footer navigation</h2>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+              <a href="{% url 'privacy_covenant' %}" class="btn btn-outline-light">Privacy of the Covenant</a>
+              <a href="{% url 'contact_lore' %}" class="btn btn-outline-light">Contact the Lore</a>
+            </div>
+          </section>
         </div>
-      </header>
-
-      <div class="archiver-content">
-        <!-- Section I -->
-        <section class="mb-5">
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">I. The Nature of the Archive</h2>
-          <ol class="opacity-90 footer-page-list">
-            <li class="mb-4 fs-5">The Elysium Archive contains forbidden texts, rituals, and lore accessible only through verified purchase.</li>
-            <li class="mb-4 fs-5"><strong>No downloads.</strong> Content exists only within the sacred site.</li>
-            <li class="mb-4 fs-5"><strong>No refunds.</strong> Access is granted immediately and eternally upon payment.</li>
-          </ol>
-        </section>
-
-        <!-- Section II -->
-        <section class="mb-5">
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">II. The Rite of Access</h2>
-          <div class="row g-4">
-            <div class="col-md-6">
-              <div class="footer-info-card">
-                <div class="card-body">
-                  <h5 class="footer-card-title">
-                    <i class="fa-solid fa-gift"></i>
-                    <span>Purchase Grants:</span>
-                  </h5>
-                  <ul class="opacity-90">
-                    <li>Permanent archive access</li>
-                    <li>My Archive listing</li>
-                    <li>Review eligibility</li>
-                    <li>Protected reading pages</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="footer-info-card">
-                <div class="card-body">
-                  <h5 class="footer-card-title">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span>Access Requires:</span>
-                  </h5>
-                  <ul class="opacity-90">
-                    <li>Verified email</li>
-                    <li>Authentication</li>
-                    <li>Purchase entitlement</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Section III -->
-        <section class="mb-5">
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">III. Prohibited Rites</h2>
-          <ul class="list-unstyled">
-            <li class="footer-highlight-item danger">
-              <strong>URL Manipulation:</strong> Direct access to protected content forbidden
-            </li>
-            <li class="footer-highlight-item danger">
-              <strong>Multiple Accounts:</strong> One soul, one account. Multiple accounts = banishment
-            </li>
-            <li class="footer-highlight-item danger">
-              <strong>Content Scraping:</strong> No downloads, screenshots, or copying permitted
-            </li>
-          </ul>
-        </section>
-
-        <!-- Section IV -->
-        <section class="mb-5">
-          <h2 class="h3 fw-bold mb-4 pb-2 border-bottom border-secondary footer-section-title">IV. The Final Reckoning</h2>
-          <p class="lead mb-4">By accessing this site, you swear the Archiver's Oath. Violation leads to eternal banishment from the Archive.</p>
-
-          <div class="footer-oath" role="note" aria-label="Archiver oath notice">
-            <div class="footer-oath-line footer-oath-line-1">
-              <span class="footer-oath-em">Your access</span>
-              <span class="footer-oath-eq">=</span>
-              <span class="footer-oath-em">Your oath</span>
-            </div>
-            <div class="footer-oath-line footer-oath-line-2">
-              No warnings. No appeals.
-            </div>
-          </div>
-        </section>
-
-        <!-- Footer navigation links -->
-        <section class="footer-page-actions">
-          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="{% url 'privacy_covenant' %}" class="btn btn-outline-light">Privacy of the Covenant</a>
-            <a href="{% url 'contact_lore' %}" class="btn btn-outline-light">Contact the Lore</a>
-          </div>
-        </section>
       </div>
     </div>
   </div>
-</div>
-{% endblock %}
+{% endblock content %}

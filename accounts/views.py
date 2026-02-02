@@ -125,7 +125,9 @@ def my_reviews(request):
     return redirect(_dashboard_url_with_tab("reviews"))
 
 @login_required
+@require_http_methods(["GET"])
 def profile(request):
+    """Redirect to dashboard profile tab."""
     redirect_response = _verified_or_redirect(request)
     if redirect_response:
         return redirect_response

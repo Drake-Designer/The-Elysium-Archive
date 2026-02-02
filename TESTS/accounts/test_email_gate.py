@@ -3,7 +3,6 @@
 import pytest
 from django.urls import reverse
 
-
 @pytest.mark.django_db
 class TestEmailVerificationGate:
     """Test that unverified users cannot access protected account pages."""
@@ -45,7 +44,6 @@ class TestEmailVerificationGate:
 
         assert response.status_code == 302
         assert reverse("account_login") in response.url
-
 
 @pytest.mark.django_db
 class TestMyArchiveDisplay:
@@ -115,7 +113,6 @@ class TestMyArchiveDisplay:
         response = client.get(reverse("my_archive"), follow=True)
 
         assert response.status_code == 200
-
 
 @pytest.mark.django_db
 class TestDashboardFormPost:

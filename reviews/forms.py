@@ -14,21 +14,27 @@ class ReviewForm(forms.ModelForm):
         widgets = {
             "rating": forms.Select(
                 attrs={
-                    "class": "form-select",
+                    "class": "review-rating-select",
                 }
             ),
             "title": forms.TextInput(
                 attrs={
-                    "class": "form-control",
+                    "class": "review-form-input",
                     "placeholder": "Give your review a title (optional)",
-                    "maxlength": "120",
+                    "maxlength": "50",
+                    "data-max-length": "50",
+                    "id": "review-title-input",
                 }
             ),
             "body": forms.Textarea(
                 attrs={
-                    "class": "form-control",
-                    "rows": 5,
+                    "class": "review-form-textarea",
+                    "rows": 6,
                     "placeholder": "Share your thoughts about this archive entry...",
+                    "maxlength": "1000",
+                    "data-max-length": "1000",
+                    "id": "review-body-input",
                 }
             ),
         }
+

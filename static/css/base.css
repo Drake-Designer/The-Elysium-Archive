@@ -305,13 +305,16 @@ main .container,
 .site-body .btn {
   align-items: center;
   border-radius: var(--radius);
-  border-width: 1.5px;
-  box-shadow: none;
+  border-style: solid;
+  border-width: 2px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
   display: inline-flex;
+  font-weight: 600;
   gap: 0.5rem;
   justify-content: center;
   letter-spacing: clamp(0.1px, 0.08vw, 0.45px);
   line-height: 1.1;
+  position: relative;
   padding: 0.55rem 1.05rem;
   transition:
     background-color 0.2s ease,
@@ -319,6 +322,7 @@ main .container,
     box-shadow 0.2s ease,
     color 0.2s ease,
     transform 0.2s ease;
+  width: fit-content;
 }
 
 .site-body .btn i {
@@ -326,7 +330,15 @@ main .container,
 }
 
 .site-body .btn:active {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
   transform: translateY(1px);
+}
+
+.site-body .btn:hover {
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.35),
+    0 0 0 2px rgba(194, 161, 77, 0.4);
+  transform: translateY(-1px);
 }
 
 .site-body .btn-sm {
@@ -355,7 +367,8 @@ main .container,
 /* Primary */
 .btn-primary {
   background-color: var(--relic-gold);
-  border-color: var(--relic-gold);
+  border-color: rgba(194, 161, 77, 0.9);
+  box-shadow: 0 0 0 1px rgba(194, 161, 77, 0.3);
   color: var(--void-black);
 }
 
@@ -363,6 +376,7 @@ main .container,
 .btn-primary:hover {
   background-color: var(--blood-crimson);
   border-color: var(--blood-crimson);
+  box-shadow: 0 0 0 2px rgba(139, 30, 45, 0.4);
   color: var(--ash-white);
 }
 
@@ -374,7 +388,9 @@ main .container,
 /* Outline Light */
 .btn-outline-light {
   background-color: transparent;
-  border-color: rgba(230, 230, 235, 0.5);
+  background-image: none;
+  border-color: rgba(230, 230, 235, 0.6);
+  box-shadow: 0 0 0 1px rgba(230, 230, 235, 0.15);
   color: var(--ash-white);
 }
 
@@ -393,7 +409,8 @@ main .container,
 /* Danger */
 .btn-danger {
   background-color: var(--blood-crimson);
-  border-color: var(--blood-crimson);
+  border-color: rgba(139, 30, 45, 0.9);
+  box-shadow: 0 0 0 1px rgba(139, 30, 45, 0.3);
   color: var(--ash-white);
 }
 
@@ -401,6 +418,7 @@ main .container,
 .btn-danger:hover {
   background-color: #6e1724;
   border-color: #6e1724;
+  box-shadow: 0 0 0 2px rgba(139, 30, 45, 0.5);
   color: var(--ash-white);
 }
 
@@ -412,7 +430,9 @@ main .container,
 /* Outline Danger */
 .btn-outline-danger {
   background-color: transparent;
+  background-image: none;
   border-color: rgba(139, 30, 45, 0.85);
+  box-shadow: 0 0 0 1px rgba(139, 30, 45, 0.2);
   color: rgba(230, 230, 235, 0.95);
 }
 
@@ -430,27 +450,31 @@ main .container,
 
 /* Success */
 .btn-success {
-  background-color: rgba(25, 135, 84, 0.95);
-  border-color: rgba(25, 135, 84, 0.95);
-  color: var(--ash-white);
+  background-color: var(--relic-gold);
+  border-color: rgba(194, 161, 77, 0.9);
+  box-shadow: 0 0 0 1px rgba(194, 161, 77, 0.3);
+  color: var(--void-black);
 }
 
 .btn-success:focus,
 .btn-success:hover {
-  background-color: rgba(20, 110, 70, 1);
-  border-color: rgba(20, 110, 70, 1);
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+  box-shadow: 0 0 0 2px rgba(139, 30, 45, 0.4);
   color: var(--ash-white);
 }
 
 .btn-success:active {
-  background-color: rgba(16, 88, 56, 1);
-  border-color: rgba(16, 88, 56, 1);
+  background-color: #6e1724;
+  border-color: #6e1724;
 }
 
 /* Outline Primary */
 .btn-outline-primary {
   background-color: transparent;
+  background-image: none;
   border-color: rgba(194, 161, 77, 0.75);
+  box-shadow: 0 0 0 1px rgba(194, 161, 77, 0.2);
   color: rgba(230, 230, 235, 0.95);
 }
 
@@ -466,15 +490,50 @@ main .container,
   border-color: rgba(194, 161, 77, 1);
 }
 
+/* Warning */
+.btn-warning {
+  background-color: var(--relic-gold);
+  border-color: rgba(194, 161, 77, 0.9);
+  box-shadow: 0 0 0 1px rgba(194, 161, 77, 0.3);
+  color: var(--void-black);
+}
+
+.btn-warning:focus,
+.btn-warning:hover {
+  background-color: var(--blood-crimson);
+  border-color: var(--blood-crimson);
+  box-shadow: 0 0 0 2px rgba(139, 30, 45, 0.4);
+  color: var(--ash-white);
+}
+
+.btn-warning:active {
+  background-color: #6e1724;
+  border-color: #6e1724;
+}
+
+.btn-outline-warning {
+  background-color: transparent;
+  background-image: none;
+  border-color: rgba(194, 161, 77, 0.75);
+  box-shadow: 0 0 0 1px rgba(194, 161, 77, 0.2);
+  color: rgba(230, 230, 235, 0.95);
+}
+
+.btn-outline-warning:focus,
+.btn-outline-warning:hover {
+  background-color: rgba(194, 161, 77, 0.15);
+  border-color: rgba(194, 161, 77, 0.95);
+  color: var(--ash-white);
+}
+
+.btn-outline-warning:active {
+  background-color: rgba(194, 161, 77, 0.25);
+  border-color: rgba(194, 161, 77, 1);
+}
+
 /* =============
    BUTTONS & CTA
    ============= */
-/* Keep .site-cta as layout helper only, so it never overrides the global button system. */
-.site-cta {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.5rem;
-}
 
 /* Effects toggle button */
 .effects-toggle-btn {
@@ -979,18 +1038,6 @@ main .container,
 
 .d-grid.gap-2 {
   justify-items: center;
-}
-
-.icon-relic-gold {
-  color: var(--relic-gold);
-}
-
-.icon-blood-crimson {
-  color: var(--blood-crimson);
-}
-
-.icon-lg {
-  font-size: 1.1rem;
 }
 
 /* ===================

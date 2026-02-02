@@ -47,15 +47,16 @@ class TestProfileView:
         """Test that POST updates display_name and shows success message."""
         client.force_login(verified_user)
         response = client.post(
-            reverse("profile")
-,
+            reverse("account_dashboard"),
             {"display_name": "Lord Dracula"},
             follow=True,
         )
         assert response.status_code == 200
         profile = UserProfile.objects.get_or_create(user=verified_user)[0]
         profile.refresh_from_db()
-        assert profile.display_name != "Lord Dracula"
+        assert profile.display_name == "Lord Dracula"
+        messages = list(response.context["messages"])
+        assert any("updated" in str(m).lower() for m in messages)
 
     def test_profile_edit_display_name_empty(self, client, verified_user):
         """Test that display_name can be set to empty (optional field)."""
@@ -64,8 +65,7 @@ class TestProfileView:
         profile.save()
         client.force_login(verified_user)
         response = client.post(
-            reverse("profile")
-,
+            reverse("account_dashboard"),
             {"display_name": ""},
             follow=True,
         )
@@ -78,8 +78,7 @@ class TestProfileView:
         client.force_login(verified_user)
         long_name = "A" * 100
         response = client.post(
-            reverse("profile")
-,
+            reverse("account_dashboard"),
             {"display_name": long_name},
             follow=True,
         )

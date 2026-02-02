@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.db import models
 
-
 class UserProfile(models.Model):
     """Extended user profile with additional fields."""
 

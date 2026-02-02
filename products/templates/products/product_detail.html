@@ -25,7 +25,7 @@
                     <img src="{{ product.image.url }}"
                          alt="{{ product.image_alt|default:product.title }}"
                          class="img-fluid rounded shadow product-hero-img"
-                         width="100%"
+                         width="800"
                          height="500">
                 {% else %}
                     <div class="product-hero-placeholder rounded shadow d-flex align-items-center justify-content-center">
@@ -45,9 +45,9 @@
                     <h1 class="display-6 mb-2">{{ product.title }}</h1>
                     {% if product.tagline %}<p class="lead fst-italic mb-4 product-tagline">{{ product.tagline }}</p>{% endif %}
                     <div class="mb-4">
-                        <h5 class="text-danger mb-3">
+                        <h2 class="h5 text-danger mb-3">
                             <i class="fa-solid fa-scroll me-2"></i>Archive Overview
-                        </h5>
+                        </h2>
                         <p class="lh-lg">{{ product.description }}</p>
                     </div>
                     <div class="border-top border-bottom py-4 mb-4">
@@ -71,7 +71,7 @@
                                     </div>
                                 {% elif purchased %}
                                     <a href="{% url 'archive_read' product.slug %}"
-                                       class="btn btn-success btn-sm w-100 py-2">
+                                       class="btn btn-success btn-sm py-2">
                                         <i class="fa-solid fa-book-open me-2"></i>Read Full Archive
                                     </a>
                                 {% elif in_cart %}
@@ -82,7 +82,7 @@
                                         </a>
                                         <form method="post"
                                               action="{% url 'remove_from_cart' %}"
-                                              style="min-width: 120px">
+                                              class="product-action-form-remove">
                                             {% csrf_token %}
                                             <input type="hidden" name="product_id" value="{{ product.id }}">
                                             <button type="submit" class="btn btn-outline-danger btn-sm py-2 w-100">
@@ -100,8 +100,7 @@
                                             </button>
                                         </form>
                                         <a href="{% url 'cart' %}"
-                                           class="btn btn-outline-light btn-sm py-2"
-                                           style="min-width: 140px">
+                                           class="btn btn-outline-light btn-sm py-2 product-action-link-cart">
                                             <i class="fa-solid fa-shopping-bag me-2"></i>View Cart
                                         </a>
                                     </div>
@@ -150,78 +149,87 @@
             <!-- Reviews section (visible to everyone) -->
             <div class="row mt-5 pt-5">
                 <div class="col-12">
-                    <div class="panel p-5">
-                        <h2 class="mb-4">
-                            <i class="fa-solid fa-comments me-2"></i>Verified Reviews
-                        </h2>
+                    <!-- Reviews Section -->
+                    <div class="reviews-section">
+                        <div class="reviews-header">
+                            <i class="fa-solid fa-comments reviews-header-icon"></i>
+                            <h2 class="reviews-header-title">Verified Reviews</h2>
+                        </div>
                         {% if can_review %}
                             <!-- Review submission form -->
-                            <div class="mb-5 pb-5 border-bottom">
-                                <h3 class="h5 mb-3">Share Your Thoughts</h3>
-                                <form method="post" action="{% url 'create_review' product.slug %}">
+                            <div class="review-form-container">
+                                <h3 class="review-form-title">
+                                    <i class="fa-solid fa-pen-fancy review-form-title-icon"></i>Share Your Thoughts
+                                </h3>
+                                <form method="post"
+                                      action="{% url 'create_review' product.slug %}"
+                                      class="review-form">
                                     {% csrf_token %}
-                                    <div class="row g-3">
-                                        <div class="col-12 col-md-6">
-                                            <div>
-                                                <label for="id_rating" class="form-label">Rating</label>
-                                                {{ form.rating }}
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-md-6">
-                                            <div>
-                                                <label for="id_title" class="form-label">Title (optional)</label>
-                                                {{ form.title }}
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div>
-                                                <label for="id_body" class="form-label">Review</label>
-                                                {{ form.body }}
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <button type="submit" class="btn btn-primary btn-icon">
-                                                <i class="fa-solid fa-paper-plane me-2"></i>Submit Review
-                                            </button>
-                                        </div>
+                                    <div class="review-form-group">
+                                        <label for="id_title" class="review-form-label">
+                                            <span>Title (optional)</span>
+                                            <span class="review-form-char-counter" id="title-counter">0 / 50</span>
+                                        </label>
+                                        {{ form.title }}
+                                    </div>
+                                    <div class="review-form-group">
+                                        <label for="id_rating" class="review-form-label review-form-label-required">Rating</label>
+                                        {{ form.rating }}
+                                    </div>
+                                    <div class="review-form-group">
+                                        <label for="id_body" class="review-form-label review-form-label-required">
+                                            <span>Review</span>
+                                            <span class="review-form-char-counter" id="body-counter">0 / 1000</span>
+                                        </label>
+                                        {{ form.body }}
+                                    </div>
+                                    <div class="review-form-actions">
+                                        <button type="submit" class="review-submit-btn">
+                                            <i class="fa-solid fa-paper-plane review-submit-btn-icon"></i>
+                                            <span class="review-submit-btn-text">Submit Review</span>
+                                        </button>
                                     </div>
                                 </form>
                             </div>
                         {% elif user_review %}
                             <!-- User's existing review -->
-                            <div class="mb-5 pb-5 border-bottom">
-                                <div class="alert alert-info" role="alert">
-                                    <i class="fa-solid fa-check-circle me-2"></i>
-                                    <strong>You have reviewed this entry.</strong>
+                            <div class="mb-4">
+                                <div class="user-review-alert">
+                                    <i class="fa-solid fa-check-circle user-review-alert-icon"></i>
+                                    <p class="user-review-alert-text">
+                                        <strong>You have reviewed this entry.</strong>
+                                    </p>
                                 </div>
                                 <div class="review-card">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h4 class="h6 mb-1">{{ user_review.title|default:"Untitled Review" }}</h4>
-                                            <div class="mb-2">
+                                    <div class="review-card-header">
+                                        <div class="review-card-info">
+                                            <h4 class="review-card-title">{{ user_review.title|default:"Untitled Review" }}</h4>
+                                            <div class="review-rating">
                                                 {% for i in "12345" %}
                                                     {% if i|add:"0" <= user_review.rating %}
-                                                        <i class="fa-solid fa-star text-warning"></i>
+                                                        <i class="fa-solid fa-star review-rating-star"></i>
                                                     {% else %}
-                                                        <i class="fa-regular fa-star text-warning"></i>
+                                                        <i class="fa-regular fa-star review-rating-star empty"></i>
                                                     {% endif %}
                                                 {% endfor %}
-                                                <span class="small muted ms-2">{{ user_review.get_rating_display }}</span>
+                                                <span class="review-rating-text">{{ user_review.get_rating_display }}</span>
                                             </div>
                                         </div>
-                                        <small class="muted">{{ user_review.created_at|date:"M d, Y" }}</small>
+                                        <span class="review-date">{{ user_review.created_at|date:"M d, Y" }}</span>
                                     </div>
-                                    <p class="muted">{{ user_review.body }}</p>
-                                    <div class="mt-3 d-flex gap-2">
+                                    <p class="review-card-body">{{ user_review.body }}</p>
+                                    <div class="review-actions">
                                         <a href="{% url 'edit_review' product.slug user_review.id %}"
-                                           class="btn btn-sm btn-outline-primary btn-icon">
-                                            <i class="fa-solid fa-edit me-1"></i>Edit Review
+                                           class="review-action-btn">
+                                            <i class="fa-solid fa-edit"></i>
+                                            <span>Edit Review</span>
                                         </a>
                                         <button type="button"
-                                                class="btn btn-sm btn-outline-danger btn-icon"
+                                                class="review-action-btn danger"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#deleteReviewModal">
-                                            <i class="fa-solid fa-trash me-1"></i>Delete Review
+                                            <i class="fa-solid fa-trash"></i>
+                                            <span>Delete Review</span>
                                         </button>
                                     </div>
                                 </div>
@@ -267,45 +275,51 @@
                         {% endif %}
                         <!-- All reviews -->
                         <div>
-                            <h3 class="h5 mb-4">
-                                {% if reviews %}
-                                    Buyer Reviews ({{ reviews|length }})
-                                {% else %}
-                                    No reviews yet
-                                {% endif %}
-                            </h3>
+                            <div class="reviews-list-header">
+                                <h3 class="reviews-list-title">
+                                    {% if reviews %}
+                                        Buyer Reviews
+                                    {% else %}
+                                        No reviews yet
+                                    {% endif %}
+                                </h3>
+                                {% if reviews %}<span class="reviews-count">{{ reviews|length }}</span>{% endif %}
+                            </div>
                             {% if reviews %}
-                                <div class="space-y-4">
+                                <div>
                                     {% for review in reviews %}
-                                        <div class="review-card p-3 border rounded">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <div>
-                                                    <h5 class="h6 mb-1">{{ review.title|default:"Untitled Review" }}</h5>
-                                                    <div class="mb-2">
+                                        <div class="review-card">
+                                            <div class="review-card-header">
+                                                <div class="review-card-info">
+                                                    <h5 class="review-card-title">{{ review.title|default:"Untitled Review" }}</h5>
+                                                    <div class="review-rating">
                                                         {% for i in "12345" %}
                                                             {% if i|add:"0" <= review.rating %}
-                                                                <i class="fa-solid fa-star text-warning"></i>
+                                                                <i class="fa-solid fa-star review-rating-star"></i>
                                                             {% else %}
-                                                                <i class="fa-regular fa-star text-warning"></i>
+                                                                <i class="fa-regular fa-star review-rating-star empty"></i>
                                                             {% endif %}
                                                         {% endfor %}
-                                                        <span class="small muted ms-2">{{ review.get_rating_display }}</span>
+                                                        <span class="review-rating-text">{{ review.get_rating_display }}</span>
                                                     </div>
                                                 </div>
-                                                <small class="muted">{{ review.created_at|date:"M d, Y" }}</small>
+                                                <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
                                             </div>
-                                            <p class="muted mb-0">{{ review.body }}</p>
-                                            <div class="mt-2 pt-2 border-top">
-                                                <small class="muted">
-                                                    <i class="fa-solid fa-user-check me-1"></i>
-                                                    Verified purchase by {{ review.user.profile.get_display_name }}
-                                                </small>
+                                            <p class="review-card-body">{{ review.body }}</p>
+                                            <div class="review-card-footer">
+                                                <div class="review-verified-badge">
+                                                    <i class="fa-solid fa-user-check review-verified-icon"></i>
+                                                    <span>Verified purchase by {{ review.user.profile.get_display_name }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <p class="muted text-center py-4">No reviews from verified buyers yet. Be the first to share your thoughts.</p>
+                                <div class="reviews-empty-state">
+                                    <i class="fa-solid fa-comment-slash reviews-empty-icon"></i>
+                                    <p class="reviews-empty-text">No reviews from verified buyers yet. Be the first to share your thoughts.</p>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
@@ -331,3 +345,6 @@
         {% endif %}
     </section>
 {% endblock content %}
+{% block extra_js %}
+    <script src="{% static 'js/review-form.js' %}"></script>
+{% endblock extra_js %}

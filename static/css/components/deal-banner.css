@@ -166,6 +166,16 @@
   }
 }
 
+/* Reduced effects toggle (manual) */
+.reduced-effects .deal-banner-marquee-track {
+  animation: none;
+  transform: none;
+}
+
+.reduced-effects .deal-banner-marquee-item {
+  transition: none;
+}
+
 /* Speed classes - slowed down for smoother viewing */
 .deal-banner-marquee.deal-marquee-speed-10 {
   --marquee-duration: 12s;

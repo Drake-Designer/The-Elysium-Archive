@@ -2,7 +2,6 @@
 
 from django.apps import AppConfig
 
-
 class CartConfig(AppConfig):
     """Configure the cart app and load signals."""
 

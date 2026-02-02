@@ -10,9 +10,9 @@
 {% block content %}
   <!-- Deal banner -->
   {% if deal_banners %}
-    <section class="container pt-1 pb-0">
-      <div class="panel deal-banner-marquee-wrapper"
-           aria-label="Current deals and promotions">
+    <section class="container pt-1 pb-0" aria-labelledby="deals-heading">
+      <h2 id="deals-heading" class="visually-hidden">Current deals and promotions</h2>
+      <div class="panel deal-banner-marquee-wrapper">
         <div class="deal-banner-marquee" role="region" aria-label="Deals ticker">
           <div class="deal-banner-marquee-track">
             {% for banner in deal_banners %}
@@ -108,6 +108,7 @@
       </div>
       <!-- Featured entries column -->
       <div class="col-12 col-lg-7">
+        <h2 class="visually-hidden">Featured entries</h2>
         <!-- Featured carousel panel -->
         <div class="panel p-3 p-lg-4">
           {% if featured_products %}

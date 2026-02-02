@@ -6,12 +6,10 @@ from products.models import Product
 
 from .models import Cart, CartItem
 
-
 def _get_or_create_user_cart(user):
     """Return the persistent cart for the user."""
     cart, _ = Cart.objects.get_or_create(user=user)
     return cart
-
 
 def _sync_session_to_db(session, user):
     """Sync session cart into DB for an authenticated user."""
@@ -50,7 +48,6 @@ def _sync_session_to_db(session, user):
     session["cart"] = {str(pid): 1 for pid in valid_products}
     session.modified = True
 
-
 def merge_db_cart_into_session(session, user):
     """Merge a user's DB cart with the current session cart and sync the result."""
     session_cart = session.get("cart", {})
@@ -75,7 +72,6 @@ def merge_db_cart_into_session(session, user):
 
     _sync_session_to_db(session, user)
 
-
 def get_cart(session):
     """Return the cart dictionary stored in the session."""
     cart = session.get("cart")
@@ -83,7 +79,6 @@ def get_cart(session):
         cart = {}
         session["cart"] = cart
     return cart
-
 
 def add_to_cart(session, product_id, user=None):
     """Add a product to the cart as a single purchase."""
@@ -106,7 +101,6 @@ def add_to_cart(session, product_id, user=None):
 
     return True
 
-
 def remove_from_cart(session, product_id, user=None):
     """Remove a product from the cart."""
     cart = get_cart(session)
@@ -122,7 +116,6 @@ def remove_from_cart(session, product_id, user=None):
         return True
 
     return False
-
 
 def get_cart_items(session, user=None):
     """Return cart items with product data."""
@@ -164,7 +157,6 @@ def get_cart_items(session, user=None):
 
     return [{"product": product} for product in products]
 
-
 def get_cart_total(session, cart_items=None):
     """Return the total value of the cart with discounts applied."""
     total = Decimal("0.00")
@@ -172,7 +164,6 @@ def get_cart_total(session, cart_items=None):
     for item in items:
         total += item["product"].get_discounted_price()
     return total
-
 
 def clear_cart(session, user=None):
     """Clear all cart items from the session."""

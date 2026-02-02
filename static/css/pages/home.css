@@ -2,19 +2,6 @@
    HOME PAGE
    ========= */
 
-/* Badge Coming */
-.badge-coming {
-  background-color: rgba(194, 161, 77, 0.15);
-  border: 1px solid rgba(194, 161, 77, 0.35);
-  color: var(--relic-gold);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  margin-top: auto;
-  padding: 0.35rem 0.65rem;
-  text-transform: uppercase;
-}
-
 /* Coming Card */
 .coming-card {
   align-items: center;
@@ -61,40 +48,6 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
-}
-
-/* Section Headers */
-.section-header {
-  align-items: flex-end;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: space-between;
-}
-
-.section-header-actions {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.4rem;
-}
-
-.section-header-text {
-  min-width: 220px;
-}
-
-/* Featured Carousel Discount Styling */
-.entry-card--featured .price--original {
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-}
-
-.entry-card--featured .price--discounted {
-  font-size: 1.5rem;
-}
-
-.entry-card--featured .discount-badge {
-  font-size: 0.875rem;
-  padding: 0.25rem 0.625rem;
 }
 
 /* Featured carousel footer alignment for deals */

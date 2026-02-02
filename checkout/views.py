@@ -19,14 +19,12 @@ from orders.models import AccessEntitlement, Order, OrderLineItem
 from orders.services import grant_entitlements_for_order
 from products.models import Product
 
-
 def _set_stripe_key() -> bool:
     """Set Stripe API key from settings and return True if available."""
     if not getattr(settings, "STRIPE_SECRET_KEY", ""):
         return False
     stripe.api_key = settings.STRIPE_SECRET_KEY
     return True
-
 
 def _remove_purchased_from_session_cart(request, product_ids):
     """Remove purchased product IDs from the session cart."""
@@ -47,7 +45,6 @@ def _remove_purchased_from_session_cart(request, product_ids):
 
     return removed
 
-
 def _get_recent_pending_order_any(request, minutes=15):
     """Return a recent pending order for the user, even without Stripe session id."""
     cutoff = timezone.now() - timedelta(minutes=minutes)
@@ -60,7 +57,6 @@ def _get_recent_pending_order_any(request, minutes=15):
         .order_by("-created_at")
         .first()
     )
-
 
 def _try_reuse_stripe_session(request, order):
     """Reuse an existing Stripe session if it is still open."""
@@ -88,7 +84,6 @@ def _try_reuse_stripe_session(request, order):
 
     return None
 
-
 def _fail_recent_pending_order(request, minutes=30):
     """Mark a recent pending order as failed."""
     cutoff = timezone.now() - timedelta(minutes=minutes)
@@ -110,7 +105,6 @@ def _fail_recent_pending_order(request, minutes=30):
     order.save(update_fields=["status", "updated_at"])
     return order
 
-
 def _fail_stale_pending_orders(request, minutes=30):
     """Mark stale pending orders for the current user as failed."""
     cutoff = timezone.now() - timedelta(minutes=minutes)
@@ -119,7 +113,6 @@ def _fail_stale_pending_orders(request, minutes=30):
         status="pending",
         created_at__lt=cutoff,
     ).update(status="failed")
-
 
 def _verify_and_finalize_order_if_paid(user, order):
     """Verify Stripe session and finalize order if Stripe reports paid."""
@@ -156,7 +149,6 @@ def _verify_and_finalize_order_if_paid(user, order):
         grant_entitlements_for_order(locked, user=user)
 
     return True
-
 
 @verified_email_required
 @require_http_methods(["POST"])
@@ -232,7 +224,7 @@ def checkout(request):
         stripe_line_items = []
         for product in valid_products:
             discounted_price = product.get_discounted_price()
-            
+
             OrderLineItem.objects.create(
                 order=order,
                 product=product,
@@ -292,7 +284,6 @@ def checkout(request):
 
         return redirect("cart")
 
-
 @verified_email_required
 @require_http_methods(["GET"])
 def checkout_success(request, order_number):
@@ -323,7 +314,6 @@ def checkout_success(request, order_number):
 
     return render(request, "checkout/success.html", {"order": order})
 
-
 @verified_email_required
 @require_http_methods(["GET"])
 def checkout_status(request, order_number):
@@ -341,7 +331,6 @@ def checkout_status(request, order_number):
             order.refresh_from_db()
 
     return JsonResponse({"status": order.status})
-
 
 @verified_email_required
 def checkout_cancel(request):

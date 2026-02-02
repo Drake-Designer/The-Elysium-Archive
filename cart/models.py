@@ -5,7 +5,6 @@ from django.db import models
 
 from products.models import Product
 
-
 class Cart(models.Model):
     """Store a persistent cart for a user."""
 
@@ -18,7 +17,6 @@ class Cart(models.Model):
 
     def __str__(self) -> str:
         return f"Cart for {self.user}"
-
 
 class CartItem(models.Model):
     """Store a product entry in a persistent cart."""
