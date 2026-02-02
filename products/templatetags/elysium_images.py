@@ -18,7 +18,7 @@ def build_cloudinary_fill_url(image, width, height):
     try:
         # Get URL from CloudinaryField
         base_url = str(image.url) if hasattr(image, "url") else str(image)
-        
+
         if not base_url:
             logger.warning(f"cloudinary_fill: Empty URL for image {image}")
             return ""
@@ -40,7 +40,7 @@ def build_cloudinary_fill_url(image, width, height):
         parts = base_url.split("/upload/")
         transformations = f"c_fill,g_auto,w_{width},h_{height},q_auto,f_auto"
         transformed_url = f"{parts[0]}/upload/{transformations}/{parts[1]}"
-        
+
         logger.debug(f"cloudinary_fill: Generated {transformed_url[:100]}")
         return transformed_url
 
@@ -80,3 +80,11 @@ def cloudinary_fill_srcset(image, *dimensions):
     result = ", ".join(srcset_parts)
     logger.debug(f"cloudinary_fill_srcset: Generated {len(srcset_parts)} URLs")
     return result
+
+
+@register.filter
+def get_item(dictionary, key):
+    """Get an item from a dictionary by key in templates."""
+    if dictionary is None:
+        return None
+    return dictionary.get(key)

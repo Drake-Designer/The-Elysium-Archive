@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load elysium_images %}
 {% block title %}
     Dashboard | The Elysium Archive
 {% endblock title %}
@@ -220,6 +221,19 @@
                                                            href="{% url 'archive_read' slug=item.product.slug %}">
                                                             <i class="fa-solid fa-scroll"></i>Read
                                                         </a>
+                                                        {% if user_reviews_by_product|get_item:item.product.id %}
+                                                            {% with review=user_reviews_by_product|get_item:item.product.id %}
+                                                                <a class="btn btn-outline-primary btn-sm btn-icon"
+                                                                   href="{% url 'edit_review' slug=item.product.slug review_id=review.id %}">
+                                                                    <i class="fa-solid fa-edit"></i>Edit Review
+                                                                </a>
+                                                            {% endwith %}
+                                                        {% else %}
+                                                            <a class="btn btn-outline-primary btn-sm btn-icon"
+                                                               href="{% url 'product_detail' item.product.slug %}#reviews-section">
+                                                                <i class="fa-solid fa-star"></i>Leave Review
+                                                            </a>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>
@@ -340,13 +354,50 @@
                                                            href="{% url 'edit_review' slug=review.product.slug review_id=review.id %}">
                                                             <i class="fa-solid fa-pen"></i>Edit
                                                         </a>
-                                                        <form method="post"
-                                                              action="{% url 'delete_review' slug=review.product.slug review_id=review.id %}">
-                                                            {% csrf_token %}
-                                                            <button type="submit" class="btn btn-outline-danger btn-sm btn-icon">
-                                                                <i class="fa-solid fa-trash"></i>Delete
-                                                            </button>
-                                                        </form>
+                                                        <button type="button"
+                                                                class="btn btn-outline-danger btn-sm btn-icon"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#deleteReviewModal-{{ review.id }}">
+                                                            <i class="fa-solid fa-trash"></i>Delete
+                                                        </button>
+                                                    </div>
+                                                    <!-- Delete review confirmation modal -->
+                                                    <div class="modal fade"
+                                                         id="deleteReviewModal-{{ review.id }}"
+                                                         tabindex="-1"
+                                                         aria-labelledby="deleteReviewModalLabel-{{ review.id }}"
+                                                         aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="deleteReviewModalLabel-{{ review.id }}">
+                                                                        <i class="fa-solid fa-trash me-2"></i>Confirm Delete
+                                                                    </h5>
+                                                                    <button type="button"
+                                                                            class="btn-close btn-close-white"
+                                                                            data-bs-dismiss="modal"
+                                                                            aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p class="mb-0">Are you sure you want to delete your review? This action cannot be undone.</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button"
+                                                                            class="btn btn-outline-light btn-icon"
+                                                                            data-bs-dismiss="modal">
+                                                                        <i class="fa-solid fa-arrow-left"></i>Stay
+                                                                    </button>
+                                                                    <form method="post"
+                                                                          action="{% url 'delete_review' slug=review.product.slug review_id=review.id %}"
+                                                                          class="review-actions-inline-form">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit" class="btn btn-danger btn-icon">
+                                                                            <i class="fa-solid fa-trash"></i>Delete
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 {% endif %}
                                             </div>

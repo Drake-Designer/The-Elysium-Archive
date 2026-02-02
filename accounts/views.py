@@ -91,12 +91,16 @@ def dashboard(request):
         .order_by("-created_at")
     )
 
+    # Build a dict for quick lookup of user reviews by product ID
+    user_reviews_by_product = {review.product_id: review for review in reviews}
+
     context = {
         "active_tab": active_tab,
         "form": form,
         "unlocked_products": unlocked_products,
         "orders": orders,
         "reviews": reviews,
+        "user_reviews_by_product": user_reviews_by_product,
     }
     return render(request, "accounts/dashboard.html", context)
 

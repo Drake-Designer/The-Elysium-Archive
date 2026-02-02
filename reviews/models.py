@@ -53,7 +53,8 @@ class Review(models.Model):
         help_text="Optional review title",
     )
     body = models.TextField(
-        help_text="Share your thoughts about this archive entry",
+        blank=True,
+        help_text="Share your thoughts about this archive entry (optional)",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

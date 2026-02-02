@@ -32,39 +32,45 @@
                         <h2 class="h5 mb-2">{{ product.title }}</h2>
                         <p class="muted small mb-0">You are editing your review for this archive entry.</p>
                     </div>
-                    <form method="post">
+                    <form method="post" class="review-form">
                         {% csrf_token %}
-                        <div class="row g-4">
-                            <div class="col-12 col-md-6">
-                                <label for="id_rating" class="form-label">Rating</label>
-                                {{ form.rating }}
-                                {% if form.rating.errors %}<div class="text-danger small mt-1">{{ form.rating.errors }}</div>{% endif %}
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label for="id_title" class="form-label">Title (optional)</label>
-                                {{ form.title }}
-                                {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors }}</div>{% endif %}
-                            </div>
-                            <div class="col-12">
-                                <label for="id_body" class="form-label">Review</label>
-                                {{ form.body }}
-                                {% if form.body.errors %}<div class="text-danger small mt-1">{{ form.body.errors }}</div>{% endif %}
-                            </div>
-                            <div class="col-12">
-                                <div class="d-flex gap-3">
-                                    <button type="submit" class="btn btn-primary btn-icon">
-                                        <i class="fa-solid fa-save me-2"></i>Save Changes
-                                    </button>
-                                    <a href="{% url 'product_detail' product.slug %}"
-                                       class="btn btn-outline-light btn-icon">
-                                        <i class="fa-solid fa-times me-2"></i>Cancel
-                                    </a>
-                                </div>
-                            </div>
+                        <div class="review-form-group">
+                            <label for="id_title" class="review-form-label">
+                                <span>Title (optional)</span>
+                                <span class="review-form-char-counter" id="title-counter">0 / 50</span>
+                            </label>
+                            {{ form.title }}
+                            {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors }}</div>{% endif %}
+                        </div>
+                        <div class="review-form-group">
+                            <label for="id_rating" class="review-form-label review-form-label-required">Rating</label>
+                            {{ form.rating }}
+                            {% if form.rating.errors %}<div class="text-danger small mt-1">{{ form.rating.errors }}</div>{% endif %}
+                        </div>
+                        <div class="review-form-group">
+                            <label for="id_body" class="review-form-label">
+                                <span>Review (optional)</span>
+                                <span class="review-form-char-counter" id="body-counter">0 / 1000</span>
+                            </label>
+                            {{ form.body }}
+                            {% if form.body.errors %}<div class="text-danger small mt-1">{{ form.body.errors }}</div>{% endif %}
+                        </div>
+                        <div class="review-form-actions">
+                            <button type="submit" class="review-submit-btn">
+                                <i class="fa-solid fa-save review-submit-btn-icon"></i>
+                                <span class="review-submit-btn-text">Save Changes</span>
+                            </button>
+                            <a href="{% url 'product_detail' product.slug %}"
+                               class="btn btn-outline-light btn-icon ms-2">
+                                <i class="fa-solid fa-times me-2"></i>Cancel
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </section>
+    {% block extra_js %}
+        <script src="{% static 'js/review-form.js' %}"></script>
+    {% endblock extra_js %}
 {% endblock content %}
