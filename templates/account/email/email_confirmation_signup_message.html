@@ -1,25 +1,13 @@
 {% extends "account/email/base_message.html" %}
-
 {% block head_title %}Confirm Your Email - The Elysium Archive{% endblock %}
-
-{% block preheader %}
-Confirm your email address to unlock the Archive.
-{% endblock %}
-
-{% block title %}
-Verify Your Email Address
-{% endblock %}
-
+{% block preheader %}Confirm your email address to unlock the Archive.{% endblock %}
+{% block title %}Verify Your Email Address{% endblock %}
 {% block content %}
-<p style="margin:0 0 10px 0;">
-  Welcome to The Elysium Archive, {{ user.get_username }}.
-</p>
-<p style="margin:0;">
-  To complete your registration and unlock the forbidden knowledge, please verify your email address.
-</p>
+  <p style="margin:0 0 10px 0;">Welcome to The Elysium Archive, {{ user.get_username }}.</p>
+  <p style="margin:0;">
+    To complete your registration and unlock the forbidden knowledge, please verify your email address.
+  </p>
 {% endblock %}
-
 {% block action_url %}{{ activate_url }}{% endblock %}
 {% block action_text %}Confirm Email Address{% endblock %}
-
 {% block fallback_url %}{{ activate_url }}{% endblock %}

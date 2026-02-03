@@ -1,382 +1,382 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    Lore | The Elysium Archive
+  Lore | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Discover the lore behind The Elysium Archive, the rules of access, the orders that guard it, and what it means to unlock forbidden entries on site.
+  Discover the lore behind The Elysium Archive, the rules of access, the orders that guard it, and what it means to unlock forbidden entries on site.
 {% endblock meta_description %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/pages/lore.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages/lore.css' %}">
 {% endblock extra_css %}
 {% block content %}
-    <!-- Lore introduction -->
-    <section class="container">
-        <div class="panel p-4 p-lg-5 text-center mb-4">
-            <h1 class="display-6 mb-2">Lore of The Elysium</h1>
-            <p class="muted mb-4">
-                A secret library for the initiated. Every Archive is a sealed text, revealed only to those who unlock it.
-            </p>
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                {% if not user.is_authenticated %}
-                    <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
-                        <i class="fa-solid fa-key"></i>Become a Member
-                    </a>
-                    <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
-                        <i class="fa-solid fa-book-open"></i>Browse the Archive
-                    </a>
-                {% endif %}
-            </div>
-            <p class="small muted mt-3 mb-0">No downloads. No external files. Access is the product.</p>
-        </div>
-        <div class="panel p-4 p-lg-5 mb-4">
-            <div class="row g-4 align-items-stretch">
-                <div class="col-12 col-lg-6">
-                    <h2 class="h3 mb-3">The Premise</h2>
-                    <p class="muted">
-                        The Elysium Archive is not a shop of files. It is a sealed library of forbidden entries, kept behind ritual
-                        and rule. Visitors may read whispers and previews, but the full texts remain locked within the site.
-                    </p>
-                    <p class="muted mb-0">
-                        When a member unlocks an Archive, a private page is granted to their account. The entry becomes part of
-                        their personal collection, readable online anytime, but never downloadable.
-                    </p>
-                </div>
-                <div class="col-12 col-lg-6">
-                    <div class="lore-image-container">
-                        <img src="{% static 'img/lore/lore-pic.jpg' %}"
-                             alt="Ancient library with sealed archives and forbidden texts"
-                             class="lore-image"
-                             loading="lazy"
-                             decoding="async">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Rules overview -->
-        <div class="panel p-4 mb-4">
-            <h2 class="h3 mb-3">The Rules of Access</h2>
-            <div class="row g-3">
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="panel p-3 h-100">
-                        <div class="mb-2">
-                            <i class="fa-solid fa-ban rules-icon rules-icon-danger"></i>
-                        </div>
-                        <h3 class="h6 mb-2">No downloads</h3>
-                        <p class="muted mb-0">Entries are readable only inside the website.</p>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="panel p-3 h-100">
-                        <div class="mb-2">
-                            <i class="fa-solid fa-user-lock rules-icon rules-icon-gold"></i>
-                        </div>
-                        <h3 class="h6 mb-2">Account bound</h3>
-                        <p class="muted mb-0">Access is tied to the member who unlocks it.</p>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="panel p-3 h-100">
-                        <div class="mb-2">
-                            <i class="fa-solid fa-infinity rules-icon rules-icon-gold"></i>
-                        </div>
-                        <h3 class="h6 mb-2">Permanent access</h3>
-                        <p class="muted mb-0">Pay once, keep the entry in your private archive.</p>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="panel p-3 h-100">
-                        <div class="mb-2">
-                            <i class="fa-solid fa-circle-xmark rules-icon rules-icon-danger"></i>
-                        </div>
-                        <h3 class="h6 mb-2">No refunds</h3>
-                        <p class="muted mb-0">Access is granted immediately after payment.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Glossary table -->
-        <div class="panel p-4 mb-4">
-            <h2 class="h3 mb-3">Glossary</h2>
-            <div class="table-responsive">
-                <table class="table table-dark table-borderless align-middle mb-0">
-                    <tbody>
-                        <tr>
-                            <th scope="row" class="text-nowrap">Archive</th>
-                            <td class="muted">A premium entry available for purchase, sealed until unlocked.</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="text-nowrap">Entry</th>
-                            <td class="muted">A single piece of forbidden content stored as an on-site page.</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="text-nowrap">The Elysium</th>
-                            <td class="muted">Your private member area where unlocked entries live.</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="text-nowrap">Sealed</th>
-                            <td class="muted">Locked content that is visible as a preview but not readable in full.</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="text-nowrap">Verified buyer</th>
-                            <td class="muted">A member who unlocked an Archive and is allowed to leave a review.</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="text-nowrap">Order</th>
-                            <td class="muted">The recorded purchase that grants access to an Archive entry.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <!-- Orders descriptions -->
-        <div class="panel p-4 mb-4">
-            <h2 class="h3 mb-3">The Orders</h2>
-            <p class="muted mb-4">
-                Not all guardians carry swords. Some guard with ink, some with silence, some with fire.
-                These orders shape the rules of the Archive.
-            </p>
-            <div class="row g-3">
-                <div class="col-12 col-md-4">
-                    <div class="panel p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                            <h3 class="h5 mb-0">The Scribes of Ash</h3>
-                            <span class="badge text-bg-secondary">Order</span>
-                        </div>
-                        <div class="lore-image-media overflow-hidden">
-                            <img src="{% static 'img/lore/scribes-of-ash.jpg' %}"
-                                 alt="The Scribes of Ash order guarding forbidden knowledge"
-                                 class="lore-image"
-                                 loading="lazy"
-                                 decoding="async">
-                        </div>
-                        <p class="muted mb-0">They catalogue what must not be forgotten, and erase what must never be spoken.</p>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="panel p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                            <h3 class="h5 mb-0">The Crimson Oath</h3>
-                            <span class="badge text-bg-secondary">Order</span>
-                        </div>
-                        <div class="lore-image-media overflow-hidden">
-                            <img src="{% static 'img/lore/crimson-oath.jpg' %}"
-                                 alt="The Crimson Oath binding blood and name"
-                                 class="lore-image"
-                                 loading="lazy"
-                                 decoding="async">
-                        </div>
-                        <p class="muted mb-0">They bind access to blood and name. An Archive opened is an Archive owned.</p>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="panel p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                            <h3 class="h5 mb-0">The Relic Keepers</h3>
-                            <span class="badge text-bg-secondary">Order</span>
-                        </div>
-                        <div class="lore-image-media overflow-hidden">
-                            <img src="{% static 'img/lore/relic-keepers.jpg' %}"
-                                 alt="The Relic Keepers protecting vaults and seals"
-                                 class="lore-image"
-                                 loading="lazy"
-                                 decoding="async">
-                        </div>
-                        <p class="muted mb-0">They protect the vaults, the seals, and the quiet promise of no loose files.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Timeline section -->
-        <div class="panel p-4 mb-4">
-            <h2 class="h3 mb-3">Timeline of the Archive</h2>
-            <div class="row g-3 align-items-center">
-                <div class="col-12 col-lg-6">
-                    <ol class="list-group list-group-numbered">
-                        <li class="list-group-item bg-transparent text-light border-secondary">
-                            <strong>The First Seal</strong>
-                            <div class="small muted">The Archive is bound to place, not paper.</div>
-                        </li>
-                        <li class="list-group-item bg-transparent text-light border-secondary">
-                            <strong>The Crimson Oath</strong>
-                            <div class="small muted">Access becomes an oath. Ownership becomes a record.</div>
-                        </li>
-                        <li class="list-group-item bg-transparent text-light border-secondary">
-                            <strong>The Elysium Opens</strong>
-                            <div class="small muted">A private chamber for every member and every unlocked entry.</div>
-                        </li>
-                        <li class="list-group-item bg-transparent text-light border-secondary">
-                            <strong>The Crimson Index</strong>
-                            <div class="small muted">Only verified buyers may review what they have unlocked.</div>
-                        </li>
-                    </ol>
-                </div>
-                <div class="col-12 col-lg-6">
-                    <div class="lore-image-container">
-                        <img src="{% static 'img/lore/timeline-archive.jpg' %}"
-                             alt="Timeline of the Archive spanning ancient seals to crimson index records"
-                             class="lore-image"
-                             loading="lazy"
-                             decoding="async">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Oath statement -->
-        <div class="panel p-4 mb-4">
-            <h2 class="h3 mb-3">Oaths and Warnings</h2>
-            <p class="muted mb-4">
-                The Archive does not leave the Archive. What you unlock is yours to read, but never to download.
-            </p>
-            <div class="row g-4 align-items-center">
-                <div class="col-12 col-lg-6">
-                    <div class="lore-image-container">
-                        <img src="{% static 'img/lore/the-oath.jpg' %}"
-                             alt="The Oath binding member access and responsibility"
-                             class="lore-image"
-                             loading="lazy"
-                             decoding="async">
-                    </div>
-                </div>
-                <div class="col-12 col-lg-6">
-                    <h3 class="h5 mb-3">The Oath</h3>
-                    <p class="muted mb-0">
-                        I accept that access is granted instantly after payment, and I understand there are no refunds. I read within the walls of The Elysium, and I do not seek loose files.
-                    </p>
-                </div>
-            </div>
-        </div>
-        <!-- FAQ accordions -->
-        <div class="panel p-4 mb-4">
-            <h2 class="h3 mb-3">FAQ</h2>
-            <div class="accordion" id="loreFaq">
-                <div class="accordion-item bg-transparent border-secondary">
-                    <h3 class="accordion-header" id="faqOne">
-                        <button class="accordion-button collapsed bg-transparent text-light"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqOneBody"
-                                aria-expanded="false"
-                                aria-controls="faqOneBody">Do I receive a file after purchase?</button>
-                    </h3>
-                    <div id="faqOneBody"
-                         class="accordion-collapse collapse"
-                         role="region"
-                         aria-labelledby="faqOne"
-                         data-bs-parent="#loreFaq">
-                        <div class="accordion-body muted">No. You unlock an on-site page inside your private archive.</div>
-                    </div>
-                </div>
-                <div class="accordion-item bg-transparent border-secondary">
-                    <h3 class="accordion-header" id="faqTwo">
-                        <button class="accordion-button collapsed bg-transparent text-light"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqTwoBody"
-                                aria-expanded="false"
-                                aria-controls="faqTwoBody">Can I read my unlocked entries later?</button>
-                    </h3>
-                    <div id="faqTwoBody"
-                         class="accordion-collapse collapse"
-                         role="region"
-                         aria-labelledby="faqTwo"
-                         data-bs-parent="#loreFaq">
-                        <div class="accordion-body muted">
-                            Yes. Your unlocked pages stay linked to your account and remain readable on site.
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item bg-transparent border-secondary">
-                    <h3 class="accordion-header" id="faqThree">
-                        <button class="accordion-button collapsed bg-transparent text-light"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqThreeBody"
-                                aria-expanded="false"
-                                aria-controls="faqThreeBody">Do I need an account to browse the Archive?</button>
-                    </h3>
-                    <div id="faqThreeBody"
-                         class="accordion-collapse collapse"
-                         role="region"
-                         aria-labelledby="faqThree"
-                         data-bs-parent="#loreFaq">
-                        <div class="accordion-body muted">
-                            No. The catalog is public. Unlocking full entries requires registration and purchase.
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item bg-transparent border-secondary">
-                    <h3 class="accordion-header" id="faqFour">
-                        <button class="accordion-button collapsed bg-transparent text-light"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqFourBody"
-                                aria-expanded="false"
-                                aria-controls="faqFourBody">Why are refunds not supported?</button>
-                    </h3>
-                    <div id="faqFourBody"
-                         class="accordion-collapse collapse"
-                         role="region"
-                         aria-labelledby="faqFour"
-                         data-bs-parent="#loreFaq">
-                        <div class="accordion-body muted">
-                            Access is granted immediately after successful payment, and the product is permanent access on site.
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item bg-transparent border-secondary">
-                    <h3 class="accordion-header" id="faqFive">
-                        <button class="accordion-button collapsed bg-transparent text-light"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqFiveBody"
-                                aria-expanded="false"
-                                aria-controls="faqFiveBody">Can anyone leave reviews?</button>
-                    </h3>
-                    <div id="faqFiveBody"
-                         class="accordion-collapse collapse"
-                         role="region"
-                         aria-labelledby="faqFive"
-                         data-bs-parent="#loreFaq">
-                        <div class="accordion-body muted">Only verified buyers may review an Archive they unlocked.</div>
-                    </div>
-                </div>
-                <div class="accordion-item bg-transparent border-secondary">
-                    <h3 class="accordion-header" id="faqSix">
-                        <button class="accordion-button collapsed bg-transparent text-light"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqSixBody"
-                                aria-expanded="false"
-                                aria-controls="faqSixBody">What happens after I unlock an entry?</button>
-                    </h3>
-                    <div id="faqSixBody"
-                         class="accordion-collapse collapse"
-                         role="region"
-                         aria-labelledby="faqSix"
-                         data-bs-parent="#loreFaq">
-                        <div class="accordion-body muted">
-                            The entry becomes available in your private area, The Elysium, as a protected page.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- Lore introduction -->
+  <section class="container">
+    <div class="panel p-4 p-lg-5 text-center mb-4">
+      <h1 class="display-6 mb-2">Lore of The Elysium</h1>
+      <p class="muted mb-4">
+        A secret library for the initiated. Every Archive is a sealed text, revealed only to those who unlock it.
+      </p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
         {% if not user.is_authenticated %}
-            <!-- Guest call to action -->
-            <div class="panel p-4 text-center">
-                <h2 class="h3 mb-2">Enter The Elysium</h2>
-                <p class="muted mb-4">Join the archive, unlock your first entry, and read what the world was not meant to remember.</p>
-                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                    <a class="btn btn-primary btn-icon" href="{% url 'account_signup' %}">
-                        <i class="fa-solid fa-user-plus"></i>Register
-                    </a>
-                    <a class="btn btn-outline-light btn-icon"
-                       href="{% url 'account_login' %}">
-                        <i class="fa-solid fa-right-to-bracket"></i>Login
-                    </a>
-                </div>
-            </div>
+          <a class="btn btn-primary btn-icon" href="{% url 'home' %}#membership">
+            <i class="fa-solid fa-key"></i>Become a Member
+          </a>
+          <a class="btn btn-outline-light btn-icon" href="{% url 'archive' %}">
+            <i class="fa-solid fa-book-open"></i>Browse the Archive
+          </a>
         {% endif %}
-    </section>
+      </div>
+      <p class="small muted mt-3 mb-0">No downloads. No external files. Access is the product.</p>
+    </div>
+    <div class="panel p-4 p-lg-5 mb-4">
+      <div class="row g-4 align-items-stretch">
+        <div class="col-12 col-lg-6">
+          <h2 class="h3 mb-3">The Premise</h2>
+          <p class="muted">
+            The Elysium Archive is not a shop of files. It is a sealed library of forbidden entries, kept behind ritual
+            and rule. Visitors may read whispers and previews, but the full texts remain locked within the site.
+          </p>
+          <p class="muted mb-0">
+            When a member unlocks an Archive, a private page is granted to their account. The entry becomes part of
+            their personal collection, readable online anytime, but never downloadable.
+          </p>
+        </div>
+        <div class="col-12 col-lg-6">
+          <div class="lore-image-container">
+            <img src="{% static 'img/lore/lore-pic.jpg' %}"
+                 alt="Ancient library with sealed archives and forbidden texts"
+                 class="lore-image"
+                 loading="lazy"
+                 decoding="async">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Rules overview -->
+    <div class="panel p-4 mb-4">
+      <h2 class="h3 mb-3">The Rules of Access</h2>
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="panel p-3 h-100">
+            <div class="mb-2">
+              <i class="fa-solid fa-ban rules-icon rules-icon-danger"></i>
+            </div>
+            <h3 class="h6 mb-2">No downloads</h3>
+            <p class="muted mb-0">Entries are readable only inside the website.</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="panel p-3 h-100">
+            <div class="mb-2">
+              <i class="fa-solid fa-user-lock rules-icon rules-icon-gold"></i>
+            </div>
+            <h3 class="h6 mb-2">Account bound</h3>
+            <p class="muted mb-0">Access is tied to the member who unlocks it.</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="panel p-3 h-100">
+            <div class="mb-2">
+              <i class="fa-solid fa-infinity rules-icon rules-icon-gold"></i>
+            </div>
+            <h3 class="h6 mb-2">Permanent access</h3>
+            <p class="muted mb-0">Pay once, keep the entry in your private archive.</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="panel p-3 h-100">
+            <div class="mb-2">
+              <i class="fa-solid fa-circle-xmark rules-icon rules-icon-danger"></i>
+            </div>
+            <h3 class="h6 mb-2">No refunds</h3>
+            <p class="muted mb-0">Access is granted immediately after payment.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Glossary table -->
+    <div class="panel p-4 mb-4">
+      <h2 class="h3 mb-3">Glossary</h2>
+      <div class="table-responsive">
+        <table class="table table-dark table-borderless align-middle mb-0">
+          <tbody>
+            <tr>
+              <th scope="row" class="text-nowrap">Archive</th>
+              <td class="muted">A premium entry available for purchase, sealed until unlocked.</td>
+            </tr>
+            <tr>
+              <th scope="row" class="text-nowrap">Entry</th>
+              <td class="muted">A single piece of forbidden content stored as an on-site page.</td>
+            </tr>
+            <tr>
+              <th scope="row" class="text-nowrap">The Elysium</th>
+              <td class="muted">Your private member area where unlocked entries live.</td>
+            </tr>
+            <tr>
+              <th scope="row" class="text-nowrap">Sealed</th>
+              <td class="muted">Locked content that is visible as a preview but not readable in full.</td>
+            </tr>
+            <tr>
+              <th scope="row" class="text-nowrap">Verified buyer</th>
+              <td class="muted">A member who unlocked an Archive and is allowed to leave a review.</td>
+            </tr>
+            <tr>
+              <th scope="row" class="text-nowrap">Order</th>
+              <td class="muted">The recorded purchase that grants access to an Archive entry.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Orders descriptions -->
+    <div class="panel p-4 mb-4">
+      <h2 class="h3 mb-3">The Orders</h2>
+      <p class="muted mb-4">
+        Not all guardians carry swords. Some guard with ink, some with silence, some with fire.
+        These orders shape the rules of the Archive.
+      </p>
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <div class="panel p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <h3 class="h5 mb-0">The Scribes of Ash</h3>
+              <span class="badge text-bg-secondary">Order</span>
+            </div>
+            <div class="lore-image-media overflow-hidden">
+              <img src="{% static 'img/lore/scribes-of-ash.jpg' %}"
+                   alt="The Scribes of Ash order guarding forbidden knowledge"
+                   class="lore-image"
+                   loading="lazy"
+                   decoding="async">
+            </div>
+            <p class="muted mb-0">They catalogue what must not be forgotten, and erase what must never be spoken.</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="panel p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <h3 class="h5 mb-0">The Crimson Oath</h3>
+              <span class="badge text-bg-secondary">Order</span>
+            </div>
+            <div class="lore-image-media overflow-hidden">
+              <img src="{% static 'img/lore/crimson-oath.jpg' %}"
+                   alt="The Crimson Oath binding blood and name"
+                   class="lore-image"
+                   loading="lazy"
+                   decoding="async">
+            </div>
+            <p class="muted mb-0">They bind access to blood and name. An Archive opened is an Archive owned.</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="panel p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <h3 class="h5 mb-0">The Relic Keepers</h3>
+              <span class="badge text-bg-secondary">Order</span>
+            </div>
+            <div class="lore-image-media overflow-hidden">
+              <img src="{% static 'img/lore/relic-keepers.jpg' %}"
+                   alt="The Relic Keepers protecting vaults and seals"
+                   class="lore-image"
+                   loading="lazy"
+                   decoding="async">
+            </div>
+            <p class="muted mb-0">They protect the vaults, the seals, and the quiet promise of no loose files.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Timeline section -->
+    <div class="panel p-4 mb-4">
+      <h2 class="h3 mb-3">Timeline of the Archive</h2>
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-lg-6">
+          <ol class="list-group list-group-numbered">
+            <li class="list-group-item bg-transparent text-light border-secondary">
+              <strong>The First Seal</strong>
+              <div class="small muted">The Archive is bound to place, not paper.</div>
+            </li>
+            <li class="list-group-item bg-transparent text-light border-secondary">
+              <strong>The Crimson Oath</strong>
+              <div class="small muted">Access becomes an oath. Ownership becomes a record.</div>
+            </li>
+            <li class="list-group-item bg-transparent text-light border-secondary">
+              <strong>The Elysium Opens</strong>
+              <div class="small muted">A private chamber for every member and every unlocked entry.</div>
+            </li>
+            <li class="list-group-item bg-transparent text-light border-secondary">
+              <strong>The Crimson Index</strong>
+              <div class="small muted">Only verified buyers may review what they have unlocked.</div>
+            </li>
+          </ol>
+        </div>
+        <div class="col-12 col-lg-6">
+          <div class="lore-image-container">
+            <img src="{% static 'img/lore/timeline-archive.jpg' %}"
+                 alt="Timeline of the Archive spanning ancient seals to crimson index records"
+                 class="lore-image"
+                 loading="lazy"
+                 decoding="async">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Oath statement -->
+    <div class="panel p-4 mb-4">
+      <h2 class="h3 mb-3">Oaths and Warnings</h2>
+      <p class="muted mb-4">
+        The Archive does not leave the Archive. What you unlock is yours to read, but never to download.
+      </p>
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-6">
+          <div class="lore-image-container">
+            <img src="{% static 'img/lore/the-oath.jpg' %}"
+                 alt="The Oath binding member access and responsibility"
+                 class="lore-image"
+                 loading="lazy"
+                 decoding="async">
+          </div>
+        </div>
+        <div class="col-12 col-lg-6">
+          <h3 class="h5 mb-3">The Oath</h3>
+          <p class="muted mb-0">
+            I accept that access is granted instantly after payment, and I understand there are no refunds. I read within the walls of The Elysium, and I do not seek loose files.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- FAQ accordions -->
+    <div class="panel p-4 mb-4">
+      <h2 class="h3 mb-3">FAQ</h2>
+      <div class="accordion" id="loreFaq">
+        <div class="accordion-item bg-transparent border-secondary">
+          <h3 class="accordion-header" id="faqOne">
+            <button class="accordion-button collapsed bg-transparent text-light"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faqOneBody"
+                    aria-expanded="false"
+                    aria-controls="faqOneBody">Do I receive a file after purchase?</button>
+          </h3>
+          <div id="faqOneBody"
+               class="accordion-collapse collapse"
+               role="region"
+               aria-labelledby="faqOne"
+               data-bs-parent="#loreFaq">
+            <div class="accordion-body muted">No. You unlock an on-site page inside your private archive.</div>
+          </div>
+        </div>
+        <div class="accordion-item bg-transparent border-secondary">
+          <h3 class="accordion-header" id="faqTwo">
+            <button class="accordion-button collapsed bg-transparent text-light"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faqTwoBody"
+                    aria-expanded="false"
+                    aria-controls="faqTwoBody">Can I read my unlocked entries later?</button>
+          </h3>
+          <div id="faqTwoBody"
+               class="accordion-collapse collapse"
+               role="region"
+               aria-labelledby="faqTwo"
+               data-bs-parent="#loreFaq">
+            <div class="accordion-body muted">
+              Yes. Your unlocked pages stay linked to your account and remain readable on site.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item bg-transparent border-secondary">
+          <h3 class="accordion-header" id="faqThree">
+            <button class="accordion-button collapsed bg-transparent text-light"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faqThreeBody"
+                    aria-expanded="false"
+                    aria-controls="faqThreeBody">Do I need an account to browse the Archive?</button>
+          </h3>
+          <div id="faqThreeBody"
+               class="accordion-collapse collapse"
+               role="region"
+               aria-labelledby="faqThree"
+               data-bs-parent="#loreFaq">
+            <div class="accordion-body muted">
+              No. The catalog is public. Unlocking full entries requires registration and purchase.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item bg-transparent border-secondary">
+          <h3 class="accordion-header" id="faqFour">
+            <button class="accordion-button collapsed bg-transparent text-light"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faqFourBody"
+                    aria-expanded="false"
+                    aria-controls="faqFourBody">Why are refunds not supported?</button>
+          </h3>
+          <div id="faqFourBody"
+               class="accordion-collapse collapse"
+               role="region"
+               aria-labelledby="faqFour"
+               data-bs-parent="#loreFaq">
+            <div class="accordion-body muted">
+              Access is granted immediately after successful payment, and the product is permanent access on site.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item bg-transparent border-secondary">
+          <h3 class="accordion-header" id="faqFive">
+            <button class="accordion-button collapsed bg-transparent text-light"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faqFiveBody"
+                    aria-expanded="false"
+                    aria-controls="faqFiveBody">Can anyone leave reviews?</button>
+          </h3>
+          <div id="faqFiveBody"
+               class="accordion-collapse collapse"
+               role="region"
+               aria-labelledby="faqFive"
+               data-bs-parent="#loreFaq">
+            <div class="accordion-body muted">Only verified buyers may review an Archive they unlocked.</div>
+          </div>
+        </div>
+        <div class="accordion-item bg-transparent border-secondary">
+          <h3 class="accordion-header" id="faqSix">
+            <button class="accordion-button collapsed bg-transparent text-light"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faqSixBody"
+                    aria-expanded="false"
+                    aria-controls="faqSixBody">What happens after I unlock an entry?</button>
+          </h3>
+          <div id="faqSixBody"
+               class="accordion-collapse collapse"
+               role="region"
+               aria-labelledby="faqSix"
+               data-bs-parent="#loreFaq">
+            <div class="accordion-body muted">
+              The entry becomes available in your private area, The Elysium, as a protected page.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% if not user.is_authenticated %}
+      <!-- Guest call to action -->
+      <div class="panel p-4 text-center">
+        <h2 class="h3 mb-2">Enter The Elysium</h2>
+        <p class="muted mb-4">Join the archive, unlock your first entry, and read what the world was not meant to remember.</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <a class="btn btn-primary btn-icon" href="{% url 'account_signup' %}">
+            <i class="fa-solid fa-user-plus"></i>Register
+          </a>
+          <a class="btn btn-outline-light btn-icon"
+             href="{% url 'account_login' %}">
+            <i class="fa-solid fa-right-to-bracket"></i>Login
+          </a>
+        </div>
+      </div>
+    {% endif %}
+  </section>
 {% endblock content %}

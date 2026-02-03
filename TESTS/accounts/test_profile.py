@@ -3,11 +3,13 @@
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils.crypto import get_random_string
 
 from accounts.models import UserProfile
 from accounts.signals import create_user_profile
 
 User = get_user_model()
+
 
 @pytest.mark.django_db
 class TestProfileView:
@@ -15,23 +17,20 @@ class TestProfileView:
 
     def test_profile_requires_login(self, client):
         """Test that profile view requires authentication."""
-        response = client.get(reverse("profile")
-)
+        response = client.get(reverse("profile"))
         assert response.status_code == 302
         assert "/accounts/login/" in response.url
 
     def test_profile_get_authenticated(self, client, verified_user):
         """Test that authenticated user can view profile page."""
         client.force_login(verified_user)
-        response = client.get(reverse("profile"), follow=True
-)
+        response = client.get(reverse("profile"), follow=True)
         assert response.status_code == 200
 
     def test_profile_displays_username_and_email(self, client, verified_user):
         """Test that profile page shows username and email read-only."""
         client.force_login(verified_user)
-        response = client.get(reverse("profile"), follow=True
-)
+        response = client.get(reverse("profile"), follow=True)
         content = response.content.decode()
         assert verified_user.username in content
         assert verified_user.email in content
@@ -39,8 +38,7 @@ class TestProfileView:
     def test_profile_edit_display_name_get(self, client, verified_user):
         """Test that profile form is displayed with empty or current display_name."""
         client.force_login(verified_user)
-        response = client.get(reverse("profile"), follow=True
-)
+        response = client.get(reverse("profile"), follow=True)
         assert "display_name" in response.content.decode()
 
     def test_profile_edit_display_name_post(self, client, verified_user):
@@ -92,13 +90,14 @@ class TestProfileView:
         user = User.objects.create_user(
             username="signal_user",
             email="signal_user@example.com",
-            password="testpass123",
+            password=get_random_string(12),
         )
 
         create_user_profile(sender=User, instance=user, created=True)
         create_user_profile(sender=User, instance=user, created=True)
 
         assert UserProfile.objects.filter(user=user).count() == 1
+
 
 @pytest.mark.django_db
 class TestAccountDelete:
@@ -115,9 +114,7 @@ class TestAccountDelete:
         client.force_login(verified_user)
         response = client.get(reverse("account_delete"))
         assert response.status_code == 200
-        assert "accounts/delete_account.html" in [
-            t.name for t in response.templates
-        ]
+        assert "accounts/delete_account.html" in [t.name for t in response.templates]
         content = response.content.decode()
         assert "Delete My Account" in content
         assert "cannot be undone" in content.lower()

@@ -19,6 +19,7 @@ from reviews.forms import ReviewForm
 
 from .models import Category, Product
 
+
 class ProductListView(ListView):
     """Show a public archive catalog with pagination."""
 
@@ -64,7 +65,9 @@ class ProductListView(ListView):
         show_deals = self.request.GET.get("deals", "").strip().lower() == "true"
 
         categories = (
-            Category.objects.filter(products__is_active=True, products__is_removed=False)
+            Category.objects.filter(
+                products__is_active=True, products__is_removed=False
+            )
             .distinct()
             .order_by("name")
         )
@@ -75,6 +78,7 @@ class ProductListView(ListView):
         context["show_deals"] = show_deals
 
         return context
+
 
 class ProductDetailView(DetailView):
     """Show an archive preview page with purchase call to action."""
@@ -142,9 +146,9 @@ class ProductDetailView(DetailView):
             reviews = product.reviews.all()  # type: ignore[attr-defined]
 
             if is_authenticated_user(self.request.user) and purchased:
-                user_review = (
-                    product.reviews.filter(user=cast(Any, self.request.user)).first()  # type: ignore[attr-defined]
-                )
+                user_review = product.reviews.filter(
+                    user=cast(Any, self.request.user)
+                ).first()  # type: ignore[attr-defined]
                 can_review = not user_review
                 if can_review:
                     form = ReviewForm()
@@ -158,6 +162,7 @@ class ProductDetailView(DetailView):
 
         return context
 
+
 class ArchiveReadView(LoginRequiredMixin, DetailView):
     """Show a private reading page for purchased archive entries."""
 
@@ -169,7 +174,9 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """Check email verification before processing the request."""
-        if is_authenticated_user(request.user) and getattr(request.user, "is_superuser", False):
+        if is_authenticated_user(request.user) and getattr(
+            request.user, "is_superuser", False
+        ):
             return super().dispatch(request, *args, **kwargs)
 
         if is_authenticated_user(request.user) and not has_verified_email(request.user):
@@ -185,7 +192,9 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
         """Return product and verify user has access."""
         obj = cast(Product, super().get_object(queryset))
 
-        if is_authenticated_user(self.request.user) and getattr(self.request.user, "is_superuser", False):
+        if is_authenticated_user(self.request.user) and getattr(
+            self.request.user, "is_superuser", False
+        ):
             return obj
 
         if not user_has_access(self.request.user, obj):

@@ -1,15 +1,15 @@
 """Admin configuration for products app."""
+
 from django import forms
 from django.contrib import admin
 from django.utils import timezone
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 
+from orders.models import AccessEntitlement
 
 from .admin_utils import admin_display
 from .models import Category, DealBanner, Product, sync_products_deal_status
-from orders.models import AccessEntitlement
-
 
 
 class ProductAdminForm(forms.ModelForm):
@@ -25,10 +25,9 @@ class ProductAdminForm(forms.ModelForm):
             # Set maxlength so the browser blocks typing beyond 150 chars
             self.fields["image_alt"].widget.attrs["maxlength"] = "150"
             # Add a helpful placeholder for the admin form
-            self.fields["image_alt"].widget.attrs["placeholder"] = (
-                "Short descriptive text (60–125 chars recommended)"
-            )
-
+            self.fields["image_alt"].widget.attrs[
+                "placeholder"
+            ] = "Short descriptive text (60–125 chars recommended)"
 
 
 @admin.register(Category)
@@ -93,7 +92,6 @@ class CategoryAdmin(admin.ModelAdmin):
         )
 
 
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Admin interface for Product model."""
@@ -139,7 +137,10 @@ class ProductAdmin(admin.ModelAdmin):
             "📝 Product Information",
             {"fields": ("title", "slug", "tagline", "category")},
         ),
-        ("💰 Pricing & Status", {"fields": ("price", "is_active", "is_removed", "is_featured")}),
+        (
+            "💰 Pricing & Status",
+            {"fields": ("price", "is_active", "is_removed", "is_featured")},
+        ),
         (
             "💰 Deal Status",
             {
@@ -216,23 +217,27 @@ class ProductAdmin(admin.ModelAdmin):
         badges = []
 
         if obj.is_removed:
-            badges.append('<span class="product-status-badge removed">🗑 Removed</span>')
+            badges.append(("removed", "🗑 Removed"))
         elif obj.is_active:
-            badges.append('<span class="product-status-badge active">✓ Active</span>')
+            badges.append(("active", "✓ Active"))
         else:
-            badges.append('<span class="product-status-badge inactive">✗ Unpublished</span>')
+            badges.append(("inactive", "✗ Unpublished"))
 
         if obj.is_featured:
-            badges.append(
-                '<span class="product-status-badge featured">⭐ Featured</span>'
-            )
+            badges.append(("featured", "⭐ Featured"))
 
         if obj.is_deal:
-            badges.append('<span class="product-status-badge deal">💰 DEAL</span>')
+            badges.append(("deal", "💰 DEAL"))
+
+        badges_html = format_html_join(
+            "",
+            '<span class="product-status-badge {}">{}</span>',
+            badges,
+        )
 
         return format_html(
             '<div class="product-status-container">{}</div>',
-            mark_safe("".join(badges)),
+            badges_html,
         )
 
     def publish_products(self, request, queryset):
@@ -554,22 +559,22 @@ class DealBannerAdmin(admin.ModelAdmin):
         badges = []
 
         if obj.is_active:
-            badges.append(
-                '<span class="deal-banner-status-badge active">✓ ACTIVE</span>'
-            )
+            badges.append(("active", "✓ ACTIVE"))
         else:
-            badges.append(
-                '<span class="deal-banner-status-badge inactive">✗ INACTIVE</span>'
-            )
+            badges.append(("inactive", "✗ INACTIVE"))
 
         if obj.is_featured:
-            badges.append(
-                '<span class="deal-banner-status-badge featured">⭐ FEATURED</span>'
-            )
+            badges.append(("featured", "⭐ FEATURED"))
+
+        badges_html = format_html_join(
+            "",
+            '<span class="deal-banner-status-badge {}">{}</span>',
+            badges,
+        )
 
         return format_html(
             '<div class="deal-banner-status-container">{}</div>',
-            mark_safe("".join(badges)),
+            badges_html,
         )
 
     @admin_display("Banner Preview")

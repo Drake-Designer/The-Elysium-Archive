@@ -2,6 +2,8 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
+from django.utils.crypto import get_random_string
+
 
 @pytest.mark.django_db
 class TestAuthPages:
@@ -19,9 +21,10 @@ class TestAuthPages:
             email="test@example.com",
             is_active=True,
         )
-        user.set_password("testpass123")
+        password = get_random_string(12)
+        user.set_password(password)
         user.save(update_fields=["password"])
-        logged_in = self.client.login(username="testuser", password="testpass123")
+        logged_in = self.client.login(username="testuser", password=password)
         assert logged_in is True
 
     def test_login_page_get_anonymous(self):

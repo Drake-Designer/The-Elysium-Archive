@@ -1,9 +1,9 @@
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
 from django.urls import reverse
 from django.utils import timezone
-from datetime import timedelta
 
 from orders.models import AccessEntitlement, Order, OrderLineItem
 from products.models import Product
@@ -55,9 +55,9 @@ def test_checkout_success_fallback_marks_paid_and_grants_entitlements_when_strip
         (),
         {
             "payment_status": "paid",
-            "get": lambda self, key, default=None: "pi_test_fallback"
-            if key == "payment_intent"
-            else default,
+            "get": lambda self, key, default=None: (
+                "pi_test_fallback" if key == "payment_intent" else default
+            ),
         },
     )()
 
@@ -129,12 +129,12 @@ def test_checkout_double_post_reuses_recent_pending_order_and_does_not_duplicate
     )()
 
     with patch(
-    "checkout.views.stripe.checkout.Session.create",
-    side_effect=[fake_session_one, fake_session_two],
-            ):
+        "checkout.views.stripe.checkout.Session.create",
+        side_effect=[fake_session_one, fake_session_two],
+    ):
 
-            response1 = client.post(reverse("checkout"))
-            response2 = client.post(reverse("checkout"))
+        response1 = client.post(reverse("checkout"))
+        response2 = client.post(reverse("checkout"))
 
     assert response1.status_code in (302, 303)
     assert response2.status_code in (302, 303)

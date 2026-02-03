@@ -24,7 +24,10 @@ class TestCartOperations:
         )
 
         assert response.status_code == 302
-        assert reverse("product_detail", kwargs={"slug": product_active.slug}) in response.url
+        assert (
+            reverse("product_detail", kwargs={"slug": product_active.slug})
+            in response.url
+        )
 
     def test_add_to_cart_stores_in_session(self, client, verified_user, product_active):
         """Product added to cart is stored in session."""
@@ -92,7 +95,9 @@ class TestCartOperations:
         second_cart_size = len(client.session.get("cart", {}))
         assert first_cart_size == second_cart_size
 
-    def test_cart_persists_after_logout_and_login(self, client, verified_user, product_active):
+    def test_cart_persists_after_logout_and_login(
+        self, client, verified_user, product_active
+    ):
         """Cart items persist after logout and login."""
         client.force_login(verified_user)
 
@@ -126,7 +131,9 @@ class TestCartValidation:
 
         assert response.status_code == 200 or response.status_code == 404
 
-    def test_add_inactive_product_to_cart(self, client, verified_user, product_inactive):
+    def test_add_inactive_product_to_cart(
+        self, client, verified_user, product_inactive
+    ):
         """Adding inactive product to cart may be allowed (purchase can be historical)."""
         client.force_login(verified_user)
 
@@ -139,7 +146,9 @@ class TestCartValidation:
 
         assert response.status_code in [302, 400, 404]
 
-    def test_cart_add_requires_verified_email(self, client, unverified_user, product_active):
+    def test_cart_add_requires_verified_email(
+        self, client, unverified_user, product_active
+    ):
         """Adding to cart requires verified email address."""
         client.force_login(unverified_user)
 

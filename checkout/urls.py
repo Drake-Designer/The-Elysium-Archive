@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from .views import checkout, checkout_cancel, checkout_success, checkout_status
+from .views import checkout, checkout_cancel, checkout_status, checkout_success
 from .webhooks import stripe_webhook
 
 urlpatterns = [

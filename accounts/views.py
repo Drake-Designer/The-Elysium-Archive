@@ -14,15 +14,18 @@ from reviews.models import Review
 from .forms import UserProfileForm
 from .models import UserProfile
 
+
 def _verified_or_redirect(request):
     if not has_verified_email(request.user):
         messages.warning(request, "Please verify your email before continuing.")
         return redirect("account_email")
     return None
 
+
 def _dashboard_url_with_tab(tab_name):
     base_url = reverse("account_dashboard")
     return f"{base_url}?tab={tab_name}"
+
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -104,6 +107,7 @@ def dashboard(request):
     }
     return render(request, "accounts/dashboard.html", context)
 
+
 @login_required
 def my_archive(request):
     redirect_response = _verified_or_redirect(request)
@@ -111,6 +115,7 @@ def my_archive(request):
         return redirect_response
 
     return redirect(_dashboard_url_with_tab("archive"))
+
 
 @login_required
 def my_orders(request):
@@ -120,6 +125,7 @@ def my_orders(request):
 
     return redirect(_dashboard_url_with_tab("orders"))
 
+
 @login_required
 def my_reviews(request):
     redirect_response = _verified_or_redirect(request)
@@ -127,6 +133,7 @@ def my_reviews(request):
         return redirect_response
 
     return redirect(_dashboard_url_with_tab("reviews"))
+
 
 @login_required
 @require_http_methods(["GET"])
@@ -137,6 +144,7 @@ def profile(request):
         return redirect_response
 
     return redirect(_dashboard_url_with_tab("profile"))
+
 
 @login_required
 @require_http_methods(["GET", "POST"])

@@ -1,50 +1,50 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    Checkout | The Elysium Archive
+  Checkout | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Review and confirm your purchase before redirecting to secure payment.
+  Review and confirm your purchase before redirecting to secure payment.
 {% endblock meta_description %}
 {% block content %}
-    <!-- Checkout page with final confirmation -->
-    <section class="container py-5">
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'home' %}">Home</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="{% url 'cart' %}">Shopping Cart</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">Checkout</li>
-            </ol>
-        </nav>
-        <div class="row mb-5">
-            <div class="col-12">
-                <h1 class="display-6 mb-2">Secure Checkout</h1>
-                <p class="muted">You will be redirected to Stripe for secure payment processing.</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12 col-lg-8 mx-auto">
-                <!-- Show NO REFUNDS policy prominently -->
-                {% include "includes/no_refunds_policy.html" %}
-                <!-- Checkout form (auto-submits to Stripe) -->
-                <form method="post" action="{% url 'checkout' %}" class="mt-4">
-                    {% csrf_token %}
-                    <div class="alert alert-info">
-                        <p class="mb-0">Click "Complete Purchase" to proceed to secure payment.</p>
-                    </div>
-                    <button type="submit" class="btn btn-danger btn-lg w-100">
-                        <i class="fa-solid fa-check me-2"></i>Complete Purchase
-                    </button>
-                </form>
-                <a href="{% url 'cart' %}"
-                   class="btn btn-outline-light btn-lg w-100 mt-3">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Return to Cart
-                </a>
-            </div>
-        </div>
-    </section>
+  <!-- Checkout page with final confirmation -->
+  <section class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'cart' %}">Shopping Cart</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+      </ol>
+    </nav>
+    <div class="row mb-5">
+      <div class="col-12">
+        <h1 class="display-6 mb-2">Secure Checkout</h1>
+        <p class="muted">You will be redirected to Stripe for secure payment processing.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg-8 mx-auto">
+        <!-- Show NO REFUNDS policy prominently -->
+        {% include "includes/no_refunds_policy.html" %}
+        <!-- Checkout form (auto-submits to Stripe) -->
+        <form method="post" action="{% url 'checkout' %}" class="mt-4">
+          {% csrf_token %}
+          <div class="alert alert-info">
+            <p class="mb-0">Click "Complete Purchase" to proceed to secure payment.</p>
+          </div>
+          <button type="submit" class="btn btn-danger btn-lg w-100">
+            <i class="fa-solid fa-check me-2"></i>Complete Purchase
+          </button>
+        </form>
+        <a href="{% url 'cart' %}"
+           class="btn btn-outline-light btn-lg w-100 mt-3">
+          <i class="fa-solid fa-arrow-left me-2"></i>Return to Cart
+        </a>
+      </div>
+    </div>
+  </section>
 {% endblock content %}

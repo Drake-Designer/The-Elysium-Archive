@@ -1,9 +1,11 @@
 """Tests for Product model CRUD operations and permissions."""
 
-import pytest
 from decimal import Decimal
-from products.models import Category, Product
+
+import pytest
 from django.urls import reverse
+
+from products.models import Category, Product
 
 
 @pytest.mark.django_db

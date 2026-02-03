@@ -179,9 +179,9 @@ main .container,
 }
 
 .site-brand::before {
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
+  -webkit-mask-image: linear-gradient(#fff, #fff), linear-gradient(#fff, #fff);
+  -webkit-mask-clip: content-box, border-box;
+  -webkit-mask-origin: content-box, border-box;
   -webkit-mask-composite: xor;
   animation: border-ripple 5.5s ease-in-out infinite;
   background: linear-gradient(90deg, transparent 0%, var(--blood-crimson) 50%, transparent 100%);
@@ -190,9 +190,9 @@ main .container,
   border-radius: 8px;
   content: '';
   inset: -2px;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
+  mask-image: linear-gradient(#fff, #fff), linear-gradient(#fff, #fff);
+  mask-clip: content-box, border-box;
+  mask-origin: content-box, border-box;
   mask-composite: exclude;
   opacity: 0;
   padding: 2px;

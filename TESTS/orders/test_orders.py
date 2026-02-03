@@ -1,12 +1,13 @@
 """Tests for order management and Stripe webhook handling."""
 
-import pytest
 from decimal import Decimal
 from unittest.mock import patch
 
+import pytest
 from django.urls import reverse
 
 from orders.models import AccessEntitlement, Order
+
 
 @pytest.mark.django_db
 class TestWebhookHandling:
@@ -283,7 +284,13 @@ class TestWebhookHandling:
         """Paid order stores Stripe IDs if they are missing."""
         order_paid.stripe_session_id = ""
         order_paid.stripe_payment_intent_id = ""
-        order_paid.save(update_fields=["stripe_session_id", "stripe_payment_intent_id", "updated_at"])
+        order_paid.save(
+            update_fields=[
+                "stripe_session_id",
+                "stripe_payment_intent_id",
+                "updated_at",
+            ]
+        )
 
         mock_construct.return_value = {
             "type": "checkout.session.completed",
@@ -341,7 +348,9 @@ class TestWebhookHandling:
         assert order_pending.status == "paid"
 
     @patch("checkout.webhooks.stripe.Webhook.construct_event")
-    def test_webhook_checkout_expired_marks_failed(self, mock_construct, client, order_pending):
+    def test_webhook_checkout_expired_marks_failed(
+        self, mock_construct, client, order_pending
+    ):
         """Webhook on checkout.session.expired marks order as failed."""
         mock_construct.return_value = {
             "type": "checkout.session.expired",
@@ -363,6 +372,7 @@ class TestWebhookHandling:
         assert response.status_code == 200
         order_pending.refresh_from_db()
         assert order_pending.status == "failed"
+
 
 @pytest.mark.django_db
 class TestOrdersDashboardTabs:

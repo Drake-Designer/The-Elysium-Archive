@@ -3,6 +3,7 @@
 import pytest
 from django.urls import reverse
 
+
 @pytest.mark.django_db
 class TestEmailVerificationGate:
     """Test that unverified users cannot access protected account pages."""
@@ -45,6 +46,7 @@ class TestEmailVerificationGate:
         assert response.status_code == 302
         assert reverse("account_login") in response.url
 
+
 @pytest.mark.django_db
 class TestMyArchiveDisplay:
     """Test that My Archive displays purchased products correctly."""
@@ -67,9 +69,10 @@ class TestMyArchiveDisplay:
         self, client, verified_user, category
     ):
         """Verified user with multiple purchases sees all products."""
-        from products.models import Product
-        from orders.models import AccessEntitlement
         from decimal import Decimal
+
+        from orders.models import AccessEntitlement
+        from products.models import Product
 
         prod1 = Product.objects.create(
             title="Product 1",
@@ -113,6 +116,7 @@ class TestMyArchiveDisplay:
         response = client.get(reverse("my_archive"), follow=True)
 
         assert response.status_code == 200
+
 
 @pytest.mark.django_db
 class TestDashboardFormPost:

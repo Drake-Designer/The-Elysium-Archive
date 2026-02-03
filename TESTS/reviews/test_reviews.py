@@ -7,12 +7,14 @@ from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.crypto import get_random_string
 
 from orders.models import AccessEntitlement
 from products.models import Category, Product
 from reviews.models import Review
 
 User = get_user_model()
+
 
 class ReviewCreationTest(TestCase):
     """Test review creation permissions."""
@@ -21,15 +23,17 @@ class ReviewCreationTest(TestCase):
         """Set up test data."""
         user_model = cast(Any, User)
 
+        password = get_random_string(12)
+
         self.buyer = user_model.objects.create_user(
             username="buyer",
             email="buyer@test.com",
-            password="pass123",
+            password=password,
         )
         self.non_buyer = user_model.objects.create_user(
             username="nonbuyer",
             email="nonbuyer@test.com",
-            password="pass123",
+            password=password,
         )
 
         EmailAddress.objects.create(
@@ -127,6 +131,7 @@ class ReviewCreationTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response["Location"])
 
+
 class DashboardReviewsTabTest(TestCase):
     """Test account dashboard reviews tab behavior."""
 
@@ -134,10 +139,12 @@ class DashboardReviewsTabTest(TestCase):
         """Set up test data."""
         user_model = cast(Any, User)
 
+        password = get_random_string(12)
+
         self.user = user_model.objects.create_user(
             username="dashreview",
             email="dashreview@test.com",
-            password="pass123",
+            password=password,
         )
         EmailAddress.objects.create(
             user=self.user,
@@ -194,15 +201,17 @@ class ReviewRemovalTest(TestCase):
         """Set up test data."""
         user_model = cast(Any, User)
 
+        password = get_random_string(12)
+
         self.buyer = user_model.objects.create_user(
             username="reviewbuyer",
             email="reviewbuyer@test.com",
-            password="pass123",
+            password=password,
         )
         self.other_buyer = user_model.objects.create_user(
             username="reviewbuyer2",
             email="reviewbuyer2@test.com",
-            password="pass123",
+            password=password,
         )
 
         EmailAddress.objects.create(

@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import UserProfile
 
+
 class ElysiumSignupForm(SignupForm):
     """Style the signup form fields and enforce unique email."""
 
@@ -57,6 +58,7 @@ class ElysiumSignupForm(SignupForm):
 
         return email
 
+
 class ElysiumLoginForm(LoginForm):
     """Style the login form fields."""
 
@@ -79,8 +81,7 @@ class ElysiumLoginForm(LoginForm):
 
     def clean(self):
         """Validate login with case sensitive checks and show one warning."""
-        cleaned_data = forms.Form.clean(self)
-        assert cleaned_data is not None
+        cleaned_data = forms.Form.clean(self) or {}
 
         login_input = (cleaned_data.get("login") or "").strip()
         password = cleaned_data.get("password") or ""
@@ -115,7 +116,9 @@ class ElysiumLoginForm(LoginForm):
             )
 
         self.add_error("login", _("Incorrect username or email."))
-        raise ValidationError(_("Incorrect username or email. Login is case sensitive."))
+        raise ValidationError(
+            _("Incorrect username or email. Login is case sensitive.")
+        )
 
     def _get_user_exact(self, login_input):
         """Return a user using an exact match on username or email."""
@@ -147,6 +150,7 @@ class ElysiumLoginForm(LoginForm):
             return user
 
         return UserModel.objects.filter(email__iexact=login_input).first()
+
 
 class UserProfileForm(forms.ModelForm):
     """Form for editing user profile information."""
@@ -183,5 +187,6 @@ class UserProfileForm(forms.ModelForm):
             "display_name": "Max 20 characters (letters, numbers, symbols, spaces allowed)",
             "profile_picture": "Upload a profile picture (JPG, PNG, max 5MB)",
         }
+
 
 ProfileForm = UserProfileForm

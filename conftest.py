@@ -6,16 +6,24 @@ from typing import Any, cast
 import pytest
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
+from django.utils.crypto import get_random_string
 
 from orders.models import AccessEntitlement, Order
 from products.models import Category, Product
 
 User = get_user_model()
 
+
+def _make_test_password():
+    """Generate a non-hardcoded password for test users."""
+    return get_random_string(12)
+
+
 @pytest.fixture
 def category():
     """Create a test category."""
     return Category.objects.create(name="Test Category", slug="test-category")
+
 
 @pytest.fixture
 def product_active(category):
@@ -32,6 +40,7 @@ def product_active(category):
         category=category,
     )
 
+
 @pytest.fixture
 def product_inactive(category):
     """Create an inactive test product."""
@@ -47,6 +56,7 @@ def product_inactive(category):
         category=category,
     )
 
+
 @pytest.fixture
 def verified_user(db):
     """Create a verified test user."""
@@ -54,10 +64,13 @@ def verified_user(db):
     user = user_model.objects.create_user(
         username="verified",
         email="verified@test.com",
-        password="testpass123",
+        password=_make_test_password(),
     )
-    EmailAddress.objects.create(user=user, email=user.email, verified=True, primary=True)
+    EmailAddress.objects.create(
+        user=user, email=user.email, verified=True, primary=True
+    )
     return user
+
 
 @pytest.fixture
 def unverified_user(db):
@@ -66,10 +79,13 @@ def unverified_user(db):
     user = user_model.objects.create_user(
         username="unverified",
         email="unverified@test.com",
-        password="testpass123",
+        password=_make_test_password(),
     )
-    EmailAddress.objects.create(user=user, email=user.email, verified=False, primary=True)
+    EmailAddress.objects.create(
+        user=user, email=user.email, verified=False, primary=True
+    )
     return user
+
 
 @pytest.fixture
 def staff_user(db):
@@ -78,10 +94,11 @@ def staff_user(db):
     return user_model.objects.create_user(
         username="staff",
         email="staff@test.com",
-        password="testpass123",
+        password=_make_test_password(),
         is_staff=True,
         is_superuser=True,
     )
+
 
 @pytest.fixture
 def client_with_cart(client, product_active):
@@ -91,6 +108,7 @@ def client_with_cart(client, product_active):
     session.save()
     return client
 
+
 @pytest.fixture
 def entitlement(verified_user, product_active):
     """Create an entitlement (purchase) for a user."""
@@ -98,6 +116,7 @@ def entitlement(verified_user, product_active):
         user=cast(Any, verified_user),
         product=product_active,
     )
+
 
 @pytest.fixture
 def order_pending(verified_user, product_active):
@@ -118,6 +137,7 @@ def order_pending(verified_user, product_active):
         line_total=product_active.price,
     )
     return order
+
 
 @pytest.fixture
 def order_paid(verified_user, product_active):

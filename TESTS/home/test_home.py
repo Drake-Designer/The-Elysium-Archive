@@ -2,6 +2,7 @@
 
 import pytest
 from django.urls import reverse
+
 from products.models import Product
 
 
@@ -313,6 +314,7 @@ class TestDealBannerVisibilityRules:
     ):
         """Category banner is hidden when all products in that category are inactive."""
         from decimal import Decimal
+
         from products.models import DealBanner, Product
 
         prod1 = Product.objects.create(
@@ -359,6 +361,7 @@ class TestDealBannerVisibilityRules:
     ):
         """Category banner shows and links to archive with category and deals filter when at least one active product exists."""
         from decimal import Decimal
+
         from products.models import DealBanner, Product
 
         Product.objects.create(

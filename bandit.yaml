@@ -1,0 +1,12 @@
+# Bandit configuration
+# Exclude test folders and generated assets.
+exclude:
+  - .venv
+  - node_modules
+  - staticfiles
+  - migrations
+  - TESTS
+  - tests
+skips:
+  - B101  # assert_used - acceptable in test code
+  - B308  # mark_safe - reviewed, only static HTML without user input

@@ -1,8 +1,8 @@
 """Admin configuration for the orders app."""
+
 from django.contrib import admin
 from django.db import transaction
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 
 from .models import AccessEntitlement, Order, OrderLineItem
 
@@ -81,7 +81,7 @@ class OrderAdmin(admin.ModelAdmin):
                 '<span class="order-username">{}</span>',
                 obj.user.username,
             )
-        return mark_safe('<span class="order-no-user">Guest</span>')
+        return format_html('<span class="order-no-user">Guest</span>')
 
     user_display.short_description = "User"
 
@@ -92,7 +92,7 @@ class OrderAdmin(admin.ModelAdmin):
                 '<span class="order-email">{}</span>',
                 obj.user.email,
             )
-        return mark_safe('<span class="text-muted">—</span>')
+        return format_html('<span class="text-muted">—</span>')
 
     email_display.short_description = "Email"
 

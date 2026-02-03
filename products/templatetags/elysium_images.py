@@ -1,9 +1,8 @@
 """Template tags for Cloudinary fill images."""
 
-
-from django import template
 import logging
 
+from django import template
 
 register = template.Library()
 logger = logging.getLogger(__name__)
@@ -30,9 +29,7 @@ def build_cloudinary_fill_url(image, width, height):
 
         # Check if it's a Cloudinary URL
         if "/upload/" not in base_url:
-            logger.warning(
-                f"cloudinary_fill: URL missing /upload/: {base_url[:100]}"
-            )
+            logger.warning(f"cloudinary_fill: URL missing /upload/: {base_url[:100]}")
             # Return original URL as fallback
             return base_url
 
@@ -64,9 +61,7 @@ def cloudinary_fill_srcset(image, *dimensions):
 
     dims = list(dimensions)
     if len(dims) % 2 != 0:
-        logger.warning(
-            f"cloudinary_fill_srcset: Odd number of dimensions: {dims}"
-        )
+        logger.warning(f"cloudinary_fill_srcset: Odd number of dimensions: {dims}")
         return ""
 
     srcset_parts = []

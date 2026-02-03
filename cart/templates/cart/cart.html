@@ -1,130 +1,130 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    Shopping Cart | The Elysium Archive
+  Shopping Cart | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Review your shopping cart before checkout. All purchases unlock permanent on-site access.
+  Review your shopping cart before checkout. All purchases unlock permanent on-site access.
 {% endblock meta_description %}
 {% block content %}
-    <!-- Cart overview page -->
-    <section class="container py-5">
-        <!-- Cart breadcrumb -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'home' %}">Home</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">Shopping Cart</li>
-            </ol>
-        </nav>
-        <div class="row mb-5">
-            <div class="col-12">
-                <h1 class="display-6 mb-2">Your Shopping Cart</h1>
-                <p class="muted">Review your archives before checkout. Each purchase unlocks permanent access.</p>
-            </div>
+  <!-- Cart overview page -->
+  <section class="container py-5">
+    <!-- Cart breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Shopping Cart</li>
+      </ol>
+    </nav>
+    <div class="row mb-5">
+      <div class="col-12">
+        <h1 class="display-6 mb-2">Your Shopping Cart</h1>
+        <p class="muted">Review your archives before checkout. Each purchase unlocks permanent access.</p>
+      </div>
+    </div>
+    {% if cart_items %}
+      <!-- Cart items layout -->
+      <div class="row g-4">
+        <div class="col-12 col-lg-8">
+          <!-- Cart items list -->
+          <div class="panel p-4">
+            {% for item in cart_items %}
+              <div class="row align-items-center border-bottom pb-4 mb-4 {% if forloop.last %}border-0 pb-0 mb-0{% endif %}">
+                <div class="col-md-8">
+                  <div class="d-flex align-items-start gap-3">
+                    {% if item.product.image %}
+                      <img src="{{ item.product.image.url }}"
+                           alt="{{ item.product.image_alt|default:item.product.title }}"
+                           class="rounded cart-product-thumb"
+                           width="80"
+                           height="80">
+                    {% else %}
+                      <div class="d-flex align-items-center justify-content-center rounded bg-dark cart-product-thumb-placeholder">
+                        <i class="fa-solid fa-book text-muted fa-2x"></i>
+                      </div>
+                    {% endif %}
+                    <div>
+                      <a href="{% url 'product_detail' slug=item.product.slug %}"
+                         class="text-decoration-none">
+                        <h2 class="h5 mb-1">{{ item.product.title }}</h2>
+                      </a>
+                      {% if item.product.tagline %}<p class="small muted mb-2">{{ item.product.tagline }}</p>{% endif %}
+                      <div class="d-flex gap-2 align-items-center">
+                        {% if item.product.category %}<span class="badge text-bg-danger">{{ item.product.category.name }}</span>{% endif %}
+                        {% if item.product.is_deal %}<span class="badge badge-deal-gold">💰 DEAL</span>{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                  <div class="mb-3">
+                    {% if item.product.is_deal and item.product.get_discount_percentage > 0 %}
+                      <div class="d-flex flex-column align-items-md-end">
+                        <span class="cart-item-price-original mb-1">€{{ item.product.price|floatformat:2 }}</span>
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="h4 cart-item-price-discounted mb-0">€{{ item.product.get_discounted_price|floatformat:2 }}</span>
+                          <span class="badge bg-danger">-{{ item.product.get_discount_percentage }}%</span>
+                        </div>
+                      </div>
+                    {% else %}
+                      <span class="h4 text-danger mb-0">€{{ item.product.price|floatformat:2 }}</span>
+                    {% endif %}
+                  </div>
+                  <form method="post" action="{% url 'remove_from_cart' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger"
+                            title="Remove from cart">
+                      <i class="fa-solid fa-trash me-1"></i>Remove
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
         </div>
-        {% if cart_items %}
-            <!-- Cart items layout -->
-            <div class="row g-4">
-                <div class="col-12 col-lg-8">
-                    <!-- Cart items list -->
-                    <div class="panel p-4">
-                        {% for item in cart_items %}
-                            <div class="row align-items-center border-bottom pb-4 mb-4 {% if forloop.last %}border-0 pb-0 mb-0{% endif %}">
-                                <div class="col-md-8">
-                                    <div class="d-flex align-items-start gap-3">
-                                        {% if item.product.image %}
-                                            <img src="{{ item.product.image.url }}"
-                                                 alt="{{ item.product.image_alt|default:item.product.title }}"
-                                                 class="rounded cart-product-thumb"
-                                                 width="80"
-                                                 height="80">
-                                        {% else %}
-                                            <div class="d-flex align-items-center justify-content-center rounded bg-dark cart-product-thumb-placeholder">
-                                                <i class="fa-solid fa-book text-muted fa-2x"></i>
-                                            </div>
-                                        {% endif %}
-                                        <div>
-                                            <a href="{% url 'product_detail' slug=item.product.slug %}"
-                                               class="text-decoration-none">
-                                                <h2 class="h5 mb-1">{{ item.product.title }}</h2>
-                                            </a>
-                                            {% if item.product.tagline %}<p class="small muted mb-2">{{ item.product.tagline }}</p>{% endif %}
-                                            <div class="d-flex gap-2 align-items-center">
-                                                {% if item.product.category %}<span class="badge text-bg-danger">{{ item.product.category.name }}</span>{% endif %}
-                                                {% if item.product.is_deal %}<span class="badge badge-deal-gold">💰 DEAL</span>{% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                    <div class="mb-3">
-                                        {% if item.product.is_deal and item.product.get_discount_percentage > 0 %}
-                                            <div class="d-flex flex-column align-items-md-end">
-                                                <span class="cart-item-price-original mb-1">€{{ item.product.price|floatformat:2 }}</span>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span class="h4 cart-item-price-discounted mb-0">€{{ item.product.get_discounted_price|floatformat:2 }}</span>
-                                                    <span class="badge bg-danger">-{{ item.product.get_discount_percentage }}%</span>
-                                                </div>
-                                            </div>
-                                        {% else %}
-                                            <span class="h4 text-danger mb-0">€{{ item.product.price|floatformat:2 }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <form method="post" action="{% url 'remove_from_cart' %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="product_id" value="{{ item.product.id }}">
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-danger"
-                                                title="Remove from cart">
-                                            <i class="fa-solid fa-trash me-1"></i>Remove
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="col-12 col-lg-4">
-                    <!-- Order summary sidebar -->
-                    <div class="panel p-4 sticky-top cart-summary">
-                        <h3 class="h5 mb-4 pb-3 border-bottom">Order Summary</h3>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="muted">Archives in cart:</span>
-                            <strong>{{ cart_items|length }}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-4 pb-4 border-bottom">
-                            <span class="h5 mb-0">Total:</span>
-                            <span class="h4 text-danger mb-0">€{{ cart_total|floatformat:2 }}</span>
-                        </div>
-                        {% include "includes/no_refunds_policy.html" %}
-                        <form method="post" action="{% url 'checkout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger w-100 btn-lg mb-3">
-                                <i class="fa-solid fa-lock-open me-2"></i>Proceed to Checkout
-                            </button>
-                        </form>
-                        <a href="{% url 'archive' %}" class="btn btn-outline-light w-100">
-                            <i class="fa-solid fa-arrow-left me-2"></i>Continue Shopping
-                        </a>
-                    </div>
-                </div>
+        <div class="col-12 col-lg-4">
+          <!-- Order summary sidebar -->
+          <div class="panel p-4 sticky-top cart-summary">
+            <h3 class="h5 mb-4 pb-3 border-bottom">Order Summary</h3>
+            <div class="d-flex justify-content-between mb-3">
+              <span class="muted">Archives in cart:</span>
+              <strong>{{ cart_items|length }}</strong>
             </div>
-        {% else %}
-            <!-- Empty cart message -->
-            <div class="row">
-                <div class="col-12 col-md-8 mx-auto">
-                    <div class="panel p-5 text-center">
-                        <i class="fa-solid fa-shopping-cart fa-5x mb-4 muted"></i>
-                        <h2 class="h4 mb-3">Your cart is empty</h2>
-                        <p class="muted mb-4">Explore our archive of forbidden entries and add something to your collection.</p>
-                        <a href="{% url 'archive' %}" class="btn btn-primary btn-lg">
-                            <i class="fa-solid fa-book-open me-2"></i>Browse the Archive
-                        </a>
-                    </div>
-                </div>
+            <div class="d-flex justify-content-between mb-4 pb-4 border-bottom">
+              <span class="h5 mb-0">Total:</span>
+              <span class="h4 text-danger mb-0">€{{ cart_total|floatformat:2 }}</span>
             </div>
-        {% endif %}
-    </section>
+            {% include "includes/no_refunds_policy.html" %}
+            <form method="post" action="{% url 'checkout' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger w-100 btn-lg mb-3">
+                <i class="fa-solid fa-lock-open me-2"></i>Proceed to Checkout
+              </button>
+            </form>
+            <a href="{% url 'archive' %}" class="btn btn-outline-light w-100">
+              <i class="fa-solid fa-arrow-left me-2"></i>Continue Shopping
+            </a>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <!-- Empty cart message -->
+      <div class="row">
+        <div class="col-12 col-md-8 mx-auto">
+          <div class="panel p-5 text-center">
+            <i class="fa-solid fa-shopping-cart fa-5x mb-4 muted"></i>
+            <h2 class="h4 mb-3">Your cart is empty</h2>
+            <p class="muted mb-4">Explore our archive of forbidden entries and add something to your collection.</p>
+            <a href="{% url 'archive' %}" class="btn btn-primary btn-lg">
+              <i class="fa-solid fa-book-open me-2"></i>Browse the Archive
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </section>
 {% endblock content %}

@@ -1,6 +1,7 @@
 """Views for the home app."""
 
 import logging
+import os
 
 from allauth.account.utils import has_verified_email
 from django.conf import settings
@@ -86,18 +87,26 @@ def home_view(request):
             url="",
         )
 
-    deal_banners = list(raw_banners.order_by("-is_featured", "order", "-created_at")[:10])
+    deal_banners = list(
+        raw_banners.order_by("-is_featured", "order", "-created_at")[:10]
+    )
 
     context = {
         "featured_products": featured_products,
         "latest_products": latest_products,
         "deal_banners": deal_banners,
-        "user_is_verified": has_verified_email(request.user)
-        if request.user.is_authenticated
-        else False,
+        "user_is_verified": (
+            has_verified_email(request.user) if request.user.is_authenticated else False
+        ),
     }
 
     return render(request, "home/index.html", context)
+
+
+if os.getenv("ALLOW_IFRAME_PREVIEW") == "1":
+    from django.views.decorators.clickjacking import xframe_options_exempt
+
+    home_view = xframe_options_exempt(home_view)
 
 
 @require_GET

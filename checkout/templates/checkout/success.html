@@ -1,120 +1,112 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    Checkout Successful | The Elysium Archive
+  Checkout Successful | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Review your order confirmation and payment status after checkout.
+  Review your order confirmation and payment status after checkout.
 {% endblock meta_description %}
-
 {% block content %}
-    <section class="container py-5">
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'home' %}">Home</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">Order Confirmation</li>
-            </ol>
-        </nav>
-
-        {% if order %}
-            <div class="row mb-5">
-                <div class="col-12">
-                    <div class="text-center mb-5"
-                         id="paymentStatusPanel"
-                         data-status-url="{% url 'checkout_status' order.order_number %}">
-                        {% if order.status == "paid" %}
-                            <i class="fa-solid fa-check-circle fa-5x text-success mb-3"></i>
-                            <h1 class="display-6 mb-2">Payment Successful</h1>
-                            <p class="lead muted">Your archive access unlocks immediately.</p>
-                        {% elif order.status == "pending" %}
-                            <i class="fa-solid fa-hourglass-half fa-5x text-warning mb-3"></i>
-                            <h1 class="display-6 mb-2" id="paymentStatusText">Payment Processing</h1>
-                            <p class="lead muted" id="paymentStatusHint">Payment is being confirmed. Refresh shortly.</p>
-                        {% else %}
-                            <i class="fa-solid fa-circle-xmark fa-5x text-danger mb-3"></i>
-                            <h1 class="display-6 mb-2">Payment Failed</h1>
-                            <p class="lead muted">No charges were captured. Please try again.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12 col-lg-8 mx-auto">
-                    <div class="panel p-5 mb-4">
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <span class="small muted d-block mb-1">Order Number</span>
-                                    <span class="h5">{{ order.order_number }}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <span class="small muted d-block mb-1">Order Date</span>
-                                    <span class="h5">{{ order.created_at|date:"M d, Y \\a\\t H:i" }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4 pb-4 border-bottom">
-                            <h3 class="h6 mb-3">Archives in This Order</h3>
-                            {% for item in order.line_items.all %}
-                                <div class="row align-items-center mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
-                                    <div class="col-8">
-                                        <div>
-                                            <h6 class="mb-1">{{ item.product_title }}</h6>
-                                            <span class="small muted">Qty: {{ item.quantity }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-4 text-end">
-                                        <span class="h6">€{{ item.line_total|floatformat:2 }}</span>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-
-                        <div class="row">
-                            <div class="col-8">
-                                <span class="h5">Order Total</span>
-                            </div>
-                            <div class="col-4 text-end">
-                                <span class="h4 text-danger">€{{ order.total|floatformat:2 }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {% include "includes/no_refunds_policy.html" %}
-
-                    <div class="d-grid gap-3">
-                        <a href="{% url 'account_dashboard' %}?tab=my-archive"
-                           class="btn btn-danger btn-lg">
-                            <i class="fa-solid fa-book-open me-2"></i>View My Archive
-                        </a>
-                        <a href="{% url 'archive' %}" class="btn btn-outline-light btn-lg">
-                            <i class="fa-solid fa-magnifying-glass me-2"></i>Browse More Archives
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            {% if order.status == "pending" %}
-                <script src="{% static 'js/checkout-status.js' %}" defer></script>
+  <section class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Order Confirmation</li>
+      </ol>
+    </nav>
+    {% if order %}
+      <div class="row mb-5">
+        <div class="col-12">
+          <div class="text-center mb-5"
+               id="paymentStatusPanel"
+               data-status-url="{% url 'checkout_status' order.order_number %}">
+            {% if order.status == "paid" %}
+              <i class="fa-solid fa-check-circle fa-5x text-success mb-3"></i>
+              <h1 class="display-6 mb-2">Payment Successful</h1>
+              <p class="lead muted">Your archive access unlocks immediately.</p>
+            {% elif order.status == "pending" %}
+              <i class="fa-solid fa-hourglass-half fa-5x text-warning mb-3"></i>
+              <h1 class="display-6 mb-2" id="paymentStatusText">Payment Processing</h1>
+              <p class="lead muted" id="paymentStatusHint">Payment is being confirmed. Refresh shortly.</p>
+            {% else %}
+              <i class="fa-solid fa-circle-xmark fa-5x text-danger mb-3"></i>
+              <h1 class="display-6 mb-2">Payment Failed</h1>
+              <p class="lead muted">No charges were captured. Please try again.</p>
             {% endif %}
-        {% else %}
-            <div class="row">
-                <div class="col-12 col-md-8 mx-auto">
-                    <div class="alert alert-info">
-                        <p>Payment was successful. Your archive access is being activated.</p>
-                    </div>
-                    <a href="{% url 'account_dashboard' %}?tab=my-archive"
-                       class="btn btn-danger btn-lg w-100">
-                        <i class="fa-solid fa-book-open me-2"></i>View My Archive
-                    </a>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+          <div class="panel p-5 mb-4">
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <span class="small muted d-block mb-1">Order Number</span>
+                  <span class="h5">{{ order.order_number }}</span>
                 </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <span class="small muted d-block mb-1">Order Date</span>
+                  <span class="h5">{{ order.created_at|date:"M d, Y \\a\\t H:i" }}</span>
+                </div>
+              </div>
             </div>
-        {% endif %}
-    </section>
+            <div class="mb-4 pb-4 border-bottom">
+              <h3 class="h6 mb-3">Archives in This Order</h3>
+              {% for item in order.line_items.all %}
+                <div class="row align-items-center mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                  <div class="col-8">
+                    <div>
+                      <h6 class="mb-1">{{ item.product_title }}</h6>
+                      <span class="small muted">Qty: {{ item.quantity }}</span>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <span class="h6">€{{ item.line_total|floatformat:2 }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="row">
+              <div class="col-8">
+                <span class="h5">Order Total</span>
+              </div>
+              <div class="col-4 text-end">
+                <span class="h4 text-danger">€{{ order.total|floatformat:2 }}</span>
+              </div>
+            </div>
+          </div>
+          {% include "includes/no_refunds_policy.html" %}
+          <div class="d-grid gap-3">
+            <a href="{% url 'account_dashboard' %}?tab=my-archive"
+               class="btn btn-danger btn-lg">
+              <i class="fa-solid fa-book-open me-2"></i>View My Archive
+            </a>
+            <a href="{% url 'archive' %}" class="btn btn-outline-light btn-lg">
+              <i class="fa-solid fa-magnifying-glass me-2"></i>Browse More Archives
+            </a>
+          </div>
+        </div>
+      </div>
+      {% if order.status == "pending" %}
+        <script src="{% static 'js/checkout-status.js' %}" defer></script>
+      {% endif %}
+    {% else %}
+      <div class="row">
+        <div class="col-12 col-md-8 mx-auto">
+          <div class="alert alert-info">
+            <p>Payment was successful. Your archive access is being activated.</p>
+          </div>
+          <a href="{% url 'account_dashboard' %}?tab=my-archive"
+             class="btn btn-danger btn-lg w-100">
+            <i class="fa-solid fa-book-open me-2"></i>View My Archive
+          </a>
+        </div>
+      </div>
+    {% endif %}
+  </section>
 {% endblock content %}

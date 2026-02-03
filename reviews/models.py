@@ -1,6 +1,6 @@
 """Models for the reviews app."""
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -10,6 +10,7 @@ from products.models import Product
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractUser
+
 
 class Review(models.Model):
     """Store a verified buyer review for a purchased product."""
@@ -22,8 +23,8 @@ class Review(models.Model):
         (5, "5 - Outstanding"),
     ]
 
-    user: models.ForeignKey
-    product: models.ForeignKey
+    user: models.ForeignKey["AbstractUser"]
+    product: models.ForeignKey[Product]
     rating: models.PositiveIntegerField
     title: models.CharField
     body: models.TextField

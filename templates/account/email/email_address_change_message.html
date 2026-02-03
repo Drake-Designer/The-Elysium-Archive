@@ -1,19 +1,12 @@
 {% extends "account/email/base_message.html" %}
-
 {% block head_title %}Email Address Changed - The Elysium Archive{% endblock %}
-
-{% block preheader %}
-Your email address has been updated successfully.
-{% endblock %}
-
-{% block title %}
-Email Address Changed
-{% endblock %}
-
+{% block preheader %}Your email address has been updated successfully.{% endblock %}
+{% block title %}Email Address Changed{% endblock %}
 {% block content %}
-<p>This is a confirmation that your email address has been successfully changed on your account.</p>
-<p><strong>Your account is now using this email address for all future communications.</strong></p>
+  <p>This is a confirmation that your email address has been successfully changed on your account.</p>
+  <p>
+    <strong>Your account is now using this email address for all future communications.</strong>
+  </p>
 {% endblock %}
-
 {% block button %}{% endblock %}
 {% block fallback %}{% endblock %}

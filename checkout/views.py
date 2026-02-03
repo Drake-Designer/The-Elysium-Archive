@@ -1,9 +1,9 @@
 """Views for checkout and Stripe integration."""
 
+import logging
 from datetime import timedelta
 
 import stripe
-
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
@@ -19,12 +19,16 @@ from orders.models import AccessEntitlement, Order, OrderLineItem
 from orders.services import grant_entitlements_for_order
 from products.models import Product
 
+logger = logging.getLogger(__name__)
+
+
 def _set_stripe_key() -> bool:
     """Set Stripe API key from settings and return True if available."""
     if not getattr(settings, "STRIPE_SECRET_KEY", ""):
         return False
     stripe.api_key = settings.STRIPE_SECRET_KEY
     return True
+
 
 def _remove_purchased_from_session_cart(request, product_ids):
     """Remove purchased product IDs from the session cart."""
@@ -45,6 +49,7 @@ def _remove_purchased_from_session_cart(request, product_ids):
 
     return removed
 
+
 def _get_recent_pending_order_any(request, minutes=15):
     """Return a recent pending order for the user, even without Stripe session id."""
     cutoff = timezone.now() - timedelta(minutes=minutes)
@@ -57,6 +62,7 @@ def _get_recent_pending_order_any(request, minutes=15):
         .order_by("-created_at")
         .first()
     )
+
 
 def _try_reuse_stripe_session(request, order):
     """Reuse an existing Stripe session if it is still open."""
@@ -84,6 +90,7 @@ def _try_reuse_stripe_session(request, order):
 
     return None
 
+
 def _fail_recent_pending_order(request, minutes=30):
     """Mark a recent pending order as failed."""
     cutoff = timezone.now() - timedelta(minutes=minutes)
@@ -105,6 +112,7 @@ def _fail_recent_pending_order(request, minutes=30):
     order.save(update_fields=["status", "updated_at"])
     return order
 
+
 def _fail_stale_pending_orders(request, minutes=30):
     """Mark stale pending orders for the current user as failed."""
     cutoff = timezone.now() - timedelta(minutes=minutes)
@@ -113,6 +121,7 @@ def _fail_stale_pending_orders(request, minutes=30):
         status="pending",
         created_at__lt=cutoff,
     ).update(status="failed")
+
 
 def _verify_and_finalize_order_if_paid(user, order):
     """Verify Stripe session and finalize order if Stripe reports paid."""
@@ -130,8 +139,8 @@ def _verify_and_finalize_order_if_paid(user, order):
     except stripe.error.StripeError:
         return False
 
-    payment_status = (
-        getattr(session, "payment_status", None) or session.get("payment_status")
+    payment_status = getattr(session, "payment_status", None) or session.get(
+        "payment_status"
     )
 
     if payment_status != "paid":
@@ -150,12 +159,15 @@ def _verify_and_finalize_order_if_paid(user, order):
 
     return True
 
+
 @verified_email_required
 @require_http_methods(["POST"])
 def checkout(request):
     """Create Stripe checkout session and redirect user to payment."""
     if not _set_stripe_key():
-        messages.error(request, "Payment is not configured yet. Please try again later.")
+        messages.error(
+            request, "Payment is not configured yet. Please try again later."
+        )
         return redirect("cart")
 
     _fail_stale_pending_orders(request)
@@ -279,10 +291,15 @@ def checkout(request):
         try:
             order.status = "failed"
             order.save(update_fields=["status", "updated_at"])
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning(
+                "Failed to update order %s status after Stripe error.",
+                order.order_number,
+                exc_info=exc,
+            )
 
         return redirect("cart")
+
 
 @verified_email_required
 @require_http_methods(["GET"])
@@ -314,6 +331,7 @@ def checkout_success(request, order_number):
 
     return render(request, "checkout/success.html", {"order": order})
 
+
 @verified_email_required
 @require_http_methods(["GET"])
 def checkout_status(request, order_number):
@@ -331,6 +349,7 @@ def checkout_status(request, order_number):
             order.refresh_from_db()
 
     return JsonResponse({"status": order.status})
+
 
 @verified_email_required
 def checkout_cancel(request):

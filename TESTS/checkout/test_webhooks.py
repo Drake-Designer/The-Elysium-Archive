@@ -53,7 +53,9 @@ def test_webhook_idempotent_paid_event_does_not_duplicate_entitlements(
         },
     }
 
-    with patch("checkout.webhooks.stripe.Webhook.construct_event", return_value=payload):
+    with patch(
+        "checkout.webhooks.stripe.Webhook.construct_event", return_value=payload
+    ):
         response1 = client.post(
             reverse("stripe_webhook"),
             data=json.dumps(payload).encode("utf-8"),

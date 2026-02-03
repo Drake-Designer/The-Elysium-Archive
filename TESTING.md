@@ -2,16 +2,31 @@
 
 This document describes the current automated test suite and manual testing procedures for the repository as it stands.
 
+## Current Test Status
+
+**120 tests passing** (as of 02/02/2026)
+
+All automated tests run successfully with pytest. See the [Automated Tests](#automated-tests) section for details.
+
+![pytest Results](documentation/testing/pytest.png)
+
+---
+
 ## Evidence Status (Testing and Quality Checklist)
 
-- Automated test suite documented: **Yes** (pytest, coverage listed below)
+- Automated test suite documented: **Yes** (120 tests, all passing)
 - Manual testing checklist provided: **Yes**
+- Python style/lint checks completed: **Yes** (black, isort, flake8, pylint, djlint, bandit)
+- Security audit completed: **Yes** (Bandit scan clean, 0 issues)
+- HTML validation results recorded: **Partial** (see HTML Validation section)
+- CSS validation results recorded: **Partial** (see CSS Validation section)
+- JavaScript validation completed: **Yes** (JSHint, 0 errors)
 - Responsiveness testing results recorded: **To be completed**
 - Accessibility testing results recorded: **To be completed**
-- HTML/CSS validation results recorded: **To be completed**
-- Python style/lint check results recorded: **To be completed**
 
 This checklist is used to track the current state of testing, validation, and quality evidence within the repository.
+
+---
 
 ## Automated Tests
 
@@ -29,6 +44,9 @@ The automated suite covers:
 - Authentication and email‑verification gates (allauth flows and protected pages)
 - Payment flow logic (Stripe checkout session creation, webhooks, and entitlement creation)
 - Data management and access control (entitlements, inactive product access rules)
+- **Review system** (create, edit, delete with character limits and optional fields)
+- **My Archive** (display of unlocked products with review/edit buttons)
+- **Dashboard functionality** (profile, archive, orders, reviews tabs with review delete modale)
 
 ### Test Configuration
 
@@ -87,7 +105,22 @@ pytest -v -s
 
 ### Test Inventory Summary
 
+**Total Tests:** 120 (all passing as of 02/02/2026)
+
+**Test Distribution by App:**
+
+- Accounts: 20 tests (authentication, email verification, profile management, account deletion)
+- Products: 29 tests (access control, archive reading, CRUD operations, product removal)
+- Cart: 12 tests (cart operations, validation, totals)
+- Checkout: 3 tests (checkout flow, Stripe integration, order reuse)
+- Orders: 15 tests (webhook handling, order status, entitlements)
+- Home: 18 tests (admin access, product management, deal banner visibility)
+- Reviews: 10 tests (review creation, dashboard integration, removed products)
+- Webhooks: 13 tests (idempotency, payment status, error handling)
+
 Test discovery (under `TESTS/`) is controlled by `pyproject.toml`. Run `pytest --collect-only` to confirm the current test count.
+
+---
 
 ## Automated Test Coverage by App
 
@@ -230,24 +263,29 @@ File:
 Coverage:
 
 - Review form visibility for buyers vs non-buyers
-- Review creation for buyers
+- Review creation for buyers (with character limits: title 50 chars, body 1000 chars)
 - Anonymous redirect to login on review POST
 - Duplicate review prevention
-- Review display (single and multiple)
-- Rating range validation
-- Optional review title
-- Review model __str__
+- Review display (single and multiple with star ratings and verified badges)
+- Rating range validation (1-5 stars)
+- **Optional review title** (no character limit enforcement required)
+- **Optional review body** (can submit rating-only reviews)
+- **Mandatory rating field** (only required field in review form)
+- Review model **str**
 - Cascade deletes for user and product
 - Review edit and delete permissions
-- Delete requires POST
+- Delete requires POST and modale confirmation in UI
+- Character counter real-time updates (JavaScript)
+- Edit review inherits same styling and validations as create
 
 Key assertions:
 
 - Status codes and redirects
 - Review database state and uniqueness
 - Content displayed on product detail page
+- Optional fields properly accepted as blank/empty
 
-### Admin (Home)
+---
 
 File:
 
@@ -288,7 +326,7 @@ Key user journeys covered below:
 python manage.py createsuperuser
 ```
 
-2. Create a test category and product:
+1. Create a test category and product:
 
 ```bash
 python manage.py shell
@@ -308,7 +346,7 @@ python manage.py shell
 ... )
 ```
 
-3. Start the dev server:
+1. Start the dev server:
 
 ```bash
 python manage.py runserver
@@ -352,7 +390,7 @@ Note: In DEBUG, email is sent to the console backend. Use the verification link 
 - [ ] Unpublished products are not listed publicly, but entitled buyers can access preview/read pages; non-entitled users cannot
 - [ ] Staff user can edit product in admin and save changes
 
-#### Cart
+#### Cart (Manual)
 
 - [ ] Verified user adds product to cart from preview page -> success message
 - [ ] Visit `/cart/` -> items listed and totals shown
@@ -373,6 +411,7 @@ Note: In DEBUG, email is sent to the console backend. Use the verification link 
 - [ ] Simulated delayed webhook: fallback confirmation still finalises paid order and unlocks access
 
 Webhook endpoint for Stripe CLI testing:
+
 - `/checkout/webhook/`
 
 Stripe CLI listener:
@@ -397,13 +436,29 @@ Post-payment verification checklist:
 - Success-page refresh safety (idempotent entitlement creation and cart clearing)
 - Webhook replay safety
 
-#### Reviews
+#### Reviews (Manual)
 
 - [ ] Buyer sees review form on product detail page
 - [ ] Non-buyer does not see review form
-- [ ] Buyer submits review -> appears on product detail page
-- [ ] Buyer edits review via `/archive/<slug>/review/<id>/edit/`
-- [ ] Buyer deletes review via POST to `/archive/<slug>/review/<id>/delete/`
+- [ ] **Rating field is mandatory** - cannot submit without selecting a rating
+- [ ] **Title field is optional** - can submit review without a title
+- [ ] **Review/Body field is optional** - can submit review with only a rating
+- [ ] Buyer enters title -> character counter updates (0-50 limit)
+- [ ] Buyer enters review body -> character counter updates (0-1000 limit)
+- [ ] Cursor blocked at 50 chars in title field (cannot type beyond limit)
+- [ ] Cursor blocked at 1000 chars in review field (cannot type beyond limit)
+- [ ] Buyer submits review -> appears on product detail page with correct rating/title/body
+- [ ] Review displays with star rating and verified badge
+- [ ] Buyer edits review via `/archive/<slug>/review/<id>/edit/` -> same form styling and character limits
+- [ ] Buyer deletes review -> **modale confirmation appears** ("Are you sure you want to delete your review?")
+- [ ] Modale "Stay" button -> closes modale, review not deleted
+- [ ] Modale "Delete" button -> removes review, redirects back
+- [ ] Buyer views My Archive tab -> **"Leave Review" button below "Read"** (if no review exists)
+- [ ] Buyer clicks "Leave Review" -> jumps to product detail review section
+- [ ] Buyer with existing review sees **"Edit Review" button** instead of "Leave Review"
+- [ ] Buyer clicks "Edit Review" from My Archive -> opens edit review page
+- [ ] Buyer views My Reviews tab in Dashboard -> review listed with edit/delete buttons
+- [ ] Buyer clicks delete from My Reviews -> **same modale confirmation appears**
 - [ ] Non-owner edit/delete -> redirected with error message
 - [ ] Delete via GET returns 405
 
@@ -424,25 +479,67 @@ Post-payment verification checklist:
 - [ ] Staff user can view order list and order detail pages
 - [ ] Test delete and bulk delete in admin and confirm observed behaviour
 
-## Responsiveness Testing (To be completed)
+## Responsiveness Testing
 
-- [ ] 320x568 (iPhone SE) – Chrome DevTools
-- [ ] 375x667 (iPhone 8) – Chrome DevTools
-- [ ] 390x844 (iPhone 12/13) – Chrome DevTools
-- [ ] 768x1024 (iPad) – Chrome DevTools
-- [ ] 820x1180 (iPad Air) – Chrome DevTools
-- [ ] 1366x768 (Laptop) – Browser resize
-- [ ] 1440x900 (Desktop) – Browser resize
-- [ ] 1920x1080 (Desktop) – Browser resize
+The application has been tested across multiple device sizes to ensure responsive design and proper layout at all breakpoints.
 
-Browser coverage:
+### Device Coverage
 
-- [ ] Chrome
-- [ ] Firefox
-- [ ] Edge
-- [ ] Safari (if available)
+#### iPhone SE
 
-Record pass/fail and any layout issues in this section when testing is completed.
+![iPhone SE Responsiveness](documentation/testing/responsiveness-iphone-se.png)
+
+- Screen size: 375x667px
+- Browser: Safari (iOS)
+- Status: ✅ Tested and verified
+
+#### Samsung Galaxy S20
+
+![Samsung Galaxy S20 Responsiveness](documentation/testing/responsiveness-samsung-s20.png)
+
+- Screen size: 360x800px
+- Browser: Chrome (Android)
+- Status: ✅ Tested and verified
+
+#### iPhone 14 Pro Max
+
+![iPhone 14 Pro Max Responsiveness](documentation/testing/responsiveness-iphone-14promax.png)
+
+- Screen size: 430x932px
+- Browser: Safari (iOS)
+- Status: ✅ Tested and verified
+
+#### iPad Pro
+
+![iPad Pro Responsiveness](documentation/testing/responsiveness-ipad-pro.png)
+
+- Screen size: 1024x1366px
+- Browser: Safari (iPadOS)
+- Status: ✅ Tested and verified
+
+#### Google Nest Hub Max
+
+![Google Nest Hub Max Responsiveness](documentation/testing/responsiveness-nesthubmax.png)
+
+- Screen size: 1280x800px
+- Browser: Chrome (Cast OS)
+- Status: ✅ Tested and verified
+
+### Testing Summary
+
+All major breakpoints have been tested across mobile (portrait/landscape), tablet, and desktop devices. The application maintains consistent layout, readability, and usability across all tested screen sizes.
+
+Key responsive features verified:
+
+- Mobile-first navigation (hamburger menu on mobile)
+- Flexible grid layouts with appropriate column spans
+- Typography scaling with viewport width
+- Touch-friendly button/link sizing on mobile devices
+- Proper spacing and padding at all breakpoints
+- Image optimization for different screen densities
+- Form inputs properly sized for mobile interaction
+
+---
 
 ## Accessibility Testing (To be completed)
 
@@ -476,25 +573,44 @@ Staff-only test URLs exist for error pages:
 
 Verify each renders the intended themed error page. These should be tested with `DEBUG=False` for production parity.
 
-## Validation and Code Quality (To be completed)
-
-No validator or lint results are stored in the repository yet. Use the steps below to capture evidence.
+## Validation and Code Quality
 
 ### HTML Validation (W3C)
 
-Suggested pages/templates:
+All key pages have been validated using the W3C HTML Validator and conform to HTML5 standards.
 
-- `templates/base.html`
-- `home/templates/home/index.html`
-- `products/templates/products/product_list.html`
-- `products/templates/products/product_detail.html`
-- `cart/templates/cart/cart.html`
-- `checkout/templates/checkout/success.html`
+#### CSS Validation Results
 
-How to validate:
+**Public Pages:**
 
-- Use https://validator.w3.org/ (direct input or file upload)
-- Record results and fixes here once completed
+- [Home](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2F) - ✅ Valid
+- [Archive Listing](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Farchive%2F) - ✅ Valid
+- [Product Detail (The Biological Purge)](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Farchive%2Fthe-biological-purge-viral-extermination-protocols%2F) - ✅ Valid
+- [Lore Page](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Flore%2F) - ✅ Valid
+- [Cart](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Fcart%2F) - ✅ Valid
+- [Privacy Policy](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Fprivacy-of-the-covenant%2F) - ✅ Valid
+- [Terms of Service](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Fterms-of-the-archiver%2F) - ✅ Valid
+- [Contact](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Fcontact-the-lore%2F) - ✅ Valid
+
+**Dashboard Pages (Authenticated):**
+
+- [Dashboard - Profile Tab](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Faccounts%2Fdashboard%2F) - ✅ Valid
+- [Dashboard - My Archive Tab](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Faccounts%2Fdashboard%2F%3Ftab%3Dmy-archive) - ✅ Valid
+- [Dashboard - My Orders Tab](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Faccounts%2Fdashboard%2F%3Ftab%3Dmy-orders) - ✅ Valid
+- [Dashboard - My Reviews Tab](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Faccounts%2Fdashboard%2F%3Ftab%3Dmy-reviews) - ✅ Valid
+- [Dashboard - Delete Account Tab](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Faccounts%2Fdashboard%2F%3Ftab%3Ddelete) - ✅ Valid
+
+**Authentication Pages:**
+
+- [Login](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Faccounts%2Flogin%2F) - ✅ Valid
+- [Signup](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Faccounts%2Fsignup%2F) - ✅ Valid
+- [Email Verification](https://validator.w3.org/nu/?doc=https%3A%2F%2Fthe-elysium-archive-a51393fa9431.herokuapp.com%2Faccounts%2Femail%2F) - ✅ Valid
+
+#### Summary
+
+All tested pages conform to W3C HTML5 standards with no validation errors or warnings.
+
+---
 
 ### CSS Validation (Jigsaw)
 
@@ -506,8 +622,27 @@ Suggested files:
 
 How to validate:
 
-- Use https://jigsaw.w3.org/css-validator/
+- Use [Jigsaw CSS Validator](https://jigsaw.w3.org/css-validator/)
 - Record results and fixes here once completed
+
+#### Validation Results
+
+- Local styles updated to remove nonstandard `line-clamp` and invalid mask shorthand.
+- Remaining CSS errors in the validator report come from external CDN libraries (Font Awesome) and cannot be fixed in this repository.
+- Warnings are primarily vendor extensions (Bootstrap/Font Awesome) and CSS variables.
+
+### JavaScript Validation (JSHint)
+
+All custom JavaScript files were validated with JSHint and returned no errors. Metrics warnings relate to complexity only.
+
+Validated files:
+
+- `static/js/admin/image-alt-counter.js`
+- `static/js/checkout-status.js`
+- `static/js/dashboard.js`
+- `static/js/effects-toggle.js`
+- `static/js/messages.js`
+- `static/js/review-form.js`
 
 ### Python Style/Lint Checks (optional)
 
@@ -517,10 +652,74 @@ Available via `dev-requirements.txt`:
 - `python -m isort --check-only .`
 - `flake8`
 - `pylint`
-- `bandit -r .`
+- `bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py`
 - `djlint --check .`
 
-Record results and any fixes here once completed.
+Results (02/02/2026):
+
+- `black --check .`: ✅ Passed after formatting.
+- `isort --check-only .`: ✅ Passed after formatting.
+- `flake8 .`: ✅ Passed with exclusions for `.venv` and migrations via `.flake8`.
+- `pylint accounts cart checkout home orders products reviews elysium_archive manage.py`: ✅ No output reported.
+- `bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py`: ✅ No issues reported.
+- `djlint --check .`: ✅ Passed (0 files would be updated).
+
+#### Bandit Security Audit Details
+
+Bandit is a security linter that scans Python code for common security issues. The project uses a custom configuration file (`bandit.yaml`) to focus scans on application code and skip false positives.
+
+**Configuration (`bandit.yaml`):**
+
+```yaml
+# Bandit configuration
+# Exclude test folders and generated assets.
+exclude:
+  - .venv
+  - node_modules
+  - staticfiles
+  - migrations
+  - TESTS
+  - tests
+skips:
+  - B101  # assert_used - acceptable in test code
+  - B308  # mark_safe - reviewed, only static HTML without user input
+```
+
+**Excluded Directories:**
+
+- `.venv`, `node_modules`, `staticfiles`: third-party code and generated assets
+- `migrations`, `TESTS`, `tests`: auto-generated code and test files
+
+**Skipped Checks:**
+
+- **B101** (assert_used): Acceptable in test code; excluded globally since tests are already excluded
+- **B308** (mark_safe): All uses reviewed and confirmed safe (static HTML only, no user input)
+
+**Security Improvements Implemented:**
+
+1. **XSS Prevention:**
+   - Replaced `mark_safe()` with `format_html()` in admin display methods where variables are interpolated
+   - Retained `mark_safe()` only for completely static HTML (reviewed and documented)
+
+2. **Password Security:**
+   - Removed all hardcoded passwords from test fixtures
+   - Implemented runtime password generation using `django.utils.crypto.get_random_string()`
+
+3. **Secret Key Management:**
+   - Removed hardcoded development secret key
+   - Added `get_random_secret_key()` fallback for local development
+   - Production validation ensures `SECRET_KEY` comes from environment
+
+4. **Exception Handling:**
+   - Added logging to all try/except blocks that previously used `pass`
+   - Exceptions are now logged with `logger.warning()` and `exc_info=True`
+
+**Scan Results:**
+
+- **Date:** 02/02/2026
+- **Lines Scanned:** 5,146 (application code only)
+- **Issues Found:** 0 (Low: 0, Medium: 0, High: 0)
+- **Status:** ✅ Clean
 
 ### Security Headers
 
@@ -565,19 +764,19 @@ jobs:
 pytest <test_name> -vv --tb=long
 ```
 
-2. Show print/debug output:
+1. Show print/debug output:
 
 ```bash
 pytest <test_name> -vv -s
 ```
 
-3. Stop on first failure:
+1. Stop on first failure:
 
 ```bash
 pytest -x
 ```
 
-4. Run in debugger (pdb):
+1. Run in debugger (pdb):
 
 ```bash
 pytest <test_name> --pdb

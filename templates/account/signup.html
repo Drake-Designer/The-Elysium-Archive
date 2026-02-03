@@ -1,129 +1,109 @@
 {% extends "base.html" %}
 {% block title %}
-    Register | The Elysium Archive
+  Register | The Elysium Archive
 {% endblock title %}
 {% block content %}
-    <!-- Registration form page -->
-    <section class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-5">
-                <div class="panel p-4 p-lg-5">
-                    <h1 class="h3 text-center mb-4">
-                        <i class="fa-solid fa-user-plus me-2"></i>Create Account
-                    </h1>
-
-                    <!-- Signup form -->
-                    <form method="post" action="{% url 'account_signup' %}" novalidate>
-                        {% csrf_token %}
-
-                        {% if redirect_field_value %}
-                            <input type="hidden"
-                                   name="{{ redirect_field_name }}"
-                                   value="{{ redirect_field_value }}">
-                        {% endif %}
-
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {% for err in form.non_field_errors %}
-                                    {{ err }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-
-                        <div class="mb-3">
-                            <label for="id_username" class="form-label">Username</label>
-                            <input type="text"
-                                   name="username"
-                                   id="id_username"
-                                   class="form-control {% if form.username.errors %}is-invalid{% endif %}"
-                                   value="{{ form.username.value|default:'' }}"
-                                   placeholder="Choose a username"
-                                   autocomplete="username"
-                                   required>
-                            {% if form.username.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.username.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_email" class="form-label">Email</label>
-                            <input type="email"
-                                   name="email"
-                                   id="id_email"
-                                   class="form-control {% if form.email.errors %}is-invalid{% endif %}"
-                                   value="{{ form.email.value|default:'' }}"
-                                   placeholder="your@email.com"
-                                   autocomplete="email"
-                                   required>
-                            {% if form.email.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.email.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <div class="form-text muted">Helps with account recovery</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_password1" class="form-label">Password</label>
-                            <input type="password"
-                                   name="password1"
-                                   id="id_password1"
-                                   class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
-                                   placeholder="Create a secure password"
-                                   autocomplete="new-password"
-                                   required>
-                            {% if form.password1.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.password1.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="id_password2" class="form-label">Confirm Password</label>
-                            <input type="password"
-                                   name="password2"
-                                   id="id_password2"
-                                   class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
-                                   placeholder="Repeat your password"
-                                   autocomplete="new-password"
-                                   required>
-                            {% if form.password2.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.password2.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Centered Sign Up button -->
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-primary btn-icon">
-                                <i class="fa-solid fa-user-plus"></i>Sign Up
-                            </button>
-                        </div>
-                    </form>
-
-                    <hr class="my-4 border-secondary">
-
-                    <div class="text-center">
-                        <p class="muted mb-2">Already have an account?</p>
-                        <a class="btn btn-outline-light btn-icon"
-                           href="{% url 'account_login' %}">
-                            <i class="fa-solid fa-right-to-bracket"></i>Sign In
-                        </a>
-                    </div>
+  <!-- Registration form page -->
+  <section class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-5">
+        <div class="panel p-4 p-lg-5">
+          <h1 class="h3 text-center mb-4">
+            <i class="fa-solid fa-user-plus me-2"></i>Create Account
+          </h1>
+          <!-- Signup form -->
+          <form method="post" action="{% url 'account_signup' %}" novalidate>
+            {% csrf_token %}
+            {% if redirect_field_value %}
+              <input type="hidden"
+                     name="{{ redirect_field_name }}"
+                     value="{{ redirect_field_value }}">
+            {% endif %}
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+              </div>
+            {% endif %}
+            <div class="mb-3">
+              <label for="id_username" class="form-label">Username</label>
+              <input type="text"
+                     name="username"
+                     id="id_username"
+                     class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                     value="{{ form.username.value|default:'' }}"
+                     placeholder="Choose a username"
+                     autocomplete="username"
+                     required>
+              {% if form.username.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.username.errors %}{{ error }}{% endfor %}
                 </div>
+              {% endif %}
             </div>
+            <div class="mb-3">
+              <label for="id_email" class="form-label">Email</label>
+              <input type="email"
+                     name="email"
+                     id="id_email"
+                     class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                     value="{{ form.email.value|default:'' }}"
+                     placeholder="your@email.com"
+                     autocomplete="email"
+                     required>
+              {% if form.email.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.email.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text muted">Helps with account recovery</div>
+            </div>
+            <div class="mb-3">
+              <label for="id_password1" class="form-label">Password</label>
+              <input type="password"
+                     name="password1"
+                     id="id_password1"
+                     class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                     placeholder="Create a secure password"
+                     autocomplete="new-password"
+                     required>
+              {% if form.password1.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.password1.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            <div class="mb-4">
+              <label for="id_password2" class="form-label">Confirm Password</label>
+              <input type="password"
+                     name="password2"
+                     id="id_password2"
+                     class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                     placeholder="Repeat your password"
+                     autocomplete="new-password"
+                     required>
+              {% if form.password2.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.password2.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            <!-- Centered Sign Up button -->
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-primary btn-icon">
+                <i class="fa-solid fa-user-plus"></i>Sign Up
+              </button>
+            </div>
+          </form>
+          <hr class="my-4 border-secondary">
+          <div class="text-center">
+            <p class="muted mb-2">Already have an account?</p>
+            <a class="btn btn-outline-light btn-icon"
+               href="{% url 'account_login' %}">
+              <i class="fa-solid fa-right-to-bracket"></i>Sign In
+            </a>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 {% endblock content %}

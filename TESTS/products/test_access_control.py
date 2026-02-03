@@ -2,6 +2,7 @@
 
 import pytest
 from django.urls import reverse
+
 from orders.models import AccessEntitlement
 
 
@@ -110,8 +111,9 @@ class TestProductListFiltering:
 
     def test_featured_products_appear_in_list(self, client, category):
         """Featured products appear in product list."""
-        from products.models import Product
         from decimal import Decimal
+
+        from products.models import Product
 
         featured = Product.objects.create(
             title="Featured",
@@ -132,8 +134,9 @@ class TestProductListFiltering:
 
     def test_inactive_featured_not_in_list(self, client, category):
         """Inactive products do not appear even if featured."""
-        from products.models import Product
         from decimal import Decimal
+
+        from products.models import Product
 
         inactive_featured = Product.objects.create(
             title="Inactive Featured",

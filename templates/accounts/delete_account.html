@@ -1,51 +1,51 @@
 {% extends "base.html" %}
 {% block title %}
-    Delete Account | The Elysium Archive
+  Delete Account | The Elysium Archive
 {% endblock title %}
 {% block content %}
-    <!-- Account deletion confirmation -->
-    <section class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6">
-                <div class="panel p-4 p-lg-5">
-                    <h1 class="h3 text-center mb-4">
-                        <i class="fa-solid fa-exclamation-triangle me-2 text-danger"></i>Delete Account
-                    </h1>
-                    {% if user.is_superuser %}
-                        <div class="alert alert-warning" role="alert">
-                            <strong>Notice:</strong> Superuser accounts cannot be deleted through this interface.
-                            Contact the system administrator for account management.
-                        </div>
-                        <div class="text-center mt-4">
-                            <a href="{% url 'profile' %}" class="btn btn-outline-light">
-                                <i class="fa-solid fa-arrow-left me-1"></i>Back to Profile
-                            </a>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-danger" role="alert">
-                            <strong>Warning:</strong> This action cannot be undone.
-                        </div>
-                        <p class="muted mb-4">Deleting your account will permanently remove:</p>
-                        <ul class="muted mb-4">
-                            <li>Your profile and account information</li>
-                            <li>Your purchase history and access to unlocked entries</li>
-                            <li>All associated data</li>
-                        </ul>
-                        <p class="muted mb-4">If you're sure you want to proceed, click the button below.</p>
-                        <form method="post">
-                            {% csrf_token %}
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-danger btn-icon">
-                                    <i class="fa-solid fa-trash"></i>Delete My Account
-                                </button>
-                                <a href="{% url 'account_dashboard' %}" class="btn btn-outline-light">
-                                    <i class="fa-solid fa-arrow-left me-1"></i>Cancel
-                                </a>
-                            </div>
-                        </form>
-                    {% endif %}
-                </div>
+  <!-- Account deletion confirmation -->
+  <section class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        <div class="panel p-4 p-lg-5">
+          <h1 class="h3 text-center mb-4">
+            <i class="fa-solid fa-exclamation-triangle me-2 text-danger"></i>Delete Account
+          </h1>
+          {% if user.is_superuser %}
+            <div class="alert alert-warning" role="alert">
+              <strong>Notice:</strong> Superuser accounts cannot be deleted through this interface.
+              Contact the system administrator for account management.
             </div>
+            <div class="text-center mt-4">
+              <a href="{% url 'profile' %}" class="btn btn-outline-light">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back to Profile
+              </a>
+            </div>
+          {% else %}
+            <div class="alert alert-danger" role="alert">
+              <strong>Warning:</strong> This action cannot be undone.
+            </div>
+            <p class="muted mb-4">Deleting your account will permanently remove:</p>
+            <ul class="muted mb-4">
+              <li>Your profile and account information</li>
+              <li>Your purchase history and access to unlocked entries</li>
+              <li>All associated data</li>
+            </ul>
+            <p class="muted mb-4">If you're sure you want to proceed, click the button below.</p>
+            <form method="post">
+              {% csrf_token %}
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-danger btn-icon">
+                  <i class="fa-solid fa-trash"></i>Delete My Account
+                </button>
+                <a href="{% url 'account_dashboard' %}" class="btn btn-outline-light">
+                  <i class="fa-solid fa-arrow-left me-1"></i>Cancel
+                </a>
+              </div>
+            </form>
+          {% endif %}
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 {% endblock content %}

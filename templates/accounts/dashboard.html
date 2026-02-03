@@ -1,452 +1,452 @@
 {% extends "base.html" %}
 {% load elysium_images %}
 {% block title %}
-    Dashboard | The Elysium Archive
+  Dashboard | The Elysium Archive
 {% endblock title %}
 {% block content %}
-    <!-- Account dashboard -->
-    <section class="container py-5">
-        <div class="row">
-            <div class="col-12 col-lg-4">
-                <aside class="dashboard-sidebar">
-                    <div class="panel sidebar-profile-card p-4 mb-3">
-                        {% if user.profile.profile_picture %}
-                            <img class="profile-pic-sidebar mb-3"
-                                 src="{{ user.profile.profile_picture.url }}"
-                                 alt="Profile picture">
-                        {% else %}
-                            <div class="sidebar-profile-icon mb-2">
-                                <i class="fa-solid fa-user-circle"></i>
-                            </div>
-                        {% endif %}
-                        <h3 class="h5 mb-1">{{ user.profile.get_display_name }}</h3>
-                        <p class="muted mb-0">{{ user.email }}</p>
+  <!-- Account dashboard -->
+  <section class="container py-5">
+    <div class="row">
+      <div class="col-12 col-lg-4">
+        <aside class="dashboard-sidebar">
+          <div class="panel sidebar-profile-card p-4 mb-3">
+            {% if user.profile.profile_picture %}
+              <img class="profile-pic-sidebar mb-3"
+                   src="{{ user.profile.profile_picture.url }}"
+                   alt="Profile picture">
+            {% else %}
+              <div class="sidebar-profile-icon mb-2">
+                <i class="fa-solid fa-user-circle"></i>
+              </div>
+            {% endif %}
+            <h3 class="h5 mb-1">{{ user.profile.get_display_name }}</h3>
+            <p class="muted mb-0">{{ user.email }}</p>
+          </div>
+          <nav class="dashboard-nav"
+               aria-label="Account dashboard navigation"
+               role="tablist">
+            <button type="button"
+                    class="dashboard-nav-item {% if active_tab == 'profile' %}active{% endif %}"
+                    id="tab-profile"
+                    data-dashboard-tab="profile"
+                    role="tab"
+                    aria-controls="profile"
+                    aria-selected="{% if active_tab == 'profile' %}true{% else %}false{% endif %}">
+              <i class="fa-solid fa-user-gear"></i>
+              <span>Profile</span>
+            </button>
+            <button type="button"
+                    class="dashboard-nav-item {% if active_tab == 'archive' %}active{% endif %}"
+                    id="tab-archive"
+                    data-dashboard-tab="archive"
+                    role="tab"
+                    aria-controls="archive"
+                    aria-selected="{% if active_tab == 'archive' %}true{% else %}false{% endif %}">
+              <i class="fa-solid fa-book-open"></i>
+              <span>My Archive</span>
+            </button>
+            <button type="button"
+                    class="dashboard-nav-item {% if active_tab == 'orders' %}active{% endif %}"
+                    id="tab-orders"
+                    data-dashboard-tab="orders"
+                    role="tab"
+                    aria-controls="orders"
+                    aria-selected="{% if active_tab == 'orders' %}true{% else %}false{% endif %}">
+              <i class="fa-solid fa-receipt"></i>
+              <span>My Orders</span>
+            </button>
+            <button type="button"
+                    class="dashboard-nav-item {% if active_tab == 'reviews' %}active{% endif %}"
+                    id="tab-reviews"
+                    data-dashboard-tab="reviews"
+                    role="tab"
+                    aria-controls="reviews"
+                    aria-selected="{% if active_tab == 'reviews' %}true{% else %}false{% endif %}">
+              <i class="fa-solid fa-star"></i>
+              <span>My Reviews</span>
+            </button>
+            {% if not user.is_superuser %}
+              <button type="button"
+                      class="dashboard-nav-item {% if active_tab == 'delete' %}active{% endif %}"
+                      id="tab-delete"
+                      data-dashboard-tab="delete"
+                      role="tab"
+                      aria-controls="delete"
+                      aria-selected="{% if active_tab == 'delete' %}true{% else %}false{% endif %}">
+                <i class="fa-solid fa-trash"></i>
+                <span>Delete Account</span>
+              </button>
+            {% endif %}
+          </nav>
+          <div class="mt-3">
+            <a class="btn btn-outline-light w-100 btn-icon"
+               href="{% url 'account_logout' %}">
+              <i class="fa-solid fa-right-from-bracket"></i>Log out
+            </a>
+          </div>
+        </aside>
+      </div>
+      <div class="col-12 col-lg-8">
+        <div id="dashboardContent">
+          <div class="tab-content">
+            <div class="tab-pane fade {% if active_tab == 'profile' %}show active{% endif %}"
+                 id="profile"
+                 role="tabpanel"
+                 aria-labelledby="tab-profile">
+              <div class="panel p-4 p-lg-5">
+                <h1 class="h3 mb-4">
+                  <i class="fa-solid fa-user-circle me-2"></i>Profile Settings
+                </h1>
+                <div class="mb-4">
+                  <h2 class="h5 mb-3">Account Information</h2>
+                  <div class="panel p-3 mb-3 account-info-panel">
+                    <div class="account-info-row">
+                      <span class="muted account-info-label">Username:</span>
+                      <strong class="account-info-value">{{ user.username }}</strong>
                     </div>
-                    <nav class="dashboard-nav"
-                         aria-label="Account dashboard navigation"
-                         role="tablist">
-                        <button type="button"
-                                class="dashboard-nav-item {% if active_tab == 'profile' %}active{% endif %}"
-                                id="tab-profile"
-                                data-dashboard-tab="profile"
-                                role="tab"
-                                aria-controls="profile"
-                                aria-selected="{% if active_tab == 'profile' %}true{% else %}false{% endif %}">
-                            <i class="fa-solid fa-user-gear"></i>
-                            <span>Profile</span>
-                        </button>
-                        <button type="button"
-                                class="dashboard-nav-item {% if active_tab == 'archive' %}active{% endif %}"
-                                id="tab-archive"
-                                data-dashboard-tab="archive"
-                                role="tab"
-                                aria-controls="archive"
-                                aria-selected="{% if active_tab == 'archive' %}true{% else %}false{% endif %}">
-                            <i class="fa-solid fa-book-open"></i>
-                            <span>My Archive</span>
-                        </button>
-                        <button type="button"
-                                class="dashboard-nav-item {% if active_tab == 'orders' %}active{% endif %}"
-                                id="tab-orders"
-                                data-dashboard-tab="orders"
-                                role="tab"
-                                aria-controls="orders"
-                                aria-selected="{% if active_tab == 'orders' %}true{% else %}false{% endif %}">
-                            <i class="fa-solid fa-receipt"></i>
-                            <span>My Orders</span>
-                        </button>
-                        <button type="button"
-                                class="dashboard-nav-item {% if active_tab == 'reviews' %}active{% endif %}"
-                                id="tab-reviews"
-                                data-dashboard-tab="reviews"
-                                role="tab"
-                                aria-controls="reviews"
-                                aria-selected="{% if active_tab == 'reviews' %}true{% else %}false{% endif %}">
-                            <i class="fa-solid fa-star"></i>
-                            <span>My Reviews</span>
-                        </button>
-                        {% if not user.is_superuser %}
-                            <button type="button"
-                                    class="dashboard-nav-item {% if active_tab == 'delete' %}active{% endif %}"
-                                    id="tab-delete"
-                                    data-dashboard-tab="delete"
-                                    role="tab"
-                                    aria-controls="delete"
-                                    aria-selected="{% if active_tab == 'delete' %}true{% else %}false{% endif %}">
-                                <i class="fa-solid fa-trash"></i>
-                                <span>Delete Account</span>
-                            </button>
-                        {% endif %}
-                    </nav>
-                    <div class="mt-3">
-                        <a class="btn btn-outline-light w-100 btn-icon"
-                           href="{% url 'account_logout' %}">
-                            <i class="fa-solid fa-right-from-bracket"></i>Log out
-                        </a>
+                    <div class="account-info-row">
+                      <span class="muted account-info-label">Display Name:</span>
+                      <strong class="account-info-value">{{ user.profile.get_display_name }}</strong>
                     </div>
-                </aside>
-            </div>
-            <div class="col-12 col-lg-8">
-                <div id="dashboardContent">
-                    <div class="tab-content">
-                        <div class="tab-pane fade {% if active_tab == 'profile' %}show active{% endif %}"
-                             id="profile"
-                             role="tabpanel"
-                             aria-labelledby="tab-profile">
-                            <div class="panel p-4 p-lg-5">
-                                <h1 class="h3 mb-4">
-                                    <i class="fa-solid fa-user-circle me-2"></i>Profile Settings
-                                </h1>
-                                <div class="mb-4">
-                                    <h2 class="h5 mb-3">Account Information</h2>
-                                    <div class="panel p-3 mb-3 account-info-panel">
-                                        <div class="account-info-row">
-                                            <span class="muted account-info-label">Username:</span>
-                                            <strong class="account-info-value">{{ user.username }}</strong>
-                                        </div>
-                                        <div class="account-info-row">
-                                            <span class="muted account-info-label">Display Name:</span>
-                                            <strong class="account-info-value">{{ user.profile.get_display_name }}</strong>
-                                        </div>
-                                        <div class="account-info-row">
-                                            <span class="muted account-info-label">Email:</span>
-                                            <strong class="text-break account-info-value">{{ user.email }}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="dashboard-profile-actions">
-                                        <a href="{% url 'account_email' %}"
-                                           class="btn btn-outline-light btn-icon">
-                                            <i class="fa-solid fa-envelope"></i>Manage Email Addresses
-                                        </a>
-                                        <a href="{% url 'account_change_password' %}"
-                                           class="btn btn-outline-light btn-icon">
-                                            <i class="fa-solid fa-key"></i>Change Password
-                                        </a>
-                                    </div>
-                                </div>
-                                <hr class="my-4 border-secondary">
-                                <h2 class="h5 mb-3">Profile Picture</h2>
-                                <form method="post" enctype="multipart/form-data" novalidate>
-                                    {% csrf_token %}
-                                    <div class="mb-3">
-                                        <label for="id_profile_picture" class="form-label">Profile Picture</label>
-                                        <input type="file"
-                                               name="profile_picture"
-                                               id="id_profile_picture"
-                                               class="form-control {% if form.profile_picture.errors %}is-invalid{% endif %}"
-                                               accept="image/*">
-                                        {% if form.profile_picture.errors %}
-                                            <div class="invalid-feedback">
-                                                {% for error in form.profile_picture.errors %}{{ error }}{% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text muted">Upload JPG or PNG (max 5MB)</div>
-                                    </div>
-                                    {% if user.profile.profile_picture %}
-                                        <div class="form-check mb-3">
-                                            <input type="checkbox"
-                                                   name="remove_picture"
-                                                   id="id_remove_picture"
-                                                   class="form-check-input">
-                                            <label for="id_remove_picture" class="form-check-label">Remove current picture</label>
-                                        </div>
-                                    {% endif %}
-                                    <div class="mb-3">
-                                        <label for="id_display_name" class="form-label">Display Name</label>
-                                        <input type="text"
-                                               name="display_name"
-                                               id="id_display_name"
-                                               class="form-control {% if form.display_name.errors %}is-invalid{% endif %}"
-                                               value="{{ form.display_name.value|default:'' }}"
-                                               placeholder="Enter a display name (optional)"
-                                               maxlength="20">
-                                        {% if form.display_name.errors %}
-                                            <div class="invalid-feedback">
-                                                {% for error in form.display_name.errors %}{{ error }}{% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text muted">Max 20 characters (letters, numbers, symbols, spaces allowed)</div>
-                                    </div>
-                                    <div class="dashboard-profile-save">
-                                        <button type="submit" class="btn btn-primary btn-icon">
-                                            <i class="fa-solid fa-save"></i>Save Changes
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade {% if active_tab == 'archive' %}show active{% endif %}"
-                             id="archive"
-                             role="tabpanel"
-                             aria-labelledby="tab-archive">
-                            <div class="panel p-4 p-lg-5">
-                                <h2 class="h3 mb-4">
-                                    <i class="fa-solid fa-book-open me-2"></i>My Archive
-                                </h2>
-                                {% if unlocked_products %}
-                                    <div class="d-flex flex-column gap-3">
-                                        {% for item in unlocked_products %}
-                                            <div class="panel p-3">
-                                                <div class="my-archive-item">
-                                                    <div class="my-archive-left">
-                                                        <div class="my-archive-thumb-wrap" aria-hidden="true">
-                                                            {% if item.product.image %}
-                                                                <img class="my-archive-thumb"
-                                                                     src="{{ item.product.image.url }}"
-                                                                     alt="{{ item.product.image_alt|default:item.product.title }}">
-                                                            {% else %}
-                                                                <div class="my-archive-thumb-placeholder">
-                                                                    <i class="fa-solid fa-image"></i>
-                                                                </div>
-                                                            {% endif %}
-                                                        </div>
-                                                        <div class="my-archive-meta">
-                                                            {% if item.product.is_removed %}
-                                                                <a href="{% url 'archive_read' slug=item.product.slug %}"
-                                                                   class="text-decoration-none my-archive-title">
-                                                                    <strong>{{ item.product.title }}</strong>
-                                                                </a>
-                                                                <span class="badge text-bg-danger ms-2">Removed</span>
-                                                            {% else %}
-                                                                <a href="{{ item.product.get_absolute_url }}"
-                                                                   class="text-decoration-none my-archive-title">
-                                                                    <strong>{{ item.product.title }}</strong>
-                                                                </a>
-                                                            {% endif %}
-                                                            <div class="muted small mt-1">Unlocked: {{ item.purchase_date|date:"Y-m-d H:i" }}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="my-archive-actions">
-                                                        <a class="btn btn-outline-light btn-sm btn-icon"
-                                                           href="{% url 'archive_read' slug=item.product.slug %}">
-                                                            <i class="fa-solid fa-scroll"></i>Read
-                                                        </a>
-                                                        {% if user_reviews_by_product|get_item:item.product.id %}
-                                                            {% with review=user_reviews_by_product|get_item:item.product.id %}
-                                                                <a class="btn btn-outline-primary btn-sm btn-icon"
-                                                                   href="{% url 'edit_review' slug=item.product.slug review_id=review.id %}">
-                                                                    <i class="fa-solid fa-edit"></i>Edit Review
-                                                                </a>
-                                                            {% endwith %}
-                                                        {% else %}
-                                                            <a class="btn btn-outline-primary btn-sm btn-icon"
-                                                               href="{% url 'product_detail' item.product.slug %}#reviews-section">
-                                                                <i class="fa-solid fa-star"></i>Leave Review
-                                                            </a>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    <p class="muted mb-0">No unlocked entries yet.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="tab-pane fade {% if active_tab == 'orders' %}show active{% endif %}"
-                             id="orders"
-                             role="tabpanel"
-                             aria-labelledby="tab-orders">
-                            <div class="panel p-4 p-lg-5">
-                                <h2 class="h3 mb-4">
-                                    <i class="fa-solid fa-receipt me-2"></i>My Orders
-                                </h2>
-                                {% if orders %}
-                                    <div class="d-flex flex-column gap-3">
-                                        {% for order in orders %}
-                                            <div class="panel p-3">
-                                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                                                    <div>
-                                                        <div class="muted small">Order Number</div>
-                                                        <div class="fw-bold">{{ order.order_number }}</div>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <div class="muted small">Status</div>
-                                                        <div class="fw-bold text-capitalize">{{ order.status }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                                                    <div>
-                                                        <span class="muted">Placed:</span>
-                                                        <strong>{{ order.created_at|date:"Y-m-d H:i" }}</strong>
-                                                    </div>
-                                                    <div>
-                                                        <span class="muted">Total:</span>
-                                                        <strong>€{{ order.total }}</strong>
-                                                    </div>
-                                                </div>
-                                                {% if order.line_items.all %}
-                                                    <div class="muted small mb-2">Items</div>
-                                                    <div class="d-flex flex-column gap-2">
-                                                        {% for item in order.line_items.all %}
-                                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                                                <div>
-                                                                    {% if item.product %}
-                                                                        {% if item.product.is_removed %}
-                                                                            <strong>{{ item.product_title }}</strong>
-                                                                            <div class="muted small">Removed from catalog</div>
-                                                                        {% else %}
-                                                                            <a href="{{ item.product.get_absolute_url }}"
-                                                                               class="text-decoration-none">
-                                                                                <strong>{{ item.product_title }}</strong>
-                                                                            </a>
-                                                                        {% endif %}
-                                                                    {% else %}
-                                                                        <strong>{{ item.product_title }}</strong>
-                                                                    {% endif %}
-                                                                    <div class="muted small">Qty {{ item.quantity }} at €{{ item.product_price }}</div>
-                                                                </div>
-                                                                <div class="fw-bold">€{{ item.line_total }}</div>
-                                                            </div>
-                                                        {% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    <p class="muted mb-0">No orders yet.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="tab-pane fade {% if active_tab == 'reviews' %}show active{% endif %}"
-                             id="reviews"
-                             role="tabpanel"
-                             aria-labelledby="tab-reviews">
-                            <div class="panel p-4 p-lg-5">
-                                <h2 class="h3 mb-4">
-                                    <i class="fa-solid fa-star me-2"></i>My Reviews
-                                </h2>
-                                {% if reviews %}
-                                    <div class="d-flex flex-column gap-3">
-                                        {% for review in reviews %}
-                                            <div class="panel p-3">
-                                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                                                    <div>
-                                                        <div class="muted small">Product</div>
-                                                        {% if review.product.is_removed %}
-                                                            <strong>{{ review.product.title }}</strong>
-                                                            <span class="badge text-bg-danger ms-2">Removed</span>
-                                                        {% else %}
-                                                            <a href="{{ review.product.get_absolute_url }}"
-                                                               class="text-decoration-none">
-                                                                <strong>{{ review.product.title }}</strong>
-                                                            </a>
-                                                        {% endif %}
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <div class="muted small">Rating</div>
-                                                        <div class="fw-bold">{{ review.rating }}/5</div>
-                                                    </div>
-                                                </div>
-                                                {% if review.title %}<div class="fw-bold mb-1">{{ review.title }}</div>{% endif %}
-                                                <div class="muted small mb-2">{{ review.created_at|date:"Y-m-d H:i" }}</div>
-                                                <p class="mb-0">{{ review.body }}</p>
-                                                {% if review.product.is_removed %}
-                                                    <div class="alert alert-warning mt-3 mb-0" role="alert">
-                                                        <i class="fa-solid fa-lock me-2"></i>
-                                                        This archive entry has been removed; reviews are locked.
-                                                    </div>
-                                                {% else %}
-                                                    <div class="d-flex gap-2 flex-wrap mt-3">
-                                                        <a class="btn btn-outline-light btn-sm btn-icon"
-                                                           href="{% url 'edit_review' slug=review.product.slug review_id=review.id %}">
-                                                            <i class="fa-solid fa-pen"></i>Edit
-                                                        </a>
-                                                        <button type="button"
-                                                                class="btn btn-outline-danger btn-sm btn-icon"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#deleteReviewModal-{{ review.id }}">
-                                                            <i class="fa-solid fa-trash"></i>Delete
-                                                        </button>
-                                                    </div>
-                                                    <!-- Delete review confirmation modal -->
-                                                    <div class="modal fade"
-                                                         id="deleteReviewModal-{{ review.id }}"
-                                                         tabindex="-1"
-                                                         aria-labelledby="deleteReviewModalLabel-{{ review.id }}"
-                                                         aria-hidden="true">
-                                                        <div class="modal-dialog modal-dialog-centered">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title" id="deleteReviewModalLabel-{{ review.id }}">
-                                                                        <i class="fa-solid fa-trash me-2"></i>Confirm Delete
-                                                                    </h5>
-                                                                    <button type="button"
-                                                                            class="btn-close btn-close-white"
-                                                                            data-bs-dismiss="modal"
-                                                                            aria-label="Close"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <p class="mb-0">Are you sure you want to delete your review? This action cannot be undone.</p>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-light btn-icon"
-                                                                            data-bs-dismiss="modal">
-                                                                        <i class="fa-solid fa-arrow-left"></i>Stay
-                                                                    </button>
-                                                                    <form method="post"
-                                                                          action="{% url 'delete_review' slug=review.product.slug review_id=review.id %}"
-                                                                          class="review-actions-inline-form">
-                                                                        {% csrf_token %}
-                                                                        <button type="submit" class="btn btn-danger btn-icon">
-                                                                            <i class="fa-solid fa-trash"></i>Delete
-                                                                        </button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    <p class="muted mb-0">No reviews yet.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% if not user.is_superuser %}
-                            <div class="tab-pane fade {% if active_tab == 'delete' %}show active{% endif %}"
-                                 id="delete"
-                                 role="tabpanel"
-                                 aria-labelledby="tab-delete">
-                                <div class="panel p-4 p-lg-5">
-                                    <h2 class="h3 mb-4">
-                                        <i class="fa-solid fa-trash me-2"></i>Delete Account
-                                    </h2>
-                                    <div class="alert alert-danger" role="alert">
-                                        <strong>Warning:</strong> This action cannot be undone.
-                                    </div>
-                                    <p class="muted mb-4">Deleting your account will permanently remove:</p>
-                                    <ul class="muted mb-4">
-                                        <li>Your profile and account information</li>
-                                        <li>Your purchase history and access to unlocked entries</li>
-                                        <li>All associated data</li>
-                                    </ul>
-                                    <form method="post" action="{% url 'account_delete' %}">
-                                        {% csrf_token %}
-                                        <div class="d-grid gap-2">
-                                            <button type="submit" class="btn btn-danger btn-icon">
-                                                <i class="fa-solid fa-trash"></i>Delete My Account
-                                            </button>
-                                            <a href="{% url 'account_dashboard' %}" class="btn btn-outline-light">
-                                                <i class="fa-solid fa-arrow-left me-1"></i>Cancel
-                                            </a>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        {% endif %}
+                    <div class="account-info-row">
+                      <span class="muted account-info-label">Email:</span>
+                      <strong class="text-break account-info-value">{{ user.email }}</strong>
                     </div>
+                  </div>
+                  <div class="dashboard-profile-actions">
+                    <a href="{% url 'account_email' %}"
+                       class="btn btn-outline-light btn-icon">
+                      <i class="fa-solid fa-envelope"></i>Manage Email Addresses
+                    </a>
+                    <a href="{% url 'account_change_password' %}"
+                       class="btn btn-outline-light btn-icon">
+                      <i class="fa-solid fa-key"></i>Change Password
+                    </a>
+                  </div>
                 </div>
+                <hr class="my-4 border-secondary">
+                <h2 class="h5 mb-3">Profile Picture</h2>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                  {% csrf_token %}
+                  <div class="mb-3">
+                    <label for="id_profile_picture" class="form-label">Profile Picture</label>
+                    <input type="file"
+                           name="profile_picture"
+                           id="id_profile_picture"
+                           class="form-control {% if form.profile_picture.errors %}is-invalid{% endif %}"
+                           accept="image/*">
+                    {% if form.profile_picture.errors %}
+                      <div class="invalid-feedback">
+                        {% for error in form.profile_picture.errors %}{{ error }}{% endfor %}
+                      </div>
+                    {% endif %}
+                    <div class="form-text muted">Upload JPG or PNG (max 5MB)</div>
+                  </div>
+                  {% if user.profile.profile_picture %}
+                    <div class="form-check mb-3">
+                      <input type="checkbox"
+                             name="remove_picture"
+                             id="id_remove_picture"
+                             class="form-check-input">
+                      <label for="id_remove_picture" class="form-check-label">Remove current picture</label>
+                    </div>
+                  {% endif %}
+                  <div class="mb-3">
+                    <label for="id_display_name" class="form-label">Display Name</label>
+                    <input type="text"
+                           name="display_name"
+                           id="id_display_name"
+                           class="form-control {% if form.display_name.errors %}is-invalid{% endif %}"
+                           value="{{ form.display_name.value|default:'' }}"
+                           placeholder="Enter a display name (optional)"
+                           maxlength="20">
+                    {% if form.display_name.errors %}
+                      <div class="invalid-feedback">
+                        {% for error in form.display_name.errors %}{{ error }}{% endfor %}
+                      </div>
+                    {% endif %}
+                    <div class="form-text muted">Max 20 characters (letters, numbers, symbols, spaces allowed)</div>
+                  </div>
+                  <div class="dashboard-profile-save">
+                    <button type="submit" class="btn btn-primary btn-icon">
+                      <i class="fa-solid fa-save"></i>Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
+            <div class="tab-pane fade {% if active_tab == 'archive' %}show active{% endif %}"
+                 id="archive"
+                 role="tabpanel"
+                 aria-labelledby="tab-archive">
+              <div class="panel p-4 p-lg-5">
+                <h2 class="h3 mb-4">
+                  <i class="fa-solid fa-book-open me-2"></i>My Archive
+                </h2>
+                {% if unlocked_products %}
+                  <div class="d-flex flex-column gap-3">
+                    {% for item in unlocked_products %}
+                      <div class="panel p-3">
+                        <div class="my-archive-item">
+                          <div class="my-archive-left">
+                            <div class="my-archive-thumb-wrap" aria-hidden="true">
+                              {% if item.product.image %}
+                                <img class="my-archive-thumb"
+                                     src="{{ item.product.image.url }}"
+                                     alt="{{ item.product.image_alt|default:item.product.title }}">
+                              {% else %}
+                                <div class="my-archive-thumb-placeholder">
+                                  <i class="fa-solid fa-image"></i>
+                                </div>
+                              {% endif %}
+                            </div>
+                            <div class="my-archive-meta">
+                              {% if item.product.is_removed %}
+                                <a href="{% url 'archive_read' slug=item.product.slug %}"
+                                   class="text-decoration-none my-archive-title">
+                                  <strong>{{ item.product.title }}</strong>
+                                </a>
+                                <span class="badge text-bg-danger ms-2">Removed</span>
+                              {% else %}
+                                <a href="{{ item.product.get_absolute_url }}"
+                                   class="text-decoration-none my-archive-title">
+                                  <strong>{{ item.product.title }}</strong>
+                                </a>
+                              {% endif %}
+                              <div class="muted small mt-1">Unlocked: {{ item.purchase_date|date:"Y-m-d H:i" }}</div>
+                            </div>
+                          </div>
+                          <div class="my-archive-actions">
+                            <a class="btn btn-outline-light btn-sm btn-icon"
+                               href="{% url 'archive_read' slug=item.product.slug %}">
+                              <i class="fa-solid fa-scroll"></i>Read
+                            </a>
+                            {% if user_reviews_by_product|get_item:item.product.id %}
+                              {% with review=user_reviews_by_product|get_item:item.product.id %}
+                                <a class="btn btn-outline-primary btn-sm btn-icon"
+                                   href="{% url 'edit_review' slug=item.product.slug review_id=review.id %}">
+                                  <i class="fa-solid fa-edit"></i>Edit Review
+                                </a>
+                              {% endwith %}
+                            {% else %}
+                              <a class="btn btn-outline-primary btn-sm btn-icon"
+                                 href="{% url 'product_detail' item.product.slug %}#reviews-section">
+                                <i class="fa-solid fa-star"></i>Leave Review
+                              </a>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="muted mb-0">No unlocked entries yet.</p>
+                {% endif %}
+              </div>
+            </div>
+            <div class="tab-pane fade {% if active_tab == 'orders' %}show active{% endif %}"
+                 id="orders"
+                 role="tabpanel"
+                 aria-labelledby="tab-orders">
+              <div class="panel p-4 p-lg-5">
+                <h2 class="h3 mb-4">
+                  <i class="fa-solid fa-receipt me-2"></i>My Orders
+                </h2>
+                {% if orders %}
+                  <div class="d-flex flex-column gap-3">
+                    {% for order in orders %}
+                      <div class="panel p-3">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                          <div>
+                            <div class="muted small">Order Number</div>
+                            <div class="fw-bold">{{ order.order_number }}</div>
+                          </div>
+                          <div class="text-end">
+                            <div class="muted small">Status</div>
+                            <div class="fw-bold text-capitalize">{{ order.status }}</div>
+                          </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                          <div>
+                            <span class="muted">Placed:</span>
+                            <strong>{{ order.created_at|date:"Y-m-d H:i" }}</strong>
+                          </div>
+                          <div>
+                            <span class="muted">Total:</span>
+                            <strong>€{{ order.total }}</strong>
+                          </div>
+                        </div>
+                        {% if order.line_items.all %}
+                          <div class="muted small mb-2">Items</div>
+                          <div class="d-flex flex-column gap-2">
+                            {% for item in order.line_items.all %}
+                              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                  {% if item.product %}
+                                    {% if item.product.is_removed %}
+                                      <strong>{{ item.product_title }}</strong>
+                                      <div class="muted small">Removed from catalog</div>
+                                    {% else %}
+                                      <a href="{{ item.product.get_absolute_url }}"
+                                         class="text-decoration-none">
+                                        <strong>{{ item.product_title }}</strong>
+                                      </a>
+                                    {% endif %}
+                                  {% else %}
+                                    <strong>{{ item.product_title }}</strong>
+                                  {% endif %}
+                                  <div class="muted small">Qty {{ item.quantity }} at €{{ item.product_price }}</div>
+                                </div>
+                                <div class="fw-bold">€{{ item.line_total }}</div>
+                              </div>
+                            {% endfor %}
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="muted mb-0">No orders yet.</p>
+                {% endif %}
+              </div>
+            </div>
+            <div class="tab-pane fade {% if active_tab == 'reviews' %}show active{% endif %}"
+                 id="reviews"
+                 role="tabpanel"
+                 aria-labelledby="tab-reviews">
+              <div class="panel p-4 p-lg-5">
+                <h2 class="h3 mb-4">
+                  <i class="fa-solid fa-star me-2"></i>My Reviews
+                </h2>
+                {% if reviews %}
+                  <div class="d-flex flex-column gap-3">
+                    {% for review in reviews %}
+                      <div class="panel p-3">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                          <div>
+                            <div class="muted small">Product</div>
+                            {% if review.product.is_removed %}
+                              <strong>{{ review.product.title }}</strong>
+                              <span class="badge text-bg-danger ms-2">Removed</span>
+                            {% else %}
+                              <a href="{{ review.product.get_absolute_url }}"
+                                 class="text-decoration-none">
+                                <strong>{{ review.product.title }}</strong>
+                              </a>
+                            {% endif %}
+                          </div>
+                          <div class="text-end">
+                            <div class="muted small">Rating</div>
+                            <div class="fw-bold">{{ review.rating }}/5</div>
+                          </div>
+                        </div>
+                        {% if review.title %}<div class="fw-bold mb-1">{{ review.title }}</div>{% endif %}
+                        <div class="muted small mb-2">{{ review.created_at|date:"Y-m-d H:i" }}</div>
+                        <p class="mb-0">{{ review.body }}</p>
+                        {% if review.product.is_removed %}
+                          <div class="alert alert-warning mt-3 mb-0" role="alert">
+                            <i class="fa-solid fa-lock me-2"></i>
+                            This archive entry has been removed; reviews are locked.
+                          </div>
+                        {% else %}
+                          <div class="d-flex gap-2 flex-wrap mt-3">
+                            <a class="btn btn-outline-light btn-sm btn-icon"
+                               href="{% url 'edit_review' slug=review.product.slug review_id=review.id %}">
+                              <i class="fa-solid fa-pen"></i>Edit
+                            </a>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm btn-icon"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteReviewModal-{{ review.id }}">
+                              <i class="fa-solid fa-trash"></i>Delete
+                            </button>
+                          </div>
+                          <!-- Delete review confirmation modal -->
+                          <div class="modal fade"
+                               id="deleteReviewModal-{{ review.id }}"
+                               tabindex="-1"
+                               aria-labelledby="deleteReviewModalLabel-{{ review.id }}"
+                               aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="deleteReviewModalLabel-{{ review.id }}">
+                                    <i class="fa-solid fa-trash me-2"></i>Confirm Delete
+                                  </h5>
+                                  <button type="button"
+                                          class="btn-close btn-close-white"
+                                          data-bs-dismiss="modal"
+                                          aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  <p class="mb-0">Are you sure you want to delete your review? This action cannot be undone.</p>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button"
+                                          class="btn btn-outline-light btn-icon"
+                                          data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-arrow-left"></i>Stay
+                                  </button>
+                                  <form method="post"
+                                        action="{% url 'delete_review' slug=review.product.slug review_id=review.id %}"
+                                        class="review-actions-inline-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-icon">
+                                      <i class="fa-solid fa-trash"></i>Delete
+                                    </button>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="muted mb-0">No reviews yet.</p>
+                {% endif %}
+              </div>
+            </div>
+            {% if not user.is_superuser %}
+              <div class="tab-pane fade {% if active_tab == 'delete' %}show active{% endif %}"
+                   id="delete"
+                   role="tabpanel"
+                   aria-labelledby="tab-delete">
+                <div class="panel p-4 p-lg-5">
+                  <h2 class="h3 mb-4">
+                    <i class="fa-solid fa-trash me-2"></i>Delete Account
+                  </h2>
+                  <div class="alert alert-danger" role="alert">
+                    <strong>Warning:</strong> This action cannot be undone.
+                  </div>
+                  <p class="muted mb-4">Deleting your account will permanently remove:</p>
+                  <ul class="muted mb-4">
+                    <li>Your profile and account information</li>
+                    <li>Your purchase history and access to unlocked entries</li>
+                    <li>All associated data</li>
+                  </ul>
+                  <form method="post" action="{% url 'account_delete' %}">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                      <button type="submit" class="btn btn-danger btn-icon">
+                        <i class="fa-solid fa-trash"></i>Delete My Account
+                      </button>
+                      <a href="{% url 'account_dashboard' %}" class="btn btn-outline-light">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Cancel
+                      </a>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            {% endif %}
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 {% endblock content %}
 {% block extra_js %}
-    {% load static %}
-    <script src="{% static 'js/dashboard.js' %}" defer></script>
+  {% load static %}
+  <script src="{% static 'js/dashboard.js' %}" defer></script>
 {% endblock extra_js %}

@@ -2,7 +2,11 @@
 
 from decimal import Decimal
 
-from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MaxValueValidator,
+    MinValueValidator,
+)
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
@@ -11,6 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
+
 
 class Category(models.Model):
     """Product category model."""
@@ -33,6 +38,7 @@ class Category(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+
 
 class Product(models.Model):
     """Archive entry (product) model."""
@@ -98,7 +104,11 @@ class Product(models.Model):
 
         # Validate fields before saving
         validate_fields = {"image_alt", "title", "slug"}
-        should_validate = is_create or update_fields_set is None or bool(update_fields_set & validate_fields)
+        should_validate = (
+            is_create
+            or update_fields_set is None
+            or bool(update_fields_set & validate_fields)
+        )
         if should_validate:
             self.full_clean()
 
@@ -114,7 +124,9 @@ class Product(models.Model):
                 is_featured_changed = old_is_featured != self.is_featured
 
                 # Track category change
-                old_category_pk = old_product.category.pk if old_product.category else None
+                old_category_pk = (
+                    old_product.category.pk if old_product.category else None
+                )
                 new_category_pk = self.category.pk if self.category else None
                 category_changed = old_category_pk != new_category_pk
             except Product.DoesNotExist:
@@ -124,13 +136,19 @@ class Product(models.Model):
 
         # Sync deal status if category changed
         deal_fields = {"category", "category_id"}
-        should_sync_deals = is_create or update_fields_set is None or bool(update_fields_set & deal_fields)
+        should_sync_deals = (
+            is_create
+            or update_fields_set is None
+            or bool(update_fields_set & deal_fields)
+        )
         if should_sync_deals:
             sync_products_deal_status(product_pks=[self.pk])
 
         # Sync featured status to banners if is_featured changed and not in sync mode
         if is_featured_changed and not skip_sync:
-            sync_product_featured_to_banners(product_pk=self.pk, is_featured=self.is_featured)
+            sync_product_featured_to_banners(
+                product_pk=self.pk, is_featured=self.is_featured
+            )
 
         # Sync featured status from category banner if category changed
         if category_changed and not skip_sync:
@@ -174,6 +192,7 @@ class Product(models.Model):
             discounted_price = self.price - discount_amount
             return discounted_price.quantize(Decimal("0.01"))
         return self.price
+
 
 class DealBanner(models.Model):
     """Custom promotional banner message for the deals marquee."""
@@ -254,7 +273,9 @@ class DealBanner(models.Model):
                 old_banner = DealBanner.objects.get(pk=self.pk)
                 old_is_featured = old_banner.is_featured
                 old_is_active = old_banner.is_active
-                old_category_pk = old_banner.category.pk if old_banner.category else None
+                old_category_pk = (
+                    old_banner.category.pk if old_banner.category else None
+                )
 
                 is_featured_changed = old_is_featured != self.is_featured
                 is_active_changed = old_is_active != self.is_active
@@ -273,25 +294,29 @@ class DealBanner(models.Model):
                 sync_banner_featured_to_product(product_pk=self.product.pk)
 
             # Sync featured status to category products if banner is linked to a category
-            if self.category and (is_create or is_featured_changed or is_active_changed):
+            if self.category and (
+                is_create or is_featured_changed or is_active_changed
+            ):
                 sync_category_banner_featured_to_products(
-                    category_pk=self.category.pk,
-                    is_featured=should_be_featured
+                    category_pk=self.category.pk, is_featured=should_be_featured
                 )
 
             # If category changed, remove featured from old category products
-            if old_category_pk and old_category_pk != (self.category.pk if self.category else None):
+            if old_category_pk and old_category_pk != (
+                self.category.pk if self.category else None
+            ):
                 # Check if old category still has other active featured banners
-                has_other_featured = DealBanner.objects.filter(
-                    category_id=old_category_pk,
-                    is_active=True,
-                    is_featured=True
-                ).exclude(pk=self.pk).exists()
+                has_other_featured = (
+                    DealBanner.objects.filter(
+                        category_id=old_category_pk, is_active=True, is_featured=True
+                    )
+                    .exclude(pk=self.pk)
+                    .exists()
+                )
 
                 if not has_other_featured:
                     sync_category_banner_featured_to_products(
-                        category_pk=old_category_pk,
-                        is_featured=False
+                        category_pk=old_category_pk, is_featured=False
                     )
 
     def delete(self, *args, **kwargs):
@@ -308,16 +333,13 @@ class DealBanner(models.Model):
         if category_pk:
             # Check if category still has other active featured banners
             has_other_featured_banners = DealBanner.objects.filter(
-                category_id=category_pk,
-                is_active=True,
-                is_featured=True
+                category_id=category_pk, is_active=True, is_featured=True
             ).exists()
 
             if not has_other_featured_banners:
                 # Remove featured from all products in category
                 sync_category_banner_featured_to_products(
-                    category_pk=category_pk,
-                    is_featured=False
+                    category_pk=category_pk, is_featured=False
                 )
 
     def get_url(self):
@@ -335,6 +357,7 @@ class DealBanner(models.Model):
 
         return f"{archive_url}?deals=true"
 
+
 def sync_products_deal_status(product_pks=None, category_pks=None):
     """Recalculate deal status for affected products."""
     product_pks = list(product_pks or [])
@@ -345,9 +368,7 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
 
     # Get products to update
     qs = (
-        Product.objects.filter(
-            Q(pk__in=product_pks) | Q(category__pk__in=category_pks)
-        )
+        Product.objects.filter(Q(pk__in=product_pks) | Q(category__pk__in=category_pks))
         .filter(is_removed=False)
         .select_related("category")
     )
@@ -355,10 +376,14 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
     # Get active banners
     active_banners = DealBanner.objects.filter(is_active=True)
     banner_product_pks = set(
-        active_banners.filter(product__isnull=False).values_list("product__pk", flat=True)
+        active_banners.filter(product__isnull=False).values_list(
+            "product__pk", flat=True
+        )
     )
     banner_category_pks = set(
-        active_banners.filter(category__isnull=False).values_list("category__pk", flat=True)
+        active_banners.filter(category__isnull=False).values_list(
+            "category__pk", flat=True
+        )
     )
 
     now = timezone.now()
@@ -387,6 +412,7 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
     if false_pks:
         Product.objects.filter(pk__in=false_pks).update(is_deal=False, updated_at=now)
 
+
 def sync_banner_featured_to_product(product_pk):
     """Sync featured status from banners to product."""
     try:
@@ -397,44 +423,46 @@ def sync_banner_featured_to_product(product_pk):
     if product.is_removed:
         if product.is_featured:
             product.is_featured = False
-            product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
+            product.save(
+                update_fields=["is_featured", "updated_at"], _skip_featured_sync=True
+            )
         return
 
     # Check if product has any active AND featured banners
     has_featured_banner = DealBanner.objects.filter(
-        product=product,
-        is_active=True,
-        is_featured=True
+        product=product, is_active=True, is_featured=True
     ).exists()
 
     # Update product featured status if needed
     if has_featured_banner and not product.is_featured:
         product.is_featured = True
-        product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
+        product.save(
+            update_fields=["is_featured", "updated_at"], _skip_featured_sync=True
+        )
     elif not has_featured_banner and product.is_featured:
         # Only remove featured if product has at least one active banner
         has_any_banner = DealBanner.objects.filter(
-            product=product,
-            is_active=True
+            product=product, is_active=True
         ).exists()
 
         if has_any_banner:
             product.is_featured = False
-            product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
+            product.save(
+                update_fields=["is_featured", "updated_at"], _skip_featured_sync=True
+            )
+
 
 def sync_product_featured_to_banners(product_pk, is_featured):
     """Sync featured status from product to its banners."""
     # Get all active banners linked to this product
-    banners = DealBanner.objects.filter(
-        product_id=product_pk,
-        is_active=True
-    )
+    banners = DealBanner.objects.filter(product_id=product_pk, is_active=True)
 
     # Update each banner individually to trigger save() and avoid recursion
     for banner in banners:
         if banner.is_featured != is_featured:
             banner.is_featured = is_featured
             banner.save(_skip_featured_sync=True)
+
 
 def sync_category_banner_featured_to_products(category_pk, is_featured):
     """Sync featured status from category banner to all active products in category."""
@@ -447,12 +475,15 @@ def sync_category_banner_featured_to_products(category_pk, is_featured):
     for product in products:
         if product.is_featured != is_featured:
             product.is_featured = is_featured
-            product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
+            product.save(
+                update_fields=["is_featured", "updated_at"], _skip_featured_sync=True
+            )
+
 
 def sync_product_featured_from_category_banner(product_pk):
     """Check if product should be featured based on its category's banner."""
     try:
-        product = Product.objects.select_related('category').get(pk=product_pk)
+        product = Product.objects.select_related("category").get(pk=product_pk)
     except Product.DoesNotExist:
         return
 
@@ -464,26 +495,27 @@ def sync_product_featured_from_category_banner(product_pk):
 
     # Check if category has any active AND featured banners
     has_featured_category_banner = DealBanner.objects.filter(
-        category=product.category,
-        is_active=True,
-        is_featured=True
+        category=product.category, is_active=True, is_featured=True
     ).exists()
 
     # Update product featured status if needed
     if has_featured_category_banner and not product.is_featured:
         product.is_featured = True
-        product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
+        product.save(
+            update_fields=["is_featured", "updated_at"], _skip_featured_sync=True
+        )
     elif not has_featured_category_banner and product.is_featured:
         # Only remove featured if no other reason to be featured (e.g., product banner)
         has_product_banner = DealBanner.objects.filter(
-            product=product,
-            is_active=True,
-            is_featured=True
+            product=product, is_active=True, is_featured=True
         ).exists()
 
         if not has_product_banner:
             product.is_featured = False
-            product.save(update_fields=["is_featured", "updated_at"], _skip_featured_sync=True)
+            product.save(
+                update_fields=["is_featured", "updated_at"], _skip_featured_sync=True
+            )
+
 
 # Signals
 @receiver(post_save, sender=DealBanner)
@@ -494,6 +526,7 @@ def deal_banner_post_save(sender, instance, created, **kwargs):
 
     if product_pks or category_pks:
         sync_products_deal_status(product_pks=product_pks, category_pks=category_pks)
+
 
 @receiver(post_delete, sender=DealBanner)
 def deal_banner_post_delete(sender, instance, **kwargs):

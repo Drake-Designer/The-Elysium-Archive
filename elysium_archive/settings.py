@@ -7,6 +7,7 @@ from typing import Any, cast
 import dj_database_url
 from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
 
 # Project root directory
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,12 +16,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if (BASE_DIR / "env.py").exists():
     import env  # noqa: F401
 
+
 # Helper: Parse boolean from environment variable
 def _env_bool(value, default=False):
     """Convert string like 'true', '1', 'yes' to boolean."""
     if value is None:
         return default
     return str(value).strip().lower() in ("true", "1", "yes", "y", "on")
+
 
 # Helper: Parse comma-separated list from environment variable
 def _env_list(name, default=None):
@@ -30,14 +33,16 @@ def _env_list(name, default=None):
         return default or []
     return [item.strip() for item in raw.split(",") if item.strip()]
 
+
 # Secret key for Django cryptographic signing (sessions, tokens, etc.)
-SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
+SECRET_KEY_ENV = os.environ.get("SECRET_KEY") or os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = SECRET_KEY_ENV or get_random_secret_key()
 
 # Debug mode (detailed error pages, auto static serving)
 DEBUG = _env_bool(os.environ.get("DEBUG"), default=True)
 
-# Prevent production deployment with unsafe secret key
-if not DEBUG and (not SECRET_KEY or SECRET_KEY == "unsafe-dev-secret-key"):
+# Prevent production deployment without explicit secret key
+if not DEBUG and not SECRET_KEY_ENV:
     raise ImproperlyConfigured(
         "SECRET_KEY must be set to a secure value when DEBUG=False."
     )
@@ -334,8 +339,12 @@ if not DEBUG and not EMAIL_HOST_PASSWORD:
     )
 
 # Stripe payment gateway configuration
-STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev")
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev")
+STRIPE_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev"
+)
+STRIPE_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev"
+)
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")
 
 # CKEditor 5 rich text editor configuration
@@ -418,9 +427,23 @@ CKEDITOR_5_CONFIGS = {
         ],
         "heading": {
             "options": [
-                {"model": "paragraph", "title": "Paragraph", "class": "ck-heading_paragraph"},
-                {"model": "heading2", "view": "h2", "title": "Heading 2", "class": "ck-heading_heading2"},
-                {"model": "heading3", "view": "h3", "title": "Heading 3", "class": "ck-heading_heading3"},
+                {
+                    "model": "paragraph",
+                    "title": "Paragraph",
+                    "class": "ck-heading_paragraph",
+                },
+                {
+                    "model": "heading2",
+                    "view": "h2",
+                    "title": "Heading 2",
+                    "class": "ck-heading_heading2",
+                },
+                {
+                    "model": "heading3",
+                    "view": "h3",
+                    "title": "Heading 3",
+                    "class": "ck-heading_heading3",
+                },
             ]
         },
         "image": {

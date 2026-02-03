@@ -4,97 +4,139 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block head_title %}The Elysium Archive{% endblock %}</title>
+    <title>
+      {% block head_title %}The Elysium Archive{% endblock %}
+    </title>
   </head>
-
   <body style="margin:0; padding:0; background-color:#0a0e27;">
     <!-- Preheader -->
-    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+    <div style="display:none;
+                max-height:0;
+                overflow:hidden;
+                opacity:0;
+                color:transparent">
       {% block preheader %}{% endblock %}
     </div>
-
     <!-- Outer wrapper -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0e27; margin:0; padding:0;">
+    <table role="presentation"
+           width="100%"
+           cellpadding="0"
+           cellspacing="0"
+           border="0"
+           style="background-color:#0a0e27;
+                  margin:0;
+                  padding:0">
       <tr>
         <td align="center" style="padding:24px 12px;">
-
           <!-- Container -->
-          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px;">
+          <table role="presentation"
+                 width="600"
+                 cellpadding="0"
+                 cellspacing="0"
+                 border="0"
+                 style="width:600px;
+                        max-width:600px">
             <tr>
               <td style="padding:0;">
-
                 <!-- Card -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1a1f3a; border:1px solid #c9a961; border-radius:8px;">
+                <table role="presentation"
+                       width="100%"
+                       cellpadding="0"
+                       cellspacing="0"
+                       border="0"
+                       style="background-color:#1a1f3a;
+                              border:1px solid #c9a961;
+                              border-radius:8px">
                   <tr>
                     <td style="padding:28px 24px 8px 24px; text-align:center;">
-                      <div style="color:#c9a961; font-family:Georgia, 'Times New Roman', serif; font-size:20px; letter-spacing:2px; font-weight:700;">
-                        THE ELYSIUM ARCHIVE
-                      </div>
+                      <div style="color:#c9a961;
+                                  font-family:Georgia, 'Times New Roman', serif;
+                                  font-size:20px;
+                                  letter-spacing:2px;
+                                  font-weight:700">THE ELYSIUM ARCHIVE</div>
                     </td>
                   </tr>
-
                   <tr>
                     <td style="padding:8px 24px 0 24px; text-align:center;">
-                      <div style="color:#c9a961; font-family:Georgia, 'Times New Roman', serif; font-size:22px; font-weight:700; line-height:1.2;">
+                      <div style="color:#c9a961;
+                                  font-family:Georgia, 'Times New Roman', serif;
+                                  font-size:22px;
+                                  font-weight:700;
+                                  line-height:1.2">
                         {% block title %}{% endblock %}
                       </div>
                     </td>
                   </tr>
-
                   <tr>
                     <td style="padding:18px 24px 0 24px;">
-                      <div style="color:#b0b0b0; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:1.6; text-align:center;">
+                      <div style="color:#b0b0b0;
+                                  font-family:Arial, Helvetica, sans-serif;
+                                  font-size:14px;
+                                  line-height:1.6;
+                                  text-align:center">
                         {% block content %}{% endblock %}
                       </div>
                     </td>
                   </tr>
-
                   <!-- Optional notice box -->
                   {% block notice %}{% endblock %}
-
                   <!-- Optional button -->
                   {% block button %}
-                  <tr>
-                    <td align="center" style="padding:18px 24px 0 24px;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                        <tr>
-                          <td style="background-color:#c9a961; border-radius:4px;">
-                            <a href="{% block action_url %}{% endblock %}"
-                               style="display:inline-block; padding:12px 22px; color:#0a0e27; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:700; text-decoration:none;">
-                              {% block action_text %}{% endblock %}
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
+                    <tr>
+                      <td align="center" style="padding:18px 24px 0 24px;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                          <tr>
+                            <td style="background-color:#c9a961; border-radius:4px;">
+                              <a href="{% block action_url %}{% endblock %}"
+                                 style="display:inline-block;
+                                        padding:12px 22px;
+                                        color:#0a0e27;
+                                        font-family:Arial, Helvetica, sans-serif;
+                                        font-size:14px;
+                                        font-weight:700;
+                                        text-decoration:none">
+                                {% block action_text %}{% endblock %}
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
                   {% endblock %}
-
                   <!-- Fallback link -->
                   {% block fallback %}
-                  <tr>
-                    <td style="padding:16px 24px 0 24px;">
-                      <div style="color:#888; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:1.5; text-align:center;">
-                        <div style="margin-bottom:6px;">If the button does not work, copy and paste this link into your browser:</div>
-                        <div style="word-break:break-all; color:#c9a961;">
-                          {% block fallback_url %}{% endblock %}
+                    <tr>
+                      <td style="padding:16px 24px 0 24px;">
+                        <div style="color:#888;
+                                    font-family:Arial, Helvetica, sans-serif;
+                                    font-size:12px;
+                                    line-height:1.5;
+                                    text-align:center">
+                          <div style="margin-bottom:6px;">If the button does not work, copy and paste this link into your browser:</div>
+                          <div style="word-break:break-all; color:#c9a961;">
+                            {% block fallback_url %}{% endblock %}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
                   {% endblock %}
-
                   <!-- Divider -->
                   <tr>
                     <td style="padding:20px 24px 0 24px;">
-                      <div style="height:1px; background-color:#333; line-height:1px; font-size:1px;">&nbsp;</div>
+                      <div style="height:1px;
+                                  background-color:#333;
+                                  line-height:1px;
+                                  font-size:1px">&nbsp;</div>
                     </td>
                   </tr>
-
                   <!-- Footer -->
                   <tr>
                     <td style="padding:18px 24px 24px 24px;">
-                      <div style="color:#666; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:1.5; text-align:center;">
+                      <div style="color:#666;
+                                  font-family:Arial, Helvetica, sans-serif;
+                                  font-size:12px;
+                                  line-height:1.5;
+                                  text-align:center">
                         <div>The Elysium Archive - No downloads. No refunds. Access is the product.</div>
                         <div style="margin-top:6px;">© 2026 The Elysium Archive. All secrets reserved.</div>
                       </div>
@@ -102,12 +144,10 @@
                   </tr>
                 </table>
                 <!-- /Card -->
-
               </td>
             </tr>
           </table>
           <!-- /Container -->
-
         </td>
       </tr>
     </table>

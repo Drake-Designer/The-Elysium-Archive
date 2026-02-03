@@ -1,76 +1,76 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    Edit Review - {{ product.title }} | The Elysium Archive
+  Edit Review - {{ product.title }} | The Elysium Archive
 {% endblock title %}
 {% block content %}
-    <!-- Edit review page -->
-    <section class="container py-5">
-        <!-- Breadcrumb navigation -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'home' %}">Home</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="{% url 'archive' %}">Archive</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="{% url 'product_detail' product.slug %}">{{ product.title }}</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">Edit Review</li>
-            </ol>
-        </nav>
-        <!-- Edit review form -->
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-8">
-                <div class="panel p-4 p-lg-5">
-                    <h1 class="h3 mb-4">
-                        <i class="fa-solid fa-edit me-2"></i>Edit Your Review
-                    </h1>
-                    <div class="mb-4 pb-4 border-bottom">
-                        <h2 class="h5 mb-2">{{ product.title }}</h2>
-                        <p class="muted small mb-0">You are editing your review for this archive entry.</p>
-                    </div>
-                    <form method="post" class="review-form">
-                        {% csrf_token %}
-                        <div class="review-form-group">
-                            <label for="id_title" class="review-form-label">
-                                <span>Title (optional)</span>
-                                <span class="review-form-char-counter" id="title-counter">0 / 50</span>
-                            </label>
-                            {{ form.title }}
-                            {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors }}</div>{% endif %}
-                        </div>
-                        <div class="review-form-group">
-                            <label for="id_rating" class="review-form-label review-form-label-required">Rating</label>
-                            {{ form.rating }}
-                            {% if form.rating.errors %}<div class="text-danger small mt-1">{{ form.rating.errors }}</div>{% endif %}
-                        </div>
-                        <div class="review-form-group">
-                            <label for="id_body" class="review-form-label">
-                                <span>Review (optional)</span>
-                                <span class="review-form-char-counter" id="body-counter">0 / 1000</span>
-                            </label>
-                            {{ form.body }}
-                            {% if form.body.errors %}<div class="text-danger small mt-1">{{ form.body.errors }}</div>{% endif %}
-                        </div>
-                        <div class="review-form-actions">
-                            <button type="submit" class="review-submit-btn">
-                                <i class="fa-solid fa-save review-submit-btn-icon"></i>
-                                <span class="review-submit-btn-text">Save Changes</span>
-                            </button>
-                            <a href="{% url 'product_detail' product.slug %}"
-                               class="btn btn-outline-light btn-icon ms-2">
-                                <i class="fa-solid fa-times me-2"></i>Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
+  <!-- Edit review page -->
+  <section class="container py-5">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'archive' %}">Archive</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'product_detail' product.slug %}">{{ product.title }}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Edit Review</li>
+      </ol>
+    </nav>
+    <!-- Edit review form -->
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-8">
+        <div class="panel p-4 p-lg-5">
+          <h1 class="h3 mb-4">
+            <i class="fa-solid fa-edit me-2"></i>Edit Your Review
+          </h1>
+          <div class="mb-4 pb-4 border-bottom">
+            <h2 class="h5 mb-2">{{ product.title }}</h2>
+            <p class="muted small mb-0">You are editing your review for this archive entry.</p>
+          </div>
+          <form method="post" class="review-form">
+            {% csrf_token %}
+            <div class="review-form-group">
+              <label for="id_title" class="review-form-label">
+                <span>Title (optional)</span>
+                <span class="review-form-char-counter" id="title-counter">0 / 50</span>
+              </label>
+              {{ form.title }}
+              {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors }}</div>{% endif %}
             </div>
+            <div class="review-form-group">
+              <label for="id_rating" class="review-form-label review-form-label-required">Rating</label>
+              {{ form.rating }}
+              {% if form.rating.errors %}<div class="text-danger small mt-1">{{ form.rating.errors }}</div>{% endif %}
+            </div>
+            <div class="review-form-group">
+              <label for="id_body" class="review-form-label">
+                <span>Review (optional)</span>
+                <span class="review-form-char-counter" id="body-counter">0 / 1000</span>
+              </label>
+              {{ form.body }}
+              {% if form.body.errors %}<div class="text-danger small mt-1">{{ form.body.errors }}</div>{% endif %}
+            </div>
+            <div class="review-form-actions">
+              <button type="submit" class="review-submit-btn">
+                <i class="fa-solid fa-save review-submit-btn-icon"></i>
+                <span class="review-submit-btn-text">Save Changes</span>
+              </button>
+              <a href="{% url 'product_detail' product.slug %}"
+                 class="btn btn-outline-light btn-icon ms-2">
+                <i class="fa-solid fa-times me-2"></i>Cancel
+              </a>
+            </div>
+          </form>
         </div>
-    </section>
-    {% block extra_js %}
-        <script src="{% static 'js/review-form.js' %}"></script>
-    {% endblock extra_js %}
+      </div>
+    </div>
+  </section>
+  {% block extra_js %}
+    <script src="{% static 'js/review-form.js' %}"></script>
+  {% endblock extra_js %}
 {% endblock content %}

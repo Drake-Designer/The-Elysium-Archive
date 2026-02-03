@@ -1,12 +1,24 @@
 """Models for the cart app."""
 
+from typing import TYPE_CHECKING
+
 from django.conf import settings
 from django.db import models
 
 from products.models import Product
 
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractUser
+
+
 class Cart(models.Model):
     """Store a persistent cart for a user."""
+
+    user: models.OneToOneField["AbstractUser"]
+    updated_at: models.DateTimeField
+
+    # Django auto-generated
+    id: int
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -18,8 +30,16 @@ class Cart(models.Model):
     def __str__(self) -> str:
         return f"Cart for {self.user}"
 
+
 class CartItem(models.Model):
     """Store a product entry in a persistent cart."""
+
+    cart: models.ForeignKey["Cart"]
+    product: models.ForeignKey[Product]
+    quantity: models.PositiveSmallIntegerField
+
+    # Django auto-generated
+    id: int
 
     cart = models.ForeignKey(
         Cart,

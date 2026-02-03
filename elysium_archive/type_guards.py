@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, TypeGuard
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 
+
 def is_authenticated_user(
     user: "AbstractBaseUser | AnonymousUser",
 ) -> "TypeGuard[AbstractBaseUser]":

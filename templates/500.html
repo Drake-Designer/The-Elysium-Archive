@@ -1,40 +1,41 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    500 - Server Error | The Elysium Archive
+  500 - Server Error | The Elysium Archive
 {% endblock title %}
 {% block meta_description %}
-    Server error page for The Elysium Archive.
+  Server error page for The Elysium Archive.
 {% endblock meta_description %}
 {% block content %}
-    <section class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-10 col-lg-8">
-                <div class="panel p-5 text-center">
-                    <div class="mb-5">
-                        <i class="fa-solid fa-server text-danger error-icon-lg"></i>
-                    </div>
-                    <h1 class="display-4 mb-3 text-danger">500 - Server Error</h1>
-                    <p class="lead mb-4 text-muted">Something went wrong on our end.</p>
-                    <p class="mb-5">
-                        The server encountered an internal error and was unable to complete your request.
-                        Please try again later.
-                    </p>
-                    <div class="d-flex flex-wrap gap-3 justify-content-center">
-                        <a href="{% url 'home' %}" class="btn btn-danger btn-icon">
-                            <i class="fa-solid fa-home me-2"></i>Return Home
-                        </a>
-                        <a href="{% url 'archive' %}" class="btn btn-outline-light btn-icon">
-                            <i class="fa-solid fa-book me-2"></i>Browse Archive
-                        </a>
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'account_dashboard' %}" class="btn btn-outline-light btn-icon">
-                                <i class="fa-solid fa-user me-2"></i>Dashboard
-                            </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+  <section class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8">
+        <div class="panel p-5 text-center">
+          <div class="mb-5">
+            <i class="fa-solid fa-server text-danger error-icon-lg"></i>
+          </div>
+          <h1 class="display-4 mb-3 text-danger">500 - Server Error</h1>
+          <p class="lead mb-4 text-muted">Something went wrong on our end.</p>
+          <p class="mb-5">
+            The server encountered an internal error and was unable to complete your request.
+            Please try again later.
+          </p>
+          <div class="d-flex flex-wrap gap-3 justify-content-center">
+            <a href="{% url 'home' %}" class="btn btn-danger btn-icon">
+              <i class="fa-solid fa-home me-2"></i>Return Home
+            </a>
+            <a href="{% url 'archive' %}" class="btn btn-outline-light btn-icon">
+              <i class="fa-solid fa-book me-2"></i>Browse Archive
+            </a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'account_dashboard' %}"
+                 class="btn btn-outline-light btn-icon">
+                <i class="fa-solid fa-user me-2"></i>Dashboard
+              </a>
+            {% endif %}
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 {% endblock content %}

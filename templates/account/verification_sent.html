@@ -1,35 +1,35 @@
 {% extends "base.html" %}
 {% block title %}
-    Verify Email | The Elysium Archive
+  Verify Email | The Elysium Archive
 {% endblock title %}
 {% block content %}
-    <!-- Verification sent notice -->
-    <section class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-5">
-                <div class="panel p-4 p-lg-5">
-                    <h1 class="h3 text-center mb-4">
-                        <i class="fa-solid fa-envelope me-2"></i>Verify Your Email
-                    </h1>
-                    <!-- Verification instructions -->
-                    <p class="text-center muted mb-4">
-                        A confirmation link has been sent to your email address. Please check your inbox and click the link to verify your account.
-                    </p>
-                    <div class="alert alert-info" role="alert">
-                        <i class="fa-solid fa-circle-info me-2"></i>
-                        If you don't see the email, check your spam folder or wait a moment and try resending.
-                    </div>
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'account_email' %}" class="btn btn-primary btn-icon">
-                            <i class="fa-solid fa-rotate-right"></i>Resend Email
-                        </a>
-                    </div>
-                    <hr class="my-4 border-secondary">
-                    <p class="text-center muted mb-0">
-                        <a href="{% url 'home' %}">Return to home</a>
-                    </p>
-                </div>
-            </div>
+  <!-- Verification sent notice -->
+  <section class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-5">
+        <div class="panel p-4 p-lg-5">
+          <h1 class="h3 text-center mb-4">
+            <i class="fa-solid fa-envelope me-2"></i>Verify Your Email
+          </h1>
+          <!-- Verification instructions -->
+          <p class="text-center muted mb-4">
+            A confirmation link has been sent to your email address. Please check your inbox and click the link to verify your account.
+          </p>
+          <div class="alert alert-info" role="alert">
+            <i class="fa-solid fa-circle-info me-2"></i>
+            If you don't see the email, check your spam folder or wait a moment and try resending.
+          </div>
+          <div class="d-grid gap-2">
+            <a href="{% url 'account_email' %}" class="btn btn-primary btn-icon">
+              <i class="fa-solid fa-rotate-right"></i>Resend Email
+            </a>
+          </div>
+          <hr class="my-4 border-secondary">
+          <p class="text-center muted mb-0">
+            <a href="{% url 'home' %}">Return to home</a>
+          </p>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 {% endblock content %}

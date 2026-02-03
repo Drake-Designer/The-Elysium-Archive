@@ -44,4 +44,3 @@ class ReviewForm(forms.ModelForm):
         self.fields["title"].required = False
         self.fields["body"].required = False
         # Rating is already required by default
-

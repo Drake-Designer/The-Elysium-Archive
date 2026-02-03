@@ -7,12 +7,13 @@ from accounts.decorators import verified_email_required
 from orders.models import AccessEntitlement
 from products.models import Product
 
+from .cart import add_to_cart as add_product_to_cart
 from .cart import (
-    add_to_cart as add_product_to_cart,
     get_cart_items,
     get_cart_total,
-    remove_from_cart as remove_product_from_cart,
 )
+from .cart import remove_from_cart as remove_product_from_cart
+
 
 def _parse_int(value, default):
     """Parse an integer from input safely."""
@@ -20,6 +21,7 @@ def _parse_int(value, default):
         return int(value)
     except (TypeError, ValueError):
         return default
+
 
 def _remove_purchased_items_from_cart(request):
     """Remove already purchased products from the cart session."""
@@ -54,6 +56,7 @@ def _remove_purchased_items_from_cart(request):
 
     return removed
 
+
 @verified_email_required
 def add_to_cart(request):
     """Add a product to the shopping cart."""
@@ -82,6 +85,7 @@ def add_to_cart(request):
 
     return redirect("product_detail", slug=product.slug)
 
+
 @verified_email_required
 def cart_view(request):
     """Render the shopping cart view."""
@@ -98,6 +102,7 @@ def cart_view(request):
         "cart_total": get_cart_total(request.session, cart_items),
     }
     return render(request, "cart/cart.html", context)
+
 
 @verified_email_required
 def remove_from_cart(request):

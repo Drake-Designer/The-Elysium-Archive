@@ -1,19 +1,16 @@
 """URL configuration for the home app."""
 
-
 from django.urls import path
-
 
 from .views import (
     home_view,
     lore_view,
-    test_errors_dashboard,
     test_error_400,
     test_error_403,
     test_error_404,
     test_error_500,
+    test_errors_dashboard,
 )
-
 
 urlpatterns = [
     path("", home_view, name="home"),

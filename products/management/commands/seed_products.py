@@ -2,7 +2,9 @@
 """Management command to seed database with sample products."""
 
 from decimal import Decimal
+
 from django.core.management.base import BaseCommand
+
 from products.models import Category, Product
 
 
@@ -82,12 +84,11 @@ class Command(BaseCommand):
         for prod_data in products_data:
             category_slug = prod_data.pop("category")
             prod_data["category"] = categories.get(category_slug)
-            
+
             product, created = Product.objects.get_or_create(
-                slug=prod_data.get("slug", ""),
-                defaults=prod_data
+                slug=prod_data.get("slug", ""), defaults=prod_data
             )
-            
+
             status = "Created" if created else "Already exists"
             self.stdout.write(f"  {status}: {product.title}")
 

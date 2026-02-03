@@ -1,10 +1,16 @@
-# Milestone Project 4: The Elysium Archive
-
 ![Code Institute Project](documentation/code-institute-img.png)
 
-**Live Site:** [The Elysium Archive](https://the-elysium-archive-a51393fa9431.herokuapp.com/)
+# Milestone Project 4: The Elysium Archive
+
+---- AM I RESPONSIVE SCREENSHOOT HERE -----
 
 The Elysium Archive is a story-driven, dark fantasy ecommerce site where each purchase unlocks a private archive page inside the website.
+
+## Quick Links
+
+- [Live Site](https://the-elysium-archive-a51393fa9431.herokuapp.com/)
+- [GitHub Project Board](https://github.com/users/Drake-Designer/projects/5)
+- [Testing Documentation](TESTING.md)
 
 ## Contents
 
@@ -33,21 +39,31 @@ The Elysium Archive is a story-driven, dark fantasy ecommerce site where each pu
 
 ## Project Overview
 
-**The Elysium Archive** is a story-driven, dark fantasy ecommerce project where you do not buy a file, you buy access. No downloads. No loose files. Just secrets.
+**The Elysium Archive** is a dark fantasy, story-driven ecommerce project where you do not buy a file. You buy access.
 
-Each product represents an archive entry, a forbidden text stored inside a private, vampire-only archive. Stripe Checkout runs in test mode, and a successful payment unlocks the entry inside your personal archive.
+No downloads. No attachments. No folders sitting on your desktop.
+When you purchase an entry, it becomes part of your personal archive inside the site.
 
-I built this project as my Code Institute Milestone Project 4 using Django and PostgreSQL. Inspired by gothic vampire lore and secret societies, The Elysium Archive is designed to feel like a real place: an ancient library reserved for invited members only.
+Each product is a piece of forbidden lore. A text that exists only within a private library. After a successful Stripe Checkout (currently in test mode), the entry unlocks and can be read directly inside your account.
+
+I built this project as my Code Institute Milestone Project 4 using Django and PostgreSQL. I wanted to explore the idea of selling access instead of files, and I wrapped that technical concept inside a world inspired by gothic vampire mythology, secret orders, and hidden libraries.
+
+The Elysium Archive is meant to feel like a place, not just a shop.
+An old archive that has existed for centuries, quietly collecting dangerous knowledge, accessible only to those who have been granted entry.
 
 ### The Story Behind The Elysium Archive
 
-The project draws on gothic vampire lore and the idea of a hidden society that exists alongside the ordinary world. The platform is framed as a private collection of forbidden texts, accessible only to verified members.
+The project is inspired by the idea that a hidden society exists alongside the normal world. A society that records truths most people were never meant to read.
 
-The dark fantasy theme supports the core logic of the platform by providing a narrative reason for:
+The platform presents itself as a private archive of forbidden texts, available only to verified members who have earned access.
 
-- User accounts tied to a personal archive
-- Access permissions based on verified purchases
-- Immediate content unlocking after payment
+This narrative gives meaning to the core features of the platform:
+
+- Each user owns a personal archive
+- Access is granted through verified purchases
+- Content unlocks instantly after payment
+
+In short, the story is not decoration. It exists to support and justify how the platform actually works.
 
 ### What You Get
 
@@ -65,7 +81,7 @@ The dark fantasy theme supports the core logic of the platform by providing a na
 
 - Visitors who enjoy dark fantasy themes and want to browse teasers
 - Members who want a buy once, access forever experience
-- Developers exploring a complete and structured Django project
+- Developers who want to explore a complete and structured Django project
 
 Refunds are not supported by design. Archive entries unlock immediately after purchase.
 
@@ -74,9 +90,8 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 1. Visitors browse the catalog without an account.
 2. Users register or log in to purchase content.
 3. Checkout is handled via Stripe.
-4. After payment, the product unlocks for the user.
-5. The entry appears in "My Archive".
-6. Users can manage their profile or delete their account.
+4. After payment, content unlocks and appears in "My Archive".
+5. Users can manage their profile or delete their account.
 
 ## Feature Summary
 
@@ -97,10 +112,9 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 
 ### Archive Access Control
 
-- Private "My Archive" area
-- Individual protected archive pages
-- Direct URL access is blocked
-- Unpublished products are hidden from the public archive list but remain reachable by entitled buyers (and superusers) via direct link; non-entitled users cannot access them
+- Private "My Archive" area with protected reading pages
+- Direct URL access blocked for non-entitled users
+- Unpublished products remain accessible to buyers who already own them
 
 ### Reviews (Verified Buyers Only)
 
@@ -150,7 +164,7 @@ The site structure was designed to support a clear journey from public browsing 
 - Protected archive pages
 - User profile
 
-Restricted areas require authentication and a verified email address. Archive content also requires a completed purchase.
+Restricted areas require authentication and a verified email address.
 
 ### Wireframes
 
@@ -232,7 +246,7 @@ This section documents implemented features organised by category.
 
 - **Registration** - Create account with username, email, and password validation
 - **Unique Email Enforcement** - Signup enforces unique emails case-insensitively (no duplicate accounts with different casing)
-- **Email Verification** - Mandatory email verification via SMTP (Resend by default; see `elysium_archive/settings.py`)
+- **Email Verification** - Mandatory email verification via SMTP (see Email Templates section for details)
 - **Login** - Secure authentication with username or email
 - **Login Warnings** - Shows one warning at a time, distinguishes wrong password vs wrong username/email, and only shows the case-sensitive reminder when relevant
 - **Password Reset** - Complete password reset flow with email link
@@ -317,14 +331,21 @@ This section documents implemented features organised by category.
 - **Access Control** - Requires authentication, verified email, and AccessEntitlement for the specific product
 - **Immersive Layout** - Clean, distraction-free design focused on reading the complete archive entry
 - **Full Content Display** - Complete archive text displayed with elegant formatting and generous spacing
+- **Content Editor** - Product content uses CKEditor5 for rich text formatting with custom styling support
 - **Navigation** - Clear links back to My Archive and product preview page
 - **No Purchase Elements** - Reading page contains no cart, pricing, or purchase CTAs
 - **Permission Denied** - Users without access receive 403 error; anonymous users redirected to login
 
+### Product Visibility and Access Control
+
+- **is_active**: Controls whether a product appears in the public archive catalog. When `False`, the product is hidden from listings.
+- **is_removed**: Marks a product as removed from public display but preserves access for verified buyers who have already purchased. Unpublished products remain reachable via direct link by entitled users and superusers; non-entitled users cannot access them.
+- **Admin Delete Behavior**: Deleting a product from Django Admin converts the delete into an unpublish (sets `is_active=False`) to preserve user access to already-purchased content.
+
 ## Pages Overview
 
 | Page | URL | Access | Description |
-| ------ | ----- | -------- | ------------- |
+| ---- | --- | ------ | ----------- |
 | Home | `/` | Public | Landing page with hero, carousel, and membership info |
 | Archive | `/archive/` | Public | Browse all archive entries |
 | Lore | `/lore/` | Public | World-building and story content |
@@ -340,10 +361,68 @@ This section documents implemented features organised by category.
 | Delete Account | `/accounts/delete/` | Authenticated + verified email | Permanently delete account |
 | Product Preview | `/archive/<slug>/` | Public | Preview page with purchase flow |
 | Archive Reading | `/archive/<slug>/read/` | Owners only + verified email | Dedicated reading page for purchased content |
-| Submit Review | `/archive/<slug>/review/` | Verified buyers (POST) | Submit review for purchased product |
+| Submit Review | `/archive/<slug>/review/` | Verified buyers | Submit review for purchased product (POST only) |
 | Edit Review | `/archive/<slug>/review/<id>/edit/` | Review owner + verified email | Edit your own review |
-| Delete Review | `/archive/<slug>/review/<id>/delete/` | Review owner + verified email (POST) | Delete your own review |
+| Delete Review | `/archive/<slug>/review/<id>/delete/` | Review owner + verified email | Delete your own review (POST only) |
 | Admin | `/admin/` | Staff only | Django admin panel |
+
+## Website Pages Showcase
+
+The Elysium Archive offers a complete user experience from public browsing to secure archive access. Here's a visual tour of the key pages:
+
+### Public Area
+
+These pages are accessible to all visitors without authentication.
+
+**Homepage** - Hero section with featured entries, deal banner bar, and membership information:
+
+![Homepage](documentation/website-pages/home.png)
+
+**Archive Catalog** - Browse all available archive entries with filters and sorting:
+
+![Archive Catalog](documentation/website-pages/archive.png)
+
+**Lore** - Dark fantasy world-building and story content:
+
+![Lore Page](documentation/website-pages/lore.png)
+
+**Privacy Policy** - Data practices and privacy information:
+
+![Privacy Policy](documentation/website-pages/privacy.png)
+
+**Terms of Service** - Usage terms and conditions:
+
+![Terms of Service](documentation/website-pages/terms.png)
+
+**Contact Form** - Reach out to site maintainers:
+
+![Contact Form](documentation/website-pages/contact.png)
+
+### Authentication Pages
+
+**Registration** - Create a new account:
+
+![Registration Page](documentation/website-pages/register.png)
+
+**Login** - Sign in to your account:
+
+![Login Page](documentation/website-pages/login.png)
+
+### Shopping & Checkout
+
+**Shopping Cart** - Review items before purchase:
+
+![Shopping Cart](documentation/website-pages/cart.png)
+
+**Stripe Payment** - Secure checkout via Stripe:
+
+![Stripe Payment](documentation/website-pages/stripe-payment.png)
+
+### User Dashboard
+
+**Profile Overview** - Manage account details, view archive, orders, and reviews:
+
+![Profile Overview](documentation/website-pages/profile-overview.png)
 
 ## Technical Overview
 
@@ -376,7 +455,7 @@ Production requirements for professional email management, password resets, and 
 **What changed:**
 
 - Replaced custom login/register views with allauth's built-in views
-- Integrated SMTP delivery (Resend by default) for account emails
+- Integrated SMTP delivery for account emails (see Email Templates section)
 - Added email verification, password reset, and account management flows
 - Implemented allauth email templates with project styling
 
@@ -388,10 +467,36 @@ Rather than removing the `accounts` app, it was preserved and enhanced to comple
 - **Dashboard and archive views** - Centralised account management and purchased content access
 - **Account deletion** - Safe account deletion with proper cleanup
 - **Custom forms** - ElysiumSignupForm and ElysiumLoginForm styled with Bootstrap
-- Fixed login compatibility issues caused by custom allauth login form overrides
-- Final behaviour supports the unified login warning messages described above
+- **Improved login warnings** - Fixed compatibility issues and implemented unified warning messages that distinguish wrong password vs wrong username/email, show case-sensitive reminders only when relevant, and display one warning at a time
 
 This hybrid approach keeps authentication professional while maintaining custom business logic within the accounts app.
+
+### Signal Handlers and Automated Logic
+
+Django signals are used to maintain data consistency and automate business logic:
+
+**Accounts Signals** (`accounts/signals.py`):
+
+- **post_save (User)** - Creates a UserProfile when a new user registers, ensuring every user has an associated profile
+- **post_save (User)** - Updates UserProfile on every user save to ensure profile persistence
+
+**Cart Signals** (`cart/signals.py`):
+
+- **user_logged_in** - Restores a user's persistent cart to the session on login, but only if the session cart is empty, preventing accidental loss of items added before login
+- **Cart filtering** - Only active products (not removed) are restored from persistent storage
+
+**Product Signals** (`products/models.py`):
+
+- **post_save (Product)** - Syncs deal status when a product's category changes or when featured status is updated
+- **post_save (DealBanner)** - Automatically marks affected products as deals when banners are activated
+- **post_delete (DealBanner)** - Removes deal status from products when banners are deleted (CASCADE behavior)
+
+These signals ensure that:
+
+- User profiles are always created on registration
+- Shopping carts persist across sessions
+- Deal statuses remain synchronized with active banners
+- No manual admin work is required to keep related data consistent
 
 ### Django Apps Structure
 
@@ -459,9 +564,9 @@ The project uses a modular CSS architecture to keep styles scoped and maintainab
 **Example (homepage template):**
 
 ```django
-{% block extracss %}
+{% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pages/home.css' %}">
-{% endblock extracss %}
+{% endblock extra_css %}
 ```
 
 #### Exception inline style: Email Templates
@@ -479,45 +584,17 @@ Static assets are organised to support both development and production environme
 ```text
 static/
 ├── css/
-│   ├── base.css                          → Global styles (navigation, forms, typography)
-│   ├── components/
-│   │   ├── dashboard.css                 → Dashboard UI components
-│   │   ├── deal-banner.css               → Deal banner marquee
-│   │   └── products.css                  → Product cards and layouts
-│   ├── pages/
-│   │   ├── home.css                      → Homepage-specific styles
-│   │   ├── lore.css                      → Lore page styles
-│   │   └── footer-pages.css              → Footer page styles
-│   └── admin/
-│       ├── admin.css                     → Admin entry point (imports all modules)
-│       ├── admin-variables.css           → Admin CSS variables
-│       ├── admin-components.css          → Admin UI components
-│       ├── admin-jazzmin-overrides.css   → Jazzmin theme customisations
-│       ├── admin-categories.css          → Category admin styling
-│       ├── admin-products.css            → Product admin styling
-│       ├── admin-orders.css              → Order admin styling
-│       ├── admin-reviews.css             → Review admin styling
-│       ├── admin-accounts.css            → Account admin styling
-│       ├── admin-deal-banners.css        → Deal banner admin styling
-│       └── admin-product-image-alt.css   → ALT text counter
-│
+│   ├── base.css                          → Global styles
+│   ├── components/                       → Dashboard, deal banner, products
+│   ├── pages/                            → Home, lore, footer pages
+│   └── admin/                            → Admin UI modules (variables, components, overrides)
 ├── js/
-│   ├── dashboard.js                      → Dashboard tab switching
-│   ├── deal-banner-carousel.js           → Deal banner auto-scroll
-│   ├── effects-toggle.js                 → Reduced effects toggle
-│   ├── messages.js                       → Django messages auto-dismiss
-│   └── admin/
-│       └── image-alt-counter.js          → Admin ALT text character counter
-│
+│   ├── dashboard.js, effects-toggle.js, messages.js, checkout-status.js, review-form.js
+│   └── admin/image-alt-counter.js
 ├── img/
-│   ├── favicon/                          → Favicon files (all formats)
-│   ├── home/
-│   │   ├── how/                          → "How it works" section images
-│   │   └── membership/                   → Membership section images
-│   └── lore/                             → Lore page images
-│
+│   ├── favicon/, home/, lore/
 └── video/
-    └── elysium-intro-video.mp4           → Homepage hero video
+    └── elysium-intro-video.mp4
 ```
 
 All static files are collected using Django's `collectstatic` command and are compatible with Heroku deployment.
@@ -535,14 +612,23 @@ Templates live in `templates/account/` and `templates/account/email/`.
 
 Each template:
 
-- Uses the site colour palette and typography
-- Is responsive on mobile and desktop
-- Has a plaintext fallback for clients that do not support HTML
+#### ⚠️ Important: Resend SMTP Configuration and Domain Verification
 
-Notes:
+Resend is used to send account emails (verification, password reset, and contact form delivery).
 
-- The "Contact the Lore" form sends an email to the address set in `CONTACT_RECIPIENT_EMAIL`.
-- Local development uses Django console email backend; production uses SMTP via `EMAIL_*` settings.
+Resend **requires domain verification** to send emails. Sending from unverified domains is not possible.
+
+For this project, using a personal verified domain was the only viable way to use Resend correctly. The project uses `drakedrumstudio.ie`, and all emails are sent from `noreply@drakedrumstudio.ie`.
+
+**Example verification email:**
+
+![Email Verification](documentation/verification-email.png)
+
+**For your own deployment:**
+
+- Verify your own domain with Resend and use it as your sender address
+- Or switch to another SMTP provider (Gmail, SendGrid, etc.)
+- Or use Django's console email backend for local development
 
 ### Favicon Support
 
@@ -579,7 +665,7 @@ All atmospheric images used throughout the project are sourced from [Stockcake](
 
 - **django-allauth 65.13.1**
   - User registration, login, logout
-- Email verification via SMTP (Resend by default)
+  - Email verification via SMTP
   - Password reset and change functionality
   - Email address management
   - Social authentication ready
@@ -596,6 +682,7 @@ All atmospheric images used throughout the project are sourced from [Stockcake](
 - **Stripe 14.1.0**
 - **Cloudinary 1.44.1**
 - **Resend SMTP** (email delivery via `EMAIL_HOST` / `RESEND_API_KEY`)
+- **CKEditor5 0.2.19** (Rich text editing for product content)
 
 ### Admin and Development
 
@@ -651,6 +738,25 @@ The Elysium Archive implements industry-standard security headers and Django bes
 - Ownership verification for user-specific resources
 - AccessEntitlement model as single source of truth for content access
 
+**Code Security Audit:**
+
+The codebase is regularly audited for security vulnerabilities using Bandit, a Python security linter:
+
+- **Bandit Configuration**: Custom `bandit.yaml` excludes test code and third-party dependencies
+- **XSS Prevention**: `format_html()` used for HTML generation with variable interpolation; `mark_safe()` only for static content
+- **Password Security**: All test passwords generated at runtime using `django.utils.crypto.get_random_string()`
+- **Secret Management**: No hardcoded secrets; `SECRET_KEY` uses environment variable with `get_random_secret_key()` fallback
+- **Exception Handling**: All exceptions logged with context; no silent failures
+- **Latest Audit**: 0 security issues (5,146 lines scanned, 02/02/2026)
+
+Run security audit:
+
+```bash
+bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py
+```
+
+See [TESTING.md](TESTING.md) for detailed security audit results and methodology.
+
 ### Custom Error Pages
 
 Error pages follow the site's styling and provide clear navigation:
@@ -680,18 +786,33 @@ The payment flow follows this sequence:
 
 Stripe sessions are created server-side using `stripe.checkout.Session.create`. The integration is configured to accept card payments only via `payment_method_types=["card"]`.
 
-### Webhook Confirmation
+### Webhook Confirmation and Fallback
 
 Payments are confirmed server-side via Stripe webhooks at `/checkout/webhook/`. Orders are marked paid and access entitlements are granted only after Stripe signature verification succeeds.
 
 The checkout success page includes a fallback verification step if webhook delivery is delayed: it re-checks the Stripe session and, when `payment_status == "paid"`, finalises the order (mark paid, store the payment intent ID, create entitlements, and clear the cart).
 
-The checkout flow is protected against duplicate submissions by reusing a recent pending order when a double POST happens in quick succession. Confirmation is robust through webhooks plus the success-page fallback, and entitlement creation is idempotent so refreshes or webhook replays do not create duplicates.
+**Stripe Session Metadata and Fallback Logic:**
 
-Entitlements are created idempotently to prevent duplicate access grants if webhook events are replayed or users refresh the success page.
+When a Stripe checkout session is created, the following metadata is included:
 
-- Entitlement creation is idempotent (DB unique constraint + `get_or_create`), so webhook replays and success-page refreshes do not create duplicates.
-- Order finalisation is atomic and uses transactions/row locking to prevent race conditions (double-submit safe).
+```python
+metadata={
+    "order_id": str(order.id),           # Primary key for quick DB lookup
+    "order_number": order.order_number,  # Human-readable order identifier
+}
+```
+
+- Add loading states and progress indicators during checkout
+- Implement skeleton screens while catalog is loading
+- Add smooth transitions between archive sections
+The `order_id` is used in the checkout success fallback to quickly retrieve the correct order from the database without relying on webhook delivery. This ensures reliable access even if webhooks are delayed or fail to arrive.
+
+**Idempotent and Atomic Processing:**
+
+- The checkout flow is protected against duplicate submissions by reusing a recent pending order when a double POST happens in quick succession
+- Entitlement creation is idempotent (DB unique constraint + `get_or_create`), so webhook replays and success-page refreshes do not create duplicates
+- Order finalisation is atomic and uses transactions/row locking to prevent race conditions (double-submit safe)
 
 ### Test Mode
 
@@ -846,6 +967,8 @@ The current relationships are represented in the ERD below and summarised in the
 The Entity Relationship Diagram (ERD) below illustrates the current database structure.
 
 The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagramming tool that allows database relationships to be defined using clear, readable syntax and exported as an image.
+
+**Note:** Some fields are omitted from the diagram for clarity (e.g., `Product.is_removed`, `Review.title`, `Review.body`, `CartItem.quantity`). Refer to the core model documentation or model files for complete field definitions.
 
 ```mermaid
 erDiagram
@@ -1013,20 +1136,42 @@ Automated tests are provided; run `pytest` locally and see [TESTING.md](TESTING.
 
 ## Testing and Bug Fixes
 
-For detailed testing, see [TESTING.md](TESTING.md).
+For detailed testing documentation, coverage reports, manual testing procedures, and validation results, see [TESTING.md](TESTING.md).
 
-### Testing Summary (Quick Start)
+### Testing Summary
 
-- Run the automated test suite: `pytest`
-- Verbose output: `pytest -v`
-- Optional Django deployment checks: `python manage.py check --deploy`
-- Optional code quality checks (available in `dev-requirements.txt`):
-  - `python -m black --check .`
-  - `python -m isort --check-only .`
-  - `flake8`
-  - `pylint`
-  - `djlint --check .`
-- HTML/CSS validation is manual (W3C + Jigsaw). See TESTING.md for current evidence/status.
+**Automated Tests:** 120 tests, all passing.
+
+Run the test suite:
+
+```bash
+pytest
+```
+
+Verbose output:
+
+```bash
+pytest -v
+```
+
+**Code Quality Checks** (available in `dev-requirements.txt`):
+
+```bash
+python -m black --check .
+python -m isort --check-only .
+flake8
+pylint accounts cart checkout home orders products reviews elysium_archive manage.py
+bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py
+djlint --check .
+```
+
+**Security Audit:** Bandit scan reports 0 issues (5,146 lines scanned)
+
+**Django Deployment Checks:**
+
+```bash
+python manage.py check --deploy
+```
 
 These are selected real bugs found and fixed during development. Fixes were validated with manual tests and deployment verification.
 
@@ -1034,183 +1179,118 @@ These are selected real bugs found and fixed during development. Fixes were vali
 
 ### Checkout access delay after payment
 
-- Symptoms:
-  - Users reached checkout success but purchases did not appear in My Archive; carts were not cleared when webhook processing arrived later.
-- Root Cause:
-  - Checkout relied on webhook-only reconciliation and used only `order_number` in session metadata; delayed webhooks left the success view without a reliable payment state.
-- Fix:
-  - Add `order_id` to Stripe session metadata, verify the Stripe session in `checkout_success` as a fallback, create `AccessEntitlement` records when payment is confirmed, and limit model saves to changed fields.
+**Symptoms:** Purchases did not appear in My Archive; carts not cleared when webhooks arrived late.
 
-`checkout/views.py`
+**Root Cause:** Checkout relied on webhook-only reconciliation with only `order_number` in session metadata.
 
-```python
-session = stripe.checkout.Session.create(
-    line_items=line_items,
-    mode="payment",
-    success_url=request.build_absolute_uri(
-        reverse("checkout_success", kwargs={"order_number": order.order_number})
-    ),
-    cancel_url=request.build_absolute_uri(reverse("checkout_cancel")),
-    client_reference_id=order.order_number,
-    metadata={
-        "order_id": str(order.id),
-        "order_number": order.order_number,
-    },
-)
-```
+**Fix:** Added `order_id` to Stripe session metadata; success view now verifies the Stripe session as a fallback and creates `AccessEntitlement` records when payment is confirmed.
 
-- How it was tested:
-  - Manual end-to-end checkout with Stripe test cards.
-  - Simulated delayed webhooks.
-  - Verified `AccessEntitlement` creation.
-  - Confirmed cart clearing after payment.
-  - Ran unit tests to ensure no regressions.
+**How it was tested:** End-to-end checkout with test cards, simulated delayed webhooks, verified entitlement creation and cart clearing.
 
 ### Checkout: atomic paid + entitlements (idempotent) + fallback success confirmation
 
-- Symptoms:
-  - Delayed webhooks or refreshes could leave orders unpaid and entitlements missing, or risk duplicate entitlements after event replay.
-- Root Cause:
-  - Payment confirmation relied on webhook timing without a guarded fallback and lacked explicit idempotent entitlement checks in the success flow.
-- Fix:
-  - Add success-page fallback that re-checks Stripe session `payment_status == "paid"` and finalises the order atomically; create entitlements idempotently to prevent duplicates.
-- How it was tested:
-  - Stripe CLI forwarding with test card `4242 4242 4242 4242`.
-  - Delayed webhook scenario followed by success-page refresh.
-  - Replayed duplicate webhook events and verified no duplicate entitlements.
+**Symptoms:** Delayed webhooks or refreshes could leave orders unpaid or risk duplicate entitlements.
+
+**Root Cause:** Payment confirmation relied on webhook timing without a guarded fallback.
+
+**Fix:** Success page now re-checks Stripe session `payment_status` and finalises orders atomically; entitlements created idempotently.
+
+**How it was tested:** Stripe CLI forwarding, delayed webhook + refresh, replayed events to verify no duplicates.
 
 ### Static assets missing on Heroku
 
-- Symptoms:
-  - Deployed site served no CSS, JavaScript, or images.
-- Root Cause:
-  - The Heroku release phase executed database migrations but did not run `collectstatic`, so static files were missing from the deployed slug.
-- Fix:
-  - Run `collectstatic` automatically in the release phase after migrations.
+**Symptoms:** Deployed site served no CSS, JavaScript, or images.
 
-`Procfile`
+**Root Cause:** Release phase ran migrations but not `collectstatic`.
+
+**Fix:** Run `collectstatic` automatically in release phase:
 
 ```text
 release: python manage.py migrate --noinput && python manage.py collectstatic --noinput
 web: gunicorn elysium_archive.wsgi:application
 ```
 
-- How it was tested:
-  - Verified on Heroku staging.
-  - Ran `python manage.py collectstatic --noinput` locally.
-  - Confirmed that CSS, JS, and images load correctly after deployment.
+**How it was tested:** Verified on Heroku staging; confirmed assets load correctly.
 
 ### Stripe webhook signature error not handled
 
-- Symptoms:
-  - Stripe webhooks failed with an import or attribute error and were not processed.
-- Root Cause:
-  - The code imported the signature verification exception from the wrong path for the installed Stripe client library.
-- Fix:
-  - Import `SignatureVerificationError` correctly from Stripe and handle invalid signatures gracefully in the webhook view.
+**Symptoms:** Webhooks failed with import or attribute errors.
 
-`checkout/webhooks.py`
+**Root Cause:** Code imported `SignatureVerificationError` from wrong path.
 
-```python
-import stripe
-from stripe import SignatureVerificationError
+**Fix:** Corrected import from `stripe` and handled invalid signatures gracefully.
 
-try:
-    event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-except ValueError:
-    logger.warning("Invalid payload for Stripe webhook")
-    return JsonResponse({"error": "Invalid payload"}, status=400)
-except SignatureVerificationError:
-    logger.warning("Invalid signature for Stripe webhook")
-    return JsonResponse({"error": "Invalid signature"}, status=400)
-```
-
-- How it was tested:
-  - Replayed webhook payloads locally.
-  - Tested invalid and valid signatures.
-  - Verified that order status updates correctly.
-  - Confirmed entitlements are created after valid webhook events.
+**How it was tested:** Replayed payloads locally; tested invalid and valid signatures; verified order updates and entitlement creation.
 
 ### Admin ALT text length overflow (became a feature)
 
-- Symptoms:
-  - Administrators could enter very long `image_alt` values in the Django Admin.
-  - These values risked causing deployment or migration failures on Postgres.
-  - The admin UX provided no feedback about safe or recommended lengths.
-- Root Cause:
-  - No server-side validation or admin input guardrails existed for `Product.image_alt`.
-- Fix:
-  - Add a server-side `MaxLengthValidator(150)` to `image_alt`.
-  - Enforce `maxlength="150"` on the admin input.
-  - Add a live character counter using small admin-only JS and CSS.
+**Symptoms:** Admins could enter very long `image_alt` values risking deployment failures.
 
-`products/models.py`
+**Root Cause:** No server-side validation or admin guardrails for `Product.image_alt`.
 
-```python
-image_alt = models.CharField(
-    max_length=255,
-    blank=True,
-    validators=[MaxLengthValidator(150)],
-    help_text="Recommended 60-125 chars. Max 150.",
-)
-```
+**Fix:** Added `MaxLengthValidator(150)`, enforced `maxlength="150"` on admin input, added live character counter.
 
-`products/admin.py`
+**How it was tested:** Manual admin tests; saves >150 chars failed server-side; verified counter updates while typing.
 
-```python
-def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    if "image_alt" in self.fields:
-        self.fields["image_alt"].widget.attrs["maxlength"] = "150"
-        self.fields["image_alt"].widget.attrs["placeholder"] = "Short descriptive text (60-125 chars recommended)"
-```
-
-- How it was tested:
-  - Manual admin tests confirming typing stops at 150 characters.
-  - Attempted saves greater than 150 characters failed server-side.
-  - Shell save attempts triggered Django validation errors.
-  - Verified that the live character counter updates correctly while typing.
-
-- Feature outcome:
-  - This bug became the inspiration for a proactive admin UX safeguard.
-  - A live ALT text counter and hard input limit were added to prevent future issues.
-  - Server-side validation remains the canonical enforcement.
-  - The counter exists purely as a UX improvement.
+**Feature outcome:** Bug became a proactive admin UX safeguard with live counter and hard limit.
 
 ### Allauth login form AttributeError after customization
 
-- Symptoms:
-  - `'ElysiumLoginForm' object has no attribute '_login'`
-  - `'str' object has no attribute 'redirect_url'`
-- Root Cause:
-  - Customising the allauth login form altered expected form processing and return values, breaking internal assumptions about the login handler and redirect objects.
-- Fix:
-  - Restored the expected form instance methods and ensured redirect handling returns the correct object types; updated the custom login form to delegate to allauth where appropriate.
-  - Adjusted login view logic to support the unified warning messages and to only show case-sensitivity hints when relevant.
-- How it was tested:
-  - Manual login attempts for wrong username and wrong password scenarios.
-  - Confirmed no AttributeError or redirect errors during local and staging sign-in flows.
-  - Ran unit tests covering accounts and login flows to prevent regressions.
+**Symptoms:** `'ElysiumLoginForm' object has no attribute '_login'`; `'str' object has no attribute 'redirect_url'`.
+
+**Root Cause:** Customising allauth login form broke internal assumptions about form processing and redirect objects.
+
+**Fix:** Restored expected form methods; ensured redirect handling returns correct types; updated login view logic for unified warning messages.
+
+**How it was tested:** Manual login tests for wrong username/password scenarios; confirmed no AttributeError; ran unit tests.
 
 ## Running the Project Locally
 
-This project uses environment variables for environment specific configuration and to keep secrets out of version control.
+### Quick Start
 
-Local development uses a file called `env.py` in the project root.
-This file sets environment variables for local development only and is loaded automatically by the Django settings if present.
+```bash
+# Clone the repository
+git clone https://github.com/Drake-Designer/the-elysium-archive.git
+cd the-elysium-archive
 
-The `env.py` file must never be committed.
+# Create a virtual environment
+python -m venv .venv
 
-### Local setup
+# Activate the virtual environment
+# On macOS/Linux:
+source .venv/bin/activate
+# On Windows:
+.venv\Scripts\Activate.ps1
 
-1. Create and activate a virtual environment.
-2. Install production dependencies:
-   - `pip install -r requirements.txt`
-3. Optional: install development dependencies:
-   - `pip install -r dev-requirements.txt`
-4. Create an `env.py` file in the project root.
-5. Run the development server:
-   - `python manage.py runserver`
+# Install dependencies
+pip install -r requirements.txt
+
+# Install development dependencies (optional but recommended)
+pip install -r dev-requirements.txt
+
+# Create env.py with your configuration (see below)
+
+# Run migrations
+python manage.py migrate
+
+# Create a superuser (optional, for admin access)
+python manage.py createsuperuser
+
+# Run the development server
+python manage.py runserver
+```
+
+The project will be available at `http://127.0.0.1:8000/`
+
+### Environment Configuration
+
+This project uses environment variables to keep secrets out of version control. Local development uses a file called `env.py` in the project root, which is loaded automatically by Django settings.
+
+**Important:** The `env.py` file must never be committed.
+
+**Static Files in Development:**
+
+Django serves static files automatically when `DEBUG=True`. The `collectstatic` command is primarily needed for deployment.
 
 ### Example `env.py`
 
@@ -1259,6 +1339,22 @@ os.environ.setdefault("EMAIL_HOST_PASSWORD", "your-smtp-password")
 
 Never commit `env.py` to version control.
 If sensitive keys are exposed, rotate them immediately and update your config vars.
+
+### Email Configuration Guide
+
+The project supports multiple SMTP providers. By default, it uses Resend.
+
+**Resend (Recommended):**
+
+```python
+os.environ.setdefault("EMAIL_HOST", "smtp.resend.com")
+os.environ.setdefault("RESEND_API_KEY", "re_xxx")
+os.environ.setdefault("DEFAULT_FROM_EMAIL", "noreply@yourdomain.com")
+```
+
+**Alternatives:** Gmail (with app password), SendGrid, or any SMTP provider. Set `EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and `DEFAULT_FROM_EMAIL` accordingly.
+
+**Local Development:** Use Django's console backend by setting `EMAIL_BACKEND` to `django.core.mail.backends.console.EmailBackend` in `env.py`. Emails print to the console instead of being sent.
 
 ### DEBUG auto-switch
 
@@ -1335,80 +1431,116 @@ The project includes a Django admin interface with custom management features fo
 
 ## Deal Banner Bar
 
-The homepage includes a scrolling **Deal Banner Bar** (admin controlled promotions) managed entirely from Django Admin.
+The homepage displays a scrolling **Deal Banner Bar** that shows promotional messages to visitors. Staff can create and manage these banners entirely from the Django Admin panel without code changes.
 
-### Admin Features
+![Deal Banner Bar](documentation/deal-banner.png)
 
-- Create banners with title, message, emoji icon, display order, and active status
-- Ordering via integer order field (lower values show first)
-- Admin previews with destination badges and status indicators
+### What It Does
 
-### Destination Logic (Link Priority)
+The Deal Banner Bar is a horizontal scrolling marquee that displays promotional messages at the top of the homepage. Each banner can include:
 
-A banner click follows this priority order:
+- A custom emoji icon
+- A promotional message
+- A clickable link to a product, category, or custom URL
 
-1. **Product**: links directly to the selected product page
-2. **Custom URL**: uses the provided URL
-3. **Category**: links to the archive filtered by category + deals
-4. **Fallback**: links to the archive with deals filter enabled
+Banners scroll continuously and are fully managed through Django Admin.
 
-### Deals Sync with Products
+### How It Works (For Staff)
 
-The banner system is connected to the product flag `is_deal`, used by filters and UI badges:
+**Creating a Banner:**
 
-- Activating a banner linked to a **product** marks that product as a deal
-- Activating a banner linked to a **category** marks all products in that category as deals
-- Disabling or deleting a banner triggers a recalculation and updates affected products automatically
+1. Go to Django Admin → Deal Banners
+2. Add a new banner with:
 
-### Deal Rules (Current Implementation)
+    - **Title**: Internal name (not shown to visitors)
+    - **Message**: The promotional text displayed on the homepage
+    - **Emoji**: Optional icon (e.g., 🔥, ⚡, 🎉)
+    - **Display Order**: Lower numbers appear first
+    - **Active**: Toggle to show/hide the banner
 
-- Deal status is computed from active `DealBanner` records and synced to `Product.is_deal` in `products/models.py`.
-- Product-linked banners set deal status for that product; category-linked banners set deal status for all active products in that category.
-- Banner visibility rules (inactive products/categories and global banners) are enforced in `home/views.py` and covered by tests in `TESTS/home/test_home.py`.
+**Linking Banners:**
 
-### Deal Banner Evidence (no screenshots stored in repo)
+Each banner can link to one of these destinations (priority order):
 
-- Frontend marquee: `home/templates/home/index.html`
-- Banner styling: `static/css/components/deal-banner.css`
+1. **Specific Product** → Links to that product's detail page
+2. **Custom URL** → Links to any URL you provide
+3. **Category** → Links to the archive filtered by that category + deals
+4. **No Link** → Links to the archive with deals filter enabled
+
+Simply select a product or category from the dropdown, or leave both empty to create a general deals banner.
+
+### Automatic Deal Management
+
+The banner system automatically manages the "Deal" status on products:
+
+- When you activate a banner linked to a **product**, that product is marked as a deal
+- When you activate a banner linked to a **category**, all active products in that category become deals
+- When you disable or delete a banner, the affected products are automatically updated
+
+This means you don't need to manually mark products as deals—the banner system handles it for you.
+
+**Implementation Details:**
+
+Deal status synchronization is handled via Django signals in the `products/models.py` module:
+
+- **Product save signal** - When a product's category changes, the deal status is recalculated based on active banners
+- **DealBanner post_save signal** - When a banner is created or updated, affected products are automatically marked as deals
+- **DealBanner post_delete signal** - When a banner is deleted, the associated products are unmarked as deals (CASCADE behavior)
+
+This ensures the `is_deal` field is always synchronized with the current state of banners without requiring manual admin intervention.
+
+### Technical Details
+
+For developers interested in the implementation:
+
+- Banner visibility rules: `home/views.py`
+- Deal status sync logic: `products/models.py`
 - Admin configuration: `products/admin.py`
-- Sync logic: `products/models.py`
-- Tests: `TESTS/home/test_home.py`
+- Frontend marquee: `home/templates/home/index.html`
+- Styling: `static/css/components/deal-banner.css`
+- Automated tests: `TESTS/home/test_home.py`
 
 ## Alt Text Safety
 
-### Context / Why
+### Context
 
-- During testing I intentionally entered very long image ALT texts to stress-test the system.
-- I discovered that overly long values can fail during deployment when the database enforces max-length constraints (notably on Heroku/Postgres).
-- To prevent accidental admin content from causing deploy or migration failures, small guardrails were added to the admin workflow.
+During testing, I intentionally entered very long image ALT texts to stress-test the system. I discovered that overly long values can fail during deployment when the database enforces max-length constraints (notably on Heroku/Postgres). To prevent accidental admin content from causing deploy or migration failures, small guardrails were added to the admin workflow.
 
-### What was changed
+### What Was Changed
 
-1. Server-side validation
-   - The `Product.image_alt` field is constrained at the Django validation level to a safe maximum of **150 characters**.
-   - This prevents saving overly long values via the admin, API, or ORM and keeps the database schema unchanged.
+1. **Server-side validation:**
+    - The `Product.image_alt` field is constrained at the Django validation level to a safe maximum of **150 characters**
+    - This prevents saving overly long values via the admin, API, or ORM and keeps the database schema unchanged
 
-2. Admin input hard limit
-   - The Django Admin form enforces `maxlength="150"` on the `image_alt` input so staff cannot type past the limit in the browser.
+2. **Admin input hard limit:**
+    - The Django Admin form enforces `maxlength="150"` on the `image_alt` input so staff cannot type past the limit in the browser
 
-3. Admin UX improvement (character counter)
-   - A small live character counter appears under the `image_alt` input (for example `0/150`) and updates while typing.
-   - When the limit is reached the counter highlights to indicate the maximum has been hit.
-   - The counter is implemented purely for UX; the security and canonical enforcement are provided by server-side validation.
+3. **Admin UX improvement (character counter):**
+    - A small live character counter appears under the `image_alt` input (for example `0/150`) and updates while typing
+    - When the limit is reached the counter highlights to indicate the maximum has been hit
+    - The counter is implemented purely for UX; the security and canonical enforcement are provided by server-side validation
 
-### Files implementing this
+### Files Implementing This
 
 - `products/models.py` - `image_alt` max length + Django validation
 - `products/admin.py` - admin ModelForm and Media inclusion
 - `static/js/admin/image-alt-counter.js` - live character counter (admin UX)
 - `static/css/admin/admin-product-image-alt.css` - counter styling (no inline styles)
 
-### Practical benefit
+### Practical Benefit
 
-- Prevents accidental invalid admin input that could break deployments or migrations.
-- Reduces the risk of runtime errors caused by data exceeding database constraints.
-- Encourages concise, meaningful ALT text which improves accessibility and content quality.
+- Prevents accidental invalid admin input that could break deployments or migrations
+- Reduces the risk of runtime errors caused by data exceeding database constraints
+- Encourages concise, meaningful ALT text which improves accessibility and content quality
 
 ## Future Improvements
+
+- Send order confirmation emails automatically after purchase
+- Show average rating summary on product cards
+- Add basic sorting options (price and newest)
+- Improve dashboard empty states with clearer guidance
+- Add simple rate limiting or spam protection on login and contact form
+
+These improvements focus on usability, feedback, and small quality-of-life enhancements without changing the core architecture.
 
 ## Credits and Acknowledgements
