@@ -4,7 +4,7 @@ This document describes the current automated test suite and manual testing proc
 
 ## Current Test Status
 
-**120 tests passing** (as of 02/02/2026)
+**120 tests passing**
 
 All automated tests run successfully with pytest. See the [Automated Tests](#automated-tests) section for details.
 
@@ -18,11 +18,15 @@ All automated tests run successfully with pytest. See the [Automated Tests](#aut
 - Manual testing checklist provided: **Yes**
 - Python style/lint checks completed: **Yes** (black, isort, flake8, pylint, djlint, bandit)
 - Security audit completed: **Yes** (Bandit scan clean, 0 issues)
-- HTML validation results recorded: **Partial** (see HTML Validation section)
-- CSS validation results recorded: **Partial** (see CSS Validation section)
+- HTML validation results recorded: **Yes** (all tested pages valid, see HTML Validation section)
+- CSS validation results recorded: **Yes** (local styles valid; remaining errors are from external CDN libraries)
 - JavaScript validation completed: **Yes** (JSHint, 0 errors)
-- Responsiveness testing results recorded: **To be completed**
-- Accessibility testing results recorded: **To be completed**
+- Responsiveness testing results recorded: **Yes** (mobile, tablet, and smart display tested)
+- Accessibility testing results recorded: **In progress** (Lighthouse completed, manual checks pending)
+- Best practices testing: **Yes** (Lighthouse Home - Mobile)
+- SEO testing: **Yes** (Lighthouse Home - Mobile)
+- Browser compatibility testing: **Yes**
+- Performance testing: **Yes** (Lighthouse Home - Mobile)
 
 This checklist is used to track the current state of testing, validation, and quality evidence within the repository.
 
@@ -40,13 +44,13 @@ This checklist is used to track the current state of testing, validation, and qu
 
 The automated suite covers:
 
-- CRUD workflows for products, reviews, and orders (model + view behavior)
-- Authentication and email‑verification gates (allauth flows and protected pages)
+- CRUD workflows for products, reviews, and orders (model + view behaviour)
+- Authentication and email-verification gates (allauth flows and protected pages)
 - Payment flow logic (Stripe checkout session creation, webhooks, and entitlement creation)
 - Data management and access control (entitlements, inactive product access rules)
 - **Review system** (create, edit, delete with character limits and optional fields)
 - **My Archive** (display of unlocked products with review/edit buttons)
-- **Dashboard functionality** (profile, archive, orders, reviews tabs with review delete modale)
+- **Dashboard functionality** (profile, archive, orders, reviews tabs with review delete modal)
 
 ### Test Configuration
 
@@ -105,7 +109,7 @@ pytest -v -s
 
 ### Test Inventory Summary
 
-**Total Tests:** 120 (all passing as of 02/02/2026)
+**Total Tests:** 120
 
 **Test Distribution by App:**
 
@@ -134,22 +138,9 @@ Files:
 
 Coverage:
 
-- Login, signup, and logout page behaviour (200/302)
-- Email verification gate for dashboard, profile, and my-archive redirects
-- Dashboard "My Orders" tab rendering/availability for verified users
-- Dashboard "My Reviews" tab rendering/availability for verified users
-- Redirect helpers `/accounts/my-orders/` and `/accounts/my-reviews/` target the correct dashboard tabs
-- Anonymous users redirected to login for account pages
-- My Archive display for verified users, including deleted-product handling
-- Dashboard form POST updates display_name
-- Profile view shows username/email and display_name form (profile POST does not update display_name)
-- Account deletion flow (confirmation, delete, logout, redirect, message, profile removal)
-
-Key assertions:
-
-- Status codes and redirect targets (`/accounts/login/`, `/accounts/email/`)
-- Template rendering and message presence
-- User/Profile database updates after delete
+- Email verification gates for dashboard, profile, and my-archive; anonymous users redirected to login
+- Dashboard tab rendering (My Orders, My Reviews) for verified users; display_name form updates
+- Account deletion with confirmation, logout, redirect, and profile cascade removal
 
 ### Products
 
@@ -161,22 +152,9 @@ Files:
 
 Coverage:
 
-- Active vs inactive product visibility for anonymous, verified, staff, and entitled users
-- Product list includes only active items; featured items appear; inactive featured items do not
-- Product detail shows title/description/price for active items
-- Archive reading page access (login required, entitlement required, email verified)
-- Preview page content separation and CTA differences
-- My Archive links to reading page
-- Reading page navigation links
-- Product model CRUD
-- Archive card layout class checks
-
-Key assertions:
-
-- Status codes (200/302/403/404)
-- Content presence or absence on preview vs reading pages
-- Correct links for reading and detail pages
-- Model persistence and deletion
+- Active/inactive visibility by user role; entitlement required for read page access (403 without)
+- Preview vs reading page content separation; email verification enforced for unpublished products
+- Product model CRUD and navigation links; archive card layout validation
 
 ### Cart
 
@@ -186,19 +164,8 @@ File:
 
 Coverage:
 
-- Add to cart redirects and session storage
-- Cart view renders with items or empty state
-- Remove from cart updates session
-- Cart persistence across pages
-- Validation for missing/nonexistent products and inactive products
-- Verified email required for add-to-cart
-- Totals for single and multiple items
-
-Key assertions:
-
-- Session cart contents
-- Redirects and status codes
-- Expected product titles in rendered cart
+- Add/remove to cart with session persistence; verified email required for add-to-cart
+- Validation for missing/inactive products; cart totals for single and multiple items
 
 ### Checkout
 
@@ -208,24 +175,9 @@ File:
 
 Coverage:
 
-- Verified email gate for checkout and anonymous login redirect
-- Stripe session creation mocked and redirects to Stripe, including redirect handling
-- Order and OrderLineItem creation from cart
-- Order total calculation
-- Stripe error cleanup (Order and OrderLineItem removal)
-- Empty cart redirects to cart
-- Success page template rendering and wrong-user access
-- Double POST to `/checkout/` in quick succession (reuse of a recent pending order)
-- Reuse of a recent pending order to prevent duplicate pending orders
-- Success fallback confirms Stripe session `payment_status == "paid"` can mark the order paid and create entitlements when webhook delivery is delayed
-- Cart clearing after success
-- Cancel page template rendering and message presence
-
-Key assertions:
-
-- Status codes and redirect targets
-- Order database state
-- Stripe session URL handling
+- Verified email gate; Stripe session creation and mocked redirect; order/OrderLineItem from cart
+- Double-submit safety (pending order reuse prevents duplicates); success fallback finalises payment if webhook delayed
+- Cart clearing after success; wrong-user success page access blocked
 
 ### Orders and Webhooks
 
@@ -235,24 +187,9 @@ File:
 
 Coverage:
 
-- Webhook handling for `checkout.session.completed` (paid and unpaid)
-- Webhook handling for `payment_intent.payment_failed`
-- Webhook handling for `checkout.session.expired`
-- Idempotent entitlement creation (unique constraint + `get_or_create` on replay)
-- Paid orders can be made consistent when Stripe IDs are missing (fill Stripe session/payment intent IDs, ensure entitlements)
-- Atomic operations and locking (`select_for_update`) used in critical flows
-- Missing/invalid signature handling and POST-only enforcement
-- Missing order ID and order without user
-- Stripe session/payment intent ID storage
-- Order model order_number generation, uniqueness, and timestamps
-- AccessEntitlement uniqueness and cascade delete
-- Order default status test exists (no explicit assertion)
-
-Key assertions:
-
-- Response codes for webhook endpoints
-- Order status transitions and stripe ID fields
-- Entitlement counts and uniqueness
+- Webhook handling for `checkout.session.completed` (paid/unpaid), `payment_intent.payment_failed`, `checkout.session.expired`
+- Idempotent entitlement creation (`get_or_create` on replay); atomic locking prevents duplicate orders
+- Signature validation and POST-only enforcement; missing order ID/user gracefully handled
 
 ### Reviews
 
@@ -262,30 +199,11 @@ File:
 
 Coverage:
 
-- Review form visibility for buyers vs non-buyers
-- Review creation for buyers (with character limits: title 50 chars, body 1000 chars)
-- Anonymous redirect to login on review POST
-- Duplicate review prevention
-- Review display (single and multiple with star ratings and verified badges)
-- Rating range validation (1-5 stars)
-- **Optional review title** (no character limit enforcement required)
-- **Optional review body** (can submit rating-only reviews)
-- **Mandatory rating field** (only required field in review form)
-- Review model **str**
-- Cascade deletes for user and product
-- Review edit and delete permissions
-- Delete requires POST and modale confirmation in UI
-- Character counter real-time updates (JavaScript)
-- Edit review inherits same styling and validations as create
+- Form visibility for buyers only; create with optional title (50 chars) and body (1000 chars), mandatory rating (1-5 stars)
+- Duplicate review prevention; cascade delete for user and product
+- Edit/delete permissions enforced; delete requires POST and modal confirmation
 
-Key assertions:
-
-- Status codes and redirects
-- Review database state and uniqueness
-- Content displayed on product detail page
-- Optional fields properly accepted as blank/empty
-
----
+### Home
 
 File:
 
@@ -293,40 +211,42 @@ File:
 
 Coverage:
 
-- Admin access for anonymous, regular, and staff users
-- Admin delete actions for products (single delete and bulk delete exercised)
-- Featured flag toggled via admin change form
-- Admin product edits and deactivation
-- Admin order list/detail access for staff only
-- A placeholder test exists for delete without entitlements (no assertions)
-
-Key assertions:
-
-- Status codes for admin access
-- Product database changes after admin POSTs
-- Staff-only access to orders in admin
+- Admin access restricted to staff (anonymous/regular users get 403 or redirect)
+- Admin delete/bulk delete and featured flag toggle; staff-only order list/detail access
 
 ## Manual Testing Procedures
 
-Manual tests validate user-facing behaviour, page rendering, and third-party flows that are not fully covered by automated tests.
+Manual tests validate user-facing behaviour, page rendering, and third-party flows not fully covered by automated tests.
 
-Key user journeys covered below:
+### Critical User Journeys
 
-- Sign up, email verification, login/logout
-- Access to protected content (dashboard, archive reading, reviews)
-- Cart operations (add/remove, totals)
-- Checkout success/cancel and entitlement creation
-- Review create/edit/delete (verified buyers)
+| Journey | Steps | Expected Result |
+|---------|-------|-----------------|
+| **Sign Up & Email Verification** | Create account → verify email from console → login | Verified user can access dashboard |
+| **Browse Archive** | Visit `/archive/` as anon/verified → click product | Active products listed; inactive hidden from non-staff |
+| **Cart & Checkout** | Add product → checkout with Stripe test card → complete | Order marked paid; entitlement created; cart cleared |
+| **Access Protected Content** | Entitled user visits `/archive/<slug>/read/` | Full content accessible; non-entitled users get 403 |
+| **Create Review** | Buyer submits rating + optional title/body on product detail | Review displays with verified badge; non-buyers see no form |
+| **Edit/Delete Review** | Click edit → update; click delete → confirm modal | Edit succeeds; delete requires POST + modal confirmation |
 
-### Test Environment Setup
+### Key Edge Cases (Manual Verification)
 
-1. Create a superuser:
+- [ ] Unverified user visits `/accounts/dashboard/` → redirected to `/accounts/email/`
+- [ ] Unverified user tries checkout → redirected to email verification
+- [ ] Non-entitled user visits read page → 403 Forbidden
+- [ ] Wrong user accesses success page → redirected with error
+- [ ] Review delete modal shows "Are you sure?" → "Stay" cancels, "Delete" removes review
+- [ ] Rapid double-click checkout → only one pending order created (no duplicate)
+
+### Test Data Setup
+
+Create a superuser:
 
 ```bash
 python manage.py createsuperuser
 ```
 
-1. Create a test category and product:
+Create a test product:
 
 ```bash
 python manage.py shell
@@ -336,7 +256,6 @@ python manage.py shell
 >>> Product.objects.create(
 ...     title="Test Product",
 ...     slug="test-product",
-...     tagline="Test tagline",
 ...     description="Test description",
 ...     content="<p>Test premium content.</p>",
 ...     image_alt="Test image",
@@ -346,73 +265,17 @@ python manage.py shell
 ... )
 ```
 
-1. Start the dev server:
+Start the dev server:
 
 ```bash
 python manage.py runserver
 ```
 
-Note: In DEBUG, email is sent to the console backend. Use the verification link printed in the terminal.
+Note: Email is sent to console backend in DEBUG. Use verification link from terminal output.
 
-### Manual Test Checklist
+### Stripe Test Mode
 
-#### Authentication and Email Verification
-
-- [ ] Anonymous user visits `/accounts/login/` -> page loads
-- [ ] Anonymous user visits `/accounts/signup/` -> page loads
-- [ ] New user signs up -> verification email appears in console
-- [ ] Sign up with an email already used is rejected (case-insensitive, e.g., `Test@Test.com` vs `test@test.com`)
-- [ ] User confirms email -> verification succeeds
-- [ ] Unverified user visits `/accounts/dashboard/` -> redirected to `/accounts/email/`
-- [ ] Verified user visits `/accounts/dashboard/` -> dashboard loads
-
-#### Dashboard, Profile, and Account Deletion
-
-- [ ] Verified user visits `/accounts/profile/` -> redirected to dashboard profile tab
-- [ ] Verified user updates display name in dashboard form -> success message shown
-- [ ] Verified user visits `/accounts/my-archive/` -> redirected to dashboard archive tab
-- [ ] Verified user visits `/accounts/delete/` -> confirmation page loads
-- [ ] User submits delete -> account removed, redirected to home, message shown
-- [ ] Superuser delete attempt -> blocked with message
-
-#### Dashboard Tabs
-
-- [ ] Verified user opens My Orders tab -> sees order list or empty state
-- [ ] Verified user opens My Reviews tab -> sees review list or empty state
-- [ ] Review edit link from dashboard works (ownership rules still apply)
-- [ ] Review delete from dashboard requires POST and removes the review
-
-#### Product Catalog and Preview
-
-- [ ] Anonymous user visits `/archive/` -> active products listed
-- [ ] Product detail page shows title, description, price, and CTA
-- [ ] Inactive products do not appear in the list for non-staff users
-- [ ] Unpublished products are not listed publicly, but entitled buyers can access preview/read pages; non-entitled users cannot
-- [ ] Staff user can edit product in admin and save changes
-
-#### Cart (Manual)
-
-- [ ] Verified user adds product to cart from preview page -> success message
-- [ ] Visit `/cart/` -> items listed and totals shown
-- [ ] Remove item via cart -> item removed
-- [ ] Empty cart shows empty state
-- [ ] Unverified user visits `/cart/` or `/cart/add/` -> redirected to `/accounts/email/`
-
-#### Checkout (Stripe Test Mode)
-
-- [ ] Verified user clicks checkout -> POST to `/checkout/` and redirect to Stripe
-- [ ] Use test card `4242 4242 4242 4242` with any future expiry and CVC
-- [ ] Stripe success -> redirected to `/checkout/success/<order_number>/`
-- [ ] Stripe cancel -> redirected to `/checkout/cancel/`
-- [ ] Order visible in admin (`/admin/orders/order/`)
-- [ ] Simulate a server crash after Stripe session creation -> no broken state; retry yields consistent pending order handling and no duplicate entitlements
-- [ ] Rapid double click / double submit checkout: only one pending order is created/reused
-- [ ] Refresh success page multiple times: no duplicate entitlements; cart remains cleared
-- [ ] Simulated delayed webhook: fallback confirmation still finalises paid order and unlocks access
-
-Webhook endpoint for Stripe CLI testing:
-
-- `/checkout/webhook/`
+Webhook endpoint: `/checkout/webhook/`
 
 Stripe CLI listener:
 
@@ -420,70 +283,34 @@ Stripe CLI listener:
 stripe listen --forward-to http://127.0.0.1:8000/checkout/webhook/
 ```
 
-Post-payment verification checklist:
-
-- latest Order is marked "paid"
-- Stripe payment intent ID stored on the order
-- AccessEntitlement exists for the order/product
-- no duplicate entitlements for the same user/product
-- cart cleared after payment
-- `/archive/<slug>/read/` accessible for the entitled user
-
-### Data Integrity and Idempotency
-
-- No duplicate entitlements (unique constraint + `get_or_create`)
-- Double-submit checkout safety (reuse/locking prevents duplicate pending orders)
-- Success-page refresh safety (idempotent entitlement creation and cart clearing)
-- Webhook replay safety
-
-#### Reviews (Manual)
-
-- [ ] Buyer sees review form on product detail page
-- [ ] Non-buyer does not see review form
-- [ ] **Rating field is mandatory** - cannot submit without selecting a rating
-- [ ] **Title field is optional** - can submit review without a title
-- [ ] **Review/Body field is optional** - can submit review with only a rating
-- [ ] Buyer enters title -> character counter updates (0-50 limit)
-- [ ] Buyer enters review body -> character counter updates (0-1000 limit)
-- [ ] Cursor blocked at 50 chars in title field (cannot type beyond limit)
-- [ ] Cursor blocked at 1000 chars in review field (cannot type beyond limit)
-- [ ] Buyer submits review -> appears on product detail page with correct rating/title/body
-- [ ] Review displays with star rating and verified badge
-- [ ] Buyer edits review via `/archive/<slug>/review/<id>/edit/` -> same form styling and character limits
-- [ ] Buyer deletes review -> **modale confirmation appears** ("Are you sure you want to delete your review?")
-- [ ] Modale "Stay" button -> closes modale, review not deleted
-- [ ] Modale "Delete" button -> removes review, redirects back
-- [ ] Buyer views My Archive tab -> **"Leave Review" button below "Read"** (if no review exists)
-- [ ] Buyer clicks "Leave Review" -> jumps to product detail review section
-- [ ] Buyer with existing review sees **"Edit Review" button** instead of "Leave Review"
-- [ ] Buyer clicks "Edit Review" from My Archive -> opens edit review page
-- [ ] Buyer views My Reviews tab in Dashboard -> review listed with edit/delete buttons
-- [ ] Buyer clicks delete from My Reviews -> **same modale confirmation appears**
-- [ ] Non-owner edit/delete -> redirected with error message
-- [ ] Delete via GET returns 405
-
-#### Archive Reading Experience
-
-- [ ] Owner clicks "Read Full Archive" -> `/archive/<slug>/read/` opens
-- [ ] Preview page does not show full content
-- [ ] Anonymous user visits `/archive/<slug>/read/` -> redirected to login
-- [ ] Verified user without entitlement -> 403
-- [ ] Unverified user with entitlement -> redirected to `/accounts/email/`
-- [ ] Reading page contains navigation back to My Archive and to preview page
-
-#### Admin Interface
-
-- [ ] Staff user accesses `/admin/` -> admin loads
-- [ ] Regular user accesses `/admin/` -> 403 or redirect to login
-- [ ] Staff user edits products and toggles `is_featured`
-- [ ] Staff user can view order list and order detail pages
-- [ ] Test delete and bulk delete in admin and confirm observed behaviour
+Test card: `4242 4242 4242 4242` with any future expiry and CVC
 
 ## Responsiveness Testing
 
-The application has been tested across multiple device sizes to ensure responsive design and proper layout at all breakpoints.
+The application has been tested across multiple device sizes to ensure responsive design and proper layout at all breakpoints. The project uses Bootstrap 5's responsive grid system with standard breakpoints.
 
-### Device Coverage
+### Breakpoints Covered
+
+The application follows Bootstrap 5 breakpoints. Coverage is based on the devices tested and listed in the Device Test Results table below:
+
+- Mobile portrait (320px - 575px)
+- Mobile landscape (576px - 767px)
+- Tablet (768px - 991px)
+- Smart display/desktop (992px+)
+
+### Device Test Results
+
+| Device | Resolution | Orientation | Browser | Status | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| iPhone SE | 375x667px | Portrait | Safari (iOS) | ✅ Tested | [Screenshot](documentation/testing/responsiveness-iphone-se.png) |
+| Samsung Galaxy S20 | 360x800px | Portrait | Chrome (Android) | ✅ Tested | [Screenshot](documentation/testing/responsiveness-samsung-s20.png) |
+| iPhone 14 Pro Max | 430x932px | Portrait | Safari (iOS) | ✅ Tested | [Screenshot](documentation/testing/responsiveness-iphone-14promax.png) |
+| iPad Pro | 1024x1366px | Portrait | Safari (iPadOS) | ✅ Tested | [Screenshot](documentation/testing/responsiveness-ipad-pro.png) |
+| Google Nest Hub Max | 1280x800px | Landscape | Chrome (Cast OS) | ✅ Tested | [Screenshot](documentation/testing/responsiveness-nesthubmax.png) |
+
+### Device Coverage Summary
+
+All tested mobile and tablet devices show consistent layout and usability.
 
 #### iPhone SE
 
@@ -501,7 +328,7 @@ The application has been tested across multiple device sizes to ensure responsiv
 - Browser: Chrome (Android)
 - Status: ✅ Tested and verified
 
-#### iPhone 14 Pro Max
+#### Apple iPhone 14 Pro Max
 
 ![iPhone 14 Pro Max Responsiveness](documentation/testing/responsiveness-iphone-14promax.png)
 
@@ -509,7 +336,7 @@ The application has been tested across multiple device sizes to ensure responsiv
 - Browser: Safari (iOS)
 - Status: ✅ Tested and verified
 
-#### iPad Pro
+#### Apple iPad Pro
 
 ![iPad Pro Responsiveness](documentation/testing/responsiveness-ipad-pro.png)
 
@@ -517,7 +344,7 @@ The application has been tested across multiple device sizes to ensure responsiv
 - Browser: Safari (iPadOS)
 - Status: ✅ Tested and verified
 
-#### Google Nest Hub Max
+#### Google Nest Hub Max (Smart Display)
 
 ![Google Nest Hub Max Responsiveness](documentation/testing/responsiveness-nesthubmax.png)
 
@@ -527,51 +354,67 @@ The application has been tested across multiple device sizes to ensure responsiv
 
 ### Testing Summary
 
-All major breakpoints have been tested across mobile (portrait/landscape), tablet, and desktop devices. The application maintains consistent layout, readability, and usability across all tested screen sizes.
-
-Key responsive features verified:
+Key responsive features verified across tested devices:
 
 - Mobile-first navigation (hamburger menu on mobile)
 - Flexible grid layouts with appropriate column spans
 - Typography scaling with viewport width
 - Touch-friendly button/link sizing on mobile devices
 - Proper spacing and padding at all breakpoints
-- Image optimization for different screen densities
+- Image optimisation for different screen densities
 - Form inputs properly sized for mobile interaction
+
+**Status:** Tested mobile (360-430px), tablet (1024px), and smart display (1280px) breakpoints.
 
 ---
 
-## Accessibility Testing (To be completed)
+## Accessibility Testing
 
-No accessibility audit results are stored in the repository yet. Use one of the methods below and record outcomes.
+**Status:** In progress
 
-### Lighthouse (recommended)
+Lighthouse Accessibility audit (Mobile, Moto G Power, Slow 4G throttling):
 
-- [ ] Run Lighthouse Accessibility audits on key pages (Home, Archive, Product Detail, Cart, Dashboard)
-- [ ] Record scores and key findings here
+- Home page: **92** - ![Lighthouse Accessibility - Home](documentation/testing/lighthouse/accessibility-home.png)
+- Archive page: **100** - ![Lighthouse Accessibility - Archive](documentation/testing/lighthouse/accessibility-archive.png)
+- Product detail page: **96** - ![Lighthouse Accessibility - Product detail](documentation/testing/lighthouse/accessibility-product-detail.png)
+- Shopping cart page: **96** - ![Lighthouse Accessibility - Cart](documentation/testing/lighthouse/accessibility-cart.png)
+- Checkout success page: **94** - ![Lighthouse Accessibility - Checkout success](documentation/testing/lighthouse/accessibility-checkout-success.png)
+- User dashboard page: **100** - ![Lighthouse Accessibility - Dashboard](documentation/testing/lighthouse/accessibility-dashboard.png)
+- Lore page: **100** - ![Lighthouse Accessibility - Lore](documentation/testing/lighthouse/accessibility-lore.png)
 
-### WAVE (alternative)
+Home page minor warnings:
+- Minor contrast warnings on primary buttons (tracked; overall score acceptable)
+- Carousel control button sizing for touch targets
+- Video captions already present (accessibility compliance satisfied)
 
-- [ ] Run WAVE checks on key pages
-- [ ] Record issues and fixes here
+**Remaining tasks:** Keyboard navigation and screen reader smoke tests pending.
 
-### Error Page Testing
+---
 
-Steps:
+## Lighthouse Testing
 
-1. Log in as a staff user.
-2. Visit `/_test/errors/` and use the dashboard to trigger each error.
-3. With `DEBUG=True`, Django will show debug pages; set `DEBUG=False` locally for production-parity template checks.
+Lighthouse 13.0.1, Mobile emulation, Slow 4G throttling, Single page session, Initial page load.
 
-Staff-only test URLs exist for error pages:
+**URL tested:** https://the-elysium-archive-a51393fa9431.herokuapp.com/
 
-- `/_test/errors/` (dashboard)
-- `/_test/errors/400/`
-- `/_test/errors/403/`
-- `/_test/errors/404/`
-- `/_test/errors/500/`
+**Latest Home (Mobile) results:**
 
-Verify each renders the intended themed error page. These should be tested with `DEBUG=False` for production parity.
+- Performance: **92**
+- First Contentful Paint (FCP): **2.7s**
+- Largest Contentful Paint (LCP): **2.8s**
+- Total Blocking Time (TBT): **0ms**
+- Cumulative Layout Shift (CLS): **0.013**
+- Speed Index (SI): **2.7s**
+
+Scores can vary slightly between runs due to network throttling, server load, caching, and third‑party resources. Results above are from the latest run.
+
+| Category | Score | Evidence |
+| --- | --- | --- |
+| Performance | 92 | ![Lighthouse Performance - Home Mobile](documentation/testing/lighthouse/performance-home.png) |
+| Best Practices | 100 | ![Lighthouse Best Practices - Home Mobile](documentation/testing/lighthouse/best-practices-home.png) |
+| SEO | 100 | ![Lighthouse SEO - Home Mobile](documentation/testing/lighthouse/seo-home.png) |
+
+---
 
 ## Validation and Code Quality
 
@@ -579,7 +422,7 @@ Verify each renders the intended themed error page. These should be tested with 
 
 All key pages have been validated using the W3C HTML Validator and conform to HTML5 standards.
 
-#### CSS Validation Results
+#### HTML Validation Results
 
 **Public Pages:**
 
@@ -614,22 +457,22 @@ All tested pages conform to W3C HTML5 standards with no validation errors or war
 
 ### CSS Validation (Jigsaw)
 
-Suggested files:
+All custom CSS files were validated using the [W3C CSS Validation Service (Jigsaw)](https://jigsaw.w3.org/css-validator/).
+
+Files validated:
 
 - `static/css/base.css`
-- `static/css/components/*`
-- `static/css/pages/*`
+- `static/css/components/dashboard.css`
+- `static/css/components/deal-banner.css`
+- `static/css/components/products.css`
+- `static/css/pages/home.css`
+- `static/css/pages/lore.css`
+- `static/css/pages/footer-pages.css`
+- `static/css/admin/admin.css` (and modules)
 
-How to validate:
+**Status:** All project CSS files validated and passed. Remaining errors in full-page reports originate from external CDN libraries (Font Awesome, Bootstrap) and cannot be fixed in this repository.
 
-- Use [Jigsaw CSS Validator](https://jigsaw.w3.org/css-validator/)
-- Record results and fixes here once completed
-
-#### Validation Results
-
-- Local styles updated to remove nonstandard `line-clamp` and invalid mask shorthand.
-- Remaining CSS errors in the validator report come from external CDN libraries (Font Awesome) and cannot be fixed in this repository.
-- Warnings are primarily vendor extensions (Bootstrap/Font Awesome) and CSS variables.
+**Evidence:** Validation screenshots stored in `documentation/testing/css-validation/`
 
 ### JavaScript Validation (JSHint)
 
@@ -644,7 +487,7 @@ Validated files:
 - `static/js/messages.js`
 - `static/js/review-form.js`
 
-### Python Style/Lint Checks (optional)
+### Python Style/Lint Checks
 
 Available via `dev-requirements.txt`:
 
@@ -655,14 +498,14 @@ Available via `dev-requirements.txt`:
 - `bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py`
 - `djlint --check .`
 
-Results (02/02/2026):
+Results:
 
-- `black --check .`: ✅ Passed after formatting.
-- `isort --check-only .`: ✅ Passed after formatting.
-- `flake8 .`: ✅ Passed with exclusions for `.venv` and migrations via `.flake8`.
-- `pylint accounts cart checkout home orders products reviews elysium_archive manage.py`: ✅ No output reported.
-- `bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py`: ✅ No issues reported.
-- `djlint --check .`: ✅ Passed (0 files would be updated).
+- `black --check .`: ✅ Passed after formatting
+- `isort --check-only .`: ✅ Passed after formatting
+- `flake8 .`: ✅ Passed with exclusions for `.venv` and migrations via `.flake8`
+- `pylint accounts cart checkout home orders products reviews elysium_archive manage.py`: ✅ No output reported
+- `bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py`: ✅ No issues reported
+- `djlint --check .`: ✅ Passed (0 files would be updated)
 
 #### Bandit Security Audit Details
 
@@ -716,7 +559,6 @@ skips:
 
 **Scan Results:**
 
-- **Date:** 02/02/2026
 - **Lines Scanned:** 5,146 (application code only)
 - **Issues Found:** 0 (Low: 0, Medium: 0, High: 0)
 - **Status:** ✅ Clean
@@ -729,112 +571,75 @@ With `DEBUG=False`, confirm response headers include:
 - `X-Content-Type-Options: nosniff`
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
 
+## Browser Compatibility Testing
+
+### Chrome Desktop (Windows)
+
+Google Chrome desktop browser was used to verify that core user journeys and ecommerce flows operate correctly without layout, JavaScript, or navigation issues.
+
+#### Test Results
+
+| Item Tested | Result |
+| --- | --- |
+| Home page loads and renders correctly | PASS |
+| Archive listing and product detail pages | PASS |
+| Login and dashboard access (verified user) | PASS |
+| Add to cart and cart display | PASS |
+| Stripe checkout cancel flow | PASS |
+| Cart persistence after cancel | PASS |
+| Archive reading page (entitled user) | PASS |
+| JavaScript console errors | None |
+
+#### Environment
+
+**OS:** Windows 11
+
+**Browser:** Google Chrome
+
+**Version:** 144.0.7559.133 (64-bit)
+
+#### Evidence
+
+**Checkout Cancelled Page:**
+
+![Checkout Cancelled page](documentation/testing/checkout-cancelled.png)
+
+**Shopping Cart After Cancellation:**
+
+![Shopping Cart after cancellation](documentation/testing/shopping-cart.png)
+
+### Firefox Desktop (Windows)
+
+Mozilla Firefox desktop browser was used to verify that core user journeys and ecommerce flows operate correctly without layout, JavaScript, or navigation issues.
+
+#### Test Results
+
+| Item Tested | Result |
+| --- | --- |
+| Home page loads and renders correctly | PASS |
+| Archive listing and product detail pages | PASS |
+| Login and dashboard access (verified user) | PASS |
+| Add to cart and cart display | PASS |
+| Stripe checkout cancel flow | PASS |
+| Cart persistence after cancel | PASS |
+| Archive reading page (entitled user) | PASS |
+| JavaScript console errors | None |
+
+#### Environment
+
+**OS:** Windows 11
+**Browser:** Mozilla Firefox
+**Version:** 147.0.2 (64-bit)
+
+#### Evidence
+
+Same evidence screenshots as Chrome Desktop:
+
+- Checkout Cancelled page
+- Shopping Cart after cancellation
+
+---
+
 ## Known Issues
 
 None recorded in this document yet. Update this section if issues are discovered during testing.
-
-## CI/CD and Continuous Integration (Recommended)
-
-No CI workflow is included in the repository. If you add one, keep it aligned with the repo's Python version.
-
-Example GitHub Actions workflow:
-
-```yaml
-name: Run Tests
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-      - run: pip install -r dev-requirements.txt
-      - run: pytest --tb=short
-```
-
-## Debugging Failed Tests
-
-1. Verbose traceback:
-
-```bash
-pytest <test_name> -vv --tb=long
-```
-
-1. Show print/debug output:
-
-```bash
-pytest <test_name> -vv -s
-```
-
-1. Stop on first failure:
-
-```bash
-pytest -x
-```
-
-1. Run in debugger (pdb):
-
-```bash
-pytest <test_name> --pdb
-```
-
-Notes:
-
-- pytest-django uses Django's test database based on `elysium_archive.settings_test`.
-- Use `response.context` to inspect template context in tests.
-- Print queries with:
-  `from django.db import connection; print(connection.queries)`
-
-## Adding New Tests
-
-Tests live under `TESTS/` and are discovered by `testpaths = ["TESTS"]`.
-
-Example layout:
-
-```text
-TESTS/
-  accounts/
-    test_auth_pages.py
-    test_new_feature.py
-```
-
-Example test using existing fixtures:
-
-```python
-import pytest
-from django.urls import reverse
-
-@pytest.mark.django_db
-class TestNewFeature:
-    def test_something(self, client, verified_user, product_active):
-        client.force_login(verified_user)
-        response = client.get(reverse("archive"))
-        assert response.status_code == 200
-```
-
-Run a new file:
-
-```bash
-pytest TESTS/accounts/test_new_feature.py -v
-```
-
-## Test Fixtures (conftest.py)
-
-Available fixtures defined in `conftest.py`:
-
-- `category`
-- `product_active`
-- `product_inactive`
-- `verified_user`
-- `unverified_user`
-- `staff_user`
-- `client_with_cart`
-- `entitlement`
-- `order_pending`
-- `order_paid`
-
-pytest-django built-ins such as `client` and `db` are also available.

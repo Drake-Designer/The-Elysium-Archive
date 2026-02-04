@@ -2,7 +2,7 @@
 
 # Milestone Project 4: The Elysium Archive
 
----- AM I RESPONSIVE SCREENSHOOT HERE -----
+![Am I Responsive](documentation/am-i-responsive.png)
 
 The Elysium Archive is a story-driven, dark fantasy ecommerce site where each purchase unlocks a private archive page inside the website.
 
