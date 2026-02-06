@@ -27,7 +27,10 @@ def _env_bool(value, default=False):
 
 # Helper: Parse comma-separated list from environment variable
 def _env_list(name, default=None):
-    """Convert 'value1,value2,value3' to ['value1', 'value2', 'value3']."""  # noqa: D400
+    """Convert comma-separated string to list.
+
+    Example: 'value1,value2,value3' -> ['value1', 'value2', 'value3']
+    """
     raw = os.environ.get(name)
     if raw is None:
         return default or []
@@ -35,7 +38,10 @@ def _env_list(name, default=None):
 
 
 # Secret key for Django cryptographic signing (sessions, tokens, etc.)
-SECRET_KEY_ENV = os.environ.get("SECRET_KEY") or os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY_ENV = (
+    os.environ.get("SECRET_KEY")
+    or os.environ.get("DJANGO_SECRET_KEY")
+)
 SECRET_KEY = SECRET_KEY_ENV or get_random_secret_key()
 
 # Debug mode (detailed error pages, auto static serving)
@@ -202,11 +208,29 @@ if os.environ.get("DATABASE_URL"):
 # Password validation rules for user accounts
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        )
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "MinimumLengthValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        )
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        )
+    },
 ]
 
 # Localization settings
@@ -229,13 +253,20 @@ if os.environ.get("CLOUDINARY_URL"):
     # Production: Use Cloudinary for media, WhiteNoise for static
     STORAGES = {
         "default": {
-            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+            "BACKEND": (
+                "cloudinary_storage.storage.MediaCloudinaryStorage"
+            ),
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": (
+                "whitenoise.storage."
+                "CompressedManifestStaticFilesStorage"
+            ),
         },
     }
-    CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    CKEDITOR_5_FILE_STORAGE = (
+        "cloudinary_storage.storage.MediaCloudinaryStorage"
+    )
 
     import cloudinary
 
@@ -247,10 +278,15 @@ else:
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": (
+                "whitenoise.storage."
+                "CompressedManifestStaticFilesStorage"
+            ),
         },
     }
-    CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    CKEDITOR_5_FILE_STORAGE = (
+        "django.core.files.storage.FileSystemStorage"
+    )
 
 # Default primary key field type for models
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -268,9 +304,13 @@ AUTHENTICATION_BACKENDS = [
 
 # Django-allauth configuration (user registration and authentication)
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*", "username*", "password1*", "password2*"
+]
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get(
+    "ACCOUNT_EMAIL_VERIFICATION", "mandatory"
+)
 ACCOUNT_EMAIL_REQUIRED = True
 
 # Custom allauth forms
@@ -324,12 +364,13 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
 # Contact form recipient
-CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL)
+CONTACT_RECIPIENT_EMAIL = os.environ.get(
+    "CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL
+)
 
 # Email subject prefix for allauth emails
 ACCOUNT_EMAIL_SUBJECT_PREFIX = os.environ.get(
-    "ACCOUNT_EMAIL_SUBJECT_PREFIX",
-    "[The Elysium Archive] ",
+    "ACCOUNT_EMAIL_SUBJECT_PREFIX", "[The Elysium Archive] "
 )
 
 # Prevent production deployment without email credentials
@@ -454,7 +495,11 @@ CKEDITOR_5_CONFIGS = {
                 "imageStyle:block",
             ],
         },
-        "table": {"contentToolbar": ["tableColumn", "tableRow", "mergeTableCells"]},
+        "table": {
+            "contentToolbar": [
+                "tableColumn", "tableRow", "mergeTableCells"
+            ]
+        },
         "height": "600px",
     },
     # Default configuration (full featured)

@@ -104,6 +104,13 @@
                     <span class="site-nav-link-text">Lore</span>
                   </a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link site-nav-link"
+                     href="{% url 'contact_lore' %}"
+                     {% if current_url_name == 'contact_lore' %}aria-current="page"{% endif %}>
+                    <span class="site-nav-link-text">Contact</span>
+                  </a>
+                </li>
               </ul>
               <!-- Mobile divider -->
               <hr class="d-lg-none border-secondary my-2">
