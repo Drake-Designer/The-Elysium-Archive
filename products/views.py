@@ -29,7 +29,10 @@ class ProductListView(ListView):
     paginate_by = 12
 
     def get_queryset(self) -> QuerySet[Product]:
-        """Return active products, optionally filtered by search, category, or deals."""
+        """Return active products, optionally filtered by search, category, or.
+
+        deals.
+        """
         queryset = (
             Product.objects.filter(is_active=True, is_removed=False)
             .select_related("category")
@@ -38,7 +41,9 @@ class ProductListView(ListView):
 
         search_query = self.request.GET.get("q", "").strip()
         category_slug = self.request.GET.get("cat", "").strip()
-        show_deals = self.request.GET.get("deals", "").strip().lower() == "true"
+        show_deals = (
+            self.request.GET.get("deals", "").strip().lower() == "true"
+        )
 
         if show_deals:
             queryset = queryset.filter(is_deal=True)
@@ -62,7 +67,9 @@ class ProductListView(ListView):
 
         search_query = self.request.GET.get("q", "").strip()
         active_category = self.request.GET.get("cat", "").strip()
-        show_deals = self.request.GET.get("deals", "").strip().lower() == "true"
+        show_deals = (
+            self.request.GET.get("deals", "").strip().lower() == "true"
+        )
 
         categories = (
             Category.objects.filter(
@@ -90,7 +97,10 @@ class ProductDetailView(DetailView):
     slug_url_kwarg = "slug"
 
     def get_queryset(self) -> QuerySet[Product]:
-        """Return all products and prefetch related data for the detail view."""
+        """Return all products and prefetch related data for the detail.
+
+        view.
+        """
         return (
             Product.objects.all()
             .select_related("category")
@@ -179,7 +189,9 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
         ):
             return super().dispatch(request, *args, **kwargs)
 
-        if is_authenticated_user(request.user) and not has_verified_email(request.user):
+        if is_authenticated_user(request.user) and not has_verified_email(
+            request.user
+        ):
             messages.warning(
                 request,
                 "Please verify your email address to access archive content.",
@@ -198,12 +210,16 @@ class ArchiveReadView(LoginRequiredMixin, DetailView):
             return obj
 
         if not user_has_access(self.request.user, obj):
-            raise PermissionDenied("You must purchase this archive to read it.")
+            raise PermissionDenied(
+                "You must purchase this archive to read it."
+            )
 
         return obj
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Add navigation context for back button."""
         context = super().get_context_data(**kwargs)
-        context["from_my_archive"] = self.request.GET.get("from") == "my_archive"
+        context["from_my_archive"] = (
+            self.request.GET.get("from") == "my_archive"
+        )
         return context

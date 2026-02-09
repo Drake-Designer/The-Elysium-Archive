@@ -12,7 +12,12 @@ class OrderLineItemInline(admin.TabularInline):
 
     model = OrderLineItem
     extra = 0
-    readonly_fields = ["product_title", "product_price", "quantity", "line_total"]
+    readonly_fields = [
+        "product_title",
+        "product_price",
+        "quantity",
+        "line_total",
+    ]
     can_delete = False
 
 
@@ -92,7 +97,7 @@ class OrderAdmin(admin.ModelAdmin):
                 '<span class="order-email">{}</span>',
                 obj.user.email,
             )
-        return format_html('<span class="text-muted">—</span>')
+        return format_html('<span class="text-muted">-</span>')
 
     email_display.short_description = "Email"
 
@@ -150,8 +155,11 @@ class OrderAdmin(admin.ModelAdmin):
 
         self.message_user(
             request,
-            f"{updated} orders marked as paid. {granted} access entitlements granted. "
-            f"{skipped_no_user} orders had no user.",
+            (
+                f"{updated} orders marked as paid. "
+                f"{granted} access entitlements granted. "
+                f"{skipped_no_user} orders had no user."
+            ),
         )
 
     mark_as_paid.short_description = "Mark as paid"

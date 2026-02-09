@@ -15,7 +15,9 @@ class TestAdminAccess:
         response = client.get(reverse("admin:index"), follow=False)
 
         assert response.status_code == 302
-        assert reverse("admin:login") in response.url or "login" in response.url
+        assert (
+            reverse("admin:login") in response.url or "login" in response.url
+        )
 
     def test_regular_user_cannot_access_admin(self, client, verified_user):
         """Regular (non-staff) user cannot access admin."""
@@ -36,7 +38,9 @@ class TestAdminAccess:
 class TestAdminProductDelete:
     """Test product unpublish behavior when delete is used in admin."""
 
-    def test_admin_delete_unpublishes_product(self, client, staff_user, product_active):
+    def test_admin_delete_unpublishes_product(
+        self, client, staff_user, product_active
+    ):
         """Admin delete converts to unpublish and keeps product in database."""
         client.force_login(staff_user)
 
@@ -52,7 +56,9 @@ class TestAdminProductDelete:
         assert product_active.is_active is False
         assert Product.objects.filter(pk=product_active.pk).exists() is True
 
-    def test_bulk_delete_unpublishes_products(self, client, staff_user, category):
+    def test_bulk_delete_unpublishes_products(
+        self, client, staff_user, category
+    ):
         """Bulk delete converts to unpublish for all selected products."""
         from decimal import Decimal
 
@@ -100,7 +106,9 @@ class TestAdminProductDelete:
 class TestAdminFeaturedToggle:
     """Test featured toggle action in admin."""
 
-    def test_staff_can_toggle_featured(self, client, staff_user, product_active):
+    def test_staff_can_toggle_featured(
+        self, client, staff_user, product_active
+    ):
         """Staff user can toggle product featured status using change form."""
         client.force_login(staff_user)
 
@@ -192,7 +200,9 @@ class TestAdminProductForm:
         product_active.refresh_from_db()
         assert product_active.title == "Updated Title"
 
-    def test_staff_can_deactivate_product(self, client, staff_user, product_active):
+    def test_staff_can_deactivate_product(
+        self, client, staff_user, product_active
+    ):
         """Staff can set is_active to False via admin form."""
         client.force_login(staff_user)
 
@@ -228,7 +238,9 @@ class TestAdminOrderAccess:
 
         assert response.status_code == 200
 
-    def test_staff_can_view_order_detail(self, client, staff_user, order_pending):
+    def test_staff_can_view_order_detail(
+        self, client, staff_user, order_pending
+    ):
         """Staff can view order details in admin."""
         client.force_login(staff_user)
 
@@ -254,12 +266,15 @@ class TestAdminOrderAccess:
 class TestDealBannerVisibilityRules:
     """Test DealBanner display and link rules on the homepage."""
 
-    def test_product_link_banner_hidden_when_product_unpublished_and_no_fallbacks(
+    def test_product_link_banner_hidden_when_unpublished_and_no_fallbacks(
         self,
         client,
         product_active,
     ):
-        """Product banner is hidden if linked product is inactive and no URL or category fallback exists."""
+        """
+        Product banner is hidden if linked product is inactive and no URL or
+        category fallback exists.
+        """
         from products.models import DealBanner
 
         banner = DealBanner.objects.create(
@@ -279,12 +294,16 @@ class TestDealBannerVisibilityRules:
         html = response.content.decode()
         assert banner.message not in html
 
-    def test_product_link_banner_kept_but_not_linked_to_unpublished_product_when_url_exists(
+    def test_product_link_banner_kept_when_url_exists(
         self,
         client,
         product_active,
     ):
-        """If product is inactive but banner has URL, banner stays and links to URL instead of product."""
+        """
+        If product is inactive but banner has URL, banner stays and links to
+        URL instead of product.
+        """
+
         from products.models import DealBanner
 
         banner = DealBanner.objects.create(
@@ -312,7 +331,11 @@ class TestDealBannerVisibilityRules:
         client,
         category,
     ):
-        """Category banner is hidden when all products in that category are inactive."""
+        """
+        Category banner is hidden when all products in that category are
+        inactive.
+        """
+
         from decimal import Decimal
 
         from products.models import DealBanner, Product
@@ -359,7 +382,11 @@ class TestDealBannerVisibilityRules:
         client,
         category,
     ):
-        """Category banner shows and links to archive with category and deals filter when at least one active product exists."""
+        """
+        Category banner shows and links to archive with category and deals
+        filter when at least one active product exists.
+        """
+
         from decimal import Decimal
 
         from products.models import DealBanner, Product
@@ -391,8 +418,14 @@ class TestDealBannerVisibilityRules:
         assert f"cat={category.slug}" in html
         assert "deals=true" in html
 
-    def test_global_deals_banner_hidden_when_no_active_deal_products(self, client):
-        """Global deals banner is hidden if there are no active deal products."""
+    def test_global_deals_banner_hidden_when_no_active_deal_products(
+        self, client
+    ):
+        """
+        Global deals banner is hidden if there are no active deal
+        products.
+        """
+
         from products.models import DealBanner
 
         banner = DealBanner.objects.create(
@@ -413,7 +446,10 @@ class TestDealBannerVisibilityRules:
         client,
         product_active,
     ):
-        """Global deals banner is shown and links to deals filter when at least one active deal product exists."""
+        """
+        Global deals banner is hidden if there are no active deal products.
+        """
+
         from products.models import DealBanner
 
         # Create a global banner (no product, no category)

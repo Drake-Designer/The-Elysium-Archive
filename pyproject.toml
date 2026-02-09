@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-line-length = 88
+line-length = 79
 target-version = ["py314"]
 include = '\.pyi?$'
 extend-exclude = '''
@@ -26,9 +26,7 @@ DJANGO_SETTINGS_MODULE = "elysium_archive.settings_test"
 python_files = ["test_*.py", "*_test.py", "tests.py"]
 testpaths = ["TESTS"]
 addopts = "-ra"
-filterwarnings = [
-  "default",
-]
+filterwarnings = ["default"]
 
 [tool.mypy]
 python_version = "3.14"
@@ -78,3 +76,22 @@ profile = "django"
 indent = 2
 ignore = "H006"
 exclude = ".venv,node_modules"
+
+[tool.ruff]
+line-length = 79
+target-version = "py314"
+extend-exclude = [".venv", "migrations"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F"]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.pydocstringformatter]
+write = true
+max-line-length = 79
+exclude = [".venv/**", "**/migrations/**"]

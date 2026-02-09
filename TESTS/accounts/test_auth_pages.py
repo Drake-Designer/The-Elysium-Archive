@@ -7,7 +7,10 @@ from django.utils.crypto import get_random_string
 
 @pytest.mark.django_db
 class TestAuthPages:
-    """Test that authentication pages behave correctly for anonymous and authenticated users."""
+    """Test that authentication pages behave correctly for anonymous and.
+
+    authenticated users.
+    """
 
     def setup_method(self):
         """Set up test client."""
@@ -38,14 +41,20 @@ class TestAuthPages:
         assert response.status_code == 200
 
     def test_login_page_authenticated_redirects_to_home(self):
-        """Test that authenticated users are redirected away from the login page."""
+        """Test that authenticated users are redirected away from the login.
+
+        page.
+        """
         self._create_and_login_user()
         response = self.client.get(reverse("account_login"))
         assert response.status_code == 302
         assert response["Location"] == reverse("home")
 
     def test_signup_page_authenticated_redirects_to_home(self):
-        """Test that authenticated users are redirected away from the signup page."""
+        """Test that authenticated users are redirected away from the signup.
+
+        page.
+        """
         self._create_and_login_user()
         response = self.client.get(reverse("account_signup"))
         assert response.status_code == 302

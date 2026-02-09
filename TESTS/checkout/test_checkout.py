@@ -10,11 +10,12 @@ from products.models import Product
 
 
 @pytest.mark.django_db
-def test_checkout_success_fallback_marks_paid_and_grants_entitlements_when_stripe_paid(
+def test_success_fallback_marks_paid_and_grants_entitlements_when_stripe_paid(
     client, verified_user
 ):
     """
-    Ensure success page fallback marks order as paid and grants entitlements
+    Ensure success page fallback marks order as paid and grants entitlements.
+
     when Stripe session reports payment_status paid.
     """
     user = verified_user
@@ -80,19 +81,22 @@ def test_checkout_success_fallback_marks_paid_and_grants_entitlements_when_strip
     assert order.status == "paid"
     assert order.stripe_payment_intent_id == "pi_test_fallback"
 
-    assert AccessEntitlement.objects.filter(user=user, product=product).exists()
+    assert AccessEntitlement.objects.filter(
+        user=user, product=product
+    ).exists()
 
     session = client.session
     assert session.get("cart", {}) == {}
 
 
 @pytest.mark.django_db
-def test_checkout_double_post_reuses_recent_pending_order_and_does_not_duplicate(
+def test_double_post_reuses_recent_pending_order_and_does_not_duplicate(
     client, verified_user
 ):
     """
-    Ensure two checkout POSTs in quick succession do not create two pending orders.
+    Ensure sending the same paid webhook twice does not duplicate entitlements.
     """
+
     user = verified_user
     client.force_login(user)
 
@@ -132,7 +136,6 @@ def test_checkout_double_post_reuses_recent_pending_order_and_does_not_duplicate
         "checkout.views.stripe.checkout.Session.create",
         side_effect=[fake_session_one, fake_session_two],
     ):
-
         response1 = client.post(reverse("checkout"))
         response2 = client.post(reverse("checkout"))
 
@@ -154,6 +157,7 @@ def test_checkout_marks_stale_pending_orders_as_failed(client, verified_user):
     """
     Ensure stale pending orders are marked as failed when starting checkout.
     """
+
     user = verified_user
     client.force_login(user)
 

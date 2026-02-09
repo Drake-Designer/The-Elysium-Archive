@@ -30,7 +30,10 @@ class ReviewForm(forms.ModelForm):
                 attrs={
                     "class": "review-form-textarea",
                     "rows": 6,
-                    "placeholder": "Share your thoughts about this archive entry (optional)...",
+                    "placeholder": (
+                        "Share your thoughts about this archive entry "
+                        "(optional)..."
+                    ),
                     "maxlength": "1000",
                     "data-max-length": "1000",
                     "id": "review-body-input",

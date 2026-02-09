@@ -19,7 +19,10 @@ class TestProductRemovalAdminAction:
         verified_user,
         order_paid,
     ):
-        """Purchased product is removed from public pages but remains readable for buyer."""
+        """Purchased product is removed from public pages but remains readable.
+
+        for buyer.
+        """
         product = order_paid.line_items.first().product
 
         client.force_login(staff_user)
@@ -44,14 +47,18 @@ class TestProductRemovalAdminAction:
         assert archive_response.status_code == 200
         assert product.title not in archive_response.content.decode()
 
-        detail_response = client.get(reverse("product_detail", args=[product.slug]))
+        detail_response = client.get(
+            reverse("product_detail", args=[product.slug])
+        )
         assert detail_response.status_code == 404
 
         my_archive_response = client.get(reverse("my_archive"), follow=True)
         assert my_archive_response.status_code == 200
         assert product.title in my_archive_response.content.decode()
 
-        read_response = client.get(reverse("archive_read", args=[product.slug]))
+        read_response = client.get(
+            reverse("archive_read", args=[product.slug])
+        )
         assert read_response.status_code == 200
 
     def test_admin_remove_unpurchased_product_hard_deletes(

@@ -7,8 +7,14 @@ from .webhooks import stripe_webhook
 
 urlpatterns = [
     path("", checkout, name="checkout"),
-    path("success/<str:order_number>/", checkout_success, name="checkout_success"),
-    path("status/<str:order_number>/", checkout_status, name="checkout_status"),
+    path(
+        "success/<str:order_number>/",
+        checkout_success,
+        name="checkout_success",
+    ),
+    path(
+        "status/<str:order_number>/", checkout_status, name="checkout_status"
+    ),
     path("cancel/", checkout_cancel, name="checkout_cancel"),
     path("webhook/", stripe_webhook, name="stripe_webhook"),
     path("wh/", stripe_webhook, name="stripe_webhook_alias"),

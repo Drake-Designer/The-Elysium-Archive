@@ -15,6 +15,7 @@ def test_webhook_idempotent_paid_event_does_not_duplicate_entitlements(
     """
     Ensure sending the same paid webhook twice does not duplicate entitlements.
     """
+
     user = verified_user
     client.force_login(user)
 
@@ -54,7 +55,8 @@ def test_webhook_idempotent_paid_event_does_not_duplicate_entitlements(
     }
 
     with patch(
-        "checkout.webhooks.stripe.Webhook.construct_event", return_value=payload
+        "checkout.webhooks.stripe.Webhook.construct_event",
+        return_value=payload,
     ):
         response1 = client.post(
             reverse("stripe_webhook"),
@@ -76,4 +78,7 @@ def test_webhook_idempotent_paid_event_does_not_duplicate_entitlements(
     assert order.status == "paid"
 
     # Must still be exactly one entitlement for this user+product
-    assert AccessEntitlement.objects.filter(user=user, product=product).count() == 1
+    assert (
+        AccessEntitlement.objects.filter(user=user, product=product).count()
+        == 1
+    )

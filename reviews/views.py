@@ -15,7 +15,9 @@ from .models import Review
 
 def _user_has_entitlement(user, product) -> bool:
     """Check if the user has purchased the given product."""
-    return AccessEntitlement.objects.filter(user=user, product=product).exists()
+    return AccessEntitlement.objects.filter(
+        user=user, product=product
+    ).exists()
 
 
 @verified_email_required
@@ -25,10 +27,14 @@ def create_review(request, slug):
     product = get_object_or_404(Product, slug=slug, is_removed=False)
 
     if not _user_has_entitlement(request.user, product):
-        messages.error(request, "You must purchase this archive to leave a review.")
+        messages.error(
+            request, "You must purchase this archive to leave a review."
+        )
         return redirect("product_detail", slug=slug)
 
-    existing_review = Review.objects.filter(user=request.user, product=product).first()
+    existing_review = Review.objects.filter(
+        user=request.user, product=product
+    ).first()
     if existing_review:
         messages.info(request, "You have already reviewed this archive entry.")
         return redirect("product_detail", slug=slug)
@@ -42,7 +48,9 @@ def create_review(request, slug):
             review.save()
             messages.success(request, "Your review has been submitted.")
         except IntegrityError:
-            messages.info(request, "You have already reviewed this archive entry.")
+            messages.info(
+                request, "You have already reviewed this archive entry."
+            )
         return redirect("product_detail", slug=slug)
 
     messages.error(request, "Please correct the errors in your review.")
@@ -54,7 +62,9 @@ def create_review(request, slug):
 def edit_review(request, slug, review_id):
     """Edit an existing review for a purchased product."""
     product = get_object_or_404(Product, slug=slug, is_removed=False)
-    review = get_object_or_404(Review, id=review_id, product=product, user=request.user)
+    review = get_object_or_404(
+        Review, id=review_id, product=product, user=request.user
+    )
 
     if request.method == "POST":
         form = ReviewForm(request.POST, instance=review)
@@ -80,7 +90,9 @@ def edit_review(request, slug, review_id):
 def delete_review(request, slug, review_id):
     """Delete an existing review."""
     product = get_object_or_404(Product, slug=slug, is_removed=False)
-    review = get_object_or_404(Review, id=review_id, product=product, user=request.user)
+    review = get_object_or_404(
+        Review, id=review_id, product=product, user=request.user
+    )
 
     review.delete()
     messages.success(request, "Your review has been deleted.")

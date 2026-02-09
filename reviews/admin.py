@@ -26,7 +26,13 @@ class ReviewAdmin(admin.ModelAdmin):
 
     list_filter = ["rating", "product"]
 
-    search_fields = ["user__username", "user__email", "product__title", "title", "body"]
+    search_fields = [
+        "user__username",
+        "user__email",
+        "product__title",
+        "title",
+        "body",
+    ]
 
     readonly_fields = ["created_at", "updated_at", "full_review_preview"]
 
@@ -98,19 +104,26 @@ class ReviewAdmin(admin.ModelAdmin):
     def title_display(self, obj):
         """Display review title or first words of body."""
         if obj.title:
-            return format_html('<div class="review-title-display">{}</div>', obj.title)
+            return format_html(
+                '<div class="review-title-display">{}</div>', obj.title
+            )
         preview = obj.body[:50] + "..." if len(obj.body) > 50 else obj.body
-        return format_html('<div class="review-body-preview">{}</div>', preview)
+        return format_html(
+            '<div class="review-body-preview">{}</div>', preview
+        )
 
     title_display.short_description = "Title/Preview"
 
     def verified_badge(self, obj):
         """Check if user has purchased the product."""
-        has_purchased = obj.user.entitlements.filter(product=obj.product).exists()
+        has_purchased = obj.user.entitlements.filter(
+            product=obj.product
+        ).exists()
 
         if has_purchased:
             return format_html(
-                '<span class="review-verified-badge">✓ Verified Purchase</span>'
+                '<span class="review-verified-badge">{}</span>',
+                "✓ Verified Purchase",
             )
         return format_html('<span class="badge-muted">Not Verified</span>')
 
@@ -134,7 +147,7 @@ class ReviewAdmin(admin.ModelAdmin):
             '<h3 class="review-preview-title">{}</h3>'
             '<p class="review-preview-body">{}</p>'
             '<div class="review-preview-meta">'
-            '<small>By {} on {}</small>'
+            "<small>By {} on {}</small>"
             "</div>"
             "</div>",
             stars_html,

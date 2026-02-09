@@ -9,7 +9,10 @@ from django.contrib.auth.models import AbstractUser
 
 
 class CaseSensitiveAuthenticationBackend(ModelBackend):
-    """Authenticate users using case sensitive matching for username and email."""
+    """
+    Authenticate users using case sensitive matching for username
+    and email.
+    """
 
     def authenticate(self, request, username=None, password=None, **kwargs):
         """Authenticate a user with an exact match on username or email."""

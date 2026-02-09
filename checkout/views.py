@@ -51,7 +51,10 @@ def _remove_purchased_from_session_cart(request, product_ids):
 
 
 def _get_recent_pending_order_any(request, minutes=15):
-    """Return a recent pending order for the user, even without Stripe session id."""
+    """Return a recent pending order for the user.
+
+    This works even when the order has no Stripe session id.
+    """
     cutoff = timezone.now() - timedelta(minutes=minutes)
     return (
         Order.objects.filter(
@@ -77,7 +80,10 @@ def _try_reuse_stripe_session(request, order):
 
     if payment_status == "paid":
         return redirect(
-            reverse("checkout_success", kwargs={"order_number": order.order_number})
+            reverse(
+                "checkout_success",
+                kwargs={"order_number": order.order_number},
+            )
         )
 
     if session_status == "open" and session_url:
@@ -142,7 +148,6 @@ def _verify_and_finalize_order_if_paid(user, order):
     payment_status = getattr(session, "payment_status", None) or session.get(
         "payment_status"
     )
-
     if payment_status != "paid":
         return False
 
@@ -153,7 +158,13 @@ def _verify_and_finalize_order_if_paid(user, order):
 
         locked.status = "paid"
         locked.stripe_payment_intent_id = session.get("payment_intent") or ""
-        locked.save(update_fields=["status", "stripe_payment_intent_id", "updated_at"])
+        locked.save(
+            update_fields=[
+                "status",
+                "stripe_payment_intent_id",
+                "updated_at",
+            ]
+        )
 
         grant_entitlements_for_order(locked, user=user)
 
@@ -166,7 +177,8 @@ def checkout(request):
     """Create Stripe checkout session and redirect user to payment."""
     if not _set_stripe_key():
         messages.error(
-            request, "Payment is not configured yet. Please try again later."
+            request,
+            "Payment is not configured yet. Please try again later.",
         )
         return redirect("cart")
 
@@ -196,7 +208,10 @@ def checkout(request):
         cart_products = [p for p in cart_products if p.pk not in purchased_ids]
 
     if not cart_products:
-        messages.info(request, "You already own everything that was in your cart.")
+        messages.info(
+            request,
+            "You already own everything that was in your cart.",
+        )
         clear_cart(request.session)
         return redirect("cart")
 
@@ -212,12 +227,17 @@ def checkout(request):
         clear_cart(request.session)
         return redirect("cart")
 
-    total = get_cart_total(request.session, [{"product": p} for p in valid_products])
+    total = get_cart_total(
+        request.session,
+        [{"product": p} for p in valid_products],
+    )
 
     with transaction.atomic():
         existing_pending = _get_recent_pending_order_any(request)
         if existing_pending:
-            locked = Order.objects.select_for_update().get(pk=existing_pending.pk)
+            locked = Order.objects.select_for_update().get(
+                pk=existing_pending.pk
+            )
             if locked.status == "pending" and locked.stripe_session_id:
                 reused = _try_reuse_stripe_session(request, locked)
                 if reused:
@@ -265,7 +285,10 @@ def checkout(request):
             line_items=stripe_line_items,
             mode="payment",
             success_url=request.build_absolute_uri(
-                reverse("checkout_success", kwargs={"order_number": order.order_number})
+                reverse(
+                    "checkout_success",
+                    kwargs={"order_number": order.order_number},
+                )
             ),
             cancel_url=request.build_absolute_uri(reverse("checkout_cancel")),
             client_reference_id=order.order_number,
@@ -285,17 +308,18 @@ def checkout(request):
 
     except Exception as exc:
         messages.error(
-            request, f"Payment initialization failed: {exc}. Please try again."
+            request,
+            f"Payment initialization failed: {exc}. Please try again.",
         )
 
         try:
             order.status = "failed"
             order.save(update_fields=["status", "updated_at"])
-        except Exception as exc:
+        except Exception as inner_exc:
             logger.warning(
                 "Failed to update order %s status after Stripe error.",
                 order.order_number,
-                exc_info=exc,
+                exc_info=inner_exc,
             )
 
         return redirect("cart")
@@ -309,7 +333,10 @@ def checkout_success(request, order_number):
     if not stripe_ready:
         messages.warning(
             request,
-            "Payment verification is not available right now. Please refresh in a moment.",
+            (
+                "Payment verification is not available right now. "
+                "Please refresh in a moment."
+            ),
         )
 
     try:
@@ -355,5 +382,8 @@ def checkout_status(request, order_number):
 def checkout_cancel(request):
     """Display cancellation message when user cancels payment."""
     _fail_recent_pending_order(request)
-    messages.info(request, "Payment was cancelled. Your cart is still available.")
+    messages.info(
+        request,
+        "Payment was cancelled. Your cart is still available.",
+    )
     return render(request, "checkout/cancel.html")

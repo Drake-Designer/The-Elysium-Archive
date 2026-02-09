@@ -17,7 +17,9 @@ from .models import UserProfile
 
 def _verified_or_redirect(request):
     if not has_verified_email(request.user):
-        messages.warning(request, "Please verify your email before continuing.")
+        messages.warning(
+            request, "Please verify your email before continuing."
+        )
         return redirect("account_email")
     return None
 
@@ -78,7 +80,8 @@ def dashboard(request):
     )
 
     unlocked_products = [
-        {"product": e.product, "purchase_date": e.granted_at} for e in entitlements
+        {"product": e.product, "purchase_date": e.granted_at}
+        for e in entitlements
     ]
 
     line_items_qs = OrderLineItem.objects.select_related("product")

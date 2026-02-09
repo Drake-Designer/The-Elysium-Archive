@@ -8,7 +8,6 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Count
 from django.utils.html import format_html
 
-from .models import UserProfile
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -114,7 +113,9 @@ class UserAdmin(BaseUserAdmin):
         try:
             from allauth.account.models import EmailAddress
 
-            verified = EmailAddress.objects.filter(user=obj, verified=True).exists()
+            verified = EmailAddress.objects.filter(
+                user=obj, verified=True
+            ).exists()
         except Exception as exc:
             verified = False
             logger.warning(
@@ -124,8 +125,14 @@ class UserAdmin(BaseUserAdmin):
             )
 
         if verified:
-            return format_html('<span class="badge-success">✓ Verified</span>')
-        return format_html('<span class="badge-warning">⚠ Unverified</span>')
+            return format_html(
+                '<span class="badge-success">{}</span>',
+                "✓ Verified",
+            )
+        return format_html(
+            '<span class="badge-warning">{}</span>',
+            "⚠ Unverified",
+        )
 
     email_verified_badge.short_description = "Email"
 
@@ -138,7 +145,10 @@ class UserAdmin(BaseUserAdmin):
                 count,
                 "s" if count != 1 else "",
             )
-        return format_html('<span class="badge-muted">No purchases</span>')
+        return format_html(
+            '<span class="badge-muted">{}</span>',
+            "No purchases",
+        )
 
     purchase_count.short_description = "Purchases"
 
@@ -148,7 +158,6 @@ admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
 
-@admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """Admin interface for user profiles."""
 

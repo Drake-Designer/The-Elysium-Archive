@@ -17,21 +17,22 @@ The Elysium Archive is a story-driven, dark fantasy ecommerce site where each pu
 - [Project Overview](#project-overview)
 - [How The Elysium Archive Works](#how-the-elysium-archive-works)
 - [Feature Summary](#feature-summary)
-- [User Experience Design](#user-experience-design)
 - [Features](#features)
 - [Pages Overview](#pages-overview)
+- [Website Pages Showcase](#website-pages-showcase)
+- [User Experience Design](#user-experience-design)
 - [Technical Overview](#technical-overview)
 - [Frontend Structure and Static Assets](#frontend-structure-and-static-assets)
 - [Technologies Used](#technologies-used)
 - [Security and Error Handling](#security-and-error-handling)
 - [Stripe Payments](#stripe-payments)
-- [Admin Panel Setup](#admin-panel-setup)
+- [Admin Power Tools](#admin-power-tools)
 - [Database Design](#database-design)
 - [AI-Assisted Development (Testing and Complex Features)](#ai-assisted-development-testing-and-complex-features)
 - [Testing and Bug Fixes](#testing-and-bug-fixes)
+- [Bug Fix Log](#bug-fix-log)
 - [Running the Project Locally](#running-the-project-locally)
 - [Heroku Deployment](#heroku-deployment)
-- [Admin Power Tools](#admin-power-tools)
 - [Deal Banner Bar](#deal-banner-bar)
 - [Alt Text Safety](#alt-text-safety)
 - [Future Improvements](#future-improvements)
@@ -44,7 +45,7 @@ The Elysium Archive is a story-driven, dark fantasy ecommerce site where each pu
 No downloads. No attachments. No folders sitting on your desktop.
 When you purchase an entry, it becomes part of your personal archive inside the site.
 
-Each product is a piece of forbidden lore. A text that exists only within a private library. After a successful Stripe Checkout (currently in test mode), the entry unlocks and can be read directly inside your account.
+Each product is a piece of forbidden lore. A text that exists only within a private library. After a successful Stripe Checkout, the entry unlocks and can be read directly inside your account.
 
 I built this project as my Code Institute Milestone Project 4 using Django and PostgreSQL. I wanted to explore the idea of selling access instead of files, and I wrapped that technical concept inside a world inspired by gothic vampire mythology, secret orders, and hidden libraries.
 
@@ -106,7 +107,7 @@ Refunds are not supported by design. Archive entries unlock immediately after pu
 
 ### Catalog and Purchases
 
-- Browse products with title, price, and description
+- Archive catalog supports search (`q`), category filter (`cat`), and deals-only filter (`deals=true`).
 - Product detail pages with a clear purchase flow
 - Stripe checkout and confirmation
 
@@ -246,7 +247,7 @@ This section documents implemented features organised by category.
 
 - **Registration** - Create account with username, email, and password validation
 - **Unique Email Enforcement** - Signup enforces unique emails case-insensitively (no duplicate accounts with different casing)
-- **Email Verification** - Mandatory email verification via SMTP (see Email Templates section for details)
+- **Email Verification** - Mandatory email verification (see Email Templates section for backend behavior)
 - **Login** - Secure authentication with username or email
 - **Login Warnings** - Shows one warning at a time, distinguishes wrong password vs wrong username/email, and only shows the case-sensitive reminder when relevant
 - **Password Reset** - Complete password reset flow with email link
@@ -288,9 +289,9 @@ This section documents implemented features organised by category.
 - **Eligibility** - Verified email and a purchased product are required to submit; reviews are public on product pages
 - **One Review Per Product** - Database constraint prevents duplicate reviews from the same user
 - **Star Rating** - Reviews include a 1-5 star rating
-- **Optional Title** - Review title is optional; defaults to "Untitled Review"
-- **Review Body** - Text field for detailed feedback (no character limit)
-- **Edit and Delete** - Users can edit or delete their own reviews at any time; ownership is enforced
+- **Optional Title** - Review title is optional. If left blank, the UI displays 'Untitled Review'.
+- **Review Body** - Review body uses a 1000-character client-side input limit.
+- **Edit and Delete** - Users can edit or delete their own reviews while the related product is not removed.
 - **Admin Moderation** - Reviews are registered in Django admin with filters for rating, product, and date
 
 ### My Archive – Permanent Access Management
@@ -298,9 +299,9 @@ This section documents implemented features organised by category.
 - **Unified Access Source** - AccessEntitlement model is the single source of truth for purchased products
 - **Dashboard Tab** - My Archive is a dashboard tab; `/accounts/my-archive/` redirects to it
 - **Purchase Date Display** - Each unlocked product shows the unlock date on archive cards
-- **Consistent Card Layout** - Archive cards display product image, title, description, and unlock date
+- **Consistent Card Layout** - Archive cards display product image, title, and unlock date.
 - **Direct Reading Access** - Each card includes a "Read" button that opens the dedicated reading page
-- **Empty State** - When no products are purchased, displays a friendly message and link to the archive catalog
+- **Empty State** - When no products are purchased, a friendly empty-state message is shown.
 - **Permanent Retention** - Once purchased, products remain in My Archive indefinitely; no expiration or revocation
 
 ### My Orders
@@ -319,7 +320,7 @@ This section documents implemented features organised by category.
 
 ### Product Preview Pages
 
-- **Public Browsing** - Product detail pages serve as previews for all visitors
+- **Public Browsing** - Product detail previews are public only for active, non-removed products. Inactive products are visible only to staff/superusers and entitled users.
 - **Purchase Flow** - Non-owners see pricing, add-to-cart button, and purchase call-to-action
 - **Access Indicator** - Owners see a "Read Full Archive" button instead of purchase options
 - **Content Separation** - Preview pages show teaser fields; full content is on the read page after entitlement
@@ -328,19 +329,22 @@ This section documents implemented features organised by category.
 ### Archive Reading Pages
 
 - **Dedicated Reading Experience** - Separate page (`/archive/<slug>/read/`) for immersive content consumption
-- **Access Control** - Requires authentication, verified email, and AccessEntitlement for the specific product
+- **Access Control** - Requires authentication. Non-superusers must have a verified email and product entitlement. Superusers bypass these checks.
 - **Immersive Layout** - Clean, distraction-free design focused on reading the complete archive entry
 - **Full Content Display** - Complete archive text displayed with elegant formatting and generous spacing
 - **Content Editor** - Product content uses CKEditor5 for rich text formatting with custom styling support
 - **Navigation** - Clear links back to My Archive and product preview page
-- **No Purchase Elements** - Reading page contains no cart, pricing, or purchase CTAs
+- **Purchase Elements** - Reading page has no purchase CTA, but includes archive metadata such as price information.
 - **Permission Denied** - Users without access receive 403 error; anonymous users redirected to login
 
 ### Product Visibility and Access Control
 
 - **is_active**: Controls whether a product appears in the public archive catalog. When `False`, the product is hidden from listings.
-- **is_removed**: Marks a product as removed from public display but preserves access for verified buyers who have already purchased. Unpublished products remain reachable via direct link by entitled users and superusers; non-entitled users cannot access them.
+- **is_removed**: is_removed hides product preview pages from non-staff users. Entitled users keep access through `/archive/<slug>/read/`. Staff and superusers retain preview access.
 - **Admin Delete Behavior**: Deleting a product from Django Admin converts the delete into an unpublish (sets `is_active=False`) to preserve user access to already-purchased content.
+- **Admin Action**: Admin includes a "Delete permanently (keep access for buyers)" action:
+  - Products with entitlements are soft-removed (`is_removed=True`).
+  - Products with no entitlements are hard-deleted.
 
 ## Pages Overview
 
@@ -358,9 +362,11 @@ This section documents implemented features organised by category.
 | Dashboard | `/accounts/dashboard/` | Authenticated + verified email | Account hub with profile, archive, orders, reviews, and delete tabs |
 | Profile | `/accounts/profile/` | Authenticated + verified email | Redirects to dashboard profile tab |
 | My Archive | `/accounts/my-archive/` | Authenticated + verified email | Redirects to dashboard archive tab |
+| My Orders | `/accounts/my-orders/` | Authenticated + verified email | Redirects to dashboard orders tab |
+| My Reviews | `/accounts/my-reviews/` | Authenticated + verified email | Redirects to dashboard reviews tab |
 | Delete Account | `/accounts/delete/` | Authenticated + verified email | Permanently delete account |
-| Product Preview | `/archive/<slug>/` | Public | Preview page with purchase flow |
-| Archive Reading | `/archive/<slug>/read/` | Owners only + verified email | Dedicated reading page for purchased content |
+| Product Preview | `/archive/<slug>/` | Public for active, non-removed products; staff/superusers and entitled users can also access inactive previews | Preview page with purchase flow |
+| Archive Reading | `/archive/<slug>/read/` | Authenticated; non-superusers require verified email + entitlement | Dedicated reading page for purchased content |
 | Submit Review | `/archive/<slug>/review/` | Verified buyers | Submit review for purchased product (POST only) |
 | Edit Review | `/archive/<slug>/review/<id>/edit/` | Review owner + verified email | Edit your own review |
 | Delete Review | `/archive/<slug>/review/<id>/delete/` | Review owner + verified email | Delete your own review (POST only) |
@@ -378,7 +384,7 @@ These pages are accessible to all visitors without authentication.
 
 ![Homepage](documentation/website-pages/home.png)
 
-**Archive Catalog** - Browse all available archive entries with filters and sorting:
+**Archive Catalog** - Browse all available archive entries with search, category filter, and deals filter:
 
 ![Archive Catalog](documentation/website-pages/archive.png)
 
@@ -441,7 +447,7 @@ Reviews use the same AccessEntitlement model to verify purchase eligibility:
 
 - **Eligibility Check**: Review creation confirms verified email and AccessEntitlement for the product
 - **Idempotent Prevention**: Unique constraint prevents users from submitting multiple reviews for the same product
-- **Edit/Delete**: Users can edit or delete their own reviews; ownership is enforced in views
+- **Edit/Delete**: Users can edit or delete their own reviews while the related product is not removed; ownership is enforced in views
 - **Display Logic**: Reviews are visible to all visitors on product pages
 
 ### Architecture Decision: Switching to Django-Allauth
@@ -455,7 +461,7 @@ Production requirements for professional email management, password resets, and 
 **What changed:**
 
 - Replaced custom login/register views with allauth's built-in views
-- Integrated SMTP delivery for account emails (see Email Templates section)
+- Integrated account email delivery with environment-based backend selection (see Email Templates section)
 - Added email verification, password reset, and account management flows
 - Implemented allauth email templates with project styling
 
@@ -487,7 +493,7 @@ Django signals are used to maintain data consistency and automate business logic
 
 **Product Signals** (`products/models.py`):
 
-- **post_save (Product)** - Syncs deal status when a product's category changes or when featured status is updated
+- **Product.save() logic** - Syncs deal status when a product's category changes or when featured status is updated
 - **post_save (DealBanner)** - Automatically marks affected products as deals when banners are activated
 - **post_delete (DealBanner)** - Removes deal status from products when banners are deleted (CASCADE behavior)
 
@@ -601,11 +607,12 @@ All static files are collected using Django's `collectstatic` command and are co
 
 ### Email Templates and Notifications
 
-All account emails are delivered via SMTP (Resend by default; configured in `elysium_archive/settings.py`) and use custom HTML templates styled to match the project:
+In DEBUG, emails use Django console backend.
+In production (`DEBUG=False`), emails use SMTP (Resend by default).
+Account emails use custom HTML templates styled to match the project:
 
 - **Email Verification** - Sent when users register (mandatory verification)
-- **Password Reset** - Sent when users request password reset
-- **Password Reset Complete** - Confirmation after successful reset
+- **Password Reset** - Password Reset email with reset link; successful reset is confirmed on-site via a completion page.
 - **Email Change Notification** - Sent when users update their email address
 
 Templates live in `templates/account/` and `templates/account/email/`.
@@ -665,10 +672,10 @@ All atmospheric images used throughout the project are sourced from [Stockcake](
 
 - **django-allauth 65.13.1**
   - User registration, login, logout
-  - Email verification via SMTP
+  - Email verification via configured Django email backend
   - Password reset and change functionality
   - Email address management
-  - Social authentication ready
+  - Social authentication is not currently configured.
 
 ### Frontend and Styling
 
@@ -684,7 +691,7 @@ All atmospheric images used throughout the project are sourced from [Stockcake](
 - **Resend SMTP** (email delivery via `EMAIL_HOST` / `RESEND_API_KEY`)
 - **CKEditor5 0.2.19** (Rich text editing for product content)
 
-### Admin and Development
+### Operations and Development
 
 - **django-jazzmin 3.0.1**
 - **whitenoise 6.11.0**
@@ -766,9 +773,9 @@ Error pages follow the site's styling and provide clear navigation:
 - **404 - Page Not Found** - Missing resources with helpful navigation
 - **500 - Server Error** - Internal errors with self-contained styling
 
-All error templates extend `base.html` (except 500, which uses inline critical CSS for reliability).
+All custom error templates (400, 403, 404, 500) extend `base.html`.
 
-Error handlers are configured in `elysium_archive/urls.py` and work in both development and production.
+Custom error templates are present; staff-only test routes (`/_test/errors/`) are used to validate them.
 When `DEBUG=True`, Django shows its debug pages; to verify the themed error templates, test with `DEBUG=False` in a production-like local run.
 
 ## Stripe Payments
@@ -784,11 +791,13 @@ The payment flow follows this sequence:
 3. **Stripe Hosted Page** - User is redirected to Stripe's secure payment form
 4. **Success or Cancel** - User returns to the site with confirmation or cancellation
 
-Stripe sessions are created server-side using `stripe.checkout.Session.create`. The integration is configured to accept card payments only via `payment_method_types=["card"]`.
+Stripe Checkout sessions are created server-side using `stripe.checkout.Session.create`.
+Payment method restrictions are not explicitly set in code.
 
 ### Webhook Confirmation and Fallback
 
-Payments are confirmed server-side via Stripe webhooks at `/checkout/webhook/`. Orders are marked paid and access entitlements are granted only after Stripe signature verification succeeds.
+Orders are finalized by verified webhooks and by a success-page fallback that rechecks Stripe session payment status.
+Stripe webhook is available at `/checkout/webhook/` with alias `/checkout/wh/`.
 
 The checkout success page includes a fallback verification step if webhook delivery is delayed: it re-checks the Stripe session and, when `payment_status == "paid"`, finalises the order (mark paid, store the payment intent ID, create entitlements, and clear the cart).
 
@@ -803,10 +812,7 @@ metadata={
 }
 ```
 
-- Add loading states and progress indicators during checkout
-- Implement skeleton screens while catalog is loading
-- Add smooth transitions between archive sections
-The `order_id` is used in the checkout success fallback to quickly retrieve the correct order from the database without relying on webhook delivery. This ensures reliable access even if webhooks are delayed or fail to arrive.
+The `order_id` metadata is primarily used by webhook handlers for direct order lookup.
 
 **Idempotent and Atomic Processing:**
 
@@ -814,14 +820,9 @@ The `order_id` is used in the checkout success fallback to quickly retrieve the 
 - Entitlement creation is idempotent (DB unique constraint + `get_or_create`), so webhook replays and success-page refreshes do not create duplicates
 - Order finalisation is atomic and uses transactions/row locking to prevent race conditions (double-submit safe)
 
-### Test Mode
+### Stripe Mode
 
-All Stripe operations in this project run in test mode. This means:
-
-- No real credit cards are charged
-- No actual money moves
-- Test card numbers are used for checkout
-- Webhooks and payment confirmation can be simulated
+Stripe mode depends on configured API keys. Local defaults are test placeholders.
 
 ### How to Test a Payment
 
@@ -860,7 +861,7 @@ This is Stripe's official test card for successful payments. Other test cards fo
 
 During checkout, you may see a "Pay with Link" button or a checkbox for "Save my information for faster checkout" on the Stripe hosted page.
 
-This is part of Stripe's UI for accelerated checkout and autofill features. The payment session is explicitly configured to accept card payments only via `payment_method_types=["card"]`.
+This is part of Stripe's UI for accelerated checkout and autofill features. Available payment options are determined by Stripe for the session and account configuration.
 
 ### Developer Note
 
@@ -870,39 +871,77 @@ The Elysium Archive served as a learning project for integrating Stripe Checkout
 
 All Stripe keys and configuration are stored in environment variables and are never committed to version control.
 
-## Admin Panel Setup
+## Admin Power Tools
 
-### Django Admin
+The admin area uses Django admin with Jazzmin and project-specific enhancements.
+It is designed for quick scanning, clear status visibility, and safer staff actions.
+Most day-to-day checks can be done directly from list views without opening every record.
 
-- The project uses Django's built-in admin panel.
-- The admin interface is available at `/admin`.
-- It is used during development to manage users, products, orders, and reviews.
+### Access for Staff
 
-### Jazzmin Admin Theme
+- Admin URL: `/admin/`
+- Staff users can sign in to manage products, users, orders, reviews, categories, and entitlements.
+- Local superuser command: `python manage.py createsuperuser`
+- Configuration is environment-based (`env.py` locally, Config Vars in production).
 
-- `django-jazzmin` enhances the Django admin UI.
-- Jazzmin is configured in `settings.py`.
-- It improves layout and usability without changing admin logic.
-- The top menu includes a staff-only quick link to `/_test/errors/` for the error testing dashboard.
+### Visual Controls and Safety
 
-### Superuser Creation
+Key admin UX improvements:
+- Colored badges and status chips for active, featured, deal, verified, and order status
+- Strong list filters and search fields for fast review and moderation
+- Read-only fields where values are system-managed (for example, derived deal status)
+- Safer flows in product management (delete action converted to unpublish, protected bulk actions)
+- Extra guardrails in forms, including limits and helper UI for image alt text
 
-- Create a superuser locally to access the admin panel.
-- Run the command: `python manage.py createsuperuser`.
-- The superuser account is required for admin access.
+### Jazzmin Showcase
 
-### Environment Variables and Security
+#### Home Dashboard
+![Jazzmin Admin Home](documentation/jazzmin/jazzmin-home.png)
+The home dashboard gives staff a clean entry point to the most important models.
+It reduces navigation time across users, products, orders, reviews, and banners.
 
-- Local development uses an `env.py` file for configuration.
-- `env.py` is never committed to version control.
-- Production uses Heroku Config Vars.
-- Configuration is always read from `os.environ`.
+#### Users
+![Jazzmin Users Management](documentation/jazzmin/users.png)
+User rows expose verification and purchase context quickly.
+This helps staff confirm account state and ownership history faster.
 
-### DEBUG Auto-Switch
+#### Products
+![Jazzmin Products Management](documentation/jazzmin/products.png)
+Product list views highlight active, featured, removed, and deal states with badges.
+Staff can filter and update visibility with fewer mistakes.
 
-- `DEBUG` defaults to `True` locally.
-- `DEBUG` is set to `False` on Heroku.
-- No manual code changes are required between environments.
+#### Categories
+![Jazzmin Categories Overview](documentation/jazzmin/categories.png)
+Category views show structure and product counts for quick scanning.
+This improves catalog organization and cleanup decisions.
+
+#### Deal Banners
+![Jazzmin Deal Banners](documentation/jazzmin/deal-banners.png)
+Banners can be reviewed with clear status cues and destination previews.
+Staff can quickly control promotion visibility and ordering.
+
+#### Orders
+![Jazzmin Orders Review](documentation/jazzmin/orders.png)
+Orders show status badges and key account details in one row.
+This supports faster support checks and payment follow-up.
+
+#### Access Entitlements
+![Jazzmin Access Entitlements](documentation/jazzmin/access-entitlements.png)
+Entitlements provide the ownership source of truth for protected content access.
+Staff can verify who owns what without jumping across multiple pages.
+
+#### Reviews
+![Jazzmin Reviews Moderation](documentation/jazzmin/reviews.png)
+Reviews include rating display, verification cues, and moderation filters.
+Staff can spot and process feedback issues more efficiently.
+
+### Test Errors Dashboard (Staff Only)
+
+Staff can open a dedicated error testing dashboard at `/_test/errors/`.
+The page is linked from the admin top bar as **Test Errors** and is protected with staff-only access.
+It is used to safely test the custom `400`, `403`, `404`, and `500` templates.
+
+![Error Pages Test Dashboard](documentation/test-error-page.png)
 
 ## Database Design
 
@@ -964,144 +1003,19 @@ The current relationships are represented in the ERD below and summarised in the
 
 ### ERD (Entity Relationship Diagram)
 
-The Entity Relationship Diagram (ERD) below illustrates the current database structure.
+The ERD below matches the current Django models in `accounts`, `cart`, `products`, `orders`, and `reviews`.
 
-The ERD was created using **[Mermaid Live](https://mermaid.live/)**, a diagramming tool that allows database relationships to be defined using clear, readable syntax and exported as an image.
+![ERD Diagram](documentation/erd-diagram.png)
 
-**Note:** Some fields are omitted from the diagram for clarity (e.g., `Product.is_removed`, `Review.title`, `Review.body`, `CartItem.quantity`). Refer to the core model documentation or model files for complete field definitions.
-
-```mermaid
-erDiagram
-    USER ||--|| USERPROFILE : has
-    USER ||--|| CART : owns
-    CART ||--o{ CARTITEM : contains
-    CARTITEM }o--|| PRODUCT : item
-    USER ||--o{ ORDER : places
-    ORDER ||--o{ ORDERLINEITEM : contains
-    ORDERLINEITEM }o--|| PRODUCT : item
-    USER ||--o{ ACCESSENTITLEMENT : grants
-    ACCESSENTITLEMENT }o--|| PRODUCT : "grants access to"
-    ACCESSENTITLEMENT }o--|| ORDER : "linked to"
-    PRODUCT }o--|| CATEGORY : "belongs to"
-    PRODUCT ||--o{ REVIEW : has
-    USER ||--o{ REVIEW : writes
-    DEALBANNER }o--|| PRODUCT : "optional"
-    DEALBANNER }o--|| CATEGORY : "optional"
-
-    USERPROFILE {
-        int id PK
-        int user_id FK
-        string display_name "max 20 characters"
-        string profile_picture "URL via Cloudinary"
-        datetime created_at
-        datetime updated_at
-    }
-
-    USER {
-        int id PK
-        string username
-        string email
-        string password
-        boolean is_active
-        boolean is_staff
-        boolean is_superuser
-    }
-
-    CART {
-        int id PK
-        int user_id FK
-        datetime updated_at
-    }
-
-    CARTITEM {
-        int id PK
-        int cart_id FK
-        int product_id FK
-        int quantity
-    }
-
-    CATEGORY {
-        int id PK
-        string name
-        string slug UK
-        text description
-        datetime created_at
-        datetime updated_at
-    }
-
-    DEALBANNER {
-        int id PK
-        string title
-        string message
-        int product_id FK
-        string url
-        int category_id FK
-        decimal discount_percentage
-        string icon
-        boolean is_active
-        boolean is_featured
-        int order
-        datetime created_at
-    }
-
-    ORDER {
-        int id PK
-        int user_id FK
-        string order_number
-        string status
-        decimal total
-        string stripe_session_id
-        string stripe_payment_intent_id
-        datetime created_at
-        datetime updated_at
-    }
-
-    ORDERLINEITEM {
-        int id PK
-        int order_id FK
-        int product_id FK
-        string product_title
-        decimal product_price
-        int quantity
-        decimal line_total
-    }
-
-    PRODUCT {
-        int id PK
-        string title
-        string slug UK
-        string tagline
-        text description
-        text content
-        decimal price
-        string image
-        string image_alt
-        boolean is_active
-        boolean is_featured
-        boolean is_deal
-        datetime created_at
-        datetime updated_at
-    }
-
-    ACCESSENTITLEMENT {
-        int id PK
-        int user_id FK
-        int product_id FK
-        int order_id FK
-        datetime granted_at
-    }
-
-    REVIEW {
-        int id PK
-        int user_id FK
-        int product_id FK
-        int rating
-        string title
-        text body
-        datetime created_at
-        datetime updated_at
-    }
-```
+Main relationship summary:
+- User ↔ UserProfile: one-to-one
+- User ↔ Order: one-to-many (`Order.user` can be null for guest-style records)
+- Order ↔ OrderLineItem: one-to-many
+- User ↔ Product ownership: many-to-many through `AccessEntitlement`
+- Product ↔ Category: many-to-one (`Product.category` is optional)
+- Product ↔ Review: one-to-many, with each review linked to one user and one product
+- DealBanner: optional links to a single product and/or a single category
+- User ↔ Cart: one-to-one, with Cart ↔ CartItem as one-to-many
 
 Each model uses Django's default primary key. Relationships are defined using foreign keys and one-to-one fields where appropriate.
 
@@ -1183,7 +1097,7 @@ These are selected real bugs found and fixed during development. Fixes were vali
 
 **Root Cause:** Checkout relied on webhook-only reconciliation with only `order_number` in session metadata.
 
-**Fix:** Added `order_id` to Stripe session metadata; success view now verifies the Stripe session as a fallback and creates `AccessEntitlement` records when payment is confirmed.
+**Fix:** Added `order_id` to Stripe session metadata for direct webhook order lookup, while keeping success-page payment-status verification as fallback.
 
 **How it was tested:** End-to-end checkout with test cards, simulated delayed webhooks, verified entitlement creation and cart clearing.
 
@@ -1222,7 +1136,7 @@ web: gunicorn elysium_archive.wsgi:application
 
 **How it was tested:** Replayed payloads locally; tested invalid and valid signatures; verified order updates and entitlement creation.
 
-### Admin ALT text length overflow (became a feature)
+### ALT text length overflow (became a feature)
 
 **Symptoms:** Admins could enter very long `image_alt` values risking deployment failures.
 
@@ -1354,7 +1268,7 @@ os.environ.setdefault("DEFAULT_FROM_EMAIL", "noreply@yourdomain.com")
 
 **Alternatives:** Gmail (with app password), SendGrid, or any SMTP provider. Set `EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and `DEFAULT_FROM_EMAIL` accordingly.
 
-**Local Development:** Use Django's console backend by setting `EMAIL_BACKEND` to `django.core.mail.backends.console.EmailBackend` in `env.py`. Emails print to the console instead of being sent.
+**Local Development:** In local DEBUG mode, Django already uses console email backend by default.
 
 ### DEBUG auto-switch
 
@@ -1369,7 +1283,7 @@ The project is deployed on Heroku.
 
 Production configuration uses Heroku Config Vars, which become environment variables at runtime. The production environment does not use `env.py`.
 
-### Required config vars
+### Recommended production config vars (some have defaults/fallbacks).
 
 The following environment variables are expected on Heroku:
 
@@ -1406,29 +1320,6 @@ The following environment variables are expected on Heroku:
 
 Set `DEBUG=False` on Heroku. If `DEBUG` is not set locally, the project defaults to `True`.
 
-## Admin Power Tools
-
-The project includes a Django admin interface with custom management features for staff users.
-
-### Product Management
-
-- Status badges for active, featured, and deal flags
-- Deal status is derived from active Deal Banners (`is_deal` is read-only in admin)
-- Filters for active status, featured status, deals, category, and creation date
-- Category admin with product counts and styled badges
-
-### User Management
-
-- Purchase count badges based on entitlements
-- Email verification badge and role badges
-- Filters for staff/superuser/active status, groups, and purchase history
-
-### Admin Styling
-
-- Jazzmin theme integration with custom CSS modules
-- Badge system for visual status cues
-- Admin-only enhancements for products, categories, reviews, and deal banners
-
 ## Deal Banner Bar
 
 The homepage displays a scrolling **Deal Banner Bar** that shows promotional messages to visitors. Staff can create and manage these banners entirely from the Django Admin panel without code changes.
@@ -1452,7 +1343,7 @@ Banners scroll continuously and are fully managed through Django Admin.
 1. Go to Django Admin → Deal Banners
 2. Add a new banner with:
 
-    - **Title**: Internal name (not shown to visitors)
+    - **Title**: Visible banner label shown to visitors (for example DEAL, HOT, NEW)
     - **Message**: The promotional text displayed on the homepage
     - **Emoji**: Optional icon (e.g., 🔥, ⚡, 🎉)
     - **Display Order**: Lower numbers appear first
@@ -1537,7 +1428,6 @@ During testing, I intentionally entered very long image ALT texts to stress-test
 
 - Send order confirmation emails automatically after purchase
 - Show average rating summary on product cards
-- Add basic sorting options (price and newest)
 - Improve dashboard empty states with clearer guidance
 - Add simple rate limiting or spam protection on login and contact form
 

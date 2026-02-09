@@ -10,7 +10,6 @@ from django.db import models
 from products.models import Product
 
 if TYPE_CHECKING:
-    from django.contrib.auth.models import AbstractUser
     from django.db.models import QuerySet
 
 
@@ -48,7 +47,11 @@ class Order(models.Model):
         blank=True,
     )
     order_number = models.CharField(max_length=32, unique=True, editable=False)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
 
     total = models.DecimalField(
         max_digits=10,
@@ -129,7 +132,8 @@ class OrderLineItem(models.Model):
 
     def __str__(self) -> str:
         return (
-            f"{self.quantity}x {self.product_title} (Order {self.order.order_number})"
+            f"{self.quantity}x {self.product_title} "
+            f"(Order {self.order.order_number})"
         )
 
     def save(self, *args: Any, **kwargs: Any) -> None:

@@ -25,7 +25,7 @@ def _sync_session_to_db(session, user):
     for key in list(cart.keys()):
         try:
             product_ids.append(int(key))
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             cart.pop(key, None)
 
     if not product_ids:
@@ -56,7 +56,10 @@ def _sync_session_to_db(session, user):
 
 
 def merge_db_cart_into_session(session, user):
-    """Merge a user's DB cart with the current session cart and sync the result."""
+    """Merge a user's DB cart with the current session cart and sync the.
+
+    result.
+    """
     session_cart = session.get("cart", {})
     if session_cart is None:
         session_cart = {}
@@ -138,7 +141,7 @@ def get_cart_items(session, user=None):
     for product_id_str in list(cart.keys()):
         try:
             valid_ids.append(int(product_id_str))
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             cart.pop(product_id_str, None)
 
     if not valid_ids:
@@ -146,7 +149,9 @@ def get_cart_items(session, user=None):
         session.modified = True
         return []
 
-    qs = Product.objects.filter(id__in=valid_ids, is_active=True, is_removed=False)
+    qs = Product.objects.filter(
+        id__in=valid_ids, is_active=True, is_removed=False
+    )
     products = list(qs)
     active_ids = set(qs.values_list("id", flat=True))
 
@@ -156,7 +161,7 @@ def get_cart_items(session, user=None):
             if int(product_id_str) not in active_ids:
                 cart.pop(product_id_str, None)
                 removed += 1
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             continue
 
     if removed:

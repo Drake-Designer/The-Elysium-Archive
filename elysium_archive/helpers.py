@@ -16,4 +16,6 @@ def user_has_access(user, product):
     if user.is_superuser:
         return True
 
-    return AccessEntitlement.objects.filter(user=user, product=product).exists()
+    return AccessEntitlement.objects.filter(
+        user=user, product=product
+    ).exists()

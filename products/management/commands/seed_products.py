@@ -17,7 +17,6 @@ class Command(BaseCommand):
         """Execute the seed command."""
         self.stdout.write("Starting database seed...")
 
-        # Create categories
         categories_data = [
             {"name": "Ancient Texts", "slug": "ancient-texts"},
             {"name": "Historical Documents", "slug": "historical-documents"},
@@ -32,13 +31,15 @@ class Command(BaseCommand):
             status = "Created" if created else "Already exists"
             self.stdout.write(f"  {status}: {category.name}")
 
-        # Create sample products
         products_data = [
             {
                 "title": "The Lost Manuscripts of Alexandria",
                 "slug": "lost-manuscripts-alexandria",
                 "tagline": "Recovered texts from the ancient library",
-                "description": "A comprehensive collection of manuscripts believed to have been lost in the fire of the Library of Alexandria.",
+                "description": (
+                    "A comprehensive collection of manuscripts believed to "
+                    "have been lost in the fire of the Library of Alexandria."
+                ),
                 "category": "ancient-texts",
                 "price": Decimal("29.99"),
                 "is_featured": True,
@@ -47,7 +48,11 @@ class Command(BaseCommand):
                 "title": "Da Vinci's Secret Notebooks",
                 "slug": "da-vinci-secret-notebooks",
                 "tagline": "Unpublished sketches and notes",
-                "description": "Recently discovered notebooks containing Leonardo da Vinci's private observations and experimental designs.",
+                "description": (
+                    "Recently discovered notebooks containing "
+                    "Leonardo da Vinci's private observations and "
+                    "experimental designs."
+                ),
                 "category": "historical-documents",
                 "price": Decimal("39.99"),
                 "is_featured": True,
@@ -56,7 +61,10 @@ class Command(BaseCommand):
                 "title": "Einstein's Personal Letters",
                 "slug": "einstein-personal-letters",
                 "tagline": "Correspondence with fellow scientists",
-                "description": "A collection of letters exchanged between Einstein and other prominent scientists of his time.",
+                "description": (
+                    "A collection of letters exchanged between Einstein and "
+                    "other prominent scientists of his time."
+                ),
                 "category": "scientific-research",
                 "price": Decimal("24.99"),
                 "is_featured": False,
@@ -65,7 +73,10 @@ class Command(BaseCommand):
                 "title": "Renaissance Art Collection",
                 "slug": "renaissance-art-collection",
                 "tagline": "High-resolution scans of masterpieces",
-                "description": "Digitally restored images of Renaissance paintings and sculptures from private collections.",
+                "description": (
+                    "Digitally restored images of Renaissance paintings and "
+                    "sculptures from private collections."
+                ),
                 "category": "art-collections",
                 "price": Decimal("19.99"),
                 "is_featured": True,
@@ -74,7 +85,10 @@ class Command(BaseCommand):
                 "title": "Mayan Codices Translation",
                 "slug": "mayan-codices-translation",
                 "tagline": "Complete translations with annotations",
-                "description": "Scholarly translation of the four surviving Mayan codices with historical context.",
+                "description": (
+                    "Scholarly translation of the four surviving "
+                    "Mayan codices with historical context."
+                ),
                 "category": "ancient-texts",
                 "price": Decimal("34.99"),
                 "is_featured": False,
@@ -86,10 +100,13 @@ class Command(BaseCommand):
             prod_data["category"] = categories.get(category_slug)
 
             product, created = Product.objects.get_or_create(
-                slug=prod_data.get("slug", ""), defaults=prod_data
+                slug=prod_data.get("slug", ""),
+                defaults=prod_data,
             )
 
             status = "Created" if created else "Already exists"
             self.stdout.write(f"  {status}: {product.title}")
 
-        self.stdout.write(self.style.SUCCESS("\nDatabase seeded successfully!"))
+        self.stdout.write(
+            self.style.SUCCESS("\nDatabase seeded successfully!")
+        )

@@ -63,7 +63,8 @@ class Review(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "product"], name="unique_review_per_user_product"
+                fields=["user", "product"],
+                name="unique_review_per_user_product",
             )
         ]
         ordering = ["-created_at"]

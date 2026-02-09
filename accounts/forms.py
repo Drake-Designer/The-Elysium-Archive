@@ -17,6 +17,7 @@ class ElysiumSignupForm(SignupForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields["username"].widget.attrs.update(
             {
                 "autocomplete": "username",
@@ -54,7 +55,9 @@ class ElysiumSignupForm(SignupForm):
 
         UserModel = get_user_model()
         if UserModel.objects.filter(email__iexact=email).exists():
-            raise ValidationError(_("An account with this email already exists."))
+            raise ValidationError(
+                _("An account with this email already exists.")
+            )
 
         return email
 
@@ -64,6 +67,7 @@ class ElysiumLoginForm(LoginForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields["login"].widget.attrs.update(
             {
                 "autocomplete": "username",
@@ -90,16 +94,13 @@ class ElysiumLoginForm(LoginForm):
             return cleaned_data
 
         exact_user = self._get_user_exact(login_input)
-
         if exact_user:
             if not exact_user.check_password(password):
                 self.add_error("password", _("Incorrect password."))
                 raise ValidationError(_("Incorrect password."))
-
             return super().clean()
 
         ci_user = self._get_user_case_insensitive(login_input)
-
         if ci_user:
             if ci_user.check_password(password):
                 self.add_error("login", _("Incorrect username or email."))
@@ -111,7 +112,8 @@ class ElysiumLoginForm(LoginForm):
             self.add_error("password", _("Incorrect password."))
             raise ValidationError(
                 _(
-                    "Incorrect username or email and incorrect password. Login is case sensitive."
+                    "Incorrect username or email and incorrect password. "
+                    "Login is case sensitive."
                 )
             )
 
@@ -125,7 +127,9 @@ class ElysiumLoginForm(LoginForm):
         UserModel = cast(type[AbstractUser], get_user_model())
 
         try:
-            return UserModel.objects.get(**{UserModel.USERNAME_FIELD: login_input})
+            return UserModel.objects.get(
+                **{UserModel.USERNAME_FIELD: login_input}
+            )
         except UserModel.DoesNotExist:
             pass
         except UserModel.MultipleObjectsReturned:
@@ -139,13 +143,17 @@ class ElysiumLoginForm(LoginForm):
             return None
 
     def _get_user_case_insensitive(self, login_input):
-        """Return a user using a case insensitive match on username or email."""
+        """
+        Return a user using a case insensitive match on username or email.
+        """
         UserModel = cast(type[AbstractUser], get_user_model())
 
         username_field = UserModel.USERNAME_FIELD
         username_lookup = f"{username_field}__iexact"
 
-        user = UserModel.objects.filter(**{username_lookup: login_input}).first()
+        user = UserModel.objects.filter(
+            **{username_lookup: login_input}
+        ).first()
         if user:
             return user
 
@@ -184,7 +192,9 @@ class UserProfileForm(forms.ModelForm):
             "profile_picture": "Profile Picture",
         }
         help_texts = {
-            "display_name": "Max 20 characters (letters, numbers, symbols, spaces allowed)",
+            "display_name": (
+                "Max 20 characters (letters, numbers, symbols, spaces allowed)"
+            ),
             "profile_picture": "Upload a profile picture (JPG, PNG, max 5MB)",
         }
 

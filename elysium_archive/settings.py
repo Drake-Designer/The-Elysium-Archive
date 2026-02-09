@@ -38,9 +38,8 @@ def _env_list(name, default=None):
 
 
 # Secret key for Django cryptographic signing (sessions, tokens, etc.)
-SECRET_KEY_ENV = (
-    os.environ.get("SECRET_KEY")
-    or os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY_ENV = os.environ.get("SECRET_KEY") or os.environ.get(
+    "DJANGO_SECRET_KEY"
 )
 SECRET_KEY = SECRET_KEY_ENV or get_random_secret_key()
 
@@ -209,26 +208,22 @@ if os.environ.get("DATABASE_URL"):
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": (
-            "django.contrib.auth.password_validation."
-            "UserAttributeSimilarityValidator"
+            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
         )
     },
     {
         "NAME": (
-            "django.contrib.auth.password_validation."
-            "MinimumLengthValidator"
+            "django.contrib.auth.password_validation.MinimumLengthValidator"
         )
     },
     {
         "NAME": (
-            "django.contrib.auth.password_validation."
-            "CommonPasswordValidator"
+            "django.contrib.auth.password_validation.CommonPasswordValidator"
         )
     },
     {
         "NAME": (
-            "django.contrib.auth.password_validation."
-            "NumericPasswordValidator"
+            "django.contrib.auth.password_validation.NumericPasswordValidator"
         )
     },
 ]
@@ -253,14 +248,11 @@ if os.environ.get("CLOUDINARY_URL"):
     # Production: Use Cloudinary for media, WhiteNoise for static
     STORAGES = {
         "default": {
-            "BACKEND": (
-                "cloudinary_storage.storage.MediaCloudinaryStorage"
-            ),
+            "BACKEND": ("cloudinary_storage.storage.MediaCloudinaryStorage"),
         },
         "staticfiles": {
             "BACKEND": (
-                "whitenoise.storage."
-                "CompressedManifestStaticFilesStorage"
+                "whitenoise.storage.CompressedManifestStaticFilesStorage"
             ),
         },
     }
@@ -279,14 +271,11 @@ else:
         },
         "staticfiles": {
             "BACKEND": (
-                "whitenoise.storage."
-                "CompressedManifestStaticFilesStorage"
+                "whitenoise.storage.CompressedManifestStaticFilesStorage"
             ),
         },
     }
-    CKEDITOR_5_FILE_STORAGE = (
-        "django.core.files.storage.FileSystemStorage"
-    )
+    CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # Default primary key field type for models
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -304,9 +293,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Django-allauth configuration (user registration and authentication)
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
-ACCOUNT_SIGNUP_FIELDS = [
-    "email*", "username*", "password1*", "password2*"
-]
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get(
     "ACCOUNT_EMAIL_VERIFICATION", "mandatory"
@@ -496,9 +483,7 @@ CKEDITOR_5_CONFIGS = {
             ],
         },
         "table": {
-            "contentToolbar": [
-                "tableColumn", "tableRow", "mergeTableCells"
-            ]
+            "contentToolbar": ["tableColumn", "tableRow", "mergeTableCells"]
         },
         "height": "600px",
     },

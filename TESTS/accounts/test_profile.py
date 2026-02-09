@@ -1,4 +1,7 @@
-"""Tests for user profile management: view, edit display_name, delete account."""
+"""Tests for user profile management: view, edit display_name, delete.
+
+account.
+"""
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -36,7 +39,10 @@ class TestProfileView:
         assert verified_user.email in content
 
     def test_profile_edit_display_name_get(self, client, verified_user):
-        """Test that profile form is displayed with empty or current display_name."""
+        """Test that profile form is displayed with empty or current.
+
+        display_name.
+        """
         client.force_login(verified_user)
         response = client.get(reverse("profile"), follow=True)
         assert "display_name" in response.content.decode()
@@ -109,12 +115,16 @@ class TestAccountDelete:
         assert response.status_code == 302
         assert "/accounts/login/" in response.url
 
-    def test_delete_account_get_shows_confirmation(self, client, verified_user):
+    def test_delete_account_get_shows_confirmation(
+        self, client, verified_user
+    ):
         """Test that GET shows confirmation page."""
         client.force_login(verified_user)
         response = client.get(reverse("account_delete"))
         assert response.status_code == 200
-        assert "accounts/delete_account.html" in [t.name for t in response.templates]
+        assert "accounts/delete_account.html" in [
+            t.name for t in response.templates
+        ]
         content = response.content.decode()
         assert "Delete My Account" in content
         assert "cannot be undone" in content.lower()

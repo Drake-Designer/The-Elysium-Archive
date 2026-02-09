@@ -1,6 +1,5 @@
 """Tests for order management and Stripe webhook handling."""
 
-from decimal import Decimal
 from unittest.mock import patch
 
 import pytest
@@ -17,7 +16,10 @@ class TestWebhookHandling:
     def test_webhook_checkout_completed_creates_entitlements(
         self, mock_construct, client, verified_user, order_pending
     ):
-        """Webhook on checkout.session.completed creates AccessEntitlements."""
+        """Webhook on checkout.session.completed creates.
+
+        AccessEntitlements.
+        """
         mock_construct.return_value = {
             "type": "checkout.session.completed",
             "data": {
@@ -30,7 +32,9 @@ class TestWebhookHandling:
             },
         }
 
-        assert AccessEntitlement.objects.filter(user=verified_user).count() == 0
+        assert (
+            AccessEntitlement.objects.filter(user=verified_user).count() == 0
+        )
 
         response = client.post(
             reverse("stripe_webhook"),
@@ -45,7 +49,9 @@ class TestWebhookHandling:
         assert entitlements.count() == 1
 
     @patch("checkout.webhooks.stripe.Webhook.construct_event")
-    def test_webhook_updates_order_status(self, mock_construct, client, order_pending):
+    def test_webhook_updates_order_status(
+        self, mock_construct, client, order_pending
+    ):
         """Webhook updates order status from pending to paid."""
         mock_construct.return_value = {
             "type": "checkout.session.completed",
@@ -72,7 +78,9 @@ class TestWebhookHandling:
         assert order_pending.status == "paid"
 
     @patch("checkout.webhooks.stripe.Webhook.construct_event")
-    def test_webhook_stores_stripe_ids(self, mock_construct, client, order_pending):
+    def test_webhook_stores_stripe_ids(
+        self, mock_construct, client, order_pending
+    ):
         """Webhook stores Stripe session and payment intent IDs."""
         session_id = "cs_test123"
         payment_id = "pi_test123"
@@ -104,7 +112,10 @@ class TestWebhookHandling:
     def test_webhook_idempotent_same_event_twice(
         self, mock_construct, client, verified_user, order_pending
     ):
-        """Same webhook event twice creates only one AccessEntitlement (idempotent)."""
+        """Same webhook event twice creates only one AccessEntitlement.
+
+        (idempotent).
+        """
         mock_construct.return_value = {
             "type": "checkout.session.completed",
             "data": {
@@ -124,7 +135,9 @@ class TestWebhookHandling:
             HTTP_STRIPE_SIGNATURE="test_sig",
         )
 
-        assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
+        assert (
+            AccessEntitlement.objects.filter(user=verified_user).count() == 1
+        )
 
         client.post(
             reverse("stripe_webhook"),
@@ -133,13 +146,18 @@ class TestWebhookHandling:
             HTTP_STRIPE_SIGNATURE="test_sig",
         )
 
-        assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
+        assert (
+            AccessEntitlement.objects.filter(user=verified_user).count() == 1
+        )
 
     @patch("checkout.webhooks.stripe.Webhook.construct_event")
     def test_webhook_checkout_completed_unpaid_does_not_grant_access(
         self, mock_construct, client, verified_user, order_pending
     ):
-        """Checkout completed but unpaid does not grant access or mark as paid."""
+        """
+        Checkout completed but unpaid does not grant access or mark as paid.
+        """
+
         mock_construct.return_value = {
             "type": "checkout.session.completed",
             "data": {
@@ -161,7 +179,9 @@ class TestWebhookHandling:
 
         order_pending.refresh_from_db()
         assert order_pending.status == "pending"
-        assert AccessEntitlement.objects.filter(user=verified_user).count() == 0
+        assert (
+            AccessEntitlement.objects.filter(user=verified_user).count() == 0
+        )
 
     @patch("checkout.webhooks.stripe.Webhook.construct_event")
     def test_webhook_payment_failed_sets_status(
@@ -194,7 +214,9 @@ class TestWebhookHandling:
         """Webhook with invalid signature is rejected."""
         from stripe import SignatureVerificationError
 
-        mock_construct.side_effect = SignatureVerificationError("Invalid", "sig")
+        mock_construct.side_effect = SignatureVerificationError(
+            "Invalid", "sig"
+        )
 
         response = client.post(
             reverse("stripe_webhook"),
@@ -249,7 +271,10 @@ class TestWebhookHandling:
     def test_webhook_paid_order_does_not_duplicate_entitlements(
         self, mock_construct, client, verified_user, order_paid
     ):
-        """Webhook on already paid order does not create duplicate entitlements."""
+        """Webhook on already paid order does not create duplicate.
+
+        entitlements.
+        """
         mock_construct.return_value = {
             "type": "checkout.session.completed",
             "data": {
@@ -262,7 +287,9 @@ class TestWebhookHandling:
             },
         }
 
-        assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
+        assert (
+            AccessEntitlement.objects.filter(user=verified_user).count() == 1
+        )
 
         response = client.post(
             reverse("stripe_webhook"),
@@ -272,7 +299,9 @@ class TestWebhookHandling:
         )
 
         assert response.status_code == 200
-        assert AccessEntitlement.objects.filter(user=verified_user).count() == 1
+        assert (
+            AccessEntitlement.objects.filter(user=verified_user).count() == 1
+        )
 
         order_paid.refresh_from_db()
         assert order_paid.status == "paid"

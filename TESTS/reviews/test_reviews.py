@@ -99,7 +99,9 @@ class ReviewCreationTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(
-            Review.objects.filter(user=self.buyer, product=self.product).exists()
+            Review.objects.filter(
+                user=self.buyer, product=self.product
+            ).exists()
         )
 
     def test_non_buyer_cannot_post_review(self):
@@ -115,7 +117,9 @@ class ReviewCreationTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertFalse(
-            Review.objects.filter(user=self.non_buyer, product=self.product).exists()
+            Review.objects.filter(
+                user=self.non_buyer, product=self.product
+            ).exists()
         )
 
     def test_anonymous_cannot_post_review(self):
@@ -186,9 +190,14 @@ class DashboardReviewsTabTest(TestCase):
         self.assertIn("tab=reviews", response["Location"])
 
     def test_dashboard_reviews_tab_renders_for_user(self):
-        """Dashboard reviews tab renders and shows the user's review content."""
+        """Dashboard reviews tab renders and shows the user's review.
+
+        content.
+        """
         self.client.force_login(self.user)
-        response = self.client.get(f"{reverse('account_dashboard')}?tab=reviews")
+        response = self.client.get(
+            f"{reverse('account_dashboard')}?tab=reviews"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Dashboard Title", response.content)
         self.assertIn(b"Dashboard body text", response.content)
@@ -276,7 +285,9 @@ class ReviewRemovalTest(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertFalse(
-            Review.objects.filter(user=self.other_buyer, product=self.product).exists()
+            Review.objects.filter(
+                user=self.other_buyer, product=self.product
+            ).exists()
         )
 
     def test_removed_product_blocks_edit_review(self):
@@ -288,7 +299,10 @@ class ReviewRemovalTest(TestCase):
         response = self.client.get(
             reverse(
                 "edit_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.id},
+                kwargs={
+                    "slug": self.product.slug,
+                    "review_id": self.review.id,
+                },
             )
         )
         self.assertEqual(response.status_code, 404)
@@ -296,7 +310,10 @@ class ReviewRemovalTest(TestCase):
         response = self.client.post(
             reverse(
                 "edit_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.id},
+                kwargs={
+                    "slug": self.product.slug,
+                    "review_id": self.review.id,
+                },
             ),
             {"rating": 3, "title": "Updated", "body": "Updated body."},
         )
@@ -314,7 +331,10 @@ class ReviewRemovalTest(TestCase):
         response = self.client.post(
             reverse(
                 "delete_review",
-                kwargs={"slug": self.product.slug, "review_id": self.review.id},
+                kwargs={
+                    "slug": self.product.slug,
+                    "review_id": self.review.id,
+                },
             )
         )
 

@@ -25,11 +25,13 @@ def build_cloudinary_fill_url(image, width, height):
         # Force HTTPS for mixed content prevention
         if base_url.startswith("http://"):
             base_url = base_url.replace("http://", "https://", 1)
-            logger.debug(f"cloudinary_fill: Converted HTTP to HTTPS")
+            logger.debug("cloudinary_fill: Converted HTTP to HTTPS")
 
         # Check if it's a Cloudinary URL
         if "/upload/" not in base_url:
-            logger.warning(f"cloudinary_fill: URL missing /upload/: {base_url[:100]}")
+            logger.warning(
+                f"cloudinary_fill: URL missing /upload/: {base_url[:100]}"
+            )
             # Return original URL as fallback
             return base_url
 
@@ -61,7 +63,9 @@ def cloudinary_fill_srcset(image, *dimensions):
 
     dims = list(dimensions)
     if len(dims) % 2 != 0:
-        logger.warning(f"cloudinary_fill_srcset: Odd number of dimensions: {dims}")
+        logger.warning(
+            f"cloudinary_fill_srcset: Odd number of dimensions: {dims}"
+        )
         return ""
 
     srcset_parts = []

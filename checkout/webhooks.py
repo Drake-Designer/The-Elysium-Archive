@@ -34,7 +34,7 @@ def _get_order_from_metadata(data):
         except Order.DoesNotExist:
             return None
 
-    # Backward compatible fallback if some sessions were created with order_number only
+    # Backward compatible fallback for sessions created with order_number only.
     order_number = metadata.get("order_number")
     if order_number:
         try:
@@ -100,15 +100,15 @@ def _handle_checkout_completed(data):
     """Handle checkout.session.completed event."""
     order = _get_order_from_metadata(data)
     if not order:
-        logger.warning("Webhook missing order reference on checkout.session.completed")
+        logger.warning(
+            "Webhook missing order reference on checkout.session.completed"
+        )
         return
 
-    # If already paid, only ensure consistency.
     if order.status == "paid":
         _ensure_paid_order_consistency(order, data)
         return
 
-    # Do not grant access unless Stripe confirms the payment is paid.
     if data.get("payment_status") != "paid":
         logger.info(
             "Checkout completed but payment not paid yet (order=%s).",
@@ -121,7 +121,9 @@ def _handle_checkout_completed(data):
                 locked = Order.objects.select_for_update().get(pk=order.pk)
                 if not locked.stripe_session_id:
                     locked.stripe_session_id = session_id
-                    locked.save(update_fields=["stripe_session_id", "updated_at"])
+                    locked.save(
+                        update_fields=["stripe_session_id", "updated_at"]
+                    )
         return
 
     _mark_order_paid(order, data)
@@ -132,7 +134,10 @@ def _handle_async_payment_succeeded(data):
     order = _get_order_from_metadata(data)
     if not order:
         logger.warning(
-            "Webhook missing order reference on checkout.session.async_payment_succeeded"
+            (
+                "Webhook missing order reference on "
+                "checkout.session.async_payment_succeeded"
+            )
         )
         return
 
@@ -148,7 +153,9 @@ def _handle_checkout_expired(data):
     """Handle checkout.session.expired event."""
     order = _get_order_from_metadata(data)
     if not order:
-        logger.warning("Webhook missing order reference on checkout.session.expired")
+        logger.warning(
+            "Webhook missing order reference on checkout.session.expired"
+        )
         return
 
     if order.status == "paid":
@@ -165,7 +172,9 @@ def _handle_checkout_expired(data):
         if session_id and not locked.stripe_session_id:
             locked.stripe_session_id = session_id
 
-        locked.save(update_fields=["status", "stripe_session_id", "updated_at"])
+        locked.save(
+            update_fields=["status", "stripe_session_id", "updated_at"]
+        )
 
 
 def _handle_payment_failed(data):
@@ -207,7 +216,11 @@ def stripe_webhook(request):
     payload = request.body
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+        event = stripe.Webhook.construct_event(
+            payload,
+            sig_header,
+            endpoint_secret,
+        )
     except ValueError:
         logger.warning("Invalid payload for Stripe webhook")
         return JsonResponse({"error": "Invalid payload"}, status=400)

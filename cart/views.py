@@ -19,7 +19,7 @@ def _parse_int(value, default):
     """Parse an integer from input safely."""
     try:
         return int(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return default
 
 
@@ -31,7 +31,7 @@ def _remove_purchased_items_from_cart(request):
 
     try:
         product_ids = [int(pid) for pid in cart.keys()]
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return 0
 
     purchased_ids = set(
@@ -47,7 +47,7 @@ def _remove_purchased_items_from_cart(request):
             if int(pid) in purchased_ids:
                 cart.pop(pid, None)
                 removed += 1
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             continue
 
     if removed:
@@ -70,11 +70,15 @@ def add_to_cart(request):
 
     product = get_object_or_404(Product, id=product_id, is_active=True)
 
-    if AccessEntitlement.objects.filter(user=request.user, product=product).exists():
+    if AccessEntitlement.objects.filter(
+        user=request.user, product=product
+    ).exists():
         messages.info(request, "You already own this archive.")
         return redirect("product_detail", slug=product.slug)
 
-    result = add_product_to_cart(request.session, product_id, user=request.user)
+    result = add_product_to_cart(
+        request.session, product_id, user=request.user
+    )
 
     if result is True:
         messages.success(request, f"✓ {product.title} added to cart!")
@@ -117,7 +121,9 @@ def remove_from_cart(request):
 
     product = get_object_or_404(Product, id=product_id)
 
-    if remove_product_from_cart(request.session, product_id, user=request.user):
+    if remove_product_from_cart(
+        request.session, product_id, user=request.user
+    ):
         messages.success(request, f"✓ {product.title} removed from cart.")
     else:
         messages.info(request, f"{product.title} was not in your cart.")

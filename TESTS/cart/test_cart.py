@@ -11,7 +11,9 @@ from django.urls import reverse
 class TestCartOperations:
     """Test basic cart add/remove/view operations."""
 
-    def test_add_to_cart_redirects(self, client, verified_user, product_active):
+    def test_add_to_cart_redirects(
+        self, client, verified_user, product_active
+    ):
         """POST to add_to_cart redirects to product detail page."""
         client.force_login(verified_user)
 
@@ -29,7 +31,9 @@ class TestCartOperations:
             in response.url
         )
 
-    def test_add_to_cart_stores_in_session(self, client, verified_user, product_active):
+    def test_add_to_cart_stores_in_session(
+        self, client, verified_user, product_active
+    ):
         """Product added to cart is stored in session."""
         client.force_login(verified_user)
 
@@ -44,7 +48,9 @@ class TestCartOperations:
         assert str(product_pk) in cart
         assert cart[str(product_pk)] == 1
 
-    def test_cart_view_shows_items(self, client, verified_user, product_active):
+    def test_cart_view_shows_items(
+        self, client, verified_user, product_active
+    ):
         """Cart view displays added items."""
         client.force_login(verified_user)
 
@@ -76,12 +82,16 @@ class TestCartOperations:
         client.post(reverse("add_to_cart"), {"product_id": str(product_pk)})
         assert len(client.session.get("cart", {})) == 1
 
-        client.post(reverse("remove_from_cart"), {"product_id": str(product_pk)})
+        client.post(
+            reverse("remove_from_cart"), {"product_id": str(product_pk)}
+        )
 
         cart = client.session.get("cart", {})
         assert str(product_pk) not in cart
 
-    def test_cart_persists_across_pages(self, client, verified_user, product_active):
+    def test_cart_persists_across_pages(
+        self, client, verified_user, product_active
+    ):
         """Cart items persist when visiting other pages."""
         client.force_login(verified_user)
 
@@ -134,7 +144,10 @@ class TestCartValidation:
     def test_add_inactive_product_to_cart(
         self, client, verified_user, product_inactive
     ):
-        """Adding inactive product to cart may be allowed (purchase can be historical)."""
+        """Adding inactive product to cart may be allowed (purchase can be.
+
+        historical).
+        """
         client.force_login(verified_user)
 
         product_pk = cast(Any, product_inactive).pk
@@ -168,7 +181,9 @@ class TestCartValidation:
 class TestCartTotals:
     """Test cart total calculation."""
 
-    def test_cart_single_item_total(self, client, verified_user, product_active):
+    def test_cart_single_item_total(
+        self, client, verified_user, product_active
+    ):
         """Cart displays correct total for single item."""
         client.force_login(verified_user)
 
@@ -208,8 +223,12 @@ class TestCartTotals:
 
         client.force_login(verified_user)
 
-        client.post(reverse("add_to_cart"), {"product_id": str(cast(Any, prod1).pk)})
-        client.post(reverse("add_to_cart"), {"product_id": str(cast(Any, prod2).pk)})
+        client.post(
+            reverse("add_to_cart"), {"product_id": str(cast(Any, prod1).pk)}
+        )
+        client.post(
+            reverse("add_to_cart"), {"product_id": str(cast(Any, prod2).pk)}
+        )
 
         response = client.get(reverse("cart"))
 

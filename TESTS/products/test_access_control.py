@@ -12,7 +12,9 @@ class TestProductAccessControl:
 
     def test_active_product_visible_to_anonymous(self, client, product_active):
         """Active product is 200 for anonymous users."""
-        response = client.get(reverse("product_detail", args=[product_active.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_active.slug])
+        )
 
         assert response.status_code == 200
         assert product_active.title in response.content.decode()
@@ -22,13 +24,19 @@ class TestProductAccessControl:
     ):
         """Active product is 200 for verified users."""
         client.force_login(verified_user)
-        response = client.get(reverse("product_detail", args=[product_active.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_active.slug])
+        )
 
         assert response.status_code == 200
 
-    def test_inactive_product_404_for_anonymous(self, client, product_inactive):
+    def test_inactive_product_404_for_anonymous(
+        self, client, product_inactive
+    ):
         """Inactive product is 404 for anonymous users."""
-        response = client.get(reverse("product_detail", args=[product_inactive.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_inactive.slug])
+        )
 
         assert response.status_code == 404
 
@@ -37,7 +45,9 @@ class TestProductAccessControl:
     ):
         """Inactive product is 404 for user without entitlement."""
         client.force_login(verified_user)
-        response = client.get(reverse("product_detail", args=[product_inactive.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_inactive.slug])
+        )
 
         assert response.status_code == 404
 
@@ -46,10 +56,14 @@ class TestProductAccessControl:
     ):
         """Inactive product is 200 for user with AccessEntitlement."""
         # Create entitlement
-        AccessEntitlement.objects.create(user=verified_user, product=product_inactive)
+        AccessEntitlement.objects.create(
+            user=verified_user, product=product_inactive
+        )
 
         client.force_login(verified_user)
-        response = client.get(reverse("product_detail", args=[product_inactive.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_inactive.slug])
+        )
 
         assert response.status_code == 200
 
@@ -58,7 +72,9 @@ class TestProductAccessControl:
     ):
         """Inactive product is 200 for staff/superuser."""
         client.force_login(staff_user)
-        response = client.get(reverse("product_detail", args=[product_inactive.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_inactive.slug])
+        )
 
         assert response.status_code == 200
 
@@ -80,7 +96,9 @@ class TestProductDetailContent:
 
     def test_active_product_shows_content(self, client, product_active):
         """Active product detail shows title and description."""
-        response = client.get(reverse("product_detail", args=[product_active.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_active.slug])
+        )
 
         assert response.status_code == 200
         content = response.content.decode()
@@ -89,18 +107,24 @@ class TestProductDetailContent:
 
     def test_product_shows_price(self, client, product_active):
         """Product detail shows price."""
-        response = client.get(reverse("product_detail", args=[product_active.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_active.slug])
+        )
 
         assert response.status_code == 200
         content = response.content.decode()
         # Price should appear somewhere (format might vary)
         assert "9.99" in content or "€" in content
 
-    def test_inactive_product_404_even_with_old_link(self, client, product_inactive):
+    def test_inactive_product_404_even_with_old_link(
+        self, client, product_inactive
+    ):
         """Product marked inactive via is_active=False returns 404."""
         assert product_inactive.is_active is False
 
-        response = client.get(reverse("product_detail", args=[product_inactive.slug]))
+        response = client.get(
+            reverse("product_detail", args=[product_inactive.slug])
+        )
 
         assert response.status_code == 404
 

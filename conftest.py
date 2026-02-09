@@ -33,7 +33,9 @@ def product_active(category):
         slug="active-product",
         tagline="A short tagline for testing",
         description="A test product",
-        content="<p>This is the full premium content available after purchase.</p>",
+        content=(
+            "<p>This is the full premium content available after purchase.</p>"
+        ),
         price=Decimal("9.99"),
         image_alt="Test image",
         is_active=True,
@@ -67,7 +69,10 @@ def verified_user(db):
         password=_make_test_password(),
     )
     EmailAddress.objects.create(
-        user=user, email=user.email, verified=True, primary=True
+        user=user,
+        email=user.email,
+        verified=True,
+        primary=True,
     )
     return user
 
@@ -82,7 +87,10 @@ def unverified_user(db):
         password=_make_test_password(),
     )
     EmailAddress.objects.create(
-        user=user, email=user.email, verified=False, primary=True
+        user=user,
+        email=user.email,
+        verified=False,
+        primary=True,
     )
     return user
 
@@ -126,6 +134,7 @@ def order_pending(verified_user, product_active):
         total=product_active.price,
         status="pending",
     )
+
     from orders.models import OrderLineItem
 
     OrderLineItem.objects.create(
@@ -147,6 +156,7 @@ def order_paid(verified_user, product_active):
         total=product_active.price,
         status="paid",
     )
+
     from orders.models import OrderLineItem
 
     OrderLineItem.objects.create(
@@ -157,6 +167,7 @@ def order_paid(verified_user, product_active):
         quantity=1,
         line_total=product_active.price,
     )
+
     AccessEntitlement.objects.create(
         user=cast(Any, verified_user),
         product=product_active,

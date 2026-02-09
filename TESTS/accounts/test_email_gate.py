@@ -8,7 +8,9 @@ from django.urls import reverse
 class TestEmailVerificationGate:
     """Test that unverified users cannot access protected account pages."""
 
-    def test_unverified_user_cannot_access_dashboard(self, client, unverified_user):
+    def test_unverified_user_cannot_access_dashboard(
+        self, client, unverified_user
+    ):
         """Unverified user gets redirected from dashboard to verify email."""
         client.force_login(unverified_user)
         response = client.get(reverse("account_dashboard"))
@@ -16,7 +18,9 @@ class TestEmailVerificationGate:
         assert response.status_code == 302
         assert reverse("account_email") in response.url
 
-    def test_unverified_user_cannot_access_my_archive(self, client, unverified_user):
+    def test_unverified_user_cannot_access_my_archive(
+        self, client, unverified_user
+    ):
         """Unverified user gets redirected from my_archive to verify email."""
         client.force_login(unverified_user)
         response = client.get(reverse("my_archive"))
@@ -24,7 +28,9 @@ class TestEmailVerificationGate:
         assert response.status_code == 302
         assert reverse("account_email") in response.url
 
-    def test_unverified_user_cannot_access_profile(self, client, unverified_user):
+    def test_unverified_user_cannot_access_profile(
+        self, client, unverified_user
+    ):
         """Unverified user gets redirected from profile to verify email."""
         client.force_login(unverified_user)
         response = client.get(reverse("profile"))
@@ -33,14 +39,20 @@ class TestEmailVerificationGate:
         assert reverse("account_email") in response.url
 
     def test_anonymous_user_redirects_to_login(self, client):
-        """Anonymous user trying to access dashboard gets redirected to login."""
+        """Anonymous user trying to access dashboard gets redirected to.
+
+        login.
+        """
         response = client.get(reverse("account_dashboard"))
 
         assert response.status_code == 302
         assert reverse("account_login") in response.url
 
     def test_unauthenticated_cannot_access_my_archive(self, client):
-        """Unauthenticated user trying to access my_archive gets redirected to login."""
+        """Unauthenticated user trying to access my_archive gets redirected to.
+
+        login.
+        """
         response = client.get(reverse("my_archive"))
 
         assert response.status_code == 302
@@ -58,7 +70,9 @@ class TestMyArchiveDisplay:
 
         assert response.status_code == 200
 
-    def test_my_archive_shows_entitlements(self, client, verified_user, order_paid):
+    def test_my_archive_shows_entitlements(
+        self, client, verified_user, order_paid
+    ):
         """Verified user sees all their purchased products in My Archive."""
         client.force_login(verified_user)
         response = client.get(reverse("my_archive"), follow=True)
@@ -122,7 +136,9 @@ class TestMyArchiveDisplay:
 class TestDashboardFormPost:
     """Test dashboard form POST functionality."""
 
-    def test_dashboard_form_post_updates_display_name(self, client, verified_user):
+    def test_dashboard_form_post_updates_display_name(
+        self, client, verified_user
+    ):
         """POST to dashboard with form data updates display_name."""
         from accounts.models import UserProfile
 

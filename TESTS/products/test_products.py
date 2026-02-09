@@ -14,7 +14,9 @@ class TestProductCRUD:
 
     def setup_method(self):
         """Create test data."""
-        self.category = Category.objects.create(name="Test Lore", slug="test-lore")
+        self.category = Category.objects.create(
+            name="Test Lore", slug="test-lore"
+        )
 
         self.product = Product.objects.create(
             title="Test Forbidden Knowledge",

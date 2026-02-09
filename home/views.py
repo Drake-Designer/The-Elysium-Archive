@@ -32,7 +32,9 @@ def home_view(request):
     - Latest archive entries (up to 3)
     """
     featured_products = (
-        Product.objects.filter(is_active=True, is_removed=False, is_featured=True)
+        Product.objects.filter(
+            is_active=True, is_removed=False, is_featured=True
+        )
         .select_related("category")
         .order_by("-created_at")
     )
@@ -59,10 +61,14 @@ def home_view(request):
     raw_banners = (
         DealBanner.objects.filter(is_active=True)
         .select_related("product", "category")
-        .annotate(has_active_category_deals=Exists(active_deals_in_banner_category))
-        # Category banners show only when category has at least one eligible active deal product.
+        .annotate(
+            has_active_category_deals=Exists(active_deals_in_banner_category)
+        )
+        # Category banners show only when category has at least one
+        # active deal product.
         .filter(Q(category__isnull=True) | Q(has_active_category_deals=True))
-        # Product-linked banners are hidden only when product is inactive and there is no fallback.
+        # Product banners hide only when product is inactive
+        # and there is no fallback.
         .exclude(
             Q(
                 product__isnull=False,
@@ -80,7 +86,7 @@ def home_view(request):
     )
 
     if not has_any_active_deals:
-        # Hide global deals banners (no product, no category, no url) when there are no active deal products.
+        # Hide global deals banners when there are no active deal products.
         raw_banners = raw_banners.exclude(
             product__isnull=True,
             category__isnull=True,
@@ -96,7 +102,9 @@ def home_view(request):
         "latest_products": latest_products,
         "deal_banners": deal_banners,
         "user_is_verified": (
-            has_verified_email(request.user) if request.user.is_authenticated else False
+            has_verified_email(request.user)
+            if request.user.is_authenticated
+            else False
         ),
     }
 
@@ -196,7 +204,9 @@ class ContactLoreView(FormView):
         )
 
         recipient = getattr(
-            settings, "CONTACT_RECIPIENT_EMAIL", settings.DEFAULT_FROM_EMAIL
+            settings,
+            "CONTACT_RECIPIENT_EMAIL",
+            settings.DEFAULT_FROM_EMAIL,
         )
 
         try:
@@ -211,12 +221,18 @@ class ContactLoreView(FormView):
 
             messages.success(
                 self.request,
-                "Your message has been sent to the Keeper. Expect a response within 24-48 hours.",
+                (
+                    "Your message has been sent to the Keeper. "
+                    "Expect a response within 24-48 hours."
+                ),
             )
         except Exception as exc:  # noqa: BLE001
             messages.error(
                 self.request,
-                "The ritual failed. Please try again or contact us directly at elysiumarchive@outlook.com",
+                (
+                    "The ritual failed. Please try again or contact us "
+                    "directly at elysiumarchive@outlook.com"
+                ),
             )
             logger.exception("Contact form email failed: %s", exc)
 
