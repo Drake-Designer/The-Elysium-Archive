@@ -38,9 +38,7 @@ def _env_list(name, default=None):
 
 
 # Secret key for Django cryptographic signing (sessions, tokens, etc.)
-SECRET_KEY_ENV = os.environ.get("SECRET_KEY") or os.environ.get(
-    "DJANGO_SECRET_KEY"
-)
+SECRET_KEY_ENV = os.environ.get("SECRET_KEY") or os.environ.get("DJANGO_SECRET_KEY")
 SECRET_KEY = SECRET_KEY_ENV or get_random_secret_key()
 
 # Debug mode (detailed error pages, auto static serving)
@@ -207,24 +205,16 @@ if os.environ.get("DATABASE_URL"):
 # Password validation rules for user accounts
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": (
-            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
     {
-        "NAME": (
-            "django.contrib.auth.password_validation.MinimumLengthValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"
     },
     {
-        "NAME": (
-            "django.contrib.auth.password_validation.CommonPasswordValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
     },
     {
-        "NAME": (
-            "django.contrib.auth.password_validation.NumericPasswordValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
     },
 ]
 
@@ -239,45 +229,35 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# WhiteNoise: do not fail collectstatic if optional source maps are missing
-if IS_HEROKU or not DEBUG:
-    WHITENOISE_MANIFEST_STRICT = False
-
-
 # User-uploaded media files configuration
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Storage backends (Cloudinary for production, local filesystem for dev)
 if os.environ.get("CLOUDINARY_URL"):
-    # Production: Use Cloudinary for media, WhiteNoise for static
+    # Production: Use Cloudinary for media, WhiteNoise for static.
+    # CompressedStaticFilesStorage avoids manifest strict errors caused by missing sourcemaps.
     STORAGES = {
         "default": {
-            "BACKEND": ("cloudinary_storage.storage.MediaCloudinaryStorage"),
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
         "staticfiles": {
-            "BACKEND": (
-                "whitenoise.storage.CompressedManifestStaticFilesStorage"
-            ),
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
-    CKEDITOR_5_FILE_STORAGE = (
-        "cloudinary_storage.storage.MediaCloudinaryStorage"
-    )
+    CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
     import cloudinary
 
     cloudinary.config(secure=True)
 else:
-    # Development: Use local filesystem for both media and static
+    # Development: Use local filesystem for media, WhiteNoise for static.
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
         "staticfiles": {
-            "BACKEND": (
-                "whitenoise.storage.CompressedManifestStaticFilesStorage"
-            ),
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
     CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
@@ -300,9 +280,7 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = os.environ.get(
-    "ACCOUNT_EMAIL_VERIFICATION", "mandatory"
-)
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
 ACCOUNT_EMAIL_REQUIRED = True
 
 # Custom allauth forms
@@ -356,13 +334,12 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
 # Contact form recipient
-CONTACT_RECIPIENT_EMAIL = os.environ.get(
-    "CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL
-)
+CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL)
 
 # Email subject prefix for allauth emails
 ACCOUNT_EMAIL_SUBJECT_PREFIX = os.environ.get(
-    "ACCOUNT_EMAIL_SUBJECT_PREFIX", "[The Elysium Archive] "
+    "ACCOUNT_EMAIL_SUBJECT_PREFIX",
+    "[The Elysium Archive] ",
 )
 
 # Prevent production deployment without email credentials
@@ -372,19 +349,14 @@ if not DEBUG and not EMAIL_HOST_PASSWORD:
     )
 
 # Stripe payment gateway configuration
-STRIPE_PUBLIC_KEY = os.environ.get(
-    "STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev"
-)
-STRIPE_SECRET_KEY = os.environ.get(
-    "STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev"
-)
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev")
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")
 
 # CKEditor 5 rich text editor configuration
 CKEDITOR_5_UPLOAD_PATH = "ckeditor5/"
 
 CKEDITOR_5_CONFIGS = {
-    # Configuration for product content (full featured)
     "product_content": {
         "toolbar": [
             "heading",
@@ -434,7 +406,6 @@ CKEDITOR_5_CONFIGS = {
         },
         "height": "500px",
     },
-    # Configuration for general writing (simplified toolbar)
     "writer": {
         "toolbar": [
             "heading",
@@ -492,7 +463,6 @@ CKEDITOR_5_CONFIGS = {
         },
         "height": "600px",
     },
-    # Default configuration (full featured)
     "default": {
         "toolbar": [
             "heading",

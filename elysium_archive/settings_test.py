@@ -1,25 +1,23 @@
 """
 Test settings for the Elysium Archive project.
 
-This file loads the main settings and changes what is needed for testing.
+This file loads the main settings and changes only what is needed for testing.
 """
 
 from elysium_archive.settings import *  # noqa: F401, F403
 
-# Avoid errors caused by missing static files during tests.
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-
-# Use simple file storage instead of the manifest system.
+# Keep storage simple and local for tests.
+# This avoids any external dependency (Cloudinary) and any manifest pipeline issues.
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
-# Keep emails in memory and does not send real ones.
+# Keep emails in memory and do not send real ones.
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 # Force HTML emails in tests as well.

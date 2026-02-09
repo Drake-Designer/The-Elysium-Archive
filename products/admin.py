@@ -381,3 +381,104 @@ class DealBannerAdmin(admin.ModelAdmin):
     readonly_fields = ["created_at", "preview_banner"]
     date_hierarchy = "created_at"
     ordering = ["order", "-created_at"]
+
+    @admin_display("Discount")
+    def discount_display(self, obj):
+        """Display discount percentage badge."""
+        if obj.discount_percentage and obj.discount_percentage > 0:
+            discount_value = f"{obj.discount_percentage}".rstrip("0").rstrip(".")
+            return format_html(
+                '<span class="badge bg-danger">-{}%</span>',
+                discount_value,
+            )
+        return mark_safe('<span class="text-muted">-</span>')
+
+    @admin_display("Destination")
+    def destination_display(self, obj):
+        """Display the banner destination type and URL."""
+        if obj.product:
+            label = "Product"
+            value = obj.product.title
+            type_class = "type-product"
+        elif obj.category:
+            label = "Category"
+            value = obj.category.name
+            type_class = "type-category"
+        elif obj.url:
+            label = "Custom URL"
+            value = "External link"
+            type_class = "type-custom"
+        else:
+            label = "Deals page"
+            value = "Deals archive"
+            type_class = "type-default"
+
+        destination_url = obj.get_url()
+
+        return format_html(
+            '<div class="deal-banner-destination">'
+            '<span class="deal-banner-destination-label {}">{}: {}</span>'
+            '<span class="deal-banner-destination-url">{}</span>'
+            "</div>",
+            type_class,
+            label,
+            value,
+            destination_url,
+        )
+
+    @admin_display("Status")
+    def status_badges(self, obj):
+        """Display active/featured badges."""
+        badges = []
+
+        if obj.is_active:
+            badges.append(("active", "Active"))
+        else:
+            badges.append(("inactive", "Inactive"))
+
+        if obj.is_featured:
+            badges.append(("featured", "Featured"))
+
+        badges_html = format_html_join(
+            "",
+            '<span class="deal-banner-status-badge {}">{}</span>',
+            badges,
+        )
+
+        return format_html(
+            '<div class="deal-banner-status-container">{}</div>',
+            badges_html,
+        )
+
+    @admin_display("Preview")
+    def preview_banner(self, obj):
+        """Render a read-only banner preview in the admin form."""
+        if not obj.pk:
+            return mark_safe("Save to preview banner.")
+
+        destination_url = obj.get_url()
+        category_badge = ""
+        if obj.category:
+            category_badge = format_html(
+                ' <span class="deal-banner-preview-category-badge">{}</span>',
+                obj.category.name,
+            )
+
+        return format_html(
+            '<div class="deal-banner-preview-wrapper">'
+            '<a class="deal-banner-preview-link" href="{}" target="_blank" '
+            'rel="noopener noreferrer">'
+            '<span class="deal-banner-preview-icon">{}</span>'
+            '<span class="deal-banner-preview-text">'
+            '<span class="deal-banner-preview-title">{}</span> {}{}'
+            "</span>"
+            "</a>"
+            '<div class="deal-banner-preview-url">{}</div>'
+            "</div>",
+            destination_url,
+            obj.icon,
+            obj.title,
+            obj.message,
+            category_badge,
+            destination_url,
+        )
