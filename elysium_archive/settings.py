@@ -239,6 +239,11 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# WhiteNoise: do not fail collectstatic if optional source maps are missing
+if not DEBUG:
+    WHITENOISE_MANIFEST_STRICT = False
+
+
 # User-uploaded media files configuration
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
