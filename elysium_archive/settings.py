@@ -240,7 +240,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # WhiteNoise: do not fail collectstatic if optional source maps are missing
-if not DEBUG:
+if IS_HEROKU or not DEBUG:
     WHITENOISE_MANIFEST_STRICT = False
 
 
