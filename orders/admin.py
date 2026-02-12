@@ -70,6 +70,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     actions = ["mark_as_paid", "mark_as_failed"]
 
+    @admin.display(description="Order")
     def order_number_display(self, obj):
         """Display order number with styling."""
         return format_html(
@@ -77,8 +78,7 @@ class OrderAdmin(admin.ModelAdmin):
             obj.order_number,
         )
 
-    order_number_display.short_description = "Order"
-
+    @admin.display(description="User")
     def user_display(self, obj):
         """Display username."""
         if obj.user:
@@ -86,10 +86,9 @@ class OrderAdmin(admin.ModelAdmin):
                 '<span class="order-username">{}</span>',
                 obj.user.username,
             )
-        return format_html('<span class="order-no-user">Guest</span>')
+        return format_html('<span class="order-no-user">{}</span>', "Guest")
 
-    user_display.short_description = "User"
-
+    @admin.display(description="Email")
     def email_display(self, obj):
         """Display user email."""
         if obj.user:
@@ -97,10 +96,9 @@ class OrderAdmin(admin.ModelAdmin):
                 '<span class="order-email">{}</span>',
                 obj.user.email,
             )
-        return format_html('<span class="text-muted">-</span>')
+        return format_html('<span class="text-muted">{}</span>', "-")
 
-    email_display.short_description = "Email"
-
+    @admin.display(description="Status")
     def status_badge(self, obj):
         """Display order status with colored badge."""
         return format_html(
@@ -109,16 +107,13 @@ class OrderAdmin(admin.ModelAdmin):
             obj.get_status_display(),
         )
 
-    status_badge.short_description = "Status"
-
+    @admin.display(description="Total")
     def total_display(self, obj):
         """Display order total with styling."""
         return format_html(
             '<span class="order-total-display">€{}</span>',
             obj.total,
         )
-
-    total_display.short_description = "Total"
 
     def mark_as_paid(self, request, queryset):
         """Mark orders as paid."""
@@ -200,6 +195,7 @@ class AccessEntitlementAdmin(admin.ModelAdmin):
     readonly_fields = ["granted_at"]
     date_hierarchy = "granted_at"
 
+    @admin.display(description="User")
     def user_display(self, obj):
         """Display username."""
         return format_html(
@@ -207,8 +203,7 @@ class AccessEntitlementAdmin(admin.ModelAdmin):
             obj.user.username,
         )
 
-    user_display.short_description = "User"
-
+    @admin.display(description="Email")
     def email_display(self, obj):
         """Display user email."""
         return format_html(
@@ -216,13 +211,10 @@ class AccessEntitlementAdmin(admin.ModelAdmin):
             obj.user.email,
         )
 
-    email_display.short_description = "Email"
-
+    @admin.display(description="Granted")
     def granted_badge(self, obj):
         """Display granted date with badge."""
         return format_html(
             '<span class="entitlement-granted-badge">{}</span>',
             obj.granted_at.strftime("%b %d, %Y"),
         )
-
-    granted_badge.short_description = "Granted"
