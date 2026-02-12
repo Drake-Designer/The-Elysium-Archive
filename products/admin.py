@@ -11,7 +11,6 @@ from orders.models import AccessEntitlement
 from .admin_utils import admin_display
 from .models import Category, DealBanner, Product
 
-
 # ============================
 # Product Admin Form
 # ============================
@@ -29,9 +28,9 @@ class ProductAdminForm(forms.ModelForm):
 
         if "image_alt" in self.fields:
             self.fields["image_alt"].widget.attrs["maxlength"] = "150"
-            self.fields["image_alt"].widget.attrs["placeholder"] = (
-                "Short descriptive text (60-125 chars recommended)"
-            )
+            self.fields["image_alt"].widget.attrs[
+                "placeholder"
+            ] = "Short descriptive text (60-125 chars recommended)"
 
 
 # ============================
@@ -386,7 +385,9 @@ class DealBannerAdmin(admin.ModelAdmin):
     def discount_display(self, obj):
         """Display discount percentage badge."""
         if obj.discount_percentage and obj.discount_percentage > 0:
-            discount_value = f"{obj.discount_percentage}".rstrip("0").rstrip(".")
+            discount_value = f"{obj.discount_percentage}".rstrip("0").rstrip(
+                "."
+            )
             return format_html(
                 '<span class="badge bg-danger">-{}%</span>',
                 discount_value,

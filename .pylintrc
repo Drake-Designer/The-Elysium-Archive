@@ -1,0 +1,28 @@
+[MAIN]
+load-plugins=pylint_django
+jobs=0
+persistent=no
+ignore-paths=
+    ^\.venv[\\/].*,
+    ^node_modules[\\/].*,
+    ^staticfiles[\\/].*,
+    .*[\\/]migrations[\\/].*,
+    .*[\\/]TESTS[\\/].*,
+    .*[\\/]tests[\\/].*
+
+[DJANGO FOREIGN KEYS REFERENCED BY STRINGS]
+django-settings-module=elysium_archive.settings
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    too-many-locals,
+    too-many-return-statements,
+    too-many-branches,
+    too-many-statements,
+    import-outside-toplevel,
+    broad-exception-caught,
+    duplicate-code,
+    hard-coded-auth-user

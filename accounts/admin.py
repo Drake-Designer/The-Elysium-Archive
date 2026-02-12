@@ -8,7 +8,6 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Count
 from django.utils.html import format_html
 
-
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class HasPurchasesFilter(admin.SimpleListFilter):
         """Filter users based on entitlements."""
         if self.value() == "yes":
             return queryset.filter(entitlements__isnull=False).distinct()
-        elif self.value() == "no":
+        if self.value() == "no":
             return queryset.filter(entitlements__isnull=True)
         return queryset
 

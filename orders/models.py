@@ -1,5 +1,6 @@
 """Models for the orders app."""
 
+import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
@@ -85,8 +86,6 @@ class Order(models.Model):
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Generate order number before saving."""
         if not self.order_number:
-            import uuid
-
             self.order_number = uuid.uuid4().hex.upper()[:16]
         super().save(*args, **kwargs)
 

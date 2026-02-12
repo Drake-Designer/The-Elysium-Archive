@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load local environment file if exists (gitignored, for dev only)
 if (BASE_DIR / "env.py").exists():
-    import env  # noqa: F401
+    import env as _env  # noqa: F401
 
 
 # Helper: Parse boolean from environment variable
@@ -38,7 +38,9 @@ def _env_list(name, default=None):
 
 
 # Secret key for Django cryptographic signing (sessions, tokens, etc.)
-SECRET_KEY_ENV = os.environ.get("SECRET_KEY") or os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY_ENV = os.environ.get("SECRET_KEY") or os.environ.get(
+    "DJANGO_SECRET_KEY"
+)
 SECRET_KEY = SECRET_KEY_ENV or get_random_secret_key()
 
 # Debug mode (detailed error pages, auto static serving)
@@ -205,13 +207,17 @@ if os.environ.get("DATABASE_URL"):
 # Password validation rules for user accounts
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        )
     },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        )
     },
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
@@ -236,7 +242,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Storage backends (Cloudinary for production, local filesystem for dev)
 if os.environ.get("CLOUDINARY_URL"):
     # Production: Use Cloudinary for media, WhiteNoise for static.
-    # CompressedStaticFilesStorage avoids manifest strict errors caused by missing sourcemaps.
+    # CompressedStaticFilesStorage avoids manifest strict errors
+    # caused by missing sourcemaps.
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -245,7 +252,9 @@ if os.environ.get("CLOUDINARY_URL"):
             "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
-    CKEDITOR_5_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    CKEDITOR_5_FILE_STORAGE = (
+        "cloudinary_storage.storage.MediaCloudinaryStorage"
+    )
 
     import cloudinary
 
@@ -280,7 +289,9 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get(
+    "ACCOUNT_EMAIL_VERIFICATION", "mandatory"
+)
 ACCOUNT_EMAIL_REQUIRED = True
 
 # Custom allauth forms
@@ -307,8 +318,8 @@ else:
 # SMTP configuration (using Resend SMTP by default)
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.resend.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_USE_TLS = _env_bool(os.environ.get("EMAIL_USE_TLS"), default=True)
-EMAIL_USE_SSL = _env_bool(os.environ.get("EMAIL_USE_SSL"), default=False)
+email_use_tls = _env_bool(os.environ.get("EMAIL_USE_TLS"), default=True)
+email_use_ssl = _env_bool(os.environ.get("EMAIL_USE_SSL"), default=False)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "resend")
 
 # Resend uses the API key as the SMTP password
@@ -318,13 +329,16 @@ EMAIL_HOST_PASSWORD = os.environ.get("RESEND_API_KEY") or os.environ.get(
 
 # Normalize TLS/SSL based on standard SMTP ports if mismatched
 if EMAIL_PORT == 465:
-    if EMAIL_USE_TLS or not EMAIL_USE_SSL:
-        EMAIL_USE_TLS = False
-        EMAIL_USE_SSL = True
+    if email_use_tls or not email_use_ssl:
+        email_use_tls = False
+        email_use_ssl = True
 elif EMAIL_PORT == 587:
-    if EMAIL_USE_SSL or not EMAIL_USE_TLS:
-        EMAIL_USE_SSL = False
-        EMAIL_USE_TLS = True
+    if email_use_ssl or not email_use_tls:
+        email_use_ssl = False
+        email_use_tls = True
+
+EMAIL_USE_TLS = email_use_tls
+EMAIL_USE_SSL = email_use_ssl
 
 # Email sender addresses
 DEFAULT_FROM_EMAIL = os.environ.get(
@@ -334,7 +348,9 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
 # Contact form recipient
-CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL)
+CONTACT_RECIPIENT_EMAIL = os.environ.get(
+    "CONTACT_RECIPIENT_EMAIL", DEFAULT_FROM_EMAIL
+)
 
 # Email subject prefix for allauth emails
 ACCOUNT_EMAIL_SUBJECT_PREFIX = os.environ.get(
@@ -349,8 +365,12 @@ if not DEBUG and not EMAIL_HOST_PASSWORD:
     )
 
 # Stripe payment gateway configuration
-STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev")
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev")
+STRIPE_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY", "pk_test_dummy_key_for_local_dev"
+)
+STRIPE_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY", "sk_test_dummy_key_for_local_dev"
+)
 STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET", "")
 
 # CKEditor 5 rich text editor configuration

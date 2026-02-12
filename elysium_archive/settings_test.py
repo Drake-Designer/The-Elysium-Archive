@@ -4,6 +4,7 @@ Test settings for the Elysium Archive project.
 This file loads the main settings and changes only what is needed for testing.
 """
 
+# pylint: disable=wildcard-import,unused-wildcard-import
 from elysium_archive.settings import *  # noqa: F401, F403
 
 # Keep storage simple and local for tests.

@@ -53,8 +53,8 @@ class ElysiumSignupForm(SignupForm):
         if not email:
             return email
 
-        UserModel = get_user_model()
-        if UserModel.objects.filter(email__iexact=email).exists():
+        user_model = get_user_model()
+        if user_model.objects.filter(email__iexact=email).exists():
             raise ValidationError(
                 _("An account with this email already exists.")
             )
@@ -124,40 +124,40 @@ class ElysiumLoginForm(LoginForm):
 
     def _get_user_exact(self, login_input):
         """Return a user using an exact match on username or email."""
-        UserModel = cast(type[AbstractUser], get_user_model())
+        user_model = cast(type[AbstractUser], get_user_model())
 
         try:
-            return UserModel.objects.get(
-                **{UserModel.USERNAME_FIELD: login_input}
+            return user_model.objects.get(
+                **{user_model.USERNAME_FIELD: login_input}
             )
-        except UserModel.DoesNotExist:
+        except user_model.DoesNotExist:
             pass
-        except UserModel.MultipleObjectsReturned:
+        except user_model.MultipleObjectsReturned:
             return None
 
         try:
-            return UserModel.objects.get(email=login_input)
-        except UserModel.DoesNotExist:
+            return user_model.objects.get(email=login_input)
+        except user_model.DoesNotExist:
             return None
-        except UserModel.MultipleObjectsReturned:
+        except user_model.MultipleObjectsReturned:
             return None
 
     def _get_user_case_insensitive(self, login_input):
         """
         Return a user using a case insensitive match on username or email.
         """
-        UserModel = cast(type[AbstractUser], get_user_model())
+        user_model = cast(type[AbstractUser], get_user_model())
 
-        username_field = UserModel.USERNAME_FIELD
+        username_field = user_model.USERNAME_FIELD
         username_lookup = f"{username_field}__iexact"
 
-        user = UserModel.objects.filter(
+        user = user_model.objects.filter(
             **{username_lookup: login_input}
         ).first()
         if user:
             return user
 
-        return UserModel.objects.filter(email__iexact=login_input).first()
+        return user_model.objects.filter(email__iexact=login_input).first()
 
 
 class UserProfileForm(forms.ModelForm):

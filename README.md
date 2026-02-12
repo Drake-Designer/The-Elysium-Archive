@@ -681,7 +681,7 @@ All atmospheric images used throughout the project are sourced from [Stockcake](
 
 - **HTML5, CSS3, JavaScript (Vanilla)**
 - **Bootstrap 5.3**
-- **Font Awesome 6.5**
+- **Font Awesome 6.7**
 - **Google Fonts**
 
 ### Backend Services and Integrations

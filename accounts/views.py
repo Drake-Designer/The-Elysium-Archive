@@ -36,26 +36,32 @@ def dashboard(request):
     if redirect_response:
         return redirect_response
 
-    profile, _created = UserProfile.objects.get_or_create(user=request.user)
+    user_profile, _created = UserProfile.objects.get_or_create(
+        user=request.user
+    )
 
     if request.method == "POST":
-        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        form = UserProfileForm(
+            request.POST,
+            request.FILES,
+            instance=user_profile,
+        )
 
         if form.is_valid():
-            profile = form.save(commit=False)
+            user_profile = form.save(commit=False)
 
             remove_picture = form.cleaned_data.get("remove_picture")
             if remove_picture:
-                profile.profile_picture = None
+                user_profile.profile_picture = None
 
-            profile.save()
+            user_profile.save()
             messages.success(request, "Your profile has been updated.")
             return redirect(_dashboard_url_with_tab("profile"))
 
         messages.error(request, "Please correct the errors below.")
         active_tab = "profile"
     else:
-        form = UserProfileForm(instance=profile)
+        form = UserProfileForm(instance=user_profile)
 
         requested_tab = (request.GET.get("tab") or "").strip().lower()
         tab_map = {

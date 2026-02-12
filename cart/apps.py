@@ -1,5 +1,7 @@
 """App configuration for the cart app."""
 
+from importlib import import_module
+
 from django.apps import AppConfig
 
 
@@ -11,4 +13,4 @@ class CartConfig(AppConfig):
 
     def ready(self) -> None:
         """Import signals when the app is ready."""
-        from . import signals  # noqa: F401
+        import_module("cart.signals")

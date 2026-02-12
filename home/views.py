@@ -11,6 +11,7 @@ from django.core.mail import EmailMessage
 from django.db.models import Exists, OuterRef, Q
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.http import require_GET
 from django.views.generic import FormView, TemplateView
 
@@ -112,8 +113,6 @@ def home_view(request):
 
 
 if os.getenv("ALLOW_IFRAME_PREVIEW") == "1":
-    from django.views.decorators.clickjacking import xframe_options_exempt
-
     home_view = xframe_options_exempt(home_view)
 
 

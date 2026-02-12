@@ -76,6 +76,7 @@ profile = "django"
 indent = 2
 ignore = "H006"
 exclude = ".venv,node_modules"
+use_gitignore = true
 
 [tool.ruff]
 line-length = 79

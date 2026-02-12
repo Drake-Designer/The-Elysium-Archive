@@ -19,7 +19,7 @@ def build_cloudinary_fill_url(image, width, height):
         base_url = str(image.url) if hasattr(image, "url") else str(image)
 
         if not base_url:
-            logger.warning(f"cloudinary_fill: Empty URL for image {image}")
+            logger.warning("cloudinary_fill: Empty URL for image %s", image)
             return ""
 
         # Force HTTPS for mixed content prevention
@@ -30,7 +30,8 @@ def build_cloudinary_fill_url(image, width, height):
         # Check if it's a Cloudinary URL
         if "/upload/" not in base_url:
             logger.warning(
-                f"cloudinary_fill: URL missing /upload/: {base_url[:100]}"
+                "cloudinary_fill: URL missing /upload/: %s",
+                base_url[:100],
             )
             # Return original URL as fallback
             return base_url
@@ -40,11 +41,11 @@ def build_cloudinary_fill_url(image, width, height):
         transformations = f"c_fill,g_auto,w_{width},h_{height},q_auto,f_auto"
         transformed_url = f"{parts[0]}/upload/{transformations}/{parts[1]}"
 
-        logger.debug(f"cloudinary_fill: Generated {transformed_url[:100]}")
+        logger.debug("cloudinary_fill: Generated %s", transformed_url[:100])
         return transformed_url
 
-    except Exception as e:
-        logger.error(f"cloudinary_fill error: {e}", exc_info=True)
+    except Exception as exc:
+        logger.error("cloudinary_fill error: %s", exc, exc_info=True)
         # Return empty string to trigger {% else %} block in template
         return ""
 
@@ -64,7 +65,7 @@ def cloudinary_fill_srcset(image, *dimensions):
     dims = list(dimensions)
     if len(dims) % 2 != 0:
         logger.warning(
-            f"cloudinary_fill_srcset: Odd number of dimensions: {dims}"
+            "cloudinary_fill_srcset: Odd number of dimensions: %s", dims
         )
         return ""
 
@@ -77,7 +78,9 @@ def cloudinary_fill_srcset(image, *dimensions):
             srcset_parts.append(f"{url} {width}w")
 
     result = ", ".join(srcset_parts)
-    logger.debug(f"cloudinary_fill_srcset: Generated {len(srcset_parts)} URLs")
+    logger.debug(
+        "cloudinary_fill_srcset: Generated %s URLs", len(srcset_parts)
+    )
     return result
 
 

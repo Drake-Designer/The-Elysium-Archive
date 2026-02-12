@@ -339,14 +339,25 @@ Custom CSS files were validated with W3C CSS Validation Service (Jigsaw); local 
 
 | File | Validator/URL (if available) | Screenshot | Notes |
 | --- | --- | --- | --- |
-| `static/css/base.css` | W3C CSS Validation Service (Jigsaw) | `documentation/testing/css-validation/` | Pass (project CSS) |
-| `static/css/components/dashboard.css` | W3C CSS Validation Service (Jigsaw) | `documentation/testing/css-validation/` | Pass (project CSS) |
-| `static/css/components/deal-banner.css` | W3C CSS Validation Service (Jigsaw) | `documentation/testing/css-validation/` | Pass (project CSS) |
-| `static/css/components/products.css` | W3C CSS Validation Service (Jigsaw) | `documentation/testing/css-validation/` | Pass (project CSS) |
-| `static/css/pages/home.css` | W3C CSS Validation Service (Jigsaw) | `documentation/testing/css-validation/` | Pass (project CSS) |
-| `static/css/pages/lore.css` | W3C CSS Validation Service (Jigsaw) | `documentation/testing/css-validation/` | Pass (project CSS) |
-| `static/css/pages/footer-pages.css` | W3C CSS Validation Service (Jigsaw) | `documentation/testing/css-validation/` | Pass (project CSS) |
-| `static/css/admin/admin.css (and modules)` | W3C CSS Validation Service (Jigsaw) | `documentation/testing/css-validation/` | Pass (project CSS) |
+| `static/css/base.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/base.png) | Pass (project CSS) |
+| `static/css/components/dashboard.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/dashboard.png) | Pass (project CSS) |
+| `static/css/components/deal-banner.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/deal-banner.png) | Pass (project CSS) |
+| `static/css/components/products.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/products.png) | Pass (project CSS) |
+| `static/css/components/reviews.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/reviews.png) | Pass (project CSS) |
+| `static/css/pages/home.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/home.png) | Pass (project CSS) |
+| `static/css/pages/lore.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/lore.png) | Pass (project CSS) |
+| `static/css/pages/footer-pages.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/footer-pages.png) | Pass (project CSS) |
+| `static/css/admin/admin.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-accounts.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-categories.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-components.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-deal-banners.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-jazzmin-overrides.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-orders.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-product-image-alt.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-products.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-reviews.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
+| `static/css/admin/admin-variables.css` | [W3C CSS Validation Service (Jigsaw) - direct input](https://jigsaw.w3.org/css-validator/#validate_by_input) | ![screenshot](documentation/testing/css-validation/admin.css.png) | Pass (project CSS) |
 
 ### JavaScript Validation (JSHint)
 
@@ -354,12 +365,13 @@ All custom JavaScript files were validated with JSHint; reported output contains
 
 | File | Tool | Result | Notes |
 | --- | --- | --- | --- |
-| `static/js/admin/image-alt-counter.js` | JSHint | **PASS** | No errors; metrics warnings only |
-| `static/js/checkout-status.js` | JSHint | **PASS** | No errors; metrics warnings only |
-| `static/js/dashboard.js` | JSHint | **PASS** | No errors; metrics warnings only |
-| `static/js/effects-toggle.js` | JSHint | **PASS** | No errors; metrics warnings only |
-| `static/js/messages.js` | JSHint | **PASS** | No errors; metrics warnings only |
-| `static/js/review-form.js` | JSHint | **PASS** | No errors; metrics warnings only |
+| `static/js/admin/image-alt-counter.js` | [JSHint](https://jshint.com/) | ![screenshot](documentation/testing/js-validation/image-alt-counter.png) | Pass (metrics warnings only) |
+| `static/js/checkout-status.js` | [JSHint](https://jshint.com/) | ![screenshot](documentation/testing/js-validation/checkout-status.png) | Pass (metrics warnings only) |
+| `static/js/dashboard.js` | [JSHint](https://jshint.com/) | ![screenshot](documentation/testing/js-validation/dashboard.png) | Pass (metrics warnings only) |
+| `static/js/deal-banner-carousel.js` | [JSHint](https://jshint.com/) | ![screenshot](documentation/testing/js-validation/deal-banner-carousel.png) | Pass (metrics warnings only) |
+| `static/js/effects-toggle.js` | [JSHint](https://jshint.com/) | ![screenshot](documentation/testing/js-validation/effects-toggle.png) | Pass (metrics warnings only) |
+| `static/js/messages.js` | [JSHint](https://jshint.com/) | ![screenshot](documentation/testing/js-validation/messages.png) | Pass (metrics warnings only) |
+| `static/js/review-form.js` | [JSHint](https://jshint.com/) | ![screenshot](documentation/testing/js-validation/review-form.png) | Pass (metrics warnings only) |
 
 ### Python Style/Lint Checks
 
@@ -367,12 +379,12 @@ Checks are available via `dev-requirements.txt` and were run with passing result
 
 | Tool | Command | Result | Notes |
 | --- | --- | --- | --- |
-| black | `python -m black --check .` | **PASS** | After formatting |
-| isort | `python -m isort --check-only .` | **PASS** | After formatting |
-| flake8 | `flake8 .` | **PASS** | `.flake8` excludes `.venv` and migrations |
-| pylint | `pylint accounts cart checkout home orders products reviews elysium_archive manage.py` | **PASS** | No output reported |
-| bandit | `bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py` | **PASS** | **0** issues |
-| djlint | `djlint --check .` | **PASS** | **0** files would be updated |
+| black | `python -m black --check .` | **PASS** | `81` files would be left unchanged |
+| isort | `python -m isort --check-only .` | **PASS** | Skipped `42` files via configured excludes |
+| flake8 | `flake8 .` | **PASS** | No lint output |
+| pylint | `pylint accounts cart checkout home orders products reviews elysium_archive manage.py` | **PASS** | `10.00/10`, no warnings/errors |
+| bandit | `bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py` | **PASS** | No issues identified (`Low: 0`, `Medium: 0`, `High: 0`) |
+| djlint | `djlint --check .` | **PASS** | `0` files would be updated (`39` files checked) |
 
 ### Bandit Security Audit Details
 
@@ -411,7 +423,7 @@ skips:
 
 | Lines Scanned | Issues Found | Status | Evidence/Notes |
 | --- | --- | --- | --- |
-| **5,146** | **0** (Low: **0**, Medium: **0**, High: **0**) | **Completed** (clean) | Application code only |
+| **5,270** | **0** (Low: **0**, Medium: **0**, High: **0**) | **Completed** (clean) | Application code only |
 
 ## Security Headers
 
@@ -419,9 +431,9 @@ Headers were verified in `DEBUG=False` mode.
 
 | Header | Expected Value | When Verified | Notes |
 | --- | --- | --- | --- |
-| `X-Frame-Options` | `DENY` | `DEBUG=False` verification | Required anti-clickjacking header present |
-| `X-Content-Type-Options` | `nosniff` | `DEBUG=False` verification | MIME sniffing disabled |
-| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | `DEBUG=False` verification | HSTS policy present |
+| `X-Frame-Options` | `DENY` | `2026-02-12` (`DEBUG=False`, secure request) | Required anti-clickjacking header present |
+| `X-Content-Type-Options` | `nosniff` | `2026-02-12` (`DEBUG=False`, secure request) | MIME sniffing disabled |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | `2026-02-12` (`DEBUG=False`, secure request) | HSTS policy present |
 
 ## Browser Compatibility Testing
 

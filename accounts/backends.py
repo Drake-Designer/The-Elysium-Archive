@@ -34,7 +34,7 @@ class CaseSensitiveAuthenticationBackend(ModelBackend):
 
     def _get_user_by_login(self, login):
         """Return a user using an exact match on username or email."""
-        UserModel = cast(type[AbstractUser], get_user_model())
+        user_model = cast(type[AbstractUser], get_user_model())
         methods = getattr(settings, "ACCOUNT_LOGIN_METHODS", {"username"})
 
         lookups = []
@@ -42,20 +42,20 @@ class CaseSensitiveAuthenticationBackend(ModelBackend):
         if "@" in login and "email" in methods:
             lookups.append(("email", login))
             if "username" in methods:
-                lookups.append((UserModel.USERNAME_FIELD, login))
+                lookups.append((user_model.USERNAME_FIELD, login))
         else:
             if "username" in methods:
-                lookups.append((UserModel.USERNAME_FIELD, login))
+                lookups.append((user_model.USERNAME_FIELD, login))
             if "email" in methods:
                 lookups.append(("email", login))
 
         for field_name, value in lookups:
             try:
-                user = UserModel.objects.get(**{field_name: value})
-            except UserModel.DoesNotExist:
+                user = user_model.objects.get(**{field_name: value})
+            except user_model.DoesNotExist:
                 user = None
-            except UserModel.MultipleObjectsReturned:
-                user = UserModel.objects.filter(**{field_name: value}).first()
+            except user_model.MultipleObjectsReturned:
+                user = user_model.objects.filter(**{field_name: value}).first()
 
             if user:
                 return user
