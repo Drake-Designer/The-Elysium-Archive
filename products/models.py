@@ -531,7 +531,7 @@ def sync_product_featured_from_category_banner(product_pk):
 
 
 @receiver(post_save, sender=DealBanner)
-def deal_banner_post_save(_sender, instance, _created, **kwargs):
+def deal_banner_post_save(instance, **_kwargs):
     """Sync product deal status when a banner is created or updated."""
     product_pks = [instance.product.pk] if instance.product else []
     category_pks = [instance.category.pk] if instance.category else []
@@ -544,7 +544,7 @@ def deal_banner_post_save(_sender, instance, _created, **kwargs):
 
 
 @receiver(post_delete, sender=DealBanner)
-def deal_banner_post_delete(_sender, instance, **kwargs):
+def deal_banner_post_delete(instance, **_kwargs):
     """Sync product deal status when a banner is deleted."""
     product_pks = [instance.product.pk] if instance.product else []
     category_pks = [instance.category.pk] if instance.category else []

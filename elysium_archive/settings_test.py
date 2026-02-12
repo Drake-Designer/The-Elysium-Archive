@@ -28,3 +28,6 @@ ACCOUNT_EMAIL_HTML = True
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
+
+# Keep Stripe webhook validation enabled in tests without requiring env vars.
+STRIPE_WH_SECRET = "whsec_test_dummy"

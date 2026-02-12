@@ -6,19 +6,19 @@ This document describes the current automated test suite and manual testing proc
 
 ## Current Test Status
 
-**120 tests passing.** Run `pytest` to execute the full suite.
+**125 tests passing.** Run `pytest` to execute the full suite.
 
 | What | Command | Expected Result | Evidence |
 | --- | --- | --- | --- |
-| Full automated suite | `pytest` | All tests pass (120) | ![pytest Results](documentation/testing/pytest/pytest.png) |
-| Verbose run | `pytest -v` | Same pass status with per-test output | Same run evidence as above |
-| Discovery check | `pytest --collect-only` | Confirms current inventory under `TESTS/` | Used for test count verification |
+| Full automated suite | `pytest` | 125 passed, 0 failed | ![Pytest run evidence](documentation/testing/pytest/pytest.png) |
+| Verbose run | `pytest -v` | Same pass status with per-test output | Same as above |
+| Discovery check | `pytest --collect-only` | Confirms current inventory under `TESTS/` | Same as above |
 
 ## Evidence Status (Testing and Quality Checklist)
 
 | Evidence Item | Status | Notes/Evidence |
 | --- | --- | --- |
-| Automated test suite documented | Yes | **120** tests, all passing|
+| Automated test suite documented | Yes | **125** tests, all passing|
 | Manual testing checklist provided | Yes | Critical journeys, edge cases, contact form, Stripe decline flow documented |
 | Python style/lint checks completed | Yes | black, isort, flake8, pylint, djlint, bandit |
 | Security audit completed | Yes | Bandit scan clean, **0** issues |
@@ -76,6 +76,7 @@ Automated testing uses `pytest` with `pytest-django`, with a mix of pytest-style
 | EMAIL_BACKEND | `django.core.mail.backends.locmem.EmailBackend` | `elysium_archive/settings_test.py` |
 | ACCOUNT_EMAIL_HTML | `True` | `elysium_archive/settings_test.py` |
 | PASSWORD_HASHERS | `MD5PasswordHasher` | `elysium_archive/settings_test.py` |
+| STRIPE_WH_SECRET | `whsec_test_dummy` | `elysium_archive/settings_test.py` |
 
 ### Running Tests
 
@@ -93,15 +94,14 @@ Automated testing uses `pytest` with `pytest-django`, with a mix of pytest-style
 
 | App | Test Count | Coverage Areas |
 | --- | --- | --- |
-| Accounts | 20 | Authentication, email verification, profile management, account deletion |
-| Products | 29 | Access control, archive reading, CRUD operations, product removal |
-| Cart | 12 | Cart operations, validation, totals |
-| Checkout | 3 | Checkout flow, Stripe integration, order reuse |
+| Accounts | 34 | Authentication, email verification, profile management, account deletion |
+| Products | 31 | Access control, archive reading, CRUD operations, product removal |
+| Cart | 13 | Cart operations, validation, totals |
+| Checkout | 4 | Checkout flow, Stripe integration, order reuse, webhook idempotency |
 | Orders | 15 | Webhook handling, order status, entitlements |
 | Home | 18 | Admin access, product management, deal banner visibility |
 | Reviews | 10 | Review creation, dashboard integration, removed products |
-| Webhooks | 13 | Idempotency, payment status, error handling |
-| Total | **120** | Current automated inventory |
+| Total | **125** | Current automated inventory |
 
 ### Automated Coverage by App
 
@@ -110,8 +110,8 @@ Automated testing uses `pytest` with `pytest-django`, with a mix of pytest-style
 | Accounts | `TESTS/accounts/test_auth_pages.py`; `TESTS/accounts/test_email_gate.py`; `TESTS/accounts/test_profile.py` | Email verification gates for dashboard/profile/my-archive, anonymous redirect to login, verified dashboard tabs (`My Orders`, `My Reviews`), `display_name` updates, account deletion confirmation/logout/redirect/profile cascade removal |
 | Products | `TESTS/products/test_access_control.py`; `TESTS/products/test_archive_read.py`; `TESTS/products/test_products.py` | Active/inactive visibility by role, entitlement required for read page access (403 without), preview vs reading separation, email verification for unpublished products, product model CRUD/navigation links, archive card layout validation |
 | Cart | `TESTS/cart/test_cart.py` | Add/remove cart with session persistence, verified email required for add-to-cart, validation for missing/inactive products, single/multiple-item totals |
-| Checkout | `TESTS/checkout/test_checkout.py` | Verified email gate, Stripe session creation and mocked redirect, `Order`/`OrderLineItem` creation from cart, pending order reuse for double-submit safety, success fallback when webhook delayed, cart clearing, wrong-user success page blocked |
-| Orders and Webhooks | `TESTS/orders/test_orders.py` | `checkout.session.completed` (paid/unpaid), `payment_intent.payment_failed`, `checkout.session.expired`, idempotent entitlement creation (`get_or_create`), atomic locking to prevent duplicate orders, signature validation, POST-only enforcement, graceful handling of missing order ID/user |
+| Checkout | `TESTS/checkout/test_checkout.py`; `TESTS/checkout/test_webhooks.py` | Verified email gate, Stripe session creation and mocked redirect, `Order`/`OrderLineItem` creation from cart, pending order reuse for double-submit safety, success fallback when webhook delayed, cart clearing, wrong-user success page blocked, webhook idempotency safety |
+| Orders | `TESTS/orders/test_orders.py` | `checkout.session.completed` (paid/unpaid), `payment_intent.payment_failed`, `checkout.session.expired`, idempotent entitlement creation (`get_or_create`), atomic locking to prevent duplicate orders, signature validation, POST-only enforcement, graceful handling of missing order ID/user |
 | Reviews | `TESTS/reviews/test_reviews.py` | Buyer-only form visibility, create with optional title (50 chars) and body (1000 chars), mandatory rating (1-5), duplicate prevention, cascade delete for user/product, edit/delete permission enforcement, delete requires POST and modal confirmation |
 | Home | `TESTS/home/test_home.py` | Staff-only admin access (anonymous/regular user 403 or redirect), admin delete/bulk delete, featured flag toggle, staff-only order list/detail access |
 

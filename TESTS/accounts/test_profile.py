@@ -115,6 +115,73 @@ class TestAccountDelete:
         assert response.status_code == 302
         assert "/accounts/login/" in response.url
 
+    def test_dashboard_delete_tab_get_does_not_delete_anything(
+        self, client, verified_user
+    ):
+        """Opening dashboard delete tab must not delete the account."""
+        user_id = verified_user.id
+        client.force_login(verified_user)
+
+        response = client.get(
+            f"{reverse('account_dashboard')}?tab=delete",
+            follow=True,
+        )
+
+        assert response.status_code == 200
+        assert User.objects.filter(id=user_id).exists()
+
+    def test_dashboard_delete_renders_modal_confirmation_pattern(
+        self, client, verified_user
+    ):
+        """Delete tab must use modal confirmation with Stay/Delete controls."""
+        client.force_login(verified_user)
+
+        response = client.get(
+            f"{reverse('account_dashboard')}?tab=delete",
+            follow=True,
+        )
+        content = response.content.decode()
+
+        assert 'id="openDeleteAccountModal"' in content
+        assert 'data-bs-target="#deleteAccountModal"' in content
+        assert 'id="deleteAccountModal"' in content
+        assert f'action="{reverse("account_delete")}"' in content
+        assert 'data-bs-dismiss="modal"' in content
+        assert "Stay" in content
+        assert "Delete" in content
+
+    def test_dashboard_delete_trigger_does_not_delete_until_confirmed(
+        self, client, verified_user
+    ):
+        """Posting dashboard data alone should never delete the account."""
+        user_id = verified_user.id
+        client.force_login(verified_user)
+
+        response = client.post(
+            reverse("account_dashboard"),
+            {"delete_account": "1"},
+            follow=True,
+        )
+
+        assert response.status_code == 200
+        assert User.objects.filter(id=user_id).exists()
+
+    def test_dashboard_delete_cancel_does_not_delete_user(
+        self, client, verified_user
+    ):
+        """Cancel control in modal should not trigger account deletion."""
+        user_id = verified_user.id
+        client.force_login(verified_user)
+
+        response = client.get(
+            f"{reverse('account_dashboard')}?tab=delete",
+            follow=True,
+        )
+        content = response.content.decode()
+
+        assert 'data-bs-dismiss="modal"' in content
+        assert User.objects.filter(id=user_id).exists()
+
     def test_delete_account_get_shows_confirmation(
         self, client, verified_user
     ):

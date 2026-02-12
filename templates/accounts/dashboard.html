@@ -426,17 +426,59 @@
                     <li>Your purchase history and access to unlocked entries</li>
                     <li>All associated data</li>
                   </ul>
-                  <form method="post" action="{% url 'account_delete' %}">
-                    {% csrf_token %}
-                    <div class="d-grid gap-2">
-                      <button type="submit" class="btn btn-danger btn-icon">
-                        <i class="fa-solid fa-trash"></i>Delete My Account
-                      </button>
-                      <a href="{% url 'account_dashboard' %}" class="btn btn-outline-light">
-                        <i class="fa-solid fa-arrow-left me-1"></i>Cancel
-                      </a>
+                  <div class="d-grid gap-2">
+                    <button type="button"
+                            id="openDeleteAccountModal"
+                            class="btn btn-danger btn-icon"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteAccountModal"
+                            aria-controls="deleteAccountModal">
+                      <i class="fa-solid fa-trash"></i>Delete My Account
+                    </button>
+                    <a href="{% url 'account_dashboard' %}?tab=profile"
+                       class="btn btn-outline-light btn-icon">
+                      <i class="fa-solid fa-arrow-left me-1"></i>Keep My Account
+                    </a>
+                  </div>
+                  <div class="modal fade"
+                       id="deleteAccountModal"
+                       tabindex="-1"
+                       aria-labelledby="deleteAccountModalLabel"
+                       aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="deleteAccountModalLabel">
+                            <i class="fa-solid fa-trash me-2"></i>Confirm Delete
+                          </h5>
+                          <button type="button"
+                                  class="btn-close btn-close-white"
+                                  data-bs-dismiss="modal"
+                                  aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <p class="mb-0">Are you sure you want to delete your account? This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button"
+                                  class="btn btn-outline-light btn-icon"
+                                  data-bs-dismiss="modal">
+                            <i class="fa-solid fa-arrow-left"></i>Stay
+                          </button>
+                          <form method="post"
+                                action="{% url 'account_delete' %}"
+                                class="review-actions-inline-form">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="btn btn-danger btn-icon"
+                                    aria-label="Confirm account deletion">
+                              <i class="fa-solid fa-trash"></i>Delete
+                            </button>
+                          </form>
+                        </div>
+                      </div>
                     </div>
-                  </form>
+                  </div>
                 </div>
               </div>
             {% endif %}
