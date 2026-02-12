@@ -1,10 +1,13 @@
 """Tests for shopping cart functionality."""
 
 from decimal import Decimal
+from types import SimpleNamespace
 from typing import Any, cast
 
 import pytest
 from django.urls import reverse
+
+from cart.signals import restore_cart_to_session
 
 
 @pytest.mark.django_db
@@ -235,3 +238,23 @@ class TestCartTotals:
         assert response.status_code == 200
         assert "Prod1" in response.content.decode()
         assert "Prod2" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_restore_cart_signal_accepts_sender_keyword(verified_user):
+    """Signal receiver must accept Django's sender keyword argument."""
+
+    class DummySession(dict):
+        """Minimal session-like object for signal testing."""
+
+        modified = False
+
+    request = SimpleNamespace(session=DummySession(cart={}))
+
+    restore_cart_to_session(
+        sender=verified_user.__class__,
+        request=request,
+        user=verified_user,
+    )
+
+    assert isinstance(request.session.get("cart"), dict)

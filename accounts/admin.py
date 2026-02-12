@@ -3,6 +3,7 @@
 import logging
 
 from django.contrib import admin
+from django.contrib.admin.sites import NotRegistered
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Count
@@ -153,7 +154,13 @@ class UserAdmin(BaseUserAdmin):
 
 
 # Unregister the default User admin and register our custom one
-admin.site.unregister(User)
+try:
+    admin.site.unregister(User)
+except NotRegistered:
+    logger.debug(
+        "User model %s was not registered in admin; skipping unregister.",
+        User,
+    )
 admin.site.register(User, UserAdmin)
 
 

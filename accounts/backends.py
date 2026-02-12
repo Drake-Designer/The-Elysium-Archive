@@ -1,11 +1,14 @@
 """Authentication backends for the accounts app."""
 
+import logging
 from typing import cast
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import AbstractUser
+
+logger = logging.getLogger(__name__)
 
 
 class CaseSensitiveAuthenticationBackend(ModelBackend):
@@ -17,25 +20,46 @@ class CaseSensitiveAuthenticationBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         """Authenticate a user with an exact match on username or email."""
         login = username or kwargs.get("email") or kwargs.get("login")
-        if not login or not password:
-            return None
+        try:
+            if not login or not password:
+                return None
 
-        user = self._get_user_by_login(login)
-        if not user:
-            return None
+            user = self._get_user_by_login(login)
+            if not user:
+                return None
 
-        if not self.user_can_authenticate(user):
-            return None
+            if not self.user_can_authenticate(user):
+                return None
 
-        if not user.check_password(password):
-            return None
+            if not user.check_password(password):
+                return None
 
-        return user
+            return user
+        except Exception:
+            logger.exception(
+                "CaseSensitiveAuthenticationBackend failed for login %r.",
+                login,
+            )
+            return None
 
     def _get_user_by_login(self, login):
         """Return a user using an exact match on username or email."""
         user_model = cast(type[AbstractUser], get_user_model())
         methods = getattr(settings, "ACCOUNT_LOGIN_METHODS", {"username"})
+        if isinstance(methods, str):
+            methods = {methods}
+        else:
+            try:
+                methods = set(methods)
+            except TypeError:
+                logger.warning(
+                    "Invalid ACCOUNT_LOGIN_METHODS=%r; using username only.",
+                    methods,
+                )
+                methods = {"username"}
+
+        if not methods.intersection({"username", "email"}):
+            methods = {"username"}
 
         lookups = []
 
