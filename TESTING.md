@@ -138,7 +138,7 @@ Manual testing verifies user-facing behavior, rendering, and third-party flows t
 | Unverified checkout attempt | Unverified user tries checkout | Redirected to email verification | **PASS** |
 | Non-entitled read attempt | Non-entitled user visits read page | 403 Forbidden | **PASS** |
 | Wrong user success page | Wrong user accesses success page | Redirected with error | **PASS** |
-| Deal banner admin controls | Staff toggles `is_active` in changelist and runs bulk activate/deactivate actions | Banner states update correctly and products are re-synced without stale `is_deal` flags | **PASS** |
+| Deal banner admin controls | Staff toggles `is_active` in changelist and runs bulk activate/deactivate actions | Banner states update correctly and products are re-synced without stale `is_deal` flags | **PASS (automated)** |
 | Review delete modal | Open delete modal -> Stay | Stay cancels, Delete removes review | **PASS** |
 | Rapid double-click checkout | Double-click checkout | Only one pending order created (no duplicate) | **PASS** |
 
