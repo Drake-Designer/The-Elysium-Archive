@@ -30,4 +30,4 @@ PASSWORD_HASHERS = [
 ]
 
 # Keep Stripe webhook validation enabled in tests without requiring env vars.
-STRIPE_WH_SECRET = "whsec_test_dummy"
+STRIPE_WH_SECRET = "whsec_test_dummy"  # nosec B105

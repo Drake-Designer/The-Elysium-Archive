@@ -6,19 +6,19 @@ This document describes the current automated test suite and manual testing proc
 
 ## Current Test Status
 
-**125 tests passing.** Run `pytest` to execute the full suite.
+**135 tests passing.** Run `python -m pytest` to execute the full suite.
 
 | What | Command | Expected Result | Evidence |
 | --- | --- | --- | --- |
-| Full automated suite | `pytest` | 125 passed, 0 failed | ![Pytest run evidence](documentation/testing/pytest/pytest.png) |
-| Verbose run | `pytest -v` | Same pass status with per-test output | Same as above |
-| Discovery check | `pytest --collect-only` | Confirms current inventory under `TESTS/` | Same as above |
+| Full automated suite | `.venv\Scripts\python.exe -m pytest -q` | 135 passed, 0 failed | Local run on 2026-02-13 |
+| Verbose run | `.venv\Scripts\python.exe -m pytest -v` | Same pass status with per-test output | Local run on 2026-02-13 |
+| Discovery check | `.venv\Scripts\python.exe -m pytest --collect-only` | Confirms current inventory under `TESTS/` | 135 tests collected |
 
 ## Evidence Status (Testing and Quality Checklist)
 
 | Evidence Item | Status | Notes/Evidence |
 | --- | --- | --- |
-| Automated test suite documented | Yes | **125** tests, all passing|
+| Automated test suite documented | Yes | **135** tests, all passing|
 | Manual testing checklist provided | Yes | Critical journeys, edge cases, contact form, Stripe decline flow documented |
 | Python style/lint checks completed | Yes | black, isort, flake8, pylint, djlint, bandit |
 | Security audit completed | Yes | Bandit scan clean, **0** issues |
@@ -82,33 +82,33 @@ Automated testing uses `pytest` with `pytest-django`, with a mix of pytest-style
 
 | Scenario | Command | Notes |
 | --- | --- | --- |
-| Run all tests | `pytest` | Full suite |
-| Verbose output | `pytest -v` | Per-test detail |
-| Specific test file | `pytest TESTS/accounts/test_profile.py -v` | File-level run |
-| Specific test class | `pytest TESTS/products/test_access_control.py::TestProductAccessControl -v` | Class-level run |
-| Specific test | `pytest TESTS/orders/test_orders.py::TestWebhookHandling::test_webhook_idempotent_same_event_twice -v` | Single test run |
-| Show print output | `pytest -v -s` | Keep stdout/stderr |
-| Collect-only discovery | `pytest --collect-only` | Confirms inventory and discovery under `TESTS/` |
+| Run all tests | `.venv\Scripts\python.exe -m pytest -q` | Full suite |
+| Verbose output | `.venv\Scripts\python.exe -m pytest -v` | Per-test detail |
+| Specific test file | `.venv\Scripts\python.exe -m pytest TESTS/accounts/test_profile.py -v` | File-level run |
+| Specific test class | `.venv\Scripts\python.exe -m pytest TESTS/products/test_access_control.py::TestProductAccessControl -v` | Class-level run |
+| Specific test | `.venv\Scripts\python.exe -m pytest TESTS/orders/test_orders.py::TestWebhookHandling::test_webhook_idempotent_same_event_twice -v` | Single test run |
+| Show print output | `.venv\Scripts\python.exe -m pytest -v -s` | Keep stdout/stderr |
+| Collect-only discovery | `.venv\Scripts\python.exe -m pytest --collect-only` | Confirms inventory and discovery under `TESTS/` |
 
 ### Test Inventory Distribution
 
 | App | Test Count | Coverage Areas |
 | --- | --- | --- |
 | Accounts | 34 | Authentication, email verification, profile management, account deletion |
-| Products | 31 | Access control, archive reading, CRUD operations, product removal |
+| Products | 41 | Access control, archive reading, CRUD operations, product removal, deal banner admin/sync logic |
 | Cart | 13 | Cart operations, validation, totals |
 | Checkout | 4 | Checkout flow, Stripe integration, order reuse, webhook idempotency |
 | Orders | 15 | Webhook handling, order status, entitlements |
 | Home | 18 | Admin access, product management, deal banner visibility |
 | Reviews | 10 | Review creation, dashboard integration, removed products |
-| Total | **125** | Current automated inventory |
+| Total | **135** | Current automated inventory |
 
 ### Automated Coverage by App
 
 | App | Test Files | What is Covered (short) |
 | --- | --- | --- |
 | Accounts | `TESTS/accounts/test_auth_pages.py`; `TESTS/accounts/test_email_gate.py`; `TESTS/accounts/test_profile.py` | Email verification gates for dashboard/profile/my-archive, anonymous redirect to login, verified dashboard tabs (`My Orders`, `My Reviews`), `display_name` updates, account deletion confirmation/logout/redirect/profile cascade removal |
-| Products | `TESTS/products/test_access_control.py`; `TESTS/products/test_archive_read.py`; `TESTS/products/test_products.py` | Active/inactive visibility by role, entitlement required for read page access (403 without), preview vs reading separation, email verification for unpublished products, product model CRUD/navigation links, archive card layout validation |
+| Products | `TESTS/products/test_access_control.py`; `TESTS/products/test_archive_read.py`; `TESTS/products/test_products.py`; `TESTS/products/test_deal_banners.py` | Active/inactive visibility by role, entitlement required for read page access (403 without), preview vs reading separation, email verification for unpublished products, product model CRUD/navigation links, archive card layout validation, deal banner admin actions, inline activation toggle, destination priority, and deal sync edge cases |
 | Cart | `TESTS/cart/test_cart.py` | Add/remove cart with session persistence, verified email required for add-to-cart, validation for missing/inactive products, single/multiple-item totals |
 | Checkout | `TESTS/checkout/test_checkout.py`; `TESTS/checkout/test_webhooks.py` | Verified email gate, Stripe session creation and mocked redirect, `Order`/`OrderLineItem` creation from cart, pending order reuse for double-submit safety, success fallback when webhook delayed, cart clearing, wrong-user success page blocked, webhook idempotency safety |
 | Orders | `TESTS/orders/test_orders.py` | `checkout.session.completed` (paid/unpaid), `payment_intent.payment_failed`, `checkout.session.expired`, idempotent entitlement creation (`get_or_create`), atomic locking to prevent duplicate orders, signature validation, POST-only enforcement, graceful handling of missing order ID/user |
@@ -138,6 +138,7 @@ Manual testing verifies user-facing behavior, rendering, and third-party flows t
 | Unverified checkout attempt | Unverified user tries checkout | Redirected to email verification | **PASS** |
 | Non-entitled read attempt | Non-entitled user visits read page | 403 Forbidden | **PASS** |
 | Wrong user success page | Wrong user accesses success page | Redirected with error | **PASS** |
+| Deal banner admin controls | Staff toggles `is_active` in changelist and runs bulk activate/deactivate actions | Banner states update correctly and products are re-synced without stale `is_deal` flags | **PASS** |
 | Review delete modal | Open delete modal -> Stay | Stay cancels, Delete removes review | **PASS** |
 | Rapid double-click checkout | Double-click checkout | Only one pending order created (no duplicate) | **PASS** |
 
@@ -379,12 +380,12 @@ Checks are available via `dev-requirements.txt` and were run with passing result
 
 | Tool | Command | Result | Notes |
 | --- | --- | --- | --- |
-| black | `python -m black --check .` | **PASS** | `81` files would be left unchanged |
-| isort | `python -m isort --check-only .` | **PASS** | Skipped `42` files via configured excludes |
-| flake8 | `flake8 .` | **PASS** | No lint output |
-| pylint | `pylint accounts cart checkout home orders products reviews elysium_archive manage.py` | **PASS** | `10.00/10`, no warnings/errors |
-| bandit | `bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py` | **PASS** | No issues identified (`Low: 0`, `Medium: 0`, `High: 0`) |
-| djlint | `djlint --check .` | **PASS** | `0` files would be updated (`39` files checked) |
+| black | `.venv\Scripts\python.exe -m black --check .` | **PASS** | `82` files would be left unchanged |
+| isort | `.venv\Scripts\python.exe -m isort --check-only .` | **PASS** | Skipped `42` files via configured excludes |
+| flake8 | `.venv\Scripts\python.exe -m flake8 .` | **PASS** | No lint output |
+| pylint | `.venv\Scripts\python.exe -m pylint accounts cart checkout home orders products reviews elysium_archive manage.py` | **PASS** | `10.00/10`, no warnings/errors |
+| bandit | `.venv\Scripts\python.exe -m bandit -c bandit.yaml -r accounts cart checkout home orders products reviews elysium_archive manage.py` | **PASS** | No issues identified (`Low: 0`, `Medium: 0`, `High: 0`) |
+| djlint | `.venv\Scripts\python.exe -m djlint --check .` | **PASS** | `0` files would be updated (`39` files checked) |
 
 ### Bandit Security Audit Details
 
@@ -423,7 +424,7 @@ skips:
 
 | Lines Scanned | Issues Found | Status | Evidence/Notes |
 | --- | --- | --- | --- |
-| **5,270** | **0** (Low: **0**, Medium: **0**, High: **0**) | **Completed** (clean) | Application code only |
+| **5,369** | **0** (Low: **0**, Medium: **0**, High: **0**) | **Completed** (clean) | Application code only; 1 reviewed `# nosec B105` in test settings |
 
 ## Security Headers
 
@@ -437,23 +438,27 @@ Headers were verified in `DEBUG=False` mode.
 
 ## Browser Compatibility Testing
 
-Core user journeys and ecommerce flows were verified on Chrome and Firefox desktop (Windows 11) with no layout, JavaScript, or navigation issues.
+Core user journeys and ecommerce flows were verified on Chrome and Firefox desktop (Windows 11) with no layout, JavaScript, or navigation issues. Behavior verified on both Chrome and Firefox. Visual evidence is shown once because the UI and behavior are identical across tested browsers.
 
-| Browser | OS | Version | Test Case | Result | Evidence |
+| Browser(s) | OS | Version(s) | Test Case | Result | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| Google Chrome | Windows 11 | 144.0.7559.133 (64-bit) | Home page loads and renders correctly | **PASS** | Manual browser test |
-| Google Chrome | Windows 11 | 144.0.7559.133 (64-bit) | Archive listing and product detail pages | **PASS** | Manual browser test |
-| Google Chrome | Windows 11 | 144.0.7559.133 (64-bit) | Login and dashboard access (verified user) | **PASS** | Manual browser test |
-| Google Chrome | Windows 11 | 144.0.7559.133 (64-bit) | Add to cart and cart display | **PASS** | Manual browser test |
-| Google Chrome | Windows 11 | 144.0.7559.133 (64-bit) | Stripe checkout cancel flow | **PASS** | ![Checkout Cancelled page](documentation/testing/checkout-cancelled.png) |
-| Google Chrome | Windows 11 | 144.0.7559.133 (64-bit) | Cart persistence after cancel | **PASS** | ![Shopping Cart after cancellation](documentation/testing/shopping-cart.png) |
-| Google Chrome | Windows 11 | 144.0.7559.133 (64-bit) | Archive reading page (entitled user) | **PASS** | Manual browser test |
-| Google Chrome | Windows 11 | 144.0.7559.133 (64-bit) | JavaScript console errors | **PASS** | No errors reported |
-| Mozilla Firefox | Windows 11 | 147.0.2 (64-bit) | Home page loads and renders correctly | **PASS** | Manual browser test |
-| Mozilla Firefox | Windows 11 | 147.0.2 (64-bit) | Archive listing and product detail pages | **PASS** | Manual browser test |
-| Mozilla Firefox | Windows 11 | 147.0.2 (64-bit) | Login and dashboard access (verified user) | **PASS** | Manual browser test |
-| Mozilla Firefox | Windows 11 | 147.0.2 (64-bit) | Add to cart and cart display | **PASS** | Manual browser test |
-| Mozilla Firefox | Windows 11 | 147.0.2 (64-bit) | Stripe checkout cancel flow | **PASS** | ![Checkout Cancelled page](documentation/testing/checkout-cancelled.png) |
-| Mozilla Firefox | Windows 11 | 147.0.2 (64-bit) | Cart persistence after cancel | **PASS** | ![Shopping Cart after cancellation](documentation/testing/shopping-cart.png) |
-| Mozilla Firefox | Windows 11 | 147.0.2 (64-bit) | Archive reading page (entitled user) | **PASS** | Manual browser test |
-| Mozilla Firefox | Windows 11 | 147.0.2 (64-bit) | JavaScript console errors | **PASS** | No errors reported |
+| Chrome + Firefox | Windows 11 | Chrome 144.0.7559.133 + Firefox 147.0.2 (64-bit) | Home page loads and renders correctly | **PASS** | Manual browser test |
+| Chrome + Firefox | Windows 11 | Chrome 144.0.7559.133 + Firefox 147.0.2 (64-bit) | Archive listing and product detail pages | **PASS** | Manual browser test |
+| Chrome + Firefox | Windows 11 | Chrome 144.0.7559.133 + Firefox 147.0.2 (64-bit) | Login and dashboard access (verified user) | **PASS** | Manual browser test |
+| Chrome + Firefox | Windows 11 | Chrome 144.0.7559.133 + Firefox 147.0.2 (64-bit) | Add to cart and cart display | **PASS** | Manual browser test |
+| Chrome + Firefox | Windows 11 | Chrome 144.0.7559.133 + Firefox 147.0.2 (64-bit) | Stripe checkout cancel flow | **PASS** | See visual evidence below |
+| Chrome + Firefox | Windows 11 | Chrome 144.0.7559.133 + Firefox 147.0.2 (64-bit) | Cart persistence after cancel | **PASS** | See visual evidence below |
+| Chrome + Firefox | Windows 11 | Chrome 144.0.7559.133 + Firefox 147.0.2 (64-bit) | Archive reading page (entitled user) | **PASS** | Manual browser test |
+| Chrome + Firefox | Windows 11 | Chrome 144.0.7559.133 + Firefox 147.0.2 (64-bit) | JavaScript console errors | **PASS** | No errors reported |
+
+### Visual Evidence – Stripe Checkout Cancel Flow
+
+The checkout cancellation page renders correctly with the "Checkout Cancelled" message and "Return to Cart" button. Behavior and UI are identical on both Chrome and Firefox.
+
+![Checkout Cancelled page](documentation/testing/checkout-cancelled.png)
+
+### Visual Evidence – Cart Persistence After Cancel
+
+After cancelling the Stripe checkout session, the user is redirected to the cart page and all items remain in the cart. Behavior and UI are identical on both Chrome and Firefox.
+
+![Shopping Cart after cancellation](documentation/testing/shopping-cart.png)

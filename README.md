@@ -493,9 +493,9 @@ Django signals are used to maintain data consistency and automate business logic
 
 **Product Signals** (`products/models.py`):
 
-- **Product.save() logic** - Syncs deal status when a product's category changes or when featured status is updated
-- **post_save (DealBanner)** - Automatically marks affected products as deals when banners are activated
-- **post_delete (DealBanner)** - Removes deal status from products when banners are deleted (CASCADE behavior)
+- **Product.save() logic** - Syncs deal status when a product category, active flag, or removed flag changes, and keeps featured status synchronized
+- **post_save (DealBanner)** - Recalculates deals for previous and current banner targets when banners are created or updated
+- **post_delete (DealBanner)** - Recalculates deals for affected targets when banners are deleted (CASCADE behavior)
 
 These signals ensure that:
 
@@ -1334,7 +1334,7 @@ The Deal Banner Bar is a horizontal scrolling marquee that displays promotional 
 - A promotional message
 - A clickable link to a product, category, or custom URL
 
-Banners scroll continuously and are fully managed through Django Admin.
+Banners scroll continuously on the homepage only and are fully managed through Django Admin.
 
 ### How It Works (For Staff)
 
@@ -1349,12 +1349,19 @@ Banners scroll continuously and are fully managed through Django Admin.
     - **Display Order**: Lower numbers appear first
     - **Active**: Toggle to show/hide the banner
 
+**Managing from Admin List:**
+
+- `is_active` is editable directly in the Deal Banner changelist
+- Bulk actions are available for **Mark selected deal banners as active** and **Mark selected deal banners as inactive**
+- Multiple banners can remain active at the same time
+- Destination labels in admin reflect the same effective priority used by live banner URLs
+
 **Linking Banners:**
 
-Each banner can link to one of these destinations (priority order):
+Each banner can link to one of these destinations (effective priority order):
 
-1. **Specific Product** → Links to that product's detail page
-2. **Custom URL** → Links to any URL you provide
+1. **Specific Product** → Used only when linked product is active and not removed
+2. **Custom URL** → Used when product destination is not available
 3. **Category** → Links to the archive filtered by that category + deals
 4. **No Link** → Links to the archive with deals filter enabled
 
@@ -1364,19 +1371,20 @@ Simply select a product or category from the dropdown, or leave both empty to cr
 
 The banner system automatically manages the "Deal" status on products:
 
-- When you activate a banner linked to a **product**, that product is marked as a deal
-- When you activate a banner linked to a **category**, all active products in that category become deals
-- When you disable or delete a banner, the affected products are automatically updated
+- A product is a deal only when it is active, not removed, and targeted by an active banner
+- Category banners affect only active, non-removed products in that category
+- When you disable or delete a banner, affected products are recalculated
+- When you reassign a banner target, both previous and new targets are recalculated
 
 This means you don't need to manually mark products as deals—the banner system handles it for you.
 
 **Implementation Details:**
 
-Deal status synchronization is handled via Django signals in the `products/models.py` module:
+Deal status synchronization is handled via model save logic and Django signals in the `products/models.py` module:
 
-- **Product save signal** - When a product's category changes, the deal status is recalculated based on active banners
-- **DealBanner post_save signal** - When a banner is created or updated, affected products are automatically marked as deals
-- **DealBanner post_delete signal** - When a banner is deleted, the associated products are unmarked as deals (CASCADE behavior)
+- **Product save logic** - Recalculates deal status when category, active flag, or removed flag changes
+- **DealBanner post_save signal** - Recalculates deal status for both previous and current product/category targets
+- **DealBanner post_delete signal** - Recalculates deal status for associated targets after deletion
 
 This ensures the `is_deal` field is always synchronized with the current state of banners without requiring manual admin intervention.
 
@@ -1389,7 +1397,7 @@ For developers interested in the implementation:
 - Admin configuration: `products/admin.py`
 - Frontend marquee: `home/templates/home/index.html`
 - Styling: `static/css/components/deal-banner.css`
-- Automated tests: `TESTS/home/test_home.py`
+- Automated tests: `TESTS/home/test_home.py`, `TESTS/products/test_deal_banners.py`
 
 ## Alt Text Safety
 

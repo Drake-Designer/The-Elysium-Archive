@@ -366,6 +366,7 @@ class DealBannerAdmin(admin.ModelAdmin):
 
     list_display = [
         "order",
+        "is_active",
         "title",
         "discount_display",
         "destination_display",
@@ -375,11 +376,45 @@ class DealBannerAdmin(admin.ModelAdmin):
     list_display_links = ["title"]
     list_filter = ["is_active", "is_featured", "category"]
     search_fields = ["title", "message", "url"]
-    list_editable = ["order"]
+    list_editable = ["order", "is_active"]
     autocomplete_fields = ["product", "category"]
     readonly_fields = ["created_at", "preview_banner"]
     date_hierarchy = "created_at"
     ordering = ["order", "-created_at"]
+    actions = [
+        "mark_selected_deal_banners_active",
+        "mark_selected_deal_banners_inactive",
+    ]
+
+    @admin.action(description="Mark selected deal banners as active")
+    def mark_selected_deal_banners_active(self, request, queryset):
+        """Mark selected deal banners as active."""
+        changed = 0
+        for banner in queryset:
+            if not banner.is_active:
+                banner.is_active = True
+                banner.save(update_fields=["is_active"])
+                changed += 1
+
+        self.message_user(
+            request,
+            f"{changed} deal banner(s) marked as active.",
+        )
+
+    @admin.action(description="Mark selected deal banners as inactive")
+    def mark_selected_deal_banners_inactive(self, request, queryset):
+        """Mark selected deal banners as inactive."""
+        changed = 0
+        for banner in queryset:
+            if banner.is_active:
+                banner.is_active = False
+                banner.save(update_fields=["is_active"])
+                changed += 1
+
+        self.message_user(
+            request,
+            f"{changed} deal banner(s) marked as inactive.",
+        )
 
     @admin_display("Discount")
     def discount_display(self, obj):
@@ -397,24 +432,10 @@ class DealBannerAdmin(admin.ModelAdmin):
     @admin_display("Destination")
     def destination_display(self, obj):
         """Display the banner destination type and URL."""
-        if obj.product:
-            label = "Product"
-            value = obj.product.title
-            type_class = "type-product"
-        elif obj.category:
-            label = "Category"
-            value = obj.category.name
-            type_class = "type-category"
-        elif obj.url:
-            label = "Custom URL"
-            value = "External link"
-            type_class = "type-custom"
-        else:
-            label = "Deals page"
-            value = "Deals archive"
-            type_class = "type-default"
-
-        destination_url = obj.get_url()
+        destination_type, label, value, destination_url = (
+            obj.get_effective_destination()
+        )
+        type_class = f"type-{destination_type}"
 
         return format_html(
             '<div class="deal-banner-destination">'

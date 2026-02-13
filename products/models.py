@@ -131,7 +131,7 @@ class Product(models.Model):
 
         super().save(*args, **kwargs)
 
-        deal_fields = {"category", "category_id"}
+        deal_fields = {"category", "category_id", "is_active", "is_removed"}
         should_sync_deals = (
             is_create
             or update_fields_set is None
@@ -255,6 +255,40 @@ class DealBanner(models.Model):
     def __str__(self):
         return f"{self.title}: {self.message}"
 
+    def get_effective_destination(self):
+        """Return destination metadata and URL based on banner priority."""
+        if (
+            self.product
+            and self.product.is_active
+            and not self.product.is_removed
+        ):
+            return (
+                "product",
+                "Product",
+                self.product.title,
+                self.product.get_absolute_url(),
+            )
+
+        if self.url:
+            return ("custom", "Custom URL", "External link", self.url)
+
+        archive_url = reverse("archive")
+
+        if self.category:
+            return (
+                "category",
+                "Category",
+                self.category.name,
+                f"{archive_url}?cat={self.category.slug}&deals=true",
+            )
+
+        return (
+            "default",
+            "Deals page",
+            "Deals archive",
+            f"{archive_url}?deals=true",
+        )
+
     def save(self, *args, **kwargs):
         """Save banner and sync featured status with linked items."""
         is_create = self.pk is None
@@ -262,11 +296,15 @@ class DealBanner(models.Model):
 
         is_featured_changed = False
         is_active_changed = False
+        old_product_pk = None
         old_category_pk = None
 
         if not is_create and self.pk:
             try:
                 old_banner = DealBanner.objects.get(pk=self.pk)
+                old_product_pk = (
+                    old_banner.product.pk if old_banner.product else None
+                )
                 old_category_pk = (
                     old_banner.category.pk if old_banner.category else None
                 )
@@ -317,6 +355,32 @@ class DealBanner(models.Model):
                     is_featured=False,
                 )
 
+        new_product_pk = self.product.pk if self.product else None
+        new_category_pk = self.category.pk if self.category else None
+
+        product_pks = list(
+            dict.fromkeys(
+                [pk for pk in (old_product_pk, new_product_pk) if pk]
+            )
+        )
+        category_pks = list(
+            dict.fromkeys(
+                [pk for pk in (old_category_pk, new_category_pk) if pk]
+            )
+        )
+
+        should_sync_deals = (
+            is_create
+            or is_active_changed
+            or old_product_pk != new_product_pk
+            or old_category_pk != new_category_pk
+        )
+        if should_sync_deals and (product_pks or category_pks):
+            sync_products_deal_status(
+                product_pks=product_pks,
+                category_pks=category_pks,
+            )
+
     def delete(self, *args, **kwargs):
         """Delete banner and sync featured status with product/category."""
         product_pk = self.product.pk if self.product else None
@@ -342,22 +406,7 @@ class DealBanner(models.Model):
 
     def get_url(self):
         """Return the appropriate URL for this banner."""
-        if (
-            self.product
-            and self.product.is_active
-            and not self.product.is_removed
-        ):
-            return self.product.get_absolute_url()
-
-        if self.url:
-            return self.url
-
-        archive_url = reverse("archive")
-
-        if self.category:
-            return f"{archive_url}?cat={self.category.slug}&deals=true"
-
-        return f"{archive_url}?deals=true"
+        return self.get_effective_destination()[3]
 
 
 def sync_products_deal_status(product_pks=None, category_pks=None):
@@ -368,13 +417,9 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
     if not product_pks and not category_pks:
         return
 
-    qs = (
-        Product.objects.filter(
-            Q(pk__in=product_pks) | Q(category__pk__in=category_pks)
-        )
-        .filter(is_removed=False)
-        .select_related("category")
-    )
+    qs = Product.objects.filter(
+        Q(pk__in=product_pks) | Q(category__pk__in=category_pks)
+    ).select_related("category")
 
     active_banners = DealBanner.objects.filter(is_active=True)
     banner_product_pks = set(
@@ -402,7 +447,11 @@ def sync_products_deal_status(product_pks=None, category_pks=None):
         )
         from_category_banner = category_pk in banner_category_pks
 
-        effective = from_product_banner or from_category_banner
+        effective = (
+            product.is_active
+            and not product.is_removed
+            and (from_product_banner or from_category_banner)
+        )
 
         if product.is_deal and not effective:
             false_pks.append(product.pk)
