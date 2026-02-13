@@ -10,8 +10,8 @@ This document describes the current automated test suite and manual testing proc
 
 | What | Command | Expected Result | Evidence |
 | --- | --- | --- | --- |
-| Full automated suite | `.venv\Scripts\python.exe -m pytest -q` | 135 passed, 0 failed | Local run on 2026-02-13 |
-| Verbose run | `.venv\Scripts\python.exe -m pytest -v` | Same pass status with per-test output | Local run on 2026-02-13 |
+| Full automated suite | `.venv\Scripts\python.exe -m pytest -q` | 135 passed, 0 failed | ![Pytest](documentation/testing/pytest/pytest.png) |
+| Verbose run | `.venv\Scripts\python.exe -m pytest -v` | Same pass status with per-test output | Local run |
 | Discovery check | `.venv\Scripts\python.exe -m pytest --collect-only` | Confirms current inventory under `TESTS/` | 135 tests collected |
 
 ## Evidence Status (Testing and Quality Checklist)
