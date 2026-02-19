@@ -1442,3 +1442,23 @@ During testing, I intentionally entered very long image ALT texts to stress-test
 These improvements focus on usability, feedback, and small quality-of-life enhancements without changing the core architecture.
 
 ## Credits and Acknowledgements
+
+### Acknowledgements
+
+I would like to acknowledge the resources and support that contributed to the development and completion of this project:
+
+- **Code Institute** – For the course structure, project guidelines, and learning materials that formed the foundation of this Milestone Project 4.
+- **Django Documentation** – For official guidance on models, signals, authentication, and best practices used throughout the project architecture.
+- **Stripe Documentation** – For detailed references on implementing Stripe Checkout, webhooks, and secure payment flows.
+- **django-allauth Documentation** – For authentication workflows, email verification, and account management features integrated into the project.
+- **Cloudinary Documentation** – For media storage, optimisation, and responsive image delivery.
+- **Mentor Guidance** – For continuous direction on project structure, testing evidence, and documentation improvements during development.
+- **AI Tools (ChatGPT and GitHub Copilot)** – Used as learning aids to better understand complex areas such as testing, access control, Stripe integration, debugging, and Django architecture. All suggestions were carefully reviewed, understood, and adapted to fit the project’s logic and requirements.
+
+### Special Thanks
+
+**Lewis Dillon** ([GitHub](https://github.com/LewisMDillon) | [LinkedIn](https://www.linkedin.com/in/lewis-dillon/)) - Mentor who reviewed the project and provided very helpful guidance on both the README and the testing process. His suggestions led to clearer documentation, better-structured testing sections, and the inclusion of screenshots and validation evidence to properly demonstrate functionality and reliability before submission.
+
+**Family Testers** - A sincere thank you to my family members who tested the site across different devices and screen sizes. They completed real user actions such as registration, email verification, browsing the archive, and making test purchases, which helped validate the full user journey and identify usability issues in a realistic environment.
+
+**Rita Perrone** ([LinkedIn](https://www.linkedin.com/in/rita-perrone-9aa7aaa2/)) - Beta tester who tested the site both during development and at the final stage of the project. She performed full workflow testing (account registration, email verification, checkout, and archive access) and provided consistent feedback that helped confirm stability and usability across multiple test sessions.
